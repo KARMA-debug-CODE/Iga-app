@@ -1,0 +1,23 @@
+{
+  "title": "The cell — practice",
+  "subject": "biology", "grade": "S1", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which part of the cell controls its activities?",
+     "choices": [{"text": "cytoplasm"}, {"text": "nucleus", "correct": true}, {"text": "cell membrane"}, {"text": "vacuole"}],
+     "explanation": "The nucleus contains DNA, which controls the cell."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** structures found in plant cells but **not** in animal cells.",
+     "choices": [{"text": "cell wall", "correct": true}, {"text": "chloroplasts", "correct": true}, {"text": "large permanent vacuole", "correct": true}, {"text": "nucleus"}, {"text": "mitochondria"}],
+     "explanation": "Remember the 3 Cs: cell wall, chloroplasts and a large central vacuole."},
+    {"type": "short", "difficulty": 1, "prompt": "Which organelle releases energy by respiration?", "accepted": ["mitochondria", "mitochondrion", "the mitochondria"],
+     "explanation": "Mitochondria are the site of aerobic respiration."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which is the correct order, smallest to largest?",
+     "choices": [{"text": "tissue → cell → organ → system"}, {"text": "cell → tissue → organ → system", "correct": true}, {"text": "cell → organ → tissue → system"}, {"text": "organ → tissue → cell → system"}],
+     "explanation": "Cells form tissues, tissues form organs, organs form systems."},
+    {"type": "true_false", "difficulty": 2, "prompt": "Red blood cells have no nucleus, giving more space for haemoglobin.", "answer": true,
+     "explanation": "This adaptation helps them carry more oxygen."},
+    {"type": "essay", "marks": 3, "difficulty": 2, "prompt": "Describe how you would prepare a slide of onion cells to view under a microscope.",
+     "marking_guide": "1 mark: peel a thin epidermis layer. 1 mark: place on slide with a drop of iodine/water. 1 mark: lower cover slip at an angle to avoid air bubbles (or: view at low power first).",
+     "explanation": "Thin layer → stain with iodine → cover slip at an angle → low power first."}
+  ]
+}

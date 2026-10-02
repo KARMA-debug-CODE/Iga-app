@@ -1,0 +1,23 @@
+{
+  "title": "Acids, bases and pH — practice",
+  "subject": "chemistry", "grade": "S2", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "A solution has pH 2. It is…",
+     "choices": [{"text": "strongly acidic", "correct": true}, {"text": "weakly acidic"}, {"text": "neutral"}, {"text": "alkaline"}],
+     "explanation": "The lower the pH below 7, the stronger the acid."},
+    {"type": "mcq", "difficulty": 1, "prompt": "What colour does an acid turn blue litmus?",
+     "choices": [{"text": "blue"}, {"text": "red", "correct": true}, {"text": "green"}, {"text": "purple"}],
+     "explanation": "Acids turn blue litmus red."},
+    {"type": "numeric", "difficulty": 1, "prompt": "What is the pH of pure water at 25 °C?", "answer": 7,
+     "explanation": "Pure water is neutral: pH 7."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the products of a neutralisation between an acid and a base.",
+     "choices": [{"text": "salt", "correct": true}, {"text": "water", "correct": true}, {"text": "hydrogen gas"}, {"text": "oxygen gas"}],
+     "explanation": "acid + base → salt + water."},
+    {"type": "short", "difficulty": 2, "prompt": "Name the salt formed when hydrochloric acid reacts with sodium hydroxide.", "accepted": ["sodium chloride", "nacl"],
+     "explanation": "$\\text{HCl} + \\text{NaOH} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O}$."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Why do farmers add lime to some soils?",
+     "choices": [{"text": "To make the soil more acidic"}, {"text": "To neutralise acidic soil", "correct": true}, {"text": "To kill earthworms"}, {"text": "To add nitrogen"}],
+     "explanation": "Lime is a base; it neutralises excess acidity so crops grow better."}
+  ]
+}

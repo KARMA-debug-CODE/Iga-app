@@ -1,0 +1,24 @@
+{
+  "title": "Parts of speech — practice",
+  "subject": "english", "grade": "S1", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "In *\"The **tall** girl won the race\"*, the bold word is a…",
+     "choices": [{"text": "noun"}, {"text": "adjective", "correct": true}, {"text": "adverb"}, {"text": "verb"}],
+     "explanation": "\"Tall\" describes the noun \"girl\", so it is an adjective."},
+    {"type": "mcq", "difficulty": 1, "prompt": "In *\"She sang **beautifully**\"*, the bold word is a…",
+     "choices": [{"text": "adverb", "correct": true}, {"text": "adjective"}, {"text": "pronoun"}, {"text": "preposition"}],
+     "explanation": "\"Beautifully\" tells us *how* she sang — it describes the verb."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which word is a **conjunction**?",
+     "choices": [{"text": "under"}, {"text": "because", "correct": true}, {"text": "quickly"}, {"text": "they"}],
+     "explanation": "\"Because\" joins two clauses."},
+    {"type": "short", "difficulty": 2, "prompt": "Fill in with the correct word: *\"He plays football very ____ (good/well).\"*", "accepted": ["well"],
+     "explanation": "We need an adverb to describe \"plays\": *well*."},
+    {"type": "mcq", "difficulty": 2, "prompt": "In *\"Can I have a **drink**?\"*, \"drink\" is a…",
+     "choices": [{"text": "verb"}, {"text": "noun", "correct": true}, {"text": "adjective"}],
+     "explanation": "Here \"drink\" is a thing, so it is a noun."},
+    {"type": "essay", "marks": 4, "difficulty": 2, "prompt": "Write one sentence that contains at least one noun, one verb, one adjective and one adverb. Label each.",
+     "marking_guide": "1 mark each for a correctly used and labelled noun, verb, adjective and adverb. Sentence must be grammatical.",
+     "explanation": "Example: The *hungry* (adj) *dog* (noun) *ate* (verb) *quickly* (adv)."}
+  ]
+}

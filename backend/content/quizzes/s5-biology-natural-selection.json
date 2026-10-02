@@ -1,0 +1,21 @@
+{
+  "title": "Natural selection — practice",
+  "subject": "biology", "grade": "S5", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "The original source of new alleles in a population is…",
+     "choices": [{"text": "mutation", "correct": true}, {"text": "competition"}, {"text": "selection pressure"}, {"text": "extinction"}],
+     "explanation": "Mutations are random changes in DNA that create new alleles."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which statement best describes natural selection?",
+     "choices": [{"text": "Individuals change during their lifetime to suit the environment"}, {"text": "Better-adapted individuals survive and reproduce more, passing on their alleles", "correct": true}, {"text": "All individuals in a population are identical"}, {"text": "Organisms choose which features to pass on"}],
+     "explanation": "Selection acts on existing variation; populations, not individuals, evolve."},
+    {"type": "true_false", "difficulty": 2, "prompt": "Finishing a full course of antibiotics helps reduce the spread of antibiotic resistance.", "answer": true,
+     "explanation": "It kills more of the bacteria, leaving fewer partly resistant survivors to multiply."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** that count as evidence for evolution.",
+     "choices": [{"text": "fossils", "correct": true}, {"text": "DNA comparisons", "correct": true}, {"text": "homologous structures", "correct": true}, {"text": "the colour of the sky"}],
+     "explanation": "Fossils, comparative anatomy and DNA all support evolution."},
+    {"type": "essay", "marks": 4, "difficulty": 3, "prompt": "Explain how a population of bacteria becomes resistant to an antibiotic.",
+     "marking_guide": "1: variation exists — some bacteria have a resistance allele (from mutation). 1: antibiotic kills non-resistant bacteria (selection pressure). 1: resistant bacteria survive and reproduce. 1: allele passed on; frequency of resistance increases over generations.",
+     "explanation": "Variation → selection pressure → survival and reproduction of resistant bacteria → inheritance and increase in allele frequency."}
+  ]
+}

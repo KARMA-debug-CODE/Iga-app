@@ -1,0 +1,114 @@
+{
+  "_note": "Topic skeleton for S1–S6. Titles follow the usual progression of the Rwandan competence-based curriculum but have NOT yet been checked line-by-line against the official REB syllabi; every unit loads with alignment_verified=false until a teacher reviews it.",
+  "mathematics": {
+    "S1": ["Integers and operations", "Fractions, decimals and percentages", "Indices and powers", "Algebraic expressions", "Linear equations and inequalities", "Angles and polygons", "Collecting and presenting data"],
+    "S2": ["Number bases", "Ratio, proportion and rates", "Simultaneous linear equations", "Linear functions and their graphs", "Pythagoras' theorem", "Area and volume", "Introduction to probability"],
+    "S3": ["Indices, surds and logarithms", "Quadratic equations", "Sets and Venn diagrams", "Trigonometric ratios", "Circles and constructions", "Vectors and transformations", "Averages and spread"],
+    "S4": ["Logic and sets of numbers", "Polynomial functions", "Quadratic functions", "Trigonometric functions", "Sequences and series", "Matrices and determinants", "Descriptive statistics"],
+    "S5": ["Limits of functions", "Differentiation", "Vectors in space", "Complex numbers", "Exponential and logarithmic functions", "Counting and probability"],
+    "S6": ["Integration and its applications", "Differential equations", "Conic sections", "Linear transformations", "Bivariate statistics", "Probability distributions"]
+  },
+  "physics": {
+    "S1": ["Introduction to physics and measurement", "Motion: speed, velocity and acceleration", "Forces and their effects", "Density and pressure", "Heat and temperature", "Reflection of light"],
+    "S2": ["Work, energy and power", "Simple machines", "Static electricity", "Current electricity and Ohm's law", "Magnetism", "Refraction of light and lenses"],
+    "S3": ["Newton's laws of motion", "Moments and equilibrium", "Waves and sound", "Electromagnetism", "Thermal properties of matter", "Introduction to atomic physics"],
+    "S4": ["Projectile motion and kinematics in 2D", "Dynamics and momentum", "Circular motion and gravitation", "Elasticity and Hooke's law", "Electric fields and potential", "Geometric optics"],
+    "S5": ["Simple harmonic motion", "Fluid mechanics", "Thermodynamics", "DC circuits and Kirchhoff's laws", "Capacitors", "Wave optics"],
+    "S6": ["Electromagnetic induction", "Alternating current", "Atomic and nuclear physics", "Photoelectric effect and quantum ideas", "Semiconductors and electronics", "Introduction to astrophysics"]
+  },
+  "chemistry": {
+    "S1": ["Introduction to chemistry and laboratory safety", "States of matter", "Separating mixtures", "Structure of the atom", "Elements, compounds and the periodic table"],
+    "S2": ["Chemical bonding", "Formulae and chemical equations", "Acids, bases and salts", "The mole concept", "Air and combustion"],
+    "S3": ["Trends in the periodic table", "Rates of reaction", "Electrolysis", "Introduction to organic chemistry", "Water and solutions"],
+    "S4": ["Electron configuration", "Bonding and molecular shapes", "Stoichiometry", "The gas laws", "Hydrocarbons"],
+    "S5": ["Chemical energetics", "Chemical equilibrium", "Acid–base equilibria and pH", "Redox reactions", "Organic functional groups"],
+    "S6": ["Reaction kinetics", "Electrochemistry", "Transition elements", "Polymers and organic synthesis", "Analytical techniques"]
+  },
+  "biology": {
+    "S1": ["Characteristics and classification of living things", "The cell", "Nutrition in plants and animals", "Health, hygiene and disease prevention", "Ecosystems"],
+    "S2": ["Transport in plants and animals", "Respiration", "The human digestive system", "Reproduction in flowering plants", "Microorganisms and disease"],
+    "S3": ["Human reproduction and sexual health", "Excretion and homeostasis", "Nervous and hormonal coordination", "Genetics and inheritance", "Conserving the environment"],
+    "S4": ["Cell structure and biochemistry", "Enzymes", "Classification and biodiversity", "Gas exchange", "Transport systems"],
+    "S5": ["DNA and genetics", "Evolution and natural selection", "Photosynthesis", "Cellular respiration", "Immunity"],
+    "S6": ["Gene expression and biotechnology", "Populations and ecology", "Nervous coordination", "Hormonal control", "Applied biology and public health"]
+  },
+  "ict": {
+    "S1": ["Computer systems: hardware and software", "Operating systems and file management", "Word processing", "Internet safety and digital citizenship", "Your first web page: HTML"],
+    "S2": ["Spreadsheets", "Presentations", "Styling web pages with CSS", "Introduction to algorithms", "Computer networks"],
+    "S3": ["Introduction to databases", "Programming with JavaScript", "Problem solving with flowcharts", "Multimedia", "ICT and society"],
+    "S4": ["Computer architecture", "Number systems and data representation", "Programming in Python", "Web development in depth", "Networking fundamentals"],
+    "S5": ["Data structures", "Object-oriented programming", "Databases and SQL", "Operating systems", "Web programming with JavaScript"],
+    "S6": ["Algorithms and complexity", "Software engineering", "Dynamic web applications", "Computer security", "Capstone project"]
+  },
+  "english": {
+    "S1": ["Parts of speech", "Reading for understanding", "Descriptive writing", "Introducing yourself and others"],
+    "S2": ["Tenses", "Letter writing", "Reading fiction", "Discussion and debate"],
+    "S3": ["Active and passive voice", "Reported speech", "Essay writing", "Poetry"],
+    "S4": ["Advanced grammar", "Report writing", "Analysing texts", "Public speaking"],
+    "S5": ["Argumentative writing", "Summary writing", "Media literacy", "Drama"],
+    "S6": ["Critical reading", "Research and referencing", "Formal communication", "Exam skills"]
+  },
+  "kinyarwanda": {
+    "S1": ["Amoko y'amagambo (Ikibonezamvugo)", "Ubuvanganzo nyemvugo", "Gusoma no gusobanukirwa", "Ihimbamwandiko"],
+    "S2": ["Inshinga n'ibihe", "Imigani n'ibisakuzo", "Ikeshamvugo", "Inyandiko z'ubutegetsi"],
+    "S3": ["Interuro n'imiterere yayo", "Ubuvanganzo nyandiko", "Kungurana ibitekerezo", "Ihimbamwandiko"],
+    "S4": ["Ikibonezamvugo cyimbitse", "Ubusizi", "Ikinamico", "Itumanaho mu kazi"],
+    "S5": ["Inkuru ndende", "Ubuhanzi nyarwanda", "Isesengura ry'inyandiko", "Kuvuga mu ruhame"],
+    "S6": ["Ubushakashatsi ku rurimi", "Ubuvanganzo bugezweho", "Inyandiko ndende", "Kwitegura ibizamini"]
+  },
+  "kiswahili": {
+    "S1": ["Sarufi: aina za maneno", "Mazungumzo na salamu", "Ufahamu", "Utungaji wa insha"],
+    "S2": ["Ngeli za nomino", "Fasihi simulizi", "Barua", "Methali na vitendawili"],
+    "S3": ["Nyakati na hali", "Ushairi", "Hadithi fupi", "Insha za kubuni"],
+    "S4": ["Sarufi na matumizi ya lugha", "Riwaya", "Tamthilia", "Uandishi wa ripoti"],
+    "S5": ["Isimu jamii", "Ushairi wa kisasa", "Uchambuzi wa fasihi", "Mjadala"],
+    "S6": ["Tafsiri", "Fasihi ya Afrika Mashariki", "Uandishi wa kitaaluma", "Maandalizi ya mtihani"]
+  },
+  "french": {
+    "S1": ["Se présenter", "Les articles et les noms", "Compréhension écrite", "La vie quotidienne"],
+    "S2": ["Le présent et le passé composé", "Décrire une personne", "La lettre amicale", "Les loisirs"],
+    "S3": ["L'imparfait et le futur", "Le récit", "Exprimer son opinion", "La santé"],
+    "S4": ["Grammaire avancée", "Le texte argumentatif", "La littérature francophone", "L'exposé oral"],
+    "S5": ["Le résumé", "Le débat", "Les médias", "Le théâtre"],
+    "S6": ["La dissertation", "La correspondance formelle", "Analyse de textes", "Préparation à l'examen"]
+  },
+  "history": {
+    "S1": ["Sources of history", "Early human societies", "Pre-colonial Rwanda", "Citizenship and national identity"],
+    "S2": ["The slave trade", "Colonisation of Africa", "Rwanda under colonial rule", "Human rights"],
+    "S3": ["Independence movements in Africa", "The First and Second World Wars", "The Genocide against the Tutsi", "Unity and reconciliation"],
+    "S4": ["Ancient civilisations", "The French and Industrial Revolutions", "The partition of Africa", "Rwandan society before 1900"],
+    "S5": ["Colonial administration in Africa", "Nationalism and decolonisation", "The world wars and the League of Nations", "The Cold War"],
+    "S6": ["Post-independence Africa", "Genocide studies and prevention", "Regional integration: EAC and AU", "Rwanda since 1994"]
+  },
+  "geography": {
+    "S1": ["Map work and scale", "The Earth and the solar system", "Weather and climate", "Physical features of Rwanda"],
+    "S2": ["Rocks and soils", "Vegetation", "Agriculture in Rwanda", "Population"],
+    "S3": ["Natural resources and conservation", "Industry and trade", "Urbanisation", "Environmental hazards"],
+    "S4": ["Practical geography: maps and photographs", "Geomorphology", "Climatology", "Population geography"],
+    "S5": ["Hydrology", "Biogeography and soils", "Economic geography of Africa", "Settlement"],
+    "S6": ["Regional geography of East Africa", "Environmental management", "Fieldwork and GIS", "Development and globalisation"]
+  },
+  "economics": {
+    "S4": ["Introduction to economics", "Demand and supply", "Elasticity", "Theory of production and costs"],
+    "S5": ["Market structures", "National income", "Money and banking", "Public finance and taxation"],
+    "S6": ["International trade", "Economic growth and development", "Inflation and unemployment", "Rwanda's economy and Vision 2050"]
+  },
+  "entrepreneurship": {
+    "S1": ["What is entrepreneurship?", "Generating business ideas", "Saving and budgeting"],
+    "S2": ["Planning a small business", "Marketing basics", "Keeping business records"],
+    "S3": ["Cooperatives", "Financial institutions", "Taxes and the community"],
+    "S4": ["The entrepreneurial mindset", "Analysing business opportunities", "Book-keeping"],
+    "S5": ["Marketing management", "Financial management", "Business law"],
+    "S6": ["Writing a business plan", "Investment decisions", "Growing a business"]
+  },
+  "literature": {
+    "S4": ["Introduction to literature and genres", "Reading prose fiction"],
+    "S5": ["Poetry", "Drama"],
+    "S6": ["African literature", "Literary criticism"]
+  },
+  "general-studies": {
+    "S4": ["Communication skills", "Rwandan culture and society"],
+    "S5": ["Critical thinking and problem solving", "Gender and development"],
+    "S6": ["Health and wellbeing", "Science, technology and society"]
+  }
+}

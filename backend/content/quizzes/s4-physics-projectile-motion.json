@@ -1,0 +1,20 @@
+{
+  "title": "Projectile motion — practice",
+  "subject": "physics", "grade": "S4", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Ignoring air resistance, the horizontal velocity of a projectile…",
+     "choices": [{"text": "increases"}, {"text": "decreases"}, {"text": "stays constant", "correct": true}, {"text": "is zero at the top"}],
+     "explanation": "No horizontal force acts, so the horizontal velocity does not change."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Which launch angle (in degrees) gives the maximum range on level ground?", "answer": 45,
+     "explanation": "$R = \\frac{u^2 \\sin 2\\theta}{g}$ is largest when $\\sin 2\\theta = 1$, i.e. $\\theta = 45^\\circ$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Which angle (in degrees) gives the same range as a launch at 25°?", "answer": 65,
+     "explanation": "Complementary angles give the same range: $90 - 25 = 65$."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.1, "prompt": "A ball is kicked at 10 m/s at 30°. Find its time of flight in seconds, to 1 d.p. ($g = 9.8$ m/s²)", "answer": 1.0,
+     "explanation": "$T = \\frac{2u\\sin\\theta}{g} = \\frac{2 \\times 10 \\times 0.5}{9.8} \\approx 1.02$ s."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.2, "prompt": "A stone is thrown at 14 m/s at 45°. Find its range in metres ($g = 9.8$ m/s²).", "answer": 20,
+     "explanation": "$R = \\frac{u^2 \\sin 90^\\circ}{g} = \\frac{196}{9.8} = 20$ m."},
+    {"type": "true_false", "difficulty": 2, "prompt": "At the highest point of its path, a projectile's velocity is zero.", "answer": false,
+     "explanation": "Only the **vertical** velocity is zero; the horizontal velocity is still $u\\cos\\theta$."}
+  ]
+}

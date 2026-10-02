@@ -1,0 +1,20 @@
+{
+  "title": "CSS basics — practice",
+  "subject": "ict", "grade": "S2", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which selector targets every element with `class=\"card\"`?",
+     "choices": [{"text": "`#card`"}, {"text": "`.card`", "correct": true}, {"text": "`card`"}, {"text": "`*card`"}],
+     "explanation": "A dot selects a class; a hash selects an id."},
+    {"type": "mcq", "difficulty": 2, "prompt": "In the box model, which layer is the space **outside** the border?",
+     "choices": [{"text": "padding"}, {"text": "content"}, {"text": "margin", "correct": true}],
+     "explanation": "content → padding → border → margin."},
+    {"type": "short", "difficulty": 1, "prompt": "Which CSS property changes the colour of text?", "accepted": ["color"],
+     "explanation": "`color` sets text colour; `background-color` sets the background."},
+    {"type": "true_false", "difficulty": 2, "prompt": "An id selector (`#header`) should be used for only one element on a page.", "answer": true,
+     "explanation": "Ids are meant to be unique; use classes for groups of elements."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which value gives a box rounded corners?",
+     "choices": [{"text": "`border-radius: 12px`", "correct": true}, {"text": "`corner: round`"}, {"text": "`border-style: round`"}, {"text": "`radius: 12px`"}],
+     "explanation": "`border-radius` rounds the corners."}
+  ]
+}

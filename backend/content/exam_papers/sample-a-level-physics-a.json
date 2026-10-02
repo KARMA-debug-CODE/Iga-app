@@ -1,0 +1,43 @@
+{
+  "paper": {
+    "level": "A", "year": 2026, "paper_code": "Sample A",
+    "title": "A-Level Physics — Sample Paper A (unofficial practice)",
+    "is_official": false,
+    "source_note": "Written for this platform as a practice paper in the style of the S6 national examination. Not a NESA paper."
+  },
+  "title": "A-Level Physics — Sample Paper A",
+  "description": "60 minutes. Take g = 9.8 m/s², h = 6.63 × 10⁻³⁴ J s. Written answers are marked by your teacher.",
+  "subject": "physics", "grade": "S6",
+  "kind": "past_paper", "feedback_mode": "after_submit", "time_limit_minutes": 60,
+  "shuffle_questions": false, "shuffle_choices": true,
+  "questions": [
+    {"type": "mcq", "marks": 1, "unit_ref": {"grade": "S6", "unit": 1}, "prompt": "The SI unit of magnetic flux is the…",
+     "choices": [{"text": "tesla"}, {"text": "weber", "correct": true}, {"text": "henry"}, {"text": "farad"}],
+     "explanation": "Magnetic flux is measured in webers (Wb); flux density in teslas."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S5", "unit": 1}, "tolerance": 0.05, "prompt": "Find the period (s) of a simple pendulum of length 1.00 m.", "answer": 2.01,
+     "explanation": "$T = 2\\pi\\sqrt{L/g} = 2\\pi\\sqrt{1/9.8} \\approx 2.01$ s."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S5", "unit": 5}, "prompt": "A 20 μF capacitor is charged to 12 V. Find the charge stored in μC.", "answer": 240,
+     "explanation": "$Q = CV = 20\\,\\mu\\text{F} \\times 12\\,\\text{V} = 240\\,\\mu\\text{C}$."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S6", "unit": 4}, "tolerance": 0.05, "prompt": "Find the energy of a photon of frequency $5.0 \\times 10^{14}$ Hz, in units of $10^{-19}$ J.", "answer": 3.32,
+     "explanation": "$E = hf = 6.63 \\times 10^{-34} \\times 5.0 \\times 10^{14} = 3.32 \\times 10^{-19}$ J."},
+    {"type": "mcq", "marks": 1, "unit_ref": {"grade": "S6", "unit": 2}, "prompt": "In a step-down transformer…",
+     "choices": [{"text": "the secondary coil has more turns than the primary"}, {"text": "the primary coil has more turns than the secondary", "correct": true}, {"text": "both coils have the same number of turns"}, {"text": "it works with direct current"}],
+     "explanation": "$\\frac{V_s}{V_p} = \\frac{N_s}{N_p}$; to reduce voltage, $N_s < N_p$."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S6", "unit": 3}, "prompt": "A radioactive sample has a mass of 80 g and a half-life of 5 days. What mass (g) remains undecayed after 15 days?", "answer": 10,
+     "explanation": "15 days = 3 half-lives: $80 \\to 40 \\to 20 \\to 10$ g."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S5", "unit": 4}, "prompt": "Find the combined resistance (Ω) of 6 Ω and 3 Ω in parallel.", "answer": 2,
+     "explanation": "$\\frac{1}{R} = \\frac{1}{6} + \\frac{1}{3} = \\frac{1}{2}$, so $R = 2\\,\\Omega$."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S5", "unit": 4}, "prompt": "A cell of e.m.f. 12 V and internal resistance 1 Ω is connected to a 5 Ω resistor. Find the current (A).", "answer": 2,
+     "explanation": "$I = \\frac{E}{R + r} = \\frac{12}{6} = 2$ A."},
+    {"type": "true_false", "marks": 1, "unit_ref": {"grade": "S6", "unit": 4}, "prompt": "In the photoelectric effect, increasing the intensity of the light increases the maximum kinetic energy of the emitted electrons.", "answer": false,
+     "explanation": "Maximum KE depends on frequency ($hf - \\phi$); intensity changes the *number* of electrons."},
+    {"type": "numeric", "marks": 2, "unit_ref": {"grade": "S4", "unit": 4}, "prompt": "A spring of constant 200 N/m is stretched by 5.0 cm. Find the force (N).", "answer": 10,
+     "explanation": "$F = kx = 200 \\times 0.05 = 10$ N."},
+    {"type": "essay", "marks": 4, "unit_ref": {"grade": "S6", "unit": 1}, "prompt": "State Lenz's law and explain how it follows from the principle of conservation of energy.",
+     "marking_guide": "B1: induced current flows in a direction to oppose the change producing it. B1: e.g. magnet pushed into coil → induced pole repels magnet. B1: work must be done against this opposition. B1: that work becomes electrical energy; if the current aided the change, energy would be created from nothing — violating conservation.",
+     "explanation": "The induced current opposes the change; the work done against it is the source of the electrical energy."},
+    {"type": "essay", "marks": 4, "unit_ref": {"grade": "S6", "unit": 5}, "prompt": "Explain how an n-type semiconductor is produced, and describe how a p–n junction diode allows current in one direction only.",
+     "marking_guide": "B1: doping silicon with a pentavalent (group 5) impurity e.g. phosphorus. B1: extra free electrons are majority carriers. B1: forward bias narrows the depletion layer and current flows. B1: reverse bias widens the depletion layer; (almost) no current.",
+     "explanation": "Pentavalent doping gives free electrons; the depletion layer narrows in forward bias and widens in reverse bias."}
+  ]
+}

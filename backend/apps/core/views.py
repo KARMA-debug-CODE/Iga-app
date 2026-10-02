@@ -1,0 +1,360 @@
+from datetime import timedelta
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db import connection
+from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework import serializers, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+from apps.assessments.models import Answer, Attempt, Question, Quiz
+from apps.assessments.serializers import AttemptListSerializer
+from apps.assessments.services import visible_quizzes
+from apps.classroom.models import Assignment, Classroom
+from apps.classroom.views import AssignmentSerializer
+from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
+from apps.curriculum.views import visible_lessons
+from apps.simulations.models import Simulation, SimulationView
+
+from . import audit
+from .constants import GRADES, LANGUAGES, ContentStatus
+from .models import AuditLog
+from .permissions import IsPlatformAdmin
+
+User = get_user_model()
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def health(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+    return Response({"status": "ok"})
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def meta(request):
+    return Response(
+        {
+            "app_name": settings.APP_NAME,
+            "grades": [{"code": c, "name": n} for c, n in GRADES],
+            "languages": [{"code": c, "name": n} for c, n in LANGUAGES],
+            "subjects": list(Subject.objects.values("code", "name", "icon", "offered_o_level", "offered_a_level")),
+        }
+    )
+
+
+def level_from_xp(xp):
+    """Every level needs 100 XP more than the last: 0, 100, 300, 600, ..."""
+    level, needed, floor = 1, 100, 0
+    while xp >= floor + needed:
+        floor += needed
+        level += 1
+        needed += 100
+    return {"level": level, "current": xp - floor, "needed": needed}
+
+
+def _continue_learning(user):
+    last = LessonProgress.objects.filter(user=user).select_related("lesson__unit").order_by("-completed_at").first()
+    done = LessonProgress.objects.filter(user=user).values("lesson_id")
+    lessons = (
+        visible_lessons(user).filter(status=ContentStatus.PUBLISHED).exclude(id__in=done).select_related("unit", "unit__subject")
+    )
+    candidate = None
+    if last:
+        unit = last.lesson.unit
+        candidate = lessons.filter(unit__subject=unit.subject, unit__grade=unit.grade).order_by("unit__number", "order").first()
+    if candidate is None and user.grade:
+        candidate = lessons.filter(unit__grade=user.grade).order_by("unit__subject__order", "unit__number", "order").first()
+    if candidate is None:
+        return None
+    return {
+        "slug": candidate.slug,
+        "title": candidate.title,
+        "subject": candidate.unit.subject.name,
+        "icon": candidate.unit.subject.icon,
+        "unit": f"Unit {candidate.unit.number}: {candidate.unit.title}",
+    }
+
+
+@api_view(["GET"])
+def dashboard(request):
+    user = request.user
+    data = {"level": level_from_xp(user.xp), "xp": user.xp, "streak_days": user.streak_days}
+
+    if user.can_teach:
+        classes = Classroom.objects.filter(teacher=user, archived=False).annotate(student_total=Count("enrollments"))
+        my_students = User.objects.filter(enrollments__classroom__teacher=user).values("id")
+        data["teacher"] = {
+            "classes": [
+                {"id": c.id, "name": c.name, "grade": c.grade, "students": c.student_total, "join_code": c.join_code}
+                for c in classes
+            ],
+            "pending_marking": Answer.objects.filter(marks_awarded__isnull=True, attempt__user_id__in=my_students)
+            .exclude(attempt__status=Attempt.Status.IN_PROGRESS)
+            .count(),
+            "recent_submissions": AttemptListSerializer(
+                Attempt.objects.filter(user_id__in=my_students)
+                .exclude(status=Attempt.Status.IN_PROGRESS)
+                .select_related("quiz", "quiz__subject", "user")
+                .order_by("-submitted_at")[:8],
+                many=True,
+            ).data,
+            "awaiting_review": {
+                "lessons": Lesson.objects.filter(author=user, status=ContentStatus.REVIEW).count(),
+                "quizzes": Quiz.objects.filter(author=user, status=ContentStatus.REVIEW).count(),
+            },
+            "approved": user.teacher_approved or user.is_platform_admin,
+        }
+        return Response(data)
+
+    if user.is_teacher and not user.teacher_approved:
+        data["teacher"] = {"approved": False}
+
+    assignments = (
+        Assignment.objects.filter(classroom__enrollments__student=user, classroom__archived=False)
+        .filter(Q(due_at__isnull=True) | Q(due_at__gte=timezone.now() - timedelta(days=7)))
+        .select_related("classroom", "quiz", "lesson", "simulation")
+        .order_by("due_at")[:20]
+    )
+    serialized = AssignmentSerializer(assignments, many=True, context={"request": request}).data
+    data["assignments"] = [a for a in serialized if a["my_status"]["state"] in ("todo", "in_progress")][:6]
+    data["recent_attempts"] = AttemptListSerializer(
+        Attempt.objects.filter(user=user)
+        .exclude(status=Attempt.Status.IN_PROGRESS)
+        .select_related("quiz", "quiz__subject")
+        .order_by("-submitted_at")[:5],
+        many=True,
+    ).data
+    data["continue_learning"] = _continue_learning(user)
+    data["lessons_completed"] = LessonProgress.objects.filter(user=user).count()
+    data["badges_earned"] = user.badges.count()
+    return Response(data)
+
+
+@api_view(["GET"])
+def search(request):
+    term = (request.query_params.get("q") or "").strip()
+    if len(term) < 2:
+        return Response({"lessons": [], "simulations": [], "quizzes": [], "subjects": []})
+    user = request.user
+    lessons = (
+        visible_lessons(user)
+        .filter(Q(title__icontains=term) | Q(summary__icontains=term) | Q(body__icontains=term))
+        .select_related("unit", "unit__subject")[:10]
+    )
+    sims = Simulation.objects.filter(Q(title__icontains=term) | Q(topics__icontains=term))[:8]
+    quizzes = visible_quizzes(user).filter(title__icontains=term).select_related("subject")[:8]
+    subjects = Subject.objects.filter(Q(name__icontains=term) | Q(name_rw__icontains=term) | Q(name_sw__icontains=term))[:5]
+    return Response(
+        {
+            "lessons": [
+                {
+                    "slug": les.slug,
+                    "title": les.title,
+                    "subject": les.unit.subject.name,
+                    "grade": les.unit.grade,
+                    "icon": les.unit.subject.icon,
+                }
+                for les in lessons
+            ],
+            "simulations": [{"slug": s.slug, "title": s.title, "provider": s.provider} for s in sims],
+            "quizzes": [{"id": q.id, "title": q.title, "kind": q.kind, "subject": q.subject.name} for q in quizzes],
+            "subjects": [{"code": s.code, "name": s.name, "icon": s.icon} for s in subjects],
+        }
+    )
+
+
+# --- Administration ------------------------------------------------------------
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "role",
+            "teacher_approved",
+            "grade",
+            "school",
+            "is_active",
+            "xp",
+            "last_login",
+            "date_joined",
+        ]
+        read_only_fields = ["id", "username", "email", "xp", "last_login", "date_joined"]
+
+
+class AdminUserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsPlatformAdmin]
+    serializer_class = AdminUserSerializer
+    http_method_names = ["get", "patch", "head", "options"]
+
+    def get_queryset(self):
+        qs = User.objects.order_by("-date_joined")
+        params = self.request.query_params
+        if params.get("role"):
+            qs = qs.filter(role=params["role"])
+        if params.get("pending_teachers"):
+            qs = qs.filter(role=User.Role.TEACHER, teacher_approved=False)
+        if params.get("q"):
+            term = params["q"]
+            qs = qs.filter(
+                Q(username__icontains=term)
+                | Q(email__icontains=term)
+                | Q(first_name__icontains=term)
+                | Q(last_name__icontains=term)
+            )
+        return qs
+
+    def perform_update(self, serializer):
+        before = {f: getattr(serializer.instance, f) for f in ("role", "teacher_approved", "is_active")}
+        if serializer.instance == self.request.user and serializer.validated_data.get("role", "admin") != "admin":
+            raise ValidationError("You can't remove your own administrator role.")
+        user = serializer.save()
+        changes = {f: [before[f], getattr(user, f)] for f in before if before[f] != getattr(user, f)}
+        if changes:
+            audit.record(self.request, "update_user", user, **{k: [str(v) for v in pair] for k, pair in changes.items()})
+
+
+class ReviewViewSet(viewsets.ViewSet):
+    """Content awaiting approval before it appears in the public library."""
+
+    permission_classes = [IsPlatformAdmin]
+    MODELS = {"lesson": Lesson, "quiz": Quiz, "resource": Resource}
+
+    def list(self, request):
+        lessons = Lesson.objects.filter(status=ContentStatus.REVIEW).select_related("unit__subject", "author")
+        quizzes = Quiz.objects.filter(status=ContentStatus.REVIEW).select_related("subject", "author")
+        resources = Resource.objects.filter(status=ContentStatus.REVIEW).select_related("subject", "uploaded_by")
+        return Response(
+            [
+                *[
+                    {
+                        "type": "lesson",
+                        "id": les.id,
+                        "title": les.title,
+                        "slug": les.slug,
+                        "subject": les.unit.subject.name,
+                        "grade": les.unit.grade,
+                        "author": les.author.display_name if les.author else None,
+                        "updated_at": les.updated_at,
+                    }
+                    for les in lessons
+                ],
+                *[
+                    {
+                        "type": "quiz",
+                        "id": q.id,
+                        "title": q.title,
+                        "subject": q.subject.name,
+                        "grade": q.grade,
+                        "author": q.author.display_name if q.author else None,
+                        "updated_at": q.updated_at,
+                    }
+                    for q in quizzes
+                ],
+                *[
+                    {
+                        "type": "resource",
+                        "id": r.id,
+                        "title": r.title,
+                        "subject": r.subject.name,
+                        "grade": r.grade,
+                        "author": r.uploaded_by.display_name if r.uploaded_by else None,
+                        "updated_at": r.created_at,
+                        "url": r.url,
+                    }
+                    for r in resources
+                ],
+            ]
+        )
+
+    @action(detail=False, methods=["post"])
+    def decide(self, request):
+        model = self.MODELS.get(request.data.get("type"))
+        if model is None:
+            raise ValidationError({"type": "Unknown content type."})
+        obj = get_object_or_404(model, pk=request.data.get("id"))
+        approve = bool(request.data.get("approve"))
+        obj.status = ContentStatus.PUBLISHED if approve else ContentStatus.DRAFT
+        obj.save(update_fields=["status"])
+        audit.record(request, "approve_content" if approve else "reject_content", obj, note=request.data.get("note", ""))
+        return Response({"status": obj.status})
+
+
+@api_view(["GET"])
+@permission_classes([IsPlatformAdmin])
+def admin_stats(request):
+    week_ago = timezone.now() - timedelta(days=7)
+    users_by_role = dict(User.objects.values_list("role").annotate(n=Count("id")))
+    active_week = User.objects.filter(last_active_date__gte=timezone.localdate() - timedelta(days=7)).count()
+    popular_lessons = (
+        LessonProgress.objects.filter(completed_at__gte=week_ago)
+        .values("lesson__title")
+        .annotate(n=Count("id"))
+        .order_by("-n")[:5]
+    )
+    popular_sims = (
+        SimulationView.objects.filter(viewed_at__gte=week_ago)
+        .values("simulation__title")
+        .annotate(n=Count("id"))
+        .order_by("-n")[:5]
+    )
+    students_by_grade = dict(User.objects.filter(role=User.Role.STUDENT).values_list("grade").annotate(n=Count("id")))
+    return Response(
+        {
+            "users_by_role": users_by_role,
+            "students_by_grade": students_by_grade,
+            "active_last_7_days": active_week,
+            "pending_teachers": User.objects.filter(role=User.Role.TEACHER, teacher_approved=False).count(),
+            "content": {
+                "subjects": Subject.objects.count(),
+                "lessons_published": Lesson.objects.filter(status=ContentStatus.PUBLISHED).count(),
+                "questions": Question.objects.count(),
+                "quizzes": Quiz.objects.filter(status=ContentStatus.PUBLISHED).count(),
+                "simulations": Simulation.objects.count(),
+                "awaiting_review": Lesson.objects.filter(status=ContentStatus.REVIEW).count()
+                + Quiz.objects.filter(status=ContentStatus.REVIEW).count()
+                + Resource.objects.filter(status=ContentStatus.REVIEW).count(),
+            },
+            "activity_last_7_days": {
+                "attempts": Attempt.objects.filter(started_at__gte=week_ago).count(),
+                "lessons_completed": LessonProgress.objects.filter(completed_at__gte=week_ago).count(),
+                "simulation_views": SimulationView.objects.filter(viewed_at__gte=week_ago).count(),
+            },
+            "popular_lessons": [{"title": r["lesson__title"], "count": r["n"]} for r in popular_lessons],
+            "popular_simulations": [{"title": r["simulation__title"], "count": r["n"]} for r in popular_sims],
+        }
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsPlatformAdmin])
+def admin_audit(request):
+    entries = AuditLog.objects.select_related("actor")
+    if request.query_params.get("action"):
+        entries = entries.filter(action=request.query_params["action"])
+    return Response(
+        [
+            {
+                "id": e.id,
+                "created_at": e.created_at,
+                "actor": e.actor.username if e.actor else None,
+                "action": e.action,
+                "target": f"{e.target_type}#{e.target_id}",
+                "details": e.details,
+            }
+            for e in entries[:200]
+        ]
+    )

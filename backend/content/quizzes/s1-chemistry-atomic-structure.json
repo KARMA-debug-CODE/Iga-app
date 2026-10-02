@@ -1,0 +1,21 @@
+{
+  "title": "Inside the atom — practice",
+  "subject": "chemistry", "grade": "S1", "unit": 4,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which particle has a negative charge?",
+     "choices": [{"text": "proton"}, {"text": "neutron"}, {"text": "electron", "correct": true}],
+     "explanation": "Electrons carry a charge of $-1$."},
+    {"type": "numeric", "difficulty": 1, "prompt": "How many protons are in an atom with atomic number 16?", "answer": 16,
+     "explanation": "Atomic number = number of protons."},
+    {"type": "numeric", "difficulty": 2, "prompt": "How many neutrons are in $^{39}_{19}\\text{K}$?", "answer": 20,
+     "explanation": "Neutrons = mass number − atomic number = $39 - 19 = 20$."},
+    {"type": "short", "difficulty": 2, "prompt": "Write the electron arrangement of oxygen (Z = 8), using commas, e.g. 2, 3", "accepted": ["2, 6", "2,6", "2 6", "2.6"],
+     "explanation": "8 electrons: 2 in the first shell and 6 in the second."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Isotopes of an element have different numbers of…",
+     "choices": [{"text": "protons"}, {"text": "neutrons", "correct": true}, {"text": "electrons in a neutral atom"}],
+     "explanation": "Same element → same protons; isotopes differ in neutrons."},
+    {"type": "numeric", "difficulty": 3, "prompt": "An ion has 12 protons and 10 electrons. What is its charge? (enter a number such as -1 or 2)", "answer": 2,
+     "explanation": "$12 - 10 = +2$, for example $\\text{Mg}^{2+}$."}
+  ]
+}

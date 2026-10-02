@@ -1,0 +1,21 @@
+{
+  "title": "Straight-line graphs — practice",
+  "subject": "mathematics", "grade": "S2", "unit": 4,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "numeric", "difficulty": 1, "prompt": "What is the gradient of $y = -3x + 8$?", "answer": -3,
+     "explanation": "In $y = mx + c$, the gradient is the coefficient of $x$: $m = -3$."},
+    {"type": "numeric", "difficulty": 1, "prompt": "Where does $y = 4x - 5$ cross the $y$-axis? Give the $y$-value.", "answer": -5,
+     "explanation": "The $y$-intercept is $c = -5$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Find the gradient of the line through $(2, 1)$ and $(6, 9)$.", "answer": 2,
+     "explanation": "$m = \\frac{9 - 1}{6 - 2} = \\frac{8}{4} = 2$."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which line is parallel to $y = 2x + 3$?",
+     "choices": [{"text": "$y = 3x + 2$"}, {"text": "$y = -2x + 3$"}, {"text": "$y = 2x - 7$", "correct": true}, {"text": "$y = \\frac{1}{2}x + 3$"}],
+     "explanation": "Parallel lines have the same gradient, here $2$."},
+    {"type": "mcq", "difficulty": 2, "prompt": "A line goes **down** from left to right and passes through the origin. Which could be its equation?",
+     "choices": [{"text": "$y = 5x$"}, {"text": "$y = -\\frac{1}{2}x$", "correct": true}, {"text": "$y = x - 4$"}, {"text": "$y = -2x + 1$"}],
+     "explanation": "Downwards means a negative gradient; through the origin means $c = 0$."},
+    {"type": "numeric", "difficulty": 3, "prompt": "A moto charges $C = 200d + 300$ FRW for a trip of $d$ km. How much does a 6 km trip cost (FRW)?", "answer": 1500,
+     "explanation": "$C = 200 \\times 6 + 300 = 1500$ FRW."}
+  ]
+}

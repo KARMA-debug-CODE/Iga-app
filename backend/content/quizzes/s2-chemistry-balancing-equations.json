@@ -1,0 +1,20 @@
+{
+  "title": "Balancing equations — practice",
+  "subject": "chemistry", "grade": "S2", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "numeric", "difficulty": 1, "prompt": "$\\_\\,\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$. What number goes in front of $\\text{H}_2$?", "answer": 2,
+     "explanation": "Four H atoms on the right need $2\\text{H}_2$ on the left."},
+    {"type": "numeric", "difficulty": 2, "prompt": "$\\text{N}_2 + \\_\\,\\text{H}_2 \\rightarrow 2\\text{NH}_3$. What number goes in front of $\\text{H}_2$?", "answer": 3,
+     "explanation": "$2\\text{NH}_3$ has 6 H atoms, so we need $3\\text{H}_2$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Balance $\\text{CH}_4 + \\_\\,\\text{O}_2 \\rightarrow \\text{CO}_2 + 2\\text{H}_2\\text{O}$. What is the coefficient of $\\text{O}_2$?", "answer": 2,
+     "explanation": "Right side: 2 O in $\\text{CO}_2$ + 2 O in $2\\text{H}_2\\text{O}$ = 4 O, so $2\\text{O}_2$."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which equation is correctly balanced?",
+     "choices": [{"text": "$\\text{Mg} + \\text{O}_2 \\rightarrow \\text{MgO}$"}, {"text": "$2\\text{Mg} + \\text{O}_2 \\rightarrow 2\\text{MgO}$", "correct": true}, {"text": "$\\text{Mg} + \\text{O}_2 \\rightarrow \\text{MgO}_2$"}, {"text": "$2\\text{Mg} + 2\\text{O}_2 \\rightarrow 2\\text{MgO}$"}],
+     "explanation": "2 Mg and 2 O on each side. Changing MgO to MgO₂ is not allowed — that's a different substance."},
+    {"type": "true_false", "difficulty": 1, "prompt": "You may change the small subscript numbers in a formula to balance an equation.", "answer": false,
+     "explanation": "Changing a subscript changes the substance. Only change the coefficients in front."},
+    {"type": "short", "difficulty": 1, "prompt": "Which law explains why equations must be balanced? (the law of conservation of …)", "accepted": ["mass", "conservation of mass", "the law of conservation of mass", "law of conservation of mass", "matter"],
+     "explanation": "The law of conservation of mass: atoms are not created or destroyed in a reaction."}
+  ]
+}

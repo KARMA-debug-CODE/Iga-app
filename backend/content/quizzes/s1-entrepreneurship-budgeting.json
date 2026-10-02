@@ -1,0 +1,20 @@
+{
+  "title": "Saving and budgeting — practice",
+  "subject": "entrepreneurship", "grade": "S1", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "multi", "difficulty": 1, "prompt": "Select **all** the needs.",
+     "choices": [{"text": "food", "correct": true}, {"text": "school fees", "correct": true}, {"text": "video games"}, {"text": "shelter", "correct": true}, {"text": "fizzy drinks"}],
+     "explanation": "Needs are things you must have to live and study."},
+    {"type": "numeric", "difficulty": 1, "prompt": "Grace receives 15 000 FRW and spends 11 500 FRW. How much does she save (FRW)?", "answer": 3500,
+     "explanation": "$15\\,000 - 11\\,500 = 3\\,500$ FRW."},
+    {"type": "mcq", "difficulty": 2, "prompt": "The next-best alternative you give up when making a choice is called the…",
+     "choices": [{"text": "budget"}, {"text": "opportunity cost", "correct": true}, {"text": "profit"}, {"text": "capital"}],
+     "explanation": "Opportunity cost is what you give up."},
+    {"type": "true_false", "difficulty": 1, "prompt": "\"Pay yourself first\" means saving before spending on wants.", "answer": true,
+     "explanation": "Set savings aside as soon as you receive income."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Your expenses are greater than your income. What should you do first?",
+     "choices": [{"text": "Borrow more money"}, {"text": "Cut spending on wants", "correct": true}, {"text": "Stop paying for needs"}, {"text": "Ignore it"}],
+     "explanation": "Reduce wants first so that needs are still covered."}
+  ]
+}

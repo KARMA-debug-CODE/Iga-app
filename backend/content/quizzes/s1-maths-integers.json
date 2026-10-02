@@ -1,0 +1,20 @@
+{
+  "title": "Integers — quick practice",
+  "subject": "mathematics", "grade": "S1", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which number is the **largest**?",
+     "choices": [{"text": "$-8$"}, {"text": "$-3$", "correct": true}, {"text": "$-5$"}, {"text": "$-10$"}],
+     "explanation": "On the number line $-3$ is furthest to the right, so it is the largest."},
+    {"type": "numeric", "difficulty": 1, "prompt": "Work out $-7 + 12$.", "answer": 5,
+     "explanation": "Start at $-7$ and move 12 steps right: $-7 + 12 = 5$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Work out $3 - (-9)$.", "answer": 12,
+     "explanation": "Subtracting a negative is adding: $3 + 9 = 12$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Work out $(-6) \\times (-4)$.", "answer": 24,
+     "explanation": "Same signs give a positive answer: $6 \\times 4 = 24$."},
+    {"type": "true_false", "difficulty": 1, "prompt": "$-2 < -9$", "answer": false,
+     "explanation": "$-2$ is to the right of $-9$, so $-2 > -9$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "At 6 am the temperature on Mount Karisimbi was $-3\\,^{\\circ}$C. By noon it had risen by $11\\,^{\\circ}$C. What was the noon temperature (in °C)?", "answer": 8,
+     "explanation": "$-3 + 11 = 8$, so it was $8\\,^{\\circ}$C."}
+  ]
+}

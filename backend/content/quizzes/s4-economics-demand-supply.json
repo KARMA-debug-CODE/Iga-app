@@ -1,0 +1,23 @@
+{
+  "title": "Demand and supply — practice",
+  "subject": "economics", "grade": "S4", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "According to the law of demand, when price rises, quantity demanded…",
+     "choices": [{"text": "rises"}, {"text": "falls", "correct": true}, {"text": "stays the same"}],
+     "explanation": "Ceteris paribus, a higher price means a lower quantity demanded."},
+    {"type": "mcq", "difficulty": 2, "prompt": "A drought destroys much of the bean harvest. What happens to the equilibrium price of beans?",
+     "choices": [{"text": "It rises", "correct": true}, {"text": "It falls"}, {"text": "No change"}],
+     "explanation": "Supply decreases (shifts left), so equilibrium price rises and quantity falls."},
+    {"type": "numeric", "difficulty": 2, "prompt": "$Q_d = 120 - 3P$ and $Q_s = 20 + 2P$. Find the equilibrium price $P$.", "answer": 20,
+     "explanation": "$120 - 3P = 20 + 2P \\Rightarrow 5P = 100 \\Rightarrow P = 20$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Using the same equations, find the equilibrium quantity.", "answer": 60,
+     "explanation": "$Q = 20 + 2(20) = 60$."},
+    {"type": "mcq", "difficulty": 2, "prompt": "If the market price is **below** equilibrium, there will be…",
+     "choices": [{"text": "a surplus"}, {"text": "a shortage", "correct": true}, {"text": "equilibrium"}],
+     "explanation": "At a low price, quantity demanded exceeds quantity supplied."},
+    {"type": "essay", "marks": 4, "difficulty": 3, "prompt": "Distinguish between a movement along a demand curve and a shift of the demand curve. Give one cause of each.",
+     "marking_guide": "1: movement = change in quantity demanded caused by change in the good's own price. 1: correct example (price rise/fall). 1: shift = change in demand at every price caused by a non-price factor. 1: correct example (income, tastes, price of substitutes/complements, population, expectations).",
+     "explanation": "Own-price changes move you along the curve; other factors shift the whole curve."}
+  ]
+}

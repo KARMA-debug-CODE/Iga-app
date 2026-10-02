@@ -1,0 +1,22 @@
+{
+  "title": "HTML basics — practice",
+  "subject": "ict", "grade": "S1", "unit": 5,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "What does HTML stand for?",
+     "choices": [{"text": "Hyperlinks and Text Markup Language"}, {"text": "HyperText Markup Language", "correct": true}, {"text": "Home Tool Markup Language"}, {"text": "High Technology Modern Language"}],
+     "explanation": "HTML = HyperText Markup Language."},
+    {"type": "mcq", "difficulty": 1, "prompt": "Which tag makes the **largest** heading?",
+     "choices": [{"text": "`<h6>`"}, {"text": "`<heading>`"}, {"text": "`<h1>`", "correct": true}, {"text": "`<head>`"}],
+     "explanation": "`<h1>` is the biggest heading; `<h6>` is the smallest."},
+    {"type": "short", "difficulty": 2, "prompt": "Which attribute of `<a>` holds the address the link goes to?", "accepted": ["href"],
+     "explanation": "`<a href=\"https://...\">` — `href` is the link target."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which tag creates a bulleted list?",
+     "choices": [{"text": "`<ol>`"}, {"text": "`<ul>`", "correct": true}, {"text": "`<li>`"}, {"text": "`<list>`"}],
+     "explanation": "`<ul>` is an unordered (bulleted) list; each item is an `<li>`."},
+    {"type": "true_false", "difficulty": 1, "prompt": "The `<img>` tag needs a closing `</img>` tag.", "answer": false,
+     "explanation": "`<img>` is an empty element; it has no closing tag."},
+    {"type": "short", "difficulty": 2, "prompt": "Which attribute describes an image for people who cannot see it?", "accepted": ["alt"],
+     "explanation": "The `alt` attribute gives alternative text for screen readers and slow connections."}
+  ]
+}

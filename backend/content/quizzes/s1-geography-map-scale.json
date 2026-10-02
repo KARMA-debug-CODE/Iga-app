@@ -1,0 +1,20 @@
+{
+  "title": "Map scale — practice",
+  "subject": "geography", "grade": "S1", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "numeric", "difficulty": 1, "prompt": "On a 1 : 50 000 map, 1 cm represents how many km?", "answer": 0.5, "tolerance": 0.001,
+     "explanation": "50 000 cm = 500 m = 0.5 km."},
+    {"type": "numeric", "difficulty": 2, "prompt": "On a 1 : 100 000 map, a road measures 4.5 cm. How long is the road in km?", "answer": 4.5, "tolerance": 0.001,
+     "explanation": "1 cm represents 1 km, so 4.5 cm represents 4.5 km."},
+    {"type": "mcq", "difficulty": 2, "prompt": "\"1 cm represents 2 km\" written as a representative fraction is…",
+     "choices": [{"text": "1 : 2 000"}, {"text": "1 : 20 000"}, {"text": "1 : 200 000", "correct": true}, {"text": "1 : 2 000 000"}],
+     "explanation": "2 km = 200 000 cm."},
+    {"type": "mcq", "difficulty": 2, "prompt": "Which map shows the **most** detail?",
+     "choices": [{"text": "1 : 5 000", "correct": true}, {"text": "1 : 50 000"}, {"text": "1 : 500 000"}],
+     "explanation": "The large-scale map (smallest denominator) shows a small area in more detail."},
+    {"type": "mcq", "difficulty": 1, "prompt": "What is the best way to measure a winding river on a map?",
+     "choices": [{"text": "a ruler straight from end to end"}, {"text": "a piece of string laid along the river", "correct": true}, {"text": "guessing"}],
+     "explanation": "String follows the curves; then straighten it against the scale."}
+  ]
+}

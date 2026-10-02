@@ -1,0 +1,19 @@
+{
+  "title": "JavaScript basics — practice",
+  "subject": "ict", "grade": "S3", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which keyword declares a variable that **cannot** be reassigned?",
+     "choices": [{"text": "`let`"}, {"text": "`var`"}, {"text": "`const`", "correct": true}, {"text": "`fixed`"}],
+     "explanation": "`const` creates a binding that cannot be reassigned."},
+    {"type": "numeric", "difficulty": 2, "prompt": "What does this return? `function f(a, b) { return a * b + 1; }  f(3, 4)`", "answer": 13,
+     "explanation": "$3 \\times 4 + 1 = 13$."},
+    {"type": "short", "difficulty": 2, "prompt": "Which method attaches a function to a button's click? (`button.______(\"click\", fn)`)", "accepted": ["addEventListener", "addeventlistener"],
+     "explanation": "`addEventListener(\"click\", fn)` runs `fn` on every click."},
+    {"type": "numeric", "difficulty": 2, "prompt": "How many times does this loop run? `for (let i = 0; i < 5; i++) { }`", "answer": 5,
+     "explanation": "i takes the values 0, 1, 2, 3, 4."},
+    {"type": "mcq", "difficulty": 1, "prompt": "Which of the three web languages controls behaviour?",
+     "choices": [{"text": "HTML"}, {"text": "CSS"}, {"text": "JavaScript", "correct": true}],
+     "explanation": "HTML = structure, CSS = style, JavaScript = behaviour."}
+  ]
+}

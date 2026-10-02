@@ -1,0 +1,21 @@
+{
+  "title": "Sources of history — practice",
+  "subject": "history", "grade": "S1", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which of these is a **primary** source?",
+     "choices": [{"text": "a history textbook written in 2020"}, {"text": "a letter written by a soldier in 1916", "correct": true}, {"text": "a documentary about ancient Egypt"}, {"text": "an encyclopedia article"}],
+     "explanation": "The letter was made at the time by someone who was there."},
+    {"type": "mcq", "difficulty": 1, "prompt": "The study of material remains such as tools and pottery is called…",
+     "choices": [{"text": "oral tradition"}, {"text": "archaeology", "correct": true}, {"text": "linguistics"}, {"text": "geography"}],
+     "explanation": "Archaeologists study the physical remains of the past."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** examples of oral tradition.",
+     "choices": [{"text": "proverbs", "correct": true}, {"text": "songs and poems passed down", "correct": true}, {"text": "newspapers"}, {"text": "genealogies told by elders", "correct": true}],
+     "explanation": "Oral tradition is passed on by word of mouth."},
+    {"type": "true_false", "difficulty": 2, "prompt": "Comparing several sources that agree makes a historical account more reliable.", "answer": true,
+     "explanation": "This is called corroboration."},
+    {"type": "essay", "marks": 4, "difficulty": 2, "prompt": "Give two strengths and two weaknesses of oral tradition as a source of history.",
+     "marking_guide": "Strengths (1 each, max 2): available where nothing was written; preserves values/culture; involves the community; cheap. Weaknesses (1 each, max 2): details change in retelling; exaggeration/bias; dates unclear; knowledge lost when elders die.",
+     "explanation": "Balance strengths (e.g. covers pre-literate times) against weaknesses (e.g. details change in retelling)."}
+  ]
+}

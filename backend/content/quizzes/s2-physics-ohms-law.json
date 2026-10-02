@@ -1,0 +1,21 @@
+{
+  "title": "Ohm's law — practice",
+  "subject": "physics", "grade": "S2", "unit": 4,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "numeric", "difficulty": 1, "prompt": "A 12 V battery is connected to a 4 Ω resistor. What current flows (in A)?", "answer": 3,
+     "explanation": "$I = \\frac{V}{R} = \\frac{12}{4} = 3$ A."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A current of 0.2 A flows through a 50 Ω resistor. What is the voltage across it (in V)?", "answer": 10,
+     "explanation": "$V = IR = 0.2 \\times 50 = 10$ V."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A torch bulb draws 0.3 A from a 4.5 V battery. Find its resistance in Ω.", "answer": 15,
+     "explanation": "$R = \\frac{V}{I} = \\frac{4.5}{0.3} = 15\\ \\Omega$."},
+    {"type": "mcq", "difficulty": 1, "prompt": "How is a voltmeter connected in a circuit?",
+     "choices": [{"text": "in series"}, {"text": "in parallel with the component", "correct": true}, {"text": "it is not connected"}],
+     "explanation": "A voltmeter measures the potential difference *across* a component, so it goes in parallel."},
+    {"type": "mcq", "difficulty": 3, "prompt": "Why does a filament lamp not obey Ohm's law?",
+     "choices": [{"text": "Its resistance increases as it gets hotter", "correct": true}, {"text": "It has no resistance"}, {"text": "It only works with AC"}, {"text": "Its current is always zero"}],
+     "explanation": "Ohm's law needs constant temperature. The filament heats up, so its resistance rises and the V–I graph curves."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the unit of resistance? (one word)", "accepted": ["ohm", "ohms", "Ω"],
+     "explanation": "Resistance is measured in ohms (Ω)."}
+  ]
+}

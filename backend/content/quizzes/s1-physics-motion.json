@@ -1,0 +1,21 @@
+{
+  "title": "Speed, velocity and acceleration — practice",
+  "subject": "physics", "grade": "S1", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "numeric", "difficulty": 1, "prompt": "A cyclist travels 600 m in 120 s. What is her average speed in m/s?", "answer": 5,
+     "explanation": "$v = \\frac{d}{t} = \\frac{600}{120} = 5$ m/s."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Convert 72 km/h to m/s.", "answer": 20,
+     "explanation": "Divide by 3.6: $72 \\div 3.6 = 20$ m/s."},
+    {"type": "mcq", "difficulty": 1, "prompt": "Which of these is a **vector** quantity?",
+     "choices": [{"text": "speed"}, {"text": "distance"}, {"text": "velocity", "correct": true}, {"text": "time"}],
+     "explanation": "Velocity has both size and direction."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A bus accelerates from 4 m/s to 16 m/s in 6 s. Find its acceleration in m/s².", "answer": 2,
+     "explanation": "$a = \\frac{v - u}{t} = \\frac{16 - 4}{6} = 2$ m/s²."},
+    {"type": "mcq", "difficulty": 2, "prompt": "On a distance–time graph, a horizontal line means the object is…",
+     "choices": [{"text": "moving at constant speed"}, {"text": "accelerating"}, {"text": "stationary", "correct": true}, {"text": "decelerating"}],
+     "explanation": "The distance is not changing, so the object is not moving."},
+    {"type": "true_false", "difficulty": 2, "prompt": "If you walk around a running track and finish where you started, your displacement is zero.", "answer": true,
+     "explanation": "Displacement is the straight-line change in position; you are back at the start."}
+  ]
+}
