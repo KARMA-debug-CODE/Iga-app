@@ -126,6 +126,11 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Rate limits and other caches must be shared between server processes in
+# production, so point REDIS_URL at a Redis instance there.
+if os.environ.get("REDIS_URL"):
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": os.environ["REDIS_URL"]}}
+
 # --- REST API -------------------------------------------------------------
 
 REST_FRAMEWORK = {
@@ -138,8 +143,12 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.ScopedRateThrottle",
     ],
+    # Per-IP limits are generous because a whole school often shares one public IP;
+    # "login" is per account and is what actually stops password guessing.
     "DEFAULT_THROTTLE_RATES": {
-        "auth": os.environ.get("THROTTLE_AUTH", "20/min"),
+        "auth": os.environ.get("THROTTLE_AUTH", "300/min"),
+        "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
+        "refresh": os.environ.get("THROTTLE_REFRESH", "600/min"),
         "chat": os.environ.get("THROTTLE_CHAT", "30/min"),
     },
 }

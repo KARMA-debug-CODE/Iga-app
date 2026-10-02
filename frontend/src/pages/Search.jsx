@@ -1,0 +1,86 @@
+import { Link, useSearchParams } from "react-router-dom";
+
+import { Empty, Loader } from "../components/ui";
+import { useApi } from "../hooks";
+import { useI18n } from "../i18n";
+
+export default function Search() {
+  const [params] = useSearchParams();
+  const q = params.get("q") || "";
+  const { t } = useI18n();
+  const state = useApi("/search/", { params: { q } });
+  return (
+    <>
+      <div className="page-header">
+        <h1>
+          {t("search.title")}: “{q}”
+        </h1>
+      </div>
+      <Loader state={state}>
+        {(r) => {
+          const total = r.lessons.length + r.simulations.length + r.quizzes.length + r.subjects.length;
+          if (!total) return <Empty icon="🔎">{t("search.none", { q })}</Empty>;
+          return (
+            <div className="stack">
+              {r.subjects.length > 0 && (
+                <div className="card">
+                  <h2>{t("learn.subjects")}</h2>
+                  <ul className="list">
+                    {r.subjects.map((s) => (
+                      <li key={s.code}>
+                        <Link to={`/learn/${s.code}`}>
+                          {s.icon} {s.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {r.lessons.length > 0 && (
+                <div className="card">
+                  <h2>📖 {t("nav.learn")}</h2>
+                  <ul className="list">
+                    {r.lessons.map((l) => (
+                      <li key={l.slug}>
+                        <Link to={`/lessons/${l.slug}`}>
+                          {l.icon} {l.title}
+                        </Link>{" "}
+                        <span className="small muted">
+                          · {l.subject} {l.grade}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {r.simulations.length > 0 && (
+                <div className="card">
+                  <h2>🔬 {t("nav.labs")}</h2>
+                  <ul className="list">
+                    {r.simulations.map((s) => (
+                      <li key={s.slug}>
+                        <Link to={`/labs/${s.slug}`}>{s.title}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {r.quizzes.length > 0 && (
+                <div className="card">
+                  <h2>📝 {t("nav.practice")}</h2>
+                  <ul className="list">
+                    {r.quizzes.map((q2) => (
+                      <li key={q2.id}>
+                        <Link to={`/practice?start=${q2.id}`}>{q2.title}</Link> <span className="small muted">· {q2.subject}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          );
+        }}
+      </Loader>
+    </>
+  );
+}

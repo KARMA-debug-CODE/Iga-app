@@ -1,17 +1,20 @@
 import pytest
+from django.core.cache import cache
 from rest_framework.test import APIClient
+from rest_framework.throttling import SimpleRateThrottle
 
 from apps.accounts.models import User
 from apps.assessments.models import Choice, Question, Quiz, QuizQuestion
 from apps.curriculum.models import Lesson, Subject, Unit
 
+RELAXED_RATES = {"auth": "1000/min", "login": "1000/min", "refresh": "1000/min", "chat": "1000/min"}
+
 
 @pytest.fixture(autouse=True)
-def _no_throttling(settings):
-    settings.REST_FRAMEWORK = {
-        **settings.REST_FRAMEWORK,
-        "DEFAULT_THROTTLE_RATES": {"auth": "1000/min", "chat": "1000/min"},
-    }
+def _no_throttling(monkeypatch):
+    # DRF reads rates into the throttle class at import time, so patch the class.
+    monkeypatch.setattr(SimpleRateThrottle, "THROTTLE_RATES", RELAXED_RATES)
+    cache.clear()
 
 
 def make_user(username, role=User.Role.STUDENT, grade="S2", **extra):

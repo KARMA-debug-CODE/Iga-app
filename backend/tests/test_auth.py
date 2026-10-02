@@ -126,3 +126,19 @@ def test_change_password(client_for, student):
     assert response.status_code == 200
     student.refresh_from_db()
     assert student.check_password("An0ther-pass-456")
+
+
+def test_login_is_throttled_per_account_not_per_ip(client_for, student, other_student, monkeypatch):
+    from rest_framework.throttling import SimpleRateThrottle
+
+    from .conftest import RELAXED_RATES
+
+    monkeypatch.setattr(SimpleRateThrottle, "THROTTLE_RATES", {**RELAXED_RATES, "login": "3/min"})
+    client = client_for()
+    for _ in range(3):
+        client.post("/api/auth/login/", {"identifier": "student", "password": "wrong"}, format="json")
+    blocked = client.post("/api/auth/login/", {"identifier": "student", "password": "Str0ng-pass-123"}, format="json")
+    assert blocked.status_code == 429
+    # A classmate behind the same school IP can still log in.
+    ok = client.post("/api/auth/login/", {"identifier": "other", "password": "Str0ng-pass-123"}, format="json")
+    assert ok.status_code == 200

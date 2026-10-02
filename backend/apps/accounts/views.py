@@ -5,6 +5,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -19,6 +20,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
 )
+from .throttles import LoginIdentifierThrottle
 
 
 def _set_refresh_cookie(response, refresh_token):
@@ -60,6 +62,7 @@ class LoginView(APIView):
 
     permission_classes = [AllowAny]
     throttle_scope = "auth"
+    throttle_classes = [LoginIdentifierThrottle, ScopedRateThrottle]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -94,7 +97,7 @@ class RefreshView(APIView):
 
     permission_classes = [AllowAny]
     authentication_classes = []
-    throttle_scope = "auth"
+    throttle_scope = "refresh"
 
     def post(self, request):
         raw = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
