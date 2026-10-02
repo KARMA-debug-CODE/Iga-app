@@ -292,3 +292,13 @@ def test_question_validation(client_for, teacher, subject):
     assert client.post("/api/questions/", {**base, "choices": two_right}, format="json").status_code == 400
     ok = [{"text": "a", "is_correct": True}, {"text": "b"}]
     assert client.post("/api/questions/", {**base, "choices": ok}, format="json").status_code == 201
+
+
+def test_blank_written_answers_score_zero_without_teacher(client_for, student, teacher, essay_quiz):
+    classroom = Classroom.objects.create(name="C", grade="S2", teacher=teacher)
+    Enrollment.objects.create(classroom=classroom, student=student)
+    client = client_for(student)
+    attempt = start(client, essay_quiz)
+    result = client.post(f"/api/attempts/{attempt['id']}/submit/").data
+    assert result["status"] == "marked"
+    assert client_for(teacher).get("/api/marking/").data == []

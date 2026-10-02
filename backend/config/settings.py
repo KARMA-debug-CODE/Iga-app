@@ -164,7 +164,7 @@ SIMPLE_JWT = {
 # so page scripts never see it. The short-lived access token stays in memory.
 REFRESH_COOKIE_NAME = "iga_refresh"
 REFRESH_COOKIE_PATH = "/api/auth/"
-REFRESH_COOKIE_SECURE = env_bool("REFRESH_COOKIE_SECURE", not DEBUG)
+REFRESH_COOKIE_SECURE = env_bool("REFRESH_COOKIE_SECURE", env_bool("HTTPS", not DEBUG))
 REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Lax")
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
@@ -177,15 +177,18 @@ EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"
 
 # --- Production hardening --------------------------------------------------
 
-if not DEBUG:
+# HTTPS defaults to on whenever DEBUG is off. Only switch it off for a local
+# docker-compose trial over plain http://localhost.
+HTTPS = env_bool("HTTPS", not DEBUG)
+if HTTPS:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
 
 LOGGING = {
     "version": 1,

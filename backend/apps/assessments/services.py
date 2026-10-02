@@ -228,6 +228,9 @@ def submit_attempt(attempt):
         answer, _ = Answer.objects.get_or_create(attempt=attempt, question=questions[question_id])
         if not answer.checked:
             answer.is_correct, answer.marks_awarded = score_answer(answer)
+            if answer.marks_awarded is None and not answer.text_answer.strip():
+                # A blank written answer scores zero; don't send it to the teacher's queue.
+                answer.is_correct, answer.marks_awarded = False, Decimal("0")
             answer.save(update_fields=["is_correct", "marks_awarded"])
     now = timezone.now()
     attempt.submitted_at = min(now, attempt.deadline) if attempt.deadline else now

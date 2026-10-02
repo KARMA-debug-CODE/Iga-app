@@ -210,15 +210,39 @@ def _build_question(data, subject, grade, default_unit, source, source_name):
     return question
 
 
+def _paper_fields(paper, subject, fallback_title):
+    return {
+        "subject": subject,
+        "level": paper["level"],
+        "year": paper["year"],
+        "paper_code": paper.get("paper_code", ""),
+        "title": paper.get("title", fallback_title),
+        "is_official": paper.get("is_official", False),
+        "source_note": paper.get("source_note", ""),
+        "paper_url": paper.get("paper_url", ""),
+        "marking_guide_url": paper.get("marking_guide_url", ""),
+    }
+
+
 @transaction.atomic
 def import_quiz_file(path, status=ContentStatus.PUBLISHED):
-    """Import one quiz (or exam paper) JSON file. Returns (quiz, created)."""
+    """Import one quiz or exam-paper JSON file.
+
+    Returns (quiz, created), or (exam_paper, created) for a PDF-only paper
+    that has no digitised questions yet.
+    """
     path = Path(path)
     data = json.loads(path.read_text(encoding="utf-8"))
     subject = Subject.objects.get(code=data["subject"])
+    paper = data.get("paper")
+
+    if paper and not data.get("questions"):
+        fields = _paper_fields(paper, subject, data.get("title", ""))
+        key = {k: fields.pop(k) for k in ("subject", "level", "year", "paper_code")}
+        return ExamPaper.objects.update_or_create(**key, quiz=None, defaults=fields)
+
     grade = data["grade"]
     default_unit = _unit(subject.code, grade, data["unit"], path.name) if data.get("unit") else None
-    paper = data.get("paper")
     source = Question.Source.SAMPLE
     if paper and paper.get("is_official"):
         source = Question.Source.PAST_PAPER
@@ -250,20 +274,7 @@ def import_quiz_file(path, status=ContentStatus.PUBLISHED):
             QuizQuestion.objects.create(quiz=quiz, question=question, order=order)
 
     if paper:
-        ExamPaper.objects.update_or_create(
-            quiz=quiz,
-            defaults={
-                "subject": subject,
-                "level": paper["level"],
-                "year": paper["year"],
-                "paper_code": paper.get("paper_code", ""),
-                "title": paper.get("title", data["title"]),
-                "is_official": paper.get("is_official", False),
-                "source_note": paper.get("source_note", ""),
-                "paper_url": paper.get("paper_url", ""),
-                "marking_guide_url": paper.get("marking_guide_url", ""),
-            },
-        )
+        ExamPaper.objects.update_or_create(quiz=quiz, defaults=_paper_fields(paper, subject, data["title"]))
     return quiz, created
 
 

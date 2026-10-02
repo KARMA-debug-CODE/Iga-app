@@ -17,8 +17,9 @@ class Command(BaseCommand):
         status = "draft" if options["draft"] else "published"
         for path in options["files"]:
             try:
-                quiz, created = import_quiz_file(path, status=status)
+                item, created = import_quiz_file(path, status=status)
             except (ContentError, KeyError, ValueError) as exc:
                 raise CommandError(f"{path}: {exc}")
             verb = "Created" if created else "Updated"
-            self.stdout.write(self.style.SUCCESS(f"{verb}: {quiz.title} ({quiz.quiz_questions.count()} questions)"))
+            detail = f"{item.quiz_questions.count()} questions" if hasattr(item, "quiz_questions") else "PDF only"
+            self.stdout.write(self.style.SUCCESS(f"{verb}: {item.title} ({detail})"))

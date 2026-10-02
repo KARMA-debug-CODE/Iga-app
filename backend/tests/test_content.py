@@ -78,3 +78,27 @@ def test_official_paper_questions_are_tagged_past_paper(tmp_path):
     assert created
     assert quiz.exam_paper.is_official
     assert quiz.questions.get().source == "past_paper"
+
+
+def test_pdf_only_paper_creates_library_entry_without_quiz(tmp_path):
+    load_all(log=lambda *_: None)
+    paper = {
+        "paper": {
+            "level": "A",
+            "year": 2018,
+            "paper_code": "P1",
+            "title": "Physics 2018 P1",
+            "paper_url": "https://example.org/p.pdf",
+        },
+        "title": "Physics 2018 P1",
+        "subject": "physics",
+        "grade": "S6",
+        "questions": [],
+    }
+    path = tmp_path / "pdf.json"
+    path.write_text(json.dumps(paper))
+    exam, created = import_quiz_file(path)
+    assert created and exam.quiz is None and exam.paper_url.endswith("p.pdf")
+    exam, created = import_quiz_file(path)
+    assert not created
+    assert not Quiz.objects.filter(title="Physics 2018 P1").exists()
