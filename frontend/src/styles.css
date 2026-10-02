@@ -1409,3 +1409,52 @@ tr:last-child td {
 .tutor-log .bubble .prose {
   font-size: 0.98rem;
 }
+
+/* Python playground */
+
+.python-output-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #0b141b;
+}
+
+.python-output {
+  margin: 0;
+  padding: 12px;
+  color: #e3edf5;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.python-output .muted {
+  color: #8aa0b2;
+}
+
+.python-output .py-stderr {
+  color: #ff9b9b;
+}
+
+.python-output .py-result {
+  color: #9be7b4;
+}
+
+.python-stdin {
+  padding: 8px 12px;
+  color: #e3edf5;
+  border-bottom: 1px solid #23333f;
+  font-weight: 500;
+}
+
+.python-stdin textarea {
+  min-height: 0;
+  background: #0f1b24;
+  color: #e3edf5;
+  border-color: #23333f;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}

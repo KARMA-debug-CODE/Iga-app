@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
@@ -5,6 +6,29 @@ import { GradeChips, Loader, Progress } from "../components/ui";
 import { results } from "../api";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { offlineSupported, saveUnitOffline, savedUnits } from "../offline";
+
+function SaveOffline({ unit }) {
+  const { t, lang } = useI18n();
+  const [state, setState] = useState(() => (savedUnits()[unit.id] ? "saved" : "idle"));
+  const [progress, setProgress] = useState("");
+  if (!offlineSupported() || !unit.lessons.length) return null;
+  async function save() {
+    setState("saving");
+    try {
+      await saveUnitOffline(unit, lang, (done, total) => setProgress(`${done}/${total}`));
+      setState("saved");
+    } catch {
+      setState("error");
+    }
+  }
+  if (state === "saved") return <span className="pill pill-success">✓ {t("offline.saved")}</span>;
+  return (
+    <button className="btn btn-sm btn-secondary" onClick={save} disabled={state === "saving"}>
+      {state === "saving" ? `${t("offline.saving")} ${progress}` : state === "error" ? t("offline.retry") : `⬇ ${t("offline.save")}`}
+    </button>
+  );
+}
 
 function ResourceList({ code, grade }) {
   const { t } = useI18n();
@@ -103,7 +127,10 @@ export default function Subject() {
                   <span>{unit.title}</span>
                 </summary>
                 <div className="unit-body">
-                  {!unit.alignment_verified && <p className="small muted">ⓘ {t("learn.notVerified")}</p>}
+                  <div className="spread" style={{ marginBottom: 6 }}>
+                    {!unit.alignment_verified ? <span className="small muted">ⓘ {t("learn.notVerified")}</span> : <span />}
+                    <SaveOffline unit={{ ...unit, grade }} />
+                  </div>
                   {unit.lessons.length ? (
                     <ul className="list">
                       {unit.lessons.map((lesson) => (

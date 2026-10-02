@@ -148,4 +148,12 @@ export default {
   "tutor.hint": "💡 Saba igitekerezo",
   "tutor.placeholder": "Baza ikibazo…",
   "tutor.thinking": "Ndimo gutekereza…",
+
+  "python.stop": "Hagarika",
+
+  "offline.save": "Bika ukoreshe nta murandasi",
+  "offline.saved": "Byabitswe",
+
+  "errors.loadTitle": "Iki gice nticyafunguka",
+  "errors.loadBody": "Gishobora gukenera murandasi ubwa mbere. Reba murandasi yawe wongere ugerageze.",
 };

@@ -3,6 +3,7 @@ import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 import { BUILTIN_SIMS } from "../sims/registry";
+import ErrorBoundary from "./ErrorBoundary";
 import { Spinner } from "./ui";
 
 function useSimulation(slug, initial, lang) {
@@ -99,9 +100,11 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
     if (!Component) return <div className="alert">Unknown built-in lab: {sim.provider_id}</div>;
     return (
       <div className="sim-frame">
-        <Suspense fallback={<Spinner />}>
-          <Component />
-        </Suspense>
+        <ErrorBoundary compact>
+          <Suspense fallback={<Spinner />}>
+            <Component />
+          </Suspense>
+        </ErrorBoundary>
         <div className="sim-caption">
           🔬 {sim.title} · {t("labs.offline")}
         </div>

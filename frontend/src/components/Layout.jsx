@@ -1,16 +1,18 @@
-import { useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Suspense, useState } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth";
 import { useOnline } from "../hooks";
 import { useI18n } from "../i18n";
-import { Logo } from "./ui";
+import ErrorBoundary from "./ErrorBoundary";
+import { Logo, Spinner } from "./ui";
 
 export default function Layout() {
   const { user, isTeacher, isAdmin } = useAuth();
   const { t } = useI18n();
   const online = useOnline();
   const navigate = useNavigate();
+  const location = useLocation();
   const [query, setQuery] = useState("");
 
   const primary = [
@@ -88,7 +90,11 @@ export default function Layout() {
           </nav>
         </aside>
         <main className="main" id="main">
-          <Outlet />
+          <ErrorBoundary resetKey={location.pathname}>
+            <Suspense fallback={<Spinner />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
 

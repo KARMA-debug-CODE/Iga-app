@@ -74,7 +74,8 @@ export async function api(path, { method = "GET", body, params, retry = true, si
   if (res.status === 401 && retry && !path.startsWith("/auth/")) {
     try {
       await refreshSession();
-    } catch {
+    } catch (err) {
+      if (!(err instanceof ApiError)) throw err; // network problem, not an expired session
       onSessionExpired();
       throw new ApiError(401, { detail: "Your session has expired. Please log in again." });
     }

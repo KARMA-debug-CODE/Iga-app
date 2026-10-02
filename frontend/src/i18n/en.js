@@ -326,4 +326,20 @@ export default {
   "tutor.s.why": "Why is the correct answer right?",
   "tutor.s.wrong": "Where did I go wrong?",
   "tutor.s.similar": "Give me a similar question to practise",
+
+  "python.input": "Input",
+  "python.inputHelp": "Lines here are read by input(), one per call.",
+  "python.loading": "Starting Python… (about 12 MB the first time, then it's saved on this device)",
+  "python.empty": "Press Run to see the output here.",
+  "python.stop": "Stop",
+  "python.stopped": "Stopped.",
+  "python.pageIntro": "Write and run real code in your browser — web pages or Python.",
+
+  "offline.save": "Save for offline",
+  "offline.saving": "Saving…",
+  "offline.saved": "Saved offline",
+  "offline.retry": "Couldn't save — try again",
+
+  "errors.loadTitle": "This part couldn't load",
+  "errors.loadBody": "It may need an internet connection the first time, or the app was just updated. Check your connection and try again.",
 };

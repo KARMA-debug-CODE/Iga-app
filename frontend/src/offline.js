@@ -1,0 +1,87 @@
+// "Save for offline": fetch every lesson in a unit so the service worker keeps a copy.
+// On logout everything cached is wiped, because school computers are often shared.
+import { api } from "./api";
+
+const KEY = "iga.offline.units";
+
+function readSaved() {
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function writeSaved(value) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(value));
+  } catch {
+    /* storage full or blocked: the lessons are still cached */
+  }
+}
+
+export function offlineSupported() {
+  return typeof navigator !== "undefined" && Boolean(navigator.serviceWorker?.controller) && "caches" in window;
+}
+
+export function savedUnits() {
+  return readSaved();
+}
+
+function waitForStylesheets() {
+  const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+  return Promise.all(
+    links.map((link) => (link.sheet ? null : new Promise((resolve) => link.addEventListener("load", resolve, { once: true })))),
+  );
+}
+
+/** Fetch the maths fonts so formulas look right offline (the service worker caches them). */
+async function cacheMathFonts() {
+  await waitForStylesheets();
+  const urls = new Set();
+  for (const sheet of document.styleSheets) {
+    let rules;
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      continue; // cross-origin stylesheet
+    }
+    for (const rule of rules) {
+      if (rule instanceof CSSFontFaceRule && /KaTeX/i.test(rule.style.getPropertyValue("font-family"))) {
+        const match = /url\(["']?([^"')]+\.woff2)["']?\)/.exec(rule.style.getPropertyValue("src"));
+        if (match) urls.add(new URL(match[1], sheet.href || window.location.href).href);
+      }
+    }
+  }
+  await Promise.all([...urls].map((url) => fetch(url).catch(() => null)));
+}
+
+export async function saveUnitOffline(unit, lang, onProgress = () => {}) {
+  // Cache the code for lesson pages and built-in labs too, not just the lesson data.
+  const { preloadBuiltinSims } = await import("./sims/registry");
+  await Promise.all([import("./pages/Lesson"), import("./components/Markdown"), preloadBuiltinSims()]);
+  await cacheMathFonts();
+  const slugs = unit.lessons.map((l) => l.slug);
+  let done = 0;
+  for (const slug of slugs) {
+    await api(`/lessons/${slug}/`, { params: { lang } });
+    done += 1;
+    onProgress(done, slugs.length);
+  }
+  const saved = readSaved();
+  saved[unit.id] = { title: unit.title, grade: unit.grade, slugs, lang, savedAt: new Date().toISOString() };
+  writeSaved(saved);
+  return saved[unit.id];
+}
+
+export async function clearOfflineData() {
+  try {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem("iga.user");
+  } catch {
+    /* ignore */
+  }
+  if (typeof caches === "undefined") return;
+  const names = await caches.keys();
+  await Promise.all(names.filter((n) => n.startsWith("iga-")).map((n) => caches.delete(n)));
+}

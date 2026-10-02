@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 import CodePlayground from "../components/CodePlayground";
+import PythonPlayground from "../components/PythonPlayground";
+import { Tabs } from "../components/ui";
 import { useI18n } from "../i18n";
 
 const STARTER = `<!DOCTYPE html>
@@ -20,15 +24,36 @@ const STARTER = `<!DOCTYPE html>
 </body>
 </html>`;
 
+const PY_STARTER = `# Iga Python playground — press Run (or Ctrl+Enter)
+name = input("What is your name? ")
+print(f"Muraho, {name}!")
+
+marks = [72, 85, 64, 90]
+average = sum(marks) / len(marks)
+print("Average mark:", round(average, 1))
+
+for m in marks:
+    print(m, "pass" if m >= 50 else "try again")
+`;
+
 export default function Playground() {
   const { t } = useI18n();
+  const [tab, setTab] = useState("web");
   return (
     <>
       <div className="page-header">
         <h1>💻 {t("nav.playground")}</h1>
-        <p>HTML · CSS · JavaScript</p>
+        <p>{t("python.pageIntro")}</p>
       </div>
-      <CodePlayground initialCode={STARTER} height={420} />
+      <Tabs
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { value: "web", label: "🌐 HTML · CSS · JS" },
+          { value: "python", label: "🐍 Python" },
+        ]}
+      />
+      {tab === "web" ? <CodePlayground initialCode={STARTER} height={420} /> : <PythonPlayground initialCode={PY_STARTER} height={380} />}
     </>
   );
 }

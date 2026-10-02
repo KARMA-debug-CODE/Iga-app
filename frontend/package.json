@@ -4,7 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "copy-pyodide": "node scripts/copy-pyodide.mjs",
+    "predev": "npm run copy-pyodide",
     "dev": "vite",
+    "prebuild": "npm run copy-pyodide",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -13,6 +16,7 @@
   },
   "dependencies": {
     "katex": "^0.16.47",
+    "pyodide": "^314.0.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-markdown": "^10.1.0",

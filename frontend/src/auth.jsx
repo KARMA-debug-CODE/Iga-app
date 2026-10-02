@@ -1,8 +1,28 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { api, refreshSession, setAccessToken, setSessionExpiredHandler } from "./api";
+import { api, ApiError, refreshSession, setAccessToken, setSessionExpiredHandler } from "./api";
+import { clearOfflineData } from "./offline";
 
 const AuthContext = createContext(null);
+const USER_KEY = "iga.user";
+
+// A copy of the profile lets the app open without a connection (offline mode).
+function rememberUser(user) {
+  try {
+    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
+    else localStorage.removeItem(USER_KEY);
+  } catch {
+    /* storage blocked */
+  }
+}
+
+function rememberedUser() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -11,6 +31,7 @@ export function AuthProvider({ children }) {
   const startSession = useCallback((data) => {
     setAccessToken(data.access);
     setUser(data.user);
+    rememberUser(data.user);
     return data.user;
   }, []);
 
@@ -18,10 +39,18 @@ export function AuthProvider({ children }) {
     setSessionExpiredHandler(() => {
       setAccessToken(null);
       setUser(null);
+      clearOfflineData();
     });
     refreshSession()
-      .then((data) => setUser(data.user))
-      .catch(() => setUser(null))
+      .then((data) => {
+        setUser(data.user);
+        rememberUser(data.user);
+      })
+      .catch((err) => {
+        // No network (rather than "not logged in"): open in offline mode with saved lessons.
+        const saved = !(err instanceof ApiError) ? rememberedUser() : null;
+        setUser(saved ? { ...saved, offline: true } : null);
+      })
       .finally(() => setReady(true));
   }, []);
 
@@ -40,11 +69,14 @@ export function AuthProvider({ children }) {
     await api("/auth/logout/", { method: "POST" }).catch(() => {});
     setAccessToken(null);
     setUser(null);
+    // Shared school computers: don't leave this student's cached pages for the next one.
+    await clearOfflineData().catch(() => {});
   }, []);
 
   const reloadUser = useCallback(async () => {
     const me = await api("/auth/me/");
     setUser(me);
+    rememberUser(me);
     return me;
   }, []);
 

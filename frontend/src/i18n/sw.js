@@ -158,4 +158,14 @@ export default {
   "tutor.s.hint": "Nipe dokezo",
   "tutor.s.why": "Kwa nini jibu sahihi ni sahihi?",
   "tutor.s.wrong": "Nilikosea wapi?",
+
+  "python.input": "Ingizo",
+  "python.stop": "Simamisha",
+  "python.empty": "Bonyeza Run kuona matokeo hapa.",
+
+  "offline.save": "Hifadhi nje ya mtandao",
+  "offline.saved": "Imehifadhiwa",
+
+  "errors.loadTitle": "Sehemu hii haikuweza kufunguka",
+  "errors.loadBody": "Huenda inahitaji mtandao mara ya kwanza, au programu imesasishwa. Angalia mtandao wako kisha ujaribu tena.",
 };

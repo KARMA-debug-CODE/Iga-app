@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
 import CodePlayground from "./CodePlayground";
+import PythonPlayground from "./PythonPlayground";
 import SimEmbed from "./SimEmbed";
 
 function codeBlockInfo(node) {
@@ -25,6 +26,9 @@ function codeBlockInfo(node) {
  *   ```playground html
  *   <h1>Hello</h1>
  *   ```
+ *   ```python-run
+ *   print("Muraho!")
+ *   ```
  * Raw HTML in the Markdown is NOT rendered, so content can't inject scripts.
  */
 export default function Markdown({ children, sims = {}, interactive = true }) {
@@ -42,6 +46,9 @@ export default function Markdown({ children, sims = {}, interactive = true }) {
             }
             if (interactive && info?.language === "playground") {
               return <CodePlayground initialCode={info.text.replace(/\n$/, "")} />;
+            }
+            if (interactive && info?.language === "python-run") {
+              return <PythonPlayground initialCode={info.text.replace(/\n$/, "")} />;
             }
             return <pre>{kids}</pre>;
           },

@@ -22,3 +22,4 @@ frontend/playwright-report/
 .DS_Store
 .idea/
 .vscode/
+frontend/public/pyodide/
