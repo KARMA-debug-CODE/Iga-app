@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apps.classroom",
     "apps.community",
     "apps.gamification",
+    "apps.tutor",
 ]
 
 MIDDLEWARE = [
@@ -150,6 +151,7 @@ REST_FRAMEWORK = {
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
         "refresh": os.environ.get("THROTTLE_REFRESH", "600/min"),
         "chat": os.environ.get("THROTTLE_CHAT", "30/min"),
+        "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
     },
 }
 
@@ -170,6 +172,15 @@ REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Lax")
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+
+# --- AI tutor (Claude API) -------------------------------------------------
+# Switched on when an Anthropic credential is configured (ANTHROPIC_API_KEY),
+# or explicitly with TUTOR_ENABLED=true (e.g. when using an `ant auth` profile).
+TUTOR_ENABLED = env_bool("TUTOR_ENABLED", bool(os.environ.get("ANTHROPIC_API_KEY")))
+TUTOR_MODEL = os.environ.get("TUTOR_MODEL", "claude-opus-5-5")
+TUTOR_EFFORT = os.environ.get("TUTOR_EFFORT", "low")
+TUTOR_MAX_TOKENS = int(os.environ.get("TUTOR_MAX_TOKENS", "4000"))
+TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
 
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).

@@ -33,6 +33,7 @@ router.register("admin/moderation", ModerationViewSet, basename="admin-moderatio
 
 api = [
     path("auth/", include("apps.accounts.urls")),
+    path("tutor/", include("apps.tutor.urls")),
     path("health/", core_views.health, name="health"),
     path("meta/", core_views.meta, name="meta"),
     path("dashboard/", core_views.dashboard, name="dashboard"),

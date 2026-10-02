@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import Markdown from "../components/Markdown";
 import SimEmbed from "../components/SimEmbed";
+import TutorPanel from "../components/TutorPanel";
 import { Loader, useToast } from "../components/ui";
 import { useApi } from "../hooks";
 import { LANGUAGES, useI18n } from "../i18n";
@@ -83,6 +84,10 @@ export default function Lesson() {
 
             <div className="card">
               <Markdown sims={sims}>{lesson.body}</Markdown>
+            </div>
+
+            <div className="section">
+              <TutorPanel lesson={lesson.slug} starters={[t("tutor.s.simpler"), t("tutor.s.example"), t("tutor.s.quizme")]} />
             </div>
 
             {extraSims.length > 0 && (

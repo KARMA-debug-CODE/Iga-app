@@ -145,4 +145,17 @@ export default {
   "common.cancel": "Ghairi",
   "common.close": "Funga",
   "common.offline": "Uko nje ya mtandao. Kurasa ulizofungua awali bado zinafanya kazi.",
+
+  "tutor.title": "Mwalimu wa Iga",
+  "tutor.open": "Muulize mwalimu wa AI",
+  "tutor.hint": "💡 Omba dokezo",
+  "tutor.explain": "🤖 Muulize mwalimu kuhusu swali hili",
+  "tutor.disclaimer": "Msaidizi wa masomo wa AI. Anaweza kukosea, kwa hiyo hakikisha mambo muhimu na mwalimu wako. Usishiriki taarifa zako binafsi.",
+  "tutor.placeholder": "Uliza swali…",
+  "tutor.thinking": "Anafikiri…",
+  "tutor.s.simpler": "Eleza somo hili kwa urahisi zaidi",
+  "tutor.s.example": "Nipe mfano mwingine",
+  "tutor.s.hint": "Nipe dokezo",
+  "tutor.s.why": "Kwa nini jibu sahihi ni sahihi?",
+  "tutor.s.wrong": "Nilikosea wapi?",
 };

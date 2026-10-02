@@ -7,7 +7,7 @@ from apps.accounts.models import User
 from apps.assessments.models import Choice, Question, Quiz, QuizQuestion
 from apps.curriculum.models import Lesson, Subject, Unit
 
-RELAXED_RATES = {"auth": "1000/min", "login": "1000/min", "refresh": "1000/min", "chat": "1000/min"}
+RELAXED_RATES = {"auth": "1000/min", "login": "1000/min", "refresh": "1000/min", "chat": "1000/min", "tutor": "1000/min"}
 
 
 @pytest.fixture(autouse=True)

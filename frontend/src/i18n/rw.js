@@ -142,4 +142,10 @@ export default {
   "common.cancel": "Hagarika",
   "common.close": "Funga",
   "common.offline": "Nta murandasi. Amapaji wafunguye mbere aracyakora.",
+
+  "tutor.title": "Umwarimu wa Iga",
+  "tutor.open": "Baza umwarimu wa AI",
+  "tutor.hint": "💡 Saba igitekerezo",
+  "tutor.placeholder": "Baza ikibazo…",
+  "tutor.thinking": "Ndimo gutekereza…",
 };

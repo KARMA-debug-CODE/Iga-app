@@ -1394,3 +1394,18 @@ tr:last-child td {
   border-radius: var(--radius-sm);
   display: inline-block;
 }
+
+/* AI tutor */
+
+.tutor {
+  border-left: 5px solid var(--blue);
+}
+
+.tutor-log {
+  max-height: 420px;
+  min-height: 0;
+}
+
+.tutor-log .bubble .prose {
+  font-size: 0.98rem;
+}

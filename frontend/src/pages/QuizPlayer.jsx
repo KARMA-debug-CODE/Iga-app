@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { api } from "../api";
 import Markdown from "../components/Markdown";
+import TutorPanel from "../components/TutorPanel";
 import { ErrorMessage, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -239,6 +240,14 @@ function Results({ attempt }) {
             <Markdown interactive={false}>{q.prompt}</Markdown>
             <QuestionBody question={q} answer={q.answer} onChange={() => {}} locked />
             <SolutionPanel question={q} answer={q.answer} />
+            <div style={{ marginTop: 12 }}>
+              <TutorPanel
+                attempt={attempt.id}
+                question={q.id}
+                label={t("tutor.explain")}
+                starters={[t("tutor.s.why"), t("tutor.s.wrong"), t("tutor.s.similar")]}
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -389,6 +398,17 @@ function Player({ initial, onFinished }) {
         <Markdown interactive={false}>{question.prompt}</Markdown>
         <QuestionBody question={question} answer={answers[question.id]} onChange={change} locked={locked || submitting} />
         <SolutionPanel question={question} answer={answers[question.id]} />
+        {immediate && !attempt.deadline && (
+          <div style={{ marginTop: 12 }}>
+            <TutorPanel
+              key={question.id}
+              attempt={attempt.id}
+              question={question.id}
+              label={t("tutor.hint")}
+              starters={[t("tutor.s.hint"), t("tutor.s.idea")]}
+            />
+          </div>
+        )}
         <ErrorMessage error={error} />
         <div className="spread" style={{ marginTop: 16 }}>
           <button className="btn btn-secondary" disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
