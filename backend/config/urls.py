@@ -8,6 +8,7 @@ from apps.accounts import parents
 from apps.assessments.views import AttemptViewSet, ExamPaperViewSet, MarkingViewSet, QuestionViewSet, QuizViewSet
 from apps.classroom.views import AssignmentViewSet, ClassroomViewSet
 from apps.community.views import MessageViewSet, ModerationViewSet, StudyGroupViewSet
+from apps.core import admin_login
 from apps.core import views as core_views
 from apps.curriculum.views import LessonViewSet, ResourceViewSet, SubjectViewSet, UnitViewSet
 from apps.gamification import views as gamification_views
@@ -51,10 +52,11 @@ api = [
 admin.site.site_header = f"{settings.APP_NAME} administration"
 admin.site.site_title = settings.APP_NAME
 
-urlpatterns = [
-    path("django-admin/", admin.site.urls),
-    path("api/", include(api)),
-]
+urlpatterns = [path("api/", include(api))]
+
+if settings.ADMIN_ENABLED:
+    admin_login.install()
+    urlpatterns.append(path("django-admin/", admin.site.urls))
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

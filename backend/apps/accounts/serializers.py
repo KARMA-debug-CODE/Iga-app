@@ -53,6 +53,17 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Unknown grade.")
         return value
 
+    def validate_email(self, value):
+        if not value:
+            return None
+        value = value.lower()
+        others = User.objects.filter(email__iexact=value)
+        if self.instance is not None:
+            others = others.exclude(pk=self.instance.pk)
+        if others.exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return value
+
 
 class PublicUserSerializer(serializers.ModelSerializer):
     """What other students may see about a user (no email, no school)."""
@@ -91,6 +102,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         candidate = User(**{k: v for k, v in attrs.items() if k != "password"})
         password_validation.validate_password(attrs["password"], candidate)
         return attrs
+
+    def validate_username(self, value):
+        if "@" in value:
+            raise serializers.ValidationError("Usernames can't contain @. Use letters, numbers, dots or dashes.")
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("That username is taken.")
+        return value
 
     def validate_email(self, value):
         if value and User.objects.filter(email__iexact=value).exists():

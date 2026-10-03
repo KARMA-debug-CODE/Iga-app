@@ -1,13 +1,35 @@
+import ipaddress
+
+from django.conf import settings
+
 from .models import AuditLog
 
 
+def _valid_ip(value):
+    try:
+        return str(ipaddress.ip_address(value.strip()))
+    except (ValueError, AttributeError):
+        return None
+
+
 def client_ip(request):
+    """The connecting client's IP, trusting X-Forwarded-For only for our own proxies.
+
+    nginx appends the address it saw to X-Forwarded-For, so with N trusted proxies the
+    client is the N-th entry from the right. Anything further left was sent by the client
+    and could be forged.
+    """
     if request is None:
         return None
-    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.META.get("REMOTE_ADDR")
+    hops = settings.TRUSTED_PROXY_COUNT
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if hops > 0 and forwarded:
+        parts = [p for p in forwarded.split(",") if p.strip()]
+        if len(parts) >= hops:
+            ip = _valid_ip(parts[-hops])
+            if ip:
+                return ip
+    return _valid_ip(request.META.get("REMOTE_ADDR", ""))
 
 
 def record(request, action, target, **details):

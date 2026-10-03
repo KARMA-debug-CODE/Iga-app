@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.functions import Lower
 
 from apps.core.constants import GRADES, LANGUAGES
 
@@ -29,6 +30,15 @@ class User(AbstractUser):
     # Optional TOTP two-factor authentication (RFC 6238, works with any authenticator app).
     totp_secret = models.CharField(max_length=64, blank=True)
     totp_enabled = models.BooleanField(default=False)
+    # Last 30-second time step accepted, so a code can't be used twice.
+    totp_last_step = models.BigIntegerField(null=True, blank=True)
+
+    class Meta(AbstractUser.Meta):
+        constraints = [
+            # "Aline" and "aline" (or two spellings of one email) must not be two accounts.
+            models.UniqueConstraint(Lower("username"), name="unique_username_ci"),
+            models.UniqueConstraint(Lower("email"), name="unique_email_ci"),
+        ]
 
     @property
     def is_student(self):

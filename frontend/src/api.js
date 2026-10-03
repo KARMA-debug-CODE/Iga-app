@@ -4,6 +4,9 @@
 
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
+// Auth endpoints where a 401 is the answer itself rather than an expired access token.
+const NO_REFRESH = new Set(["/auth/login/", "/auth/register/", "/auth/refresh/", "/auth/logout/"]);
+
 let accessToken = null;
 let refreshing = null;
 let onSessionExpired = () => {};
@@ -36,9 +39,16 @@ function messageFrom(data) {
   return field === "non_field_errors" ? text : `${field}: ${text}`;
 }
 
+// Refresh tokens work once. Tabs take turns (Web Locks) so a second tab sends
+// the cookie the first tab's refresh just set, not the one it used up.
+function postRefresh() {
+  const send = () => fetch(`${BASE}/auth/refresh/`, { method: "POST", credentials: "include" });
+  return typeof navigator !== "undefined" && navigator.locks ? navigator.locks.request("iga-refresh", send) : send();
+}
+
 export async function refreshSession() {
   if (!refreshing) {
-    refreshing = fetch(`${BASE}/auth/refresh/`, { method: "POST", credentials: "include" })
+    refreshing = postRefresh()
       .then(async (res) => {
         if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
         const data = await res.json();
@@ -71,11 +81,12 @@ export async function api(path, { method = "GET", body, params, retry = true, si
     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   });
 
-  if (res.status === 401 && retry && !path.startsWith("/auth/")) {
+  if (res.status === 401 && retry && !NO_REFRESH.has(path)) {
     try {
       await refreshSession();
     } catch (err) {
-      if (!(err instanceof ApiError)) throw err; // network problem, not an expired session
+      // Only a refusal from the server means the session is over; a network blip or 5xx doesn't.
+      if (!(err instanceof ApiError) || ![401, 403].includes(err.status)) throw err;
       onSessionExpired();
       throw new ApiError(401, { detail: "Your session has expired. Please log in again." });
     }

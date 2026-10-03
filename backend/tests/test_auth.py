@@ -1,3 +1,5 @@
+import time
+
 import pyotp
 import pytest
 
@@ -102,14 +104,26 @@ def test_two_factor_flow(client_for, student):
     anon = client_for()
     response = anon.post("/api/auth/login/", {"identifier": "student", "password": "Str0ng-pass-123"}, format="json")
     assert response.status_code == 401 and response.data["otp_required"]
+    # Each code works once, so later steps use the next 30-second codes (within the drift window).
+    totp = pyotp.TOTP(secret)
     response = anon.post(
         "/api/auth/login/",
-        {"identifier": "student", "password": "Str0ng-pass-123", "otp": pyotp.TOTP(secret).now()},
+        {"identifier": "student", "password": "Str0ng-pass-123", "otp": totp.at(time.time() + 30)},
         format="json",
     )
     assert response.status_code == 200
 
-    assert client.post("/api/auth/2fa/disable/", {"otp": pyotp.TOTP(secret).now()}, format="json").status_code == 200
+    # Replaying the same code is refused.
+    replay = anon.post(
+        "/api/auth/login/",
+        {"identifier": "student", "password": "Str0ng-pass-123", "otp": totp.at(time.time() + 30)},
+        format="json",
+    )
+    assert replay.status_code == 401
+
+    assert client.post("/api/auth/2fa/disable/", {"otp": totp.at(time.time() + 30)}, format="json").status_code == 400
+    User.objects.filter(pk=student.pk).update(totp_last_step=None)  # as if the next 30 s window had arrived
+    assert client.post("/api/auth/2fa/disable/", {"otp": totp.now()}, format="json").status_code == 200
     student.refresh_from_db()
     assert not student.totp_enabled and not student.totp_secret
 

@@ -23,13 +23,20 @@ def env_list(name, default=""):
     return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
 
 
-DEBUG = env_bool("DJANGO_DEBUG", True)
+# Fail safe: production (gunicorn via wsgi.py) runs with DEBUG off unless told
+# otherwise. manage.py turns it on by default for local development.
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
+PLACEHOLDER_SECRETS = {
+    "",
+    "change-me-to-a-long-random-string",
+    "dev-only-insecure-key-do-not-use-in-production",
+}
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
-if not SECRET_KEY:
+if SECRET_KEY in PLACEHOLDER_SECRETS or len(SECRET_KEY) < 32:
     if not DEBUG:
-        raise RuntimeError("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is off")
-    SECRET_KEY = "dev-only-insecure-key-do-not-use-in-production"
+        raise RuntimeError("Set DJANGO_SECRET_KEY to a long random value (at least 32 characters) when DJANGO_DEBUG is off.")
+    SECRET_KEY = SECRET_KEY if len(SECRET_KEY) >= 32 else "dev-only-insecure-key-do-not-use-in-production"
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1],testserver")
 
@@ -43,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "apps.core",
     "apps.accounts",
@@ -72,7 +80,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -134,6 +142,10 @@ if os.environ.get("REDIS_URL"):
 
 # --- REST API -------------------------------------------------------------
 
+# Number of reverse proxies in front of Django that append to X-Forwarded-For
+# (1 for the bundled nginx). 0 means use the direct connection address only.
+TRUSTED_PROXY_COUNT = int(os.environ.get("TRUSTED_PROXY_COUNT", "0"))
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -141,6 +153,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
+    # Per-IP throttles only trust X-Forwarded-For entries added by our own proxies.
+    "NUM_PROXIES": TRUSTED_PROXY_COUNT,
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.ScopedRateThrottle",
     ],
@@ -151,6 +165,9 @@ REST_FRAMEWORK = {
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
         "refresh": os.environ.get("THROTTLE_REFRESH", "600/min"),
         "chat": os.environ.get("THROTTLE_CHAT", "30/min"),
+        # Per user: password / 2FA changes, and guessing class, group or parent codes.
+        "sensitive": os.environ.get("THROTTLE_SENSITIVE", "5/min"),
+        "join": os.environ.get("THROTTLE_JOIN", "10/min"),
         "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
     },
 }
@@ -159,6 +176,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ.get("JWT_ACCESS_MINUTES", "15"))),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ.get("JWT_REFRESH_DAYS", "14"))),
     "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
 
@@ -168,6 +186,9 @@ REFRESH_COOKIE_NAME = "iga_refresh"
 REFRESH_COOKIE_PATH = "/api/auth/"
 REFRESH_COOKIE_SECURE = env_bool("REFRESH_COOKIE_SECURE", env_bool("HTTPS", not DEBUG))
 REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Lax")
+# A used refresh token that comes back later means it was stolen, and every session of
+# that user is ended. Within this window it is treated as two tabs refreshing at once.
+REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", "30"))
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ALLOW_CREDENTIALS = True
@@ -185,6 +206,12 @@ TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).
 EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"))
+
+# The Django admin (/django-admin/) is for content managers. In production it is
+# off unless DJANGO_ADMIN_ENABLED=true, and staff must use two-factor login.
+ADMIN_ENABLED = env_bool("DJANGO_ADMIN_ENABLED", DEBUG)
+ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", not DEBUG)
+ADMIN_LOGIN_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_ATTEMPTS_PER_MINUTE", "10"))
 
 # --- Production hardening --------------------------------------------------
 
