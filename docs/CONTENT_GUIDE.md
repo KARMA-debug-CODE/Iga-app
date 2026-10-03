@@ -10,7 +10,7 @@ python manage.py load_curriculum          # everything in backend/content/
 python manage.py import_exam_paper paper.json [--draft]
 ```
 
-Both commands are **idempotent**: running them again updates existing items, matched by `slug`, by `(subject, grade, number)` for units, and by `(title, subject, grade)` for quizzes. They never duplicate. A quiz's questions are rebuilt only while nobody has attempted it, so students' results stay valid.
+Both commands are **idempotent**: running them again updates existing items, matched by `slug`, by `(subject, grade, number)` for units, and by `(title, subject, grade)` for quizzes. They never duplicate. A quiz's questions are rebuilt only while nobody has attempted it, so students' results stay valid. Re-running them never republishes a lesson or quiz an admin has archived or unpublished, and a PDF-only past paper and its digitised version are merged into one library entry.
 
 ---
 
@@ -50,6 +50,13 @@ Embed a live HTML/CSS/JS editor (for ICT lessons):
 
 ```playground html
 <h1>Hello</h1>
+```
+
+Run real Python in the browser (it works offline once loaded; `input()` is supported):
+
+```python-run
+name = input("Your name? ")
+print("Muraho", name)
 ```
 ```
 

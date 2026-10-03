@@ -2,14 +2,16 @@
 
 **Iga** (Kinyarwanda for *"learn!"*) is a learning platform for Rwandan secondary school students (Senior 1–6) and their teachers. It brings together:
 
-- **Lessons** that follow the competence-based curriculum, with maths rendering, worked examples and live code editors
+- **Lessons** that follow the competence-based curriculum, with maths rendering, worked examples and live code editors (HTML/JS and Python)
 - **Virtual labs**: our own offline simulations plus PhET and GeoGebra
 - **Practice quizzes** with instant feedback, and **past papers** in timed exam mode
-- **Classes** where teachers set work, mark written answers and track progress
+- **An AI study tutor** (Claude) that explains lessons and gives hints without handing out answers
+- **Classes** where teachers set work, mark written answers, analyse results and track progress
+- **Parent access** so a guardian can follow a child's progress
 - **Study groups** with moderated chat and shared notes
 - **XP, streaks, badges and leaderboards** to keep students motivated
 
-It is mobile-first, installable as an app (PWA), works in **English, Kinyarwanda and Kiswahili**, and keeps lessons you've opened available offline.
+It is mobile-first, installable as an app (PWA), works in **English, Kinyarwanda and Kiswahili**, and whole units can be saved for offline study.
 
 > This repository also contains some older, unrelated files (`robot.py.4`, `crypto.py.3`, …). They are untouched.
 
@@ -19,15 +21,19 @@ It is mobile-first, installable as an app (PWA), works in **English, Kinyarwanda
 
 | Area | What works today |
 |---|---|
-| **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 19 complete sample lessons across maths, sciences, ICT, languages and humanities, a Kiswahili translation, and resources (with a link to the REB e-learning portal) |
-| **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 28 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
+| **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, a Kiswahili translation, and resources (with a link to the REB e-learning portal) |
+| **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
+| **Coding** | HTML/CSS/JS playground, and real Python in the browser (Pyodide, self-hosted, works offline) inside lessons and in the playground |
+| **AI tutor** | Lesson and question help from Claude, with context the server controls: switched off during exams and timed tests, never shown answers before the student may see them, rate-limited, and off unless an Anthropic API key is configured |
+| **Offline** | Save a unit for offline use (lessons, maths fonts, built-in labs); the app opens without a connection for a student who logged in before, and logging out clears the saved pages on shared computers |
 | **Assessment** | 6 question types (MCQ, multi-select, true/false, numeric with tolerance, short answer, essay); practice and exam modes; server-enforced time limits; per-attempt shuffling; answers never sent before submit; partial credit; teacher marking queue; explanations and marking guides |
 | **Past papers** | Library filtered by level, year and subject; PDF and marking-guide links; interactive versions. Ships with **2 clearly-labelled unofficial sample papers**. Real NESA papers go in through the importer |
-| **Teachers** | Classes with readable join codes, assignments (quiz, lesson or lab) with due dates, gradebook, "hardest topics" report, question-bank and quiz builder, lesson editor with live preview, resource sharing |
+| **Teachers** | Classes with readable join codes, student accounts created from a CSV list (temporary passwords, changed at first login) and password resets, assignments (quiz, lesson or lab) with due dates, gradebook, "hardest topics" report, per-quiz results analysis (score distribution, question difficulty and discrimination, option choices), question-bank and quiz builder, lesson editor with live preview, resource sharing |
+| **Parents** | A student creates a one-time code; the linked parent sees a read-only progress report (subjects, recent scores, assignments) and can unlink at any time |
 | **Community** | Public and private study groups, polling chat, shared Markdown notes, message reporting, moderator hiding, an admin moderation queue |
 | **Motivation** | XP ledger (never double-awarded), levels, daily streaks, 8 badges, weekly leaderboards by grade, school or class (surnames shortened for privacy) |
 | **Admin** | Stats dashboard, teacher approval, content review (teacher content needs approval before it goes public), audit log, full Django admin |
-| **Security** | Short-lived JWT access token kept in memory, rotating refresh token in an httpOnly cookie, optional TOTP 2FA, per-account login throttling, role-based access everywhere, audit trail |
+| **Security** | Short-lived JWT access token kept in memory; refresh tokens in an httpOnly cookie that rotate, are revoked on logout, password or 2FA change, and end every session if a used one is replayed; optional TOTP 2FA (single-use codes), required for the Django admin; per-account login and per-user code-guessing throttles; uploads type-checked and served so they can't run scripts; role-based access everywhere; audit trail |
 
 ## Quick start (development)
 
@@ -56,6 +62,7 @@ npm run dev
 | `grace` | Student, S1 | |
 | `kevin` | Student, S4 | |
 | `teacher` | Teacher | Owns "S2 Mathematics — Stream A" |
+| `parent` | Parent | Linked to Aline |
 | `admin` | Admin | Also has the Django admin at `/django-admin/` |
 
 To load only the curriculum (no demo users), for example on a pilot server, run `python manage.py load_curriculum`.
@@ -63,11 +70,11 @@ To load only the curriculum (no demo users), for example on a pilot server, run 
 ## Running the tests
 
 ```bash
-cd backend && pytest                 # 91 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
+cd backend && pytest                 # 173 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
 cd backend && ruff check .           # lint
 cd frontend && npm test              # unit tests for the lab maths
 cd frontend && npm run lint
-cd frontend && npx playwright test   # 9 end-to-end journeys × (mobile + desktop) against the real API
+cd frontend && npx playwright test   # 14 end-to-end journeys × (mobile + desktop) against the real API
 ```
 
 The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.
@@ -89,13 +96,14 @@ This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, and ngi
 
 ```
 backend/                 Django + Django REST Framework API
-  apps/accounts          users, roles, JWT auth, 2FA, per-account login throttle
+  apps/accounts          users, roles, JWT auth, 2FA, sessions, parent links
   apps/curriculum        subjects, units, lessons (+ translations), resources, progress
   apps/simulations       lab catalogue and embed URLs
   apps/assessments       question bank, quizzes, exam papers, attempts, marking
-  apps/classroom         classes, enrolment, assignments, reports
+  apps/classroom         classes, enrolment, CSV roster import, assignments, reports
   apps/community         study groups, chat, notes, reports
   apps/gamification      XP ledger, streaks, badges, leaderboards
+  apps/tutor             AI study tutor (Claude API)
   apps/core              shared constants, permissions, audit log, dashboard, admin API, content loader
   content/               curriculum content as files (JSON + Markdown), loaded by `load_curriculum`
   tests/                 pytest suite
