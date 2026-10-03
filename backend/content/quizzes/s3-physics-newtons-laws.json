@@ -1,0 +1,21 @@
+{
+  "title": "Newton's laws of motion — practice",
+  "subject": "physics", "grade": "S3", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Passengers in a bus lurch forward when the driver brakes suddenly. Which law best explains this?",
+     "choices": [{"text": "Newton's first law (inertia)", "correct": true}, {"text": "Newton's second law ($F = ma$)"}, {"text": "Newton's third law (action and reaction)"}, {"text": "The law of conservation of energy"}],
+     "explanation": "The passengers' bodies tend to keep moving at the same velocity (inertia) while the bus slows down. This is Newton's first law."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A car of mass 1200 kg accelerates at 2.5 m/s². What resultant force acts on it, in newtons?", "answer": 3000,
+     "explanation": "$F = ma = 1200 \\times 2.5 = 3000$ N."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A 40 kg crate is pushed along the floor with a horizontal force of 150 N. Friction is 70 N. Find the acceleration of the crate in m/s².", "answer": 2,
+     "explanation": "Resultant force $= 150 - 70 = 80$ N. Then $a = \\frac{F}{m} = \\frac{80}{40} = 2$ m/s²."},
+    {"type": "multi", "difficulty": 2, "prompt": "Which statements are true about the two forces in an action–reaction pair (Newton's third law)? Select all that apply.",
+     "choices": [{"text": "They are equal in size", "correct": true}, {"text": "They act in opposite directions", "correct": true}, {"text": "They act on two different objects", "correct": true}, {"text": "They act on the same object and cancel each other out"}, {"text": "The heavier object always exerts the bigger force"}],
+     "explanation": "Action and reaction are equal in size and opposite in direction, but they act on different objects, so they never cancel each other out. The size does not depend on which object is heavier."},
+    {"type": "true_false", "difficulty": 2, "prompt": "A minibus moving at a steady 50 km/h along a straight, level road has zero resultant force acting on it.", "answer": true,
+     "explanation": "Constant velocity means zero acceleration, so by $F = ma$ the resultant force is zero: the driving force balances friction and air resistance."},
+    {"type": "short", "difficulty": 1, "prompt": "What name is given to the tendency of an object to resist any change in its state of rest or motion?", "accepted": ["inertia", "Inertia", "intertia", "inersia"],
+     "explanation": "This is **inertia**. The greater the mass of an object, the greater its inertia."}
+  ]
+}

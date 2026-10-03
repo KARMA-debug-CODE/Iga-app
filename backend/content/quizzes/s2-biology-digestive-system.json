@@ -1,0 +1,21 @@
+{
+  "title": "The human digestive system — practice",
+  "subject": "biology", "grade": "S2", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Where in the body is bile **made**?",
+     "choices": [{"text": "Gall bladder"}, {"text": "Liver", "correct": true}, {"text": "Pancreas"}, {"text": "Stomach"}],
+     "explanation": "Bile is made in the **liver**. The gall bladder only stores it until food enters the duodenum."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the statements that correctly describe the villi of the ileum.",
+     "choices": [{"text": "Their wall is only one cell thick", "correct": true}, {"text": "They have a dense network of blood capillaries", "correct": true}, {"text": "Each contains a lacteal that absorbs fatty acids and glycerol", "correct": true}, {"text": "They produce bile to emulsify fats"}, {"text": "They are found mainly in the stomach"}],
+     "explanation": "Villi give the ileum a huge surface area. A thin wall, a rich blood supply and a lacteal make absorption fast. Bile comes from the liver, and villi line the small intestine, not the stomach."},
+    {"type": "true_false", "difficulty": 1, "prompt": "Pepsin works best in the acidic conditions inside the stomach.", "answer": true,
+     "explanation": "The stomach makes hydrochloric acid (about pH 2). Pepsin, the stomach protease, works best at this low pH."},
+    {"type": "numeric", "difficulty": 2, "prompt": "The dental formula of a cow is $i\\,\\frac{0}{3}\\ c\\,\\frac{0}{1}\\ pm\\,\\frac{3}{3}\\ m\\,\\frac{3}{3}$. How many teeth does an adult cow have in total?", "answer": 32,
+     "explanation": "One side: upper $0 + 0 + 3 + 3 = 6$, lower $3 + 1 + 3 + 3 = 10$, so $6 + 10 = 16$. Both sides: $16 \\times 2 = 32$ teeth. A cow has no upper incisors; it bites grass against a hard dental pad."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.05, "prompt": "In an amylase experiment, the starch disappears after 2.5 minutes at 37 °C and after 8 minutes at 20 °C. How many times faster is starch digestion at 37 °C? Give your answer to 1 decimal place.", "answer": 3.2,
+     "explanation": "Rate $= \\frac{1}{\\text{time}}$, so the ratio of rates is $\\frac{8}{2.5} = 3.2$. Digestion is 3.2 times faster at 37 °C, which is body temperature, the temperature at which human enzymes work best."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the name for the waves of muscle contraction that push food along the oesophagus and the rest of the gut?", "accepted": ["peristalsis", "Peristalsis", "peristalysis", "peristalisis", "peristolsis", "peristaltic", "peristaltic waves", "peristaltic movement", "peristalses"],
+     "explanation": "**Peristalsis**: rings of muscle in the gut wall contract behind the food and push it forwards."}
+  ]
+}

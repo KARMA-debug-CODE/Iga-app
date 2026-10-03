@@ -1,0 +1,94 @@
+{
+  "title": "States of matter — practice",
+  "subject": "chemistry",
+  "grade": "S1",
+  "unit": 2,
+  "kind": "practice",
+  "feedback_mode": "immediate",
+  "questions": [
+    {
+      "type": "mcq",
+      "difficulty": 2,
+      "prompt": "Acetone (nail-polish remover) melts at −95 °C and boils at 56 °C. What is its state at 70 °C?",
+      "choices": [
+        {
+          "text": "Solid"
+        },
+        {
+          "text": "Liquid"
+        },
+        {
+          "text": "Gas",
+          "correct": true
+        },
+        {
+          "text": "Half solid, half liquid"
+        }
+      ],
+      "explanation": "70 °C is above the boiling point (56 °C), so acetone is a gas. It would be a liquid only between −95 °C and 56 °C."
+    },
+    {
+      "type": "multi",
+      "difficulty": 2,
+      "prompt": "Which changes of state **take in** energy from the surroundings? Select all that apply.",
+      "choices": [
+        {
+          "text": "Melting",
+          "correct": true
+        },
+        {
+          "text": "Boiling",
+          "correct": true
+        },
+        {
+          "text": "Sublimation",
+          "correct": true
+        },
+        {
+          "text": "Freezing"
+        },
+        {
+          "text": "Condensation"
+        }
+      ],
+      "explanation": "Melting, boiling (and evaporation) and sublimation need energy to overcome the forces between particles. Freezing and condensation give energy out as the particles come closer together."
+    },
+    {
+      "type": "true_false",
+      "difficulty": 1,
+      "prompt": "Water boils at a lower temperature in Kigali than at the seaside in Mombasa.",
+      "answer": true,
+      "explanation": "Kigali is about 1 500 m above sea level, where air pressure is lower, so water boils at about 95 °C instead of 100 °C."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 2,
+      "tolerance": 0,
+      "prompt": "In Musanze, water boils at about 94 °C. A pot of water at 22 °C is heated and its temperature rises by 4 °C every minute. How many minutes does it take to start boiling?",
+      "answer": 18,
+      "explanation": "Temperature rise $= 94 - 22 = 72\\ ^\\circ\\text{C}$. Time $= 72 \\div 4 = 18$ minutes."
+    },
+    {
+      "type": "short",
+      "difficulty": 1,
+      "prompt": "What is the name of the change when a solid turns directly into a gas without melting first?",
+      "accepted": [
+        "sublimation",
+        "sublimating",
+        "subliming",
+        "sublime",
+        "sublimes",
+        "sublimate"
+      ],
+      "explanation": "This is **sublimation**. Iodine crystals and moth balls (naphthalene) sublime when warmed."
+    },
+    {
+      "type": "essay",
+      "difficulty": 3,
+      "marks": 3,
+      "prompt": "A student heats ice steadily. The thermometer stays at 0 °C while the ice is melting, even though heating continues. Use the particle model to explain why.",
+      "marking_guide": "1 mark: the energy supplied is used to overcome (break) the forces of attraction between the particles. 1 mark: the particles do not move faster (their kinetic energy does not increase), so the temperature does not rise. 1 mark: the particles change from vibrating in fixed positions (regular arrangement) to sliding past each other; once all the ice has melted the temperature rises again.",
+      "explanation": "During a change of state, the energy goes into separating the particles rather than speeding them up, so the temperature stays constant until melting is complete."
+    }
+  ]
+}

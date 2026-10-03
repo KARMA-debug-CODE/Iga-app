@@ -1,0 +1,22 @@
+{
+  "title": "Averages and spread — practice",
+  "subject": "mathematics", "grade": "S3", "unit": 7,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "What is the median of 3, 9, 4, 7, 5?",
+     "choices": [{"text": "4"}, {"text": "5", "correct": true}, {"text": "5.6"}, {"text": "7"}],
+     "explanation": "In order the values are 3, 4, **5**, 7, 9, so the middle value is 5. (5.6 is the mean: $\\frac{28}{5} = 5.6$.)"},
+    {"type": "multi", "difficulty": 2, "prompt": "For the data 2, 3, 3, 5, 7, 10, select **all** the true statements.",
+     "choices": [{"text": "The mode is 3", "correct": true}, {"text": "The median is 4", "correct": true}, {"text": "The mean is 5", "correct": true}, {"text": "The range is 10"}, {"text": "The median is 3"}],
+     "explanation": "3 appears twice, so the mode is 3. With 6 values the median is $\\frac{3 + 5}{2} = 4$. The mean is $\\frac{30}{6} = 5$. The range is $10 - 2 = 8$, not 10."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.01, "prompt": "A school football team in Musanze recorded the goals it scored in 15 matches.\n\n| Goals | 0 | 1 | 2 | 3 | 4 |\n|---|---|---|---|---|---|\n| Matches | 3 | 5 | 4 | 2 | 1 |\n\nFind the mean number of goals per match, to 2 decimal places.", "answer": 1.53,
+     "explanation": "$\\sum fx = 0 \\times 3 + 1 \\times 5 + 2 \\times 4 + 3 \\times 2 + 4 \\times 1 = 0 + 5 + 8 + 6 + 4 = 23$ and $\\sum f = 15$, so $\\bar{x} = \\frac{23}{15} \\approx 1.53$ goals."},
+    {"type": "true_false", "difficulty": 1, "prompt": "The mean of a data set must always be one of the values in the data set.", "answer": false,
+     "explanation": "The mean need not be one of the values. For example, the mean of 1 and 2 is 1.5, and the mean household size in the lesson was 3.85 people."},
+    {"type": "short", "difficulty": 1, "prompt": "Which average is the value that occurs most often in a data set?", "accepted": ["mode", "the mode", "modal value", "the modal value", "modal"],
+     "explanation": "The **mode** is the most frequent value. It is the only average that also works for categories, such as the most popular crop."},
+    {"type": "essay", "difficulty": 3, "marks": 4, "prompt": "The monthly wages (FRW) of six workers at a carpentry workshop in Huye are:\n\n50,000 · 55,000 · 55,000 · 65,000 · 75,000 · 400,000\n\n(a) Calculate the mean wage and the median wage.\n\n(b) Which of these two averages better describes a typical wage at the workshop? Explain your answer.",
+     "marking_guide": "1 mark: mean = 700,000 ÷ 6 ≈ 116,667 FRW (accept 116,666.67). 1 mark: median = (55,000 + 65,000) ÷ 2 = 60,000 FRW, with the values in order. 1 mark: chooses the median. 1 mark: explains that the 400,000 FRW wage is an extreme value that pulls the mean up, so five of the six workers earn less than the mean, while the median is not affected by it.",
+     "explanation": "Total $= 700\\,000$, so the mean is $\\frac{700\\,000}{6} \\approx 116\\,667$ FRW. The median is $\\frac{55\\,000 + 65\\,000}{2} = 60\\,000$ FRW. The median is the better average, because the one large wage of 400,000 FRW pulls the mean above what five of the six workers earn."}
+  ]
+}

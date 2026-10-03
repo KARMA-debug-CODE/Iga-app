@@ -1,0 +1,94 @@
+{
+  "title": "Rates of reaction — practice",
+  "subject": "chemistry",
+  "grade": "S3",
+  "unit": 2,
+  "kind": "practice",
+  "feedback_mode": "immediate",
+  "questions": [
+    {
+      "type": "mcq",
+      "difficulty": 1,
+      "prompt": "Marble chips react with dilute hydrochloric acid. Which change would **not** make the reaction faster?",
+      "choices": [
+        {
+          "text": "Using powdered marble instead of chips"
+        },
+        {
+          "text": "Warming the acid"
+        },
+        {
+          "text": "Using more concentrated acid"
+        },
+        {
+          "text": "Using larger marble chips",
+          "correct": true
+        }
+      ],
+      "explanation": "Larger chips have a smaller surface area, so fewer particles are exposed and the reaction is slower. The other three changes all increase the rate."
+    },
+    {
+      "type": "multi",
+      "difficulty": 2,
+      "prompt": "Which statements about a catalyst are correct? Select all that apply.",
+      "choices": [
+        {
+          "text": "It speeds up a reaction",
+          "correct": true
+        },
+        {
+          "text": "It provides a route with a lower activation energy",
+          "correct": true
+        },
+        {
+          "text": "It is chemically unchanged at the end of the reaction",
+          "correct": true
+        },
+        {
+          "text": "It is used up during the reaction"
+        },
+        {
+          "text": "It increases the total amount of product formed"
+        }
+      ],
+      "explanation": "A catalyst lowers the activation energy, so the reaction is faster, and it is not used up. It does not change how much product is made, only how quickly."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 2,
+      "tolerance": 0.01,
+      "prompt": "Zinc reacts with dilute acid and 60 cm³ of hydrogen is collected in the first 40 s. What is the average rate in cm³/s?",
+      "answer": 1.5,
+      "explanation": "Average rate $= \\frac{60}{40} = 1.5$ cm³/s."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 3,
+      "tolerance": 0.01,
+      "prompt": "A flask of marble chips and acid on a balance reads 250.00 g at the start and 249.10 g after 3 minutes. What is the average rate of loss of mass in g/min?",
+      "answer": 0.3,
+      "explanation": "Mass lost $= 250.00 - 249.10 = 0.90$ g. Average rate $= \\frac{0.90}{3} = 0.30$ g/min."
+    },
+    {
+      "type": "true_false",
+      "difficulty": 3,
+      "prompt": "Raising the temperature speeds up a reaction **only** because the particles collide more often.",
+      "answer": false,
+      "explanation": "Particles do collide more often, but the more important reason is that a larger fraction of collisions now have energy equal to or greater than the activation energy, so more collisions are successful."
+    },
+    {
+      "type": "short",
+      "difficulty": 1,
+      "prompt": "What name is given to the minimum energy that colliding particles must have in order to react?",
+      "accepted": [
+        "activation energy",
+        "the activation energy",
+        "energy of activation",
+        "Ea",
+        "E_a",
+        "activation energy (Ea)"
+      ],
+      "explanation": "This is the **activation energy**, $E_a$. Collisions with less energy than this do not lead to a reaction."
+    }
+  ]
+}

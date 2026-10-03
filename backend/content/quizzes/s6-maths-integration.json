@@ -1,0 +1,22 @@
+{
+  "title": "Integration and its applications — practice",
+  "subject": "mathematics", "grade": "S6", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 2, "prompt": "Evaluate $\\int_0^2 (3x^2 + 2x)\\,dx$.",
+     "choices": [{"text": "8"}, {"text": "12", "correct": true}, {"text": "16"}, {"text": "20"}],
+     "explanation": "$\\int_0^2 (3x^2 + 2x)\\,dx = \\Big[x^3 + x^2\\Big]_0^2 = (8 + 4) - (0 + 0) = 12$. (16 is the value of $3x^2 + 2x$ at $x = 2$, not the integral.)"},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the correct results ($C$ is a constant).",
+     "choices": [{"text": "$\\int \\cos x\\,dx = \\sin x + C$", "correct": true}, {"text": "$\\int \\frac{1}{x}\\,dx = \\ln|x| + C$", "correct": true}, {"text": "$\\int e^x\\,dx = e^x + C$", "correct": true}, {"text": "$\\int \\sin x\\,dx = \\cos x + C$"}, {"text": "$\\int x^3\\,dx = 3x^2 + C$"}],
+     "explanation": "$\\int \\sin x\\,dx = -\\cos x + C$, because $\\frac{d}{dx}(-\\cos x) = \\sin x$. And $\\int x^3\\,dx = \\frac{x^4}{4} + C$; $3x^2$ is the derivative of $x^3$, not its integral."},
+    {"type": "true_false", "difficulty": 2, "prompt": "$\\int_0^4 (x^2 - 4x)\\,dx$ is equal to the area enclosed between the curve $y = x^2 - 4x$ and the x-axis.", "answer": false,
+     "explanation": "For $0 < x < 4$ the curve lies below the x-axis, so the integral is negative: $\\Big[\\frac{x^3}{3} - 2x^2\\Big]_0^4 = \\frac{64}{3} - 32 = -\\frac{32}{3}$. The area is the positive value, $\\frac{32}{3} \\approx 10.67$ square units."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.05, "prompt": "The line $y = x$ from $x = 0$ to $x = 3$ is rotated through $360^\\circ$ about the x-axis to make a cone. Using $V = \\pi\\int_a^b y^2\\,dx$, find the volume in cubic units, to 2 decimal places.", "answer": 28.27,
+     "explanation": "$V = \\pi\\int_0^3 x^2\\,dx = \\pi\\Big[\\frac{x^3}{3}\\Big]_0^3 = \\pi \\times \\frac{27}{3} = 9\\pi \\approx 28.27$. Check with the cone formula: $\\frac{1}{3}\\pi r^2 h = \\frac{1}{3}\\pi (3^2)(3) = 9\\pi$."},
+    {"type": "short", "difficulty": 1, "prompt": "In $\\int f(x)\\,dx = F(x) + C$, what is the constant $C$ called? (the constant of …)", "accepted": ["integration", "constant of integration", "the constant of integration", "a constant of integration", "integration constant", "the integration constant", "constant of integration c", "c, the constant of integration", "arbitrary constant", "an arbitrary constant", "the arbitrary constant"],
+     "explanation": "$C$ is the **constant of integration**. Any constant differentiates to zero, so every antiderivative can have a constant added to it."},
+    {"type": "essay", "difficulty": 3, "marks": 4, "prompt": "Find the area of the region enclosed by the curve $y = 4 - x^2$ and the x-axis. Show all your working.",
+     "marking_guide": "1 mark: finds where the curve meets the x-axis, $4 - x^2 = 0$, so $x = -2$ and $x = 2$. 1 mark: correct antiderivative $4x - \\frac{x^3}{3}$. 1 mark: substitutes the limits correctly, $\\left(8 - \\frac{8}{3}\\right) - \\left(-8 + \\frac{8}{3}\\right) = \\frac{16}{3} + \\frac{16}{3}$. 1 mark: final answer $\\frac{32}{3} \\approx 10.67$ square units. Accept the method of doubling $\\int_0^2 (4 - x^2)\\,dx = \\frac{16}{3}$ by symmetry.",
+     "explanation": "$\\int_{-2}^{2} (4 - x^2)\\,dx = \\Big[4x - \\frac{x^3}{3}\\Big]_{-2}^{2} = \\frac{16}{3} - \\left(-\\frac{16}{3}\\right) = \\frac{32}{3} \\approx 10.67$ square units."}
+  ]
+}

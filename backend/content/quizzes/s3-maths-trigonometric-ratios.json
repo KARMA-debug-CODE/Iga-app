@@ -1,0 +1,21 @@
+{
+  "title": "Trigonometric ratios — practice",
+  "subject": "mathematics", "grade": "S3", "unit": 4,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "In a right-angled triangle, which ratio is equal to $\\frac{\\text{opposite}}{\\text{hypotenuse}}$?",
+     "choices": [{"text": "$\\sin\\theta$", "correct": true}, {"text": "$\\cos\\theta$"}, {"text": "$\\tan\\theta$"}, {"text": "$\\frac{1}{\\tan\\theta}$"}],
+     "explanation": "SOH: **S**ine = **O**pposite ÷ **H**ypotenuse. Cosine is adjacent ÷ hypotenuse and tangent is opposite ÷ adjacent."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the expressions that are equal to $\\frac{1}{2}$.",
+     "choices": [{"text": "$\\sin 30^\\circ$", "correct": true}, {"text": "$\\cos 60^\\circ$", "correct": true}, {"text": "$\\tan 45^\\circ$"}, {"text": "$\\cos 30^\\circ$"}, {"text": "$\\sin 45^\\circ$"}],
+     "explanation": "$\\sin 30^\\circ = \\cos 60^\\circ = \\frac{1}{2}$. But $\\tan 45^\\circ = 1$, $\\cos 30^\\circ = \\frac{\\sqrt{3}}{2} \\approx 0.866$ and $\\sin 45^\\circ = \\frac{\\sqrt{2}}{2} \\approx 0.707$."},
+    {"type": "numeric", "difficulty": 2, "tolerance": 0.01, "prompt": "A 5 m ladder leans against a classroom wall, making an angle of $65^\\circ$ with the ground. How high up the wall does it reach? Give your answer in metres to 2 decimal places.", "answer": 4.53,
+     "explanation": "The ladder is the hypotenuse and the height is opposite the $65^\\circ$ angle: $h = 5\\sin 65^\\circ \\approx 5 \\times 0.9063 \\approx 4.53$ m."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.1, "prompt": "In a right-angled triangle, the side opposite angle $\\theta$ is 8 cm and the side adjacent to $\\theta$ is 6 cm. Find $\\theta$ in degrees, to 1 decimal place.", "answer": 53.1,
+     "explanation": "$\\tan\\theta = \\frac{8}{6} \\approx 1.3333$, so $\\theta = \\tan^{-1}(1.3333) \\approx 53.1^\\circ$."},
+    {"type": "true_false", "difficulty": 2, "prompt": "For an acute angle $\\theta$ in a right-angled triangle, $\\sin\\theta$ can be greater than 1.", "answer": false,
+     "explanation": "$\\sin\\theta = \\frac{\\text{opposite}}{\\text{hypotenuse}}$ and the hypotenuse is always the longest side, so the ratio is always less than 1."},
+    {"type": "short", "difficulty": 1, "prompt": "A student on a football pitch looks **up** at the top of a flagpole. What is the name of the angle between the horizontal and her line of sight?", "accepted": ["angle of elevation", "the angle of elevation", "elevation", "elevation angle", "an angle of elevation", "angle of elevetion"],
+     "explanation": "Looking **up** from the horizontal gives an **angle of elevation**. Looking down from the horizontal gives an angle of depression."}
+  ]
+}

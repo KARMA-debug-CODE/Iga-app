@@ -1,0 +1,22 @@
+{
+  "title": "Respiration — practice",
+  "subject": "biology", "grade": "S2", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "In which part of a cell does most aerobic respiration take place?",
+     "choices": [{"text": "Nucleus"}, {"text": "Mitochondria", "correct": true}, {"text": "Cell membrane"}, {"text": "Vacuole"}],
+     "explanation": "Aerobic respiration happens mainly in the **mitochondria**, which is why very active cells such as muscle cells have many of them."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the substances that are produced by aerobic respiration.",
+     "choices": [{"text": "Carbon dioxide", "correct": true}, {"text": "Water", "correct": true}, {"text": "Oxygen"}, {"text": "Lactic acid"}, {"text": "Glucose"}],
+     "explanation": "$\\text{glucose} + \\text{oxygen} \\rightarrow \\text{carbon dioxide} + \\text{water} + \\text{energy}$. Oxygen and glucose are used up; lactic acid is made only in anaerobic respiration in muscles."},
+    {"type": "true_false", "difficulty": 1, "prompt": "Green plants respire only at night, when they are not photosynthesising.", "answer": false,
+     "explanation": "All living cells respire all the time, day and night. In daylight a plant also photosynthesises, but its cells are still respiring."},
+    {"type": "numeric", "difficulty": 2, "tolerance": 0.1, "prompt": "180 g of glucose releases about 2880 kJ by aerobic respiration and about 150 kJ by anaerobic respiration in muscles. How many times more energy does aerobic respiration release? Give your answer to 1 decimal place.", "answer": 19.2,
+     "explanation": "$\\frac{2880}{150} = 19.2$, so aerobic respiration releases about 19 times more energy from the same mass of glucose."},
+    {"type": "short", "difficulty": 1, "prompt": "Which substance builds up in human muscles during hard exercise, when they respire without enough oxygen?", "accepted": ["lactic acid", "Lactic acid", "lactic", "lactate", "lactic-acid", "lacticacid", "lactic acids", "lactic asid", "lactic acide"],
+     "explanation": "In muscles, anaerobic respiration is $\\text{glucose} \\rightarrow \\text{lactic acid} + \\text{a little energy}$. The lactic acid causes tiredness and cramp."},
+    {"type": "essay", "marks": 4, "difficulty": 3, "prompt": "A farmer in Musanze stores freshly harvested Irish potatoes in a closed pit with no ventilation. After two weeks the potatoes are warm and have lost mass. Explain these observations.",
+     "marking_guide": "1 mark: the potato cells are alive and carry out respiration. 1 mark: respiration releases energy, some as heat, so the store warms up (heat cannot escape without ventilation). 1 mark: stored food (starch/glucose) is broken down into carbon dioxide and water, which leave the potatoes, so they lose mass. 1 mark: with no ventilation the oxygen is used up / carbon dioxide builds up, so cells may respire anaerobically and the potatoes start to rot; good ventilation keeps the store cool.",
+     "explanation": "Living potato cells keep respiring after harvest. Respiration uses up stored food (loss of mass) and releases heat, which builds up in a closed store. Ventilation removes heat and supplies oxygen."}
+  ]
+}

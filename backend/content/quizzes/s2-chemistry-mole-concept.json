@@ -1,0 +1,100 @@
+{
+  "title": "The mole concept — practice",
+  "subject": "chemistry",
+  "grade": "S2",
+  "unit": 4,
+  "kind": "practice",
+  "feedback_mode": "immediate",
+  "questions": [
+    {
+      "type": "mcq",
+      "difficulty": 2,
+      "prompt": "What is the relative formula mass of calcium hydroxide, $\\text{Ca(OH)}_2$? (Ca = 40, O = 16, H = 1)",
+      "choices": [
+        {
+          "text": "57"
+        },
+        {
+          "text": "58"
+        },
+        {
+          "text": "74",
+          "correct": true
+        },
+        {
+          "text": "114"
+        }
+      ],
+      "explanation": "Everything inside the bracket is multiplied by 2: $40 + 2(16 + 1) = 40 + 34 = 74$."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 1,
+      "tolerance": 0.005,
+      "prompt": "How many moles of magnesium atoms are there in 4.8 g of magnesium? (Mg = 24)",
+      "answer": 0.2,
+      "explanation": "$n = \\frac{m}{M} = \\frac{4.8}{24} = 0.2$ mol."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 3,
+      "tolerance": 0.05,
+      "prompt": "What volume, in dm³, does 11 g of carbon dioxide ($\\text{CO}_2$) occupy at room temperature and pressure? (C = 12, O = 16; molar volume = 24 dm³)",
+      "answer": 6,
+      "explanation": "$M(\\text{CO}_2) = 12 + 2(16) = 44$ g/mol. $n = \\frac{11}{44} = 0.25$ mol. $V = 0.25 \\times 24 = 6$ dm³."
+    },
+    {
+      "type": "multi",
+      "difficulty": 2,
+      "prompt": "Which of these samples contain exactly **one mole** of the stated particles? (H = 1, C = 12, O = 16; molar volume at r.t.p. = 24 dm³) Select all that apply.",
+      "choices": [
+        {
+          "text": "12 g of carbon atoms",
+          "correct": true
+        },
+        {
+          "text": "18 g of water molecules",
+          "correct": true
+        },
+        {
+          "text": "24 dm³ of nitrogen gas at r.t.p.",
+          "correct": true
+        },
+        {
+          "text": "16 g of oxygen molecules, $\\text{O}_2$"
+        },
+        {
+          "text": "1 g of hydrogen molecules, $\\text{H}_2$"
+        }
+      ],
+      "explanation": "C: $12 \\div 12 = 1$ mol. $\\text{H}_2\\text{O}$: $18 \\div 18 = 1$ mol. Any gas: $24 \\div 24 = 1$ mol. But $M(\\text{O}_2) = 32$, so 16 g is 0.5 mol, and $M(\\text{H}_2) = 2$, so 1 g is 0.5 mol."
+    },
+    {
+      "type": "true_false",
+      "difficulty": 1,
+      "prompt": "One mole of water and one mole of carbon have the same mass.",
+      "answer": false,
+      "explanation": "They contain the same **number** of particles ($6.02 \\times 10^{23}$), but one mole of water has a mass of 18 g and one mole of carbon has a mass of 12 g."
+    },
+    {
+      "type": "short",
+      "difficulty": 1,
+      "prompt": "The number $6.02 \\times 10^{23}$, the number of particles in one mole, is called the ______ constant.",
+      "accepted": [
+        "Avogadro",
+        "Avogadro constant",
+        "the Avogadro constant",
+        "Avogadro's constant",
+        "Avogadros constant",
+        "Avogadro's number",
+        "Avogadro number",
+        "Avogadros number",
+        "Avogadro's",
+        "Avogadro’s constant",
+        "Avogadro’s number",
+        "Avogadro’s"
+      ],
+      "explanation": "It is the **Avogadro constant**, $N_A = 6.02 \\times 10^{23}$ per mole."
+    }
+  ]
+}

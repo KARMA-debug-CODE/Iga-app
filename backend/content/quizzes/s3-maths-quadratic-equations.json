@@ -1,0 +1,21 @@
+{
+  "title": "Quadratic equations — practice",
+  "subject": "mathematics", "grade": "S3", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which of these is a quadratic equation?",
+     "choices": [{"text": "$3x + 2 = 0$"}, {"text": "$x^2 - 7x + 10 = 0$", "correct": true}, {"text": "$x^3 - x = 0$"}, {"text": "$\\frac{1}{x} = 4$"}],
+     "explanation": "A quadratic equation has 2 as the highest power of the unknown. $3x + 2 = 0$ is linear, $x^3 - x = 0$ is cubic, and $\\frac{1}{x} = 4$ has $x$ in the denominator (it simplifies to the linear equation $4x = 1$)."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the roots of $x^2 - x - 12 = 0$.",
+     "choices": [{"text": "$x = 4$", "correct": true}, {"text": "$x = -3$", "correct": true}, {"text": "$x = 3$"}, {"text": "$x = -4$"}, {"text": "$x = 12$"}],
+     "explanation": "Two numbers with product $-12$ and sum $-1$ are $-4$ and $3$, so $(x - 4)(x + 3) = 0$ and $x = 4$ or $x = -3$. Check: $16 - 4 - 12 = 0$ and $9 + 3 - 12 = 0$."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.01, "prompt": "Use the quadratic formula to find the **larger** root of $x^2 - 2x - 4 = 0$, correct to 2 decimal places.", "answer": 3.24,
+     "explanation": "$a = 1$, $b = -2$, $c = -4$, so $b^2 - 4ac = 4 + 16 = 20$. Then $x = \\frac{2 \\pm \\sqrt{20}}{2} = 1 \\pm \\sqrt{5}$. The larger root is $1 + \\sqrt{5} \\approx 1 + 2.236 = 3.236 \\approx 3.24$."},
+    {"type": "true_false", "difficulty": 2, "prompt": "The equation $x^2 + 2x + 6 = 0$ has two different real roots.", "answer": false,
+     "explanation": "The discriminant is $b^2 - 4ac = 2^2 - 4(1)(6) = 4 - 24 = -20$. It is negative, so there are no real roots."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the name of the expression $b^2 - 4ac$, which tells you how many real roots a quadratic equation has?", "accepted": ["discriminant", "the discriminant", "discriminent", "the discriminent", "discriminant delta", "delta", "Δ"],
+     "explanation": "$b^2 - 4ac$ is the **discriminant**: positive gives two roots, zero gives one repeated root, negative gives no real roots."},
+    {"type": "numeric", "difficulty": 3, "prompt": "A rectangular vegetable garden at a school in Huye is 3 m longer than it is wide. Its area is 40 m². Find its width in metres.", "answer": 5,
+     "explanation": "Let the width be $w$. Then $w(w + 3) = 40$, so $w^2 + 3w - 40 = 0$ and $(w + 8)(w - 5) = 0$. A width cannot be negative, so $w = 5$ m (length 8 m, and $5 \\times 8 = 40$ ✓)."}
+  ]
+}

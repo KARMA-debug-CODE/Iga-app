@@ -1,0 +1,21 @@
+{
+  "title": "Waves and sound — practice",
+  "subject": "physics", "grade": "S3", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which of these is a **longitudinal** wave?",
+     "choices": [{"text": "A ripple on Lake Kivu"}, {"text": "Light from the Sun"}, {"text": "Sound from a drum", "correct": true}, {"text": "A wave sent along a rope"}],
+     "explanation": "In a sound wave the air particles vibrate back and forth along the direction the wave travels, making compressions and rarefactions. The other three are transverse waves."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A sound of frequency 170 Hz travels through air at 340 m/s. What is its wavelength in metres?", "answer": 2,
+     "explanation": "$\\lambda = \\frac{v}{f} = \\frac{340}{170} = 2$ m."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A student shouts in front of a cliff and hears the echo 2 s later. The speed of sound in air is 340 m/s. How far away is the cliff, in metres?", "answer": 340,
+     "explanation": "The sound travels to the cliff and back, so $d = \\frac{v t}{2} = \\frac{340 \\times 2}{2} = 340$ m."},
+    {"type": "multi", "difficulty": 2, "prompt": "Which statements about sound are correct? Select all that apply.",
+     "choices": [{"text": "Sound needs a medium to travel through", "correct": true}, {"text": "Sound travels faster in water than in air", "correct": true}, {"text": "Sound waves are longitudinal", "correct": true}, {"text": "Sound can travel through a vacuum"}, {"text": "A larger amplitude gives a higher pitch"}],
+     "explanation": "Sound is a longitudinal mechanical wave, so it needs a medium and cannot cross a vacuum. It travels at about 1500 m/s in water compared with about 340 m/s in air. Amplitude affects **loudness**; frequency affects pitch."},
+    {"type": "true_false", "difficulty": 1, "prompt": "A wave carries the water itself from the middle of Lake Kivu to the shore.", "answer": false,
+     "explanation": "Waves transfer **energy**, not matter. The water particles only move up and down (or back and forth) about their rest positions."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the name for the number of complete waves that pass a point each second?", "accepted": ["frequency", "Frequency", "frequancy", "frequence", "the frequency"],
+     "explanation": "This is the **frequency**, measured in hertz (Hz). 1 Hz means one complete wave per second."}
+  ]
+}

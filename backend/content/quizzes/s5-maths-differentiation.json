@@ -1,0 +1,21 @@
+{
+  "title": "Differentiation — practice",
+  "subject": "mathematics", "grade": "S5", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 2, "prompt": "Using the chain rule, find $\\frac{dy}{dx}$ when $y = (2x+1)^3$.",
+     "choices": [{"text": "$3(2x+1)^2$"}, {"text": "$6(2x+1)^2$", "correct": true}, {"text": "$6(2x+1)^3$"}, {"text": "$2(2x+1)^2$"}],
+     "explanation": "Let $u = 2x + 1$, so $y = u^3$. Then $\\frac{dy}{dx} = \\frac{dy}{du} \\times \\frac{du}{dx} = 3(2x+1)^2 \\times 2 = 6(2x+1)^2$. Forgetting the $\\times 2$ from $\\frac{du}{dx}$ gives the wrong answer $3(2x+1)^2$."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the correct derivatives.",
+     "choices": [{"text": "$\\frac{d}{dx}(x^5) = 5x^4$", "correct": true}, {"text": "$\\frac{d}{dx}(7) = 0$", "correct": true}, {"text": "$\\frac{d}{dx}(\\sin x) = \\cos x$", "correct": true}, {"text": "$\\frac{d}{dx}(\\cos x) = \\sin x$"}, {"text": "$\\frac{d}{dx}\\left(\\frac{1}{x}\\right) = \\frac{1}{x^2}$"}],
+     "explanation": "$\\frac{d}{dx}(\\cos x) = -\\sin x$. Since $\\frac{1}{x} = x^{-1}$, its derivative is $-1 \\times x^{-2} = -\\frac{1}{x^2}$. The other three are correct."},
+    {"type": "numeric", "difficulty": 3, "prompt": "A farmer has 80 m of fencing to make a rectangular enclosure against a long straight wall, so only three sides need fencing. What is the largest area, in m², that she can enclose?", "answer": 800,
+     "explanation": "Let the two sides at right angles to the wall be $x$ m, so the third side is $80 - 2x$ m. $A = x(80 - 2x) = 80x - 2x^2$, so $\\frac{dA}{dx} = 80 - 4x = 0$ gives $x = 20$. $\\frac{d^2A}{dx^2} = -4 < 0$, so this is a maximum. $A = 20 \\times 40 = 800$ m²."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.05, "prompt": "A stone dropped into Lake Kivu makes a circular ripple of area $A = \\pi r^2$. Find $\\frac{dA}{dr}$, the rate of change of the area with respect to the radius, when $r = 5$ m. Give your answer to 2 decimal places.", "answer": 31.42,
+     "explanation": "$\\frac{dA}{dr} = 2\\pi r = 2\\pi \\times 5 = 10\\pi \\approx 31.42$ m² per metre."},
+    {"type": "true_false", "difficulty": 2, "prompt": "If $f'(a) = 0$ and $f''(a) > 0$, then the point on the curve where $x = a$ is a maximum point.", "answer": false,
+     "explanation": "$f''(a) > 0$ means the curve bends upwards there, so the stationary point is a **minimum**. A maximum needs $f''(a) < 0$."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the gradient of a curve at a stationary point? (Give a number or a word.)", "accepted": ["0", "zero", "0.0", "nil", "zero gradient", "0 gradient", "it is zero", "it is 0", "gradient is zero", "gradient is 0", "the gradient is zero", "the gradient is 0", "f'(x) = 0", "f'(x)=0", "dy/dx = 0", "dy/dx=0"],
+     "explanation": "At a stationary point the tangent is horizontal, so the gradient is zero: $f'(x) = 0$."}
+  ]
+}

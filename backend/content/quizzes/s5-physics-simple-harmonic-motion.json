@@ -1,0 +1,22 @@
+{
+  "title": "Simple harmonic motion — practice",
+  "subject": "physics", "grade": "S5", "unit": 1,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which equation defines simple harmonic motion? ($x$ = displacement from equilibrium, $\\omega$ = a constant)",
+     "choices": [{"text": "$a = -\\omega^2 x$", "correct": true}, {"text": "$a = \\omega^2 x$"}, {"text": "$a = -\\omega x^2$"}, {"text": "$v = \\omega^2 x$"}],
+     "explanation": "In SHM the acceleration is proportional to the displacement and always directed towards equilibrium, which the minus sign shows: $a = -\\omega^2 x$."},
+    {"type": "numeric", "difficulty": 2, "tolerance": 0.02, "prompt": "Find the period, in seconds, of a simple pendulum of length 0.50 m. Take $g = 9.8$ m/s² and give your answer to 2 decimal places.", "answer": 1.42,
+     "explanation": "$T = 2\\pi\\sqrt{\\frac{L}{g}} = 2\\pi\\sqrt{\\frac{0.50}{9.8}} = 2\\pi \\times 0.2259 \\approx 1.42$ s."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.02, "prompt": "A 0.20 kg mass oscillates on a spring of spring constant 80 N/m with an amplitude of 5.0 cm. Find its maximum speed in m/s.", "answer": 1.0,
+     "explanation": "$\\omega = \\sqrt{\\frac{k}{m}} = \\sqrt{\\frac{80}{0.20}} = \\sqrt{400} = 20$ rad/s, so $v_{\\max} = \\omega A = 20 \\times 0.050 = 1.0$ m/s."},
+    {"type": "multi", "difficulty": 2, "prompt": "For small swings, the period of a simple pendulum depends on which of these? Select all that apply.",
+     "choices": [{"text": "The length of the string", "correct": true}, {"text": "The acceleration due to gravity, $g$", "correct": true}, {"text": "The mass of the bob"}, {"text": "The amplitude of the swing"}],
+     "explanation": "$T = 2\\pi\\sqrt{\\frac{L}{g}}$ contains only $L$ and $g$. The mass cancels out, and for small angles the period does not depend on the amplitude."},
+    {"type": "short", "difficulty": 1, "prompt": "Oscillations whose amplitude gradually decreases because energy is lost to friction and air resistance are called ______ oscillations.", "accepted": ["damped", "Damped", "damping", "damped oscillations", "dampened"],
+     "explanation": "These are **damped** oscillations. Shock absorbers on vehicles are designed to damp oscillations of the springs quickly."},
+    {"type": "essay", "difficulty": 3, "marks": 5, "prompt": "Describe how you would use a simple pendulum to measure the acceleration due to gravity, $g$, in your school laboratory. Include how you would take measurements and how you would calculate $g$.",
+     "marking_guide": "1 mark: set-up described — small heavy bob on a light string clamped between two small wooden blocks (or a split cork) on a retort stand; length L measured from the point of suspension to the centre of the bob with a metre rule. 1 mark: bob displaced through a small angle (less than about 10°) and released; time for 20 (or more) complete oscillations measured with a stopwatch. 1 mark: timing repeated and averaged, and period found as T = total time ÷ number of oscillations. 1 mark: measurements repeated for at least five different lengths and a graph of T² against L plotted (a straight line through the origin). 1 mark: g calculated from g = 4π² ÷ gradient (or from g = 4π²L/T² for a single length).",
+     "explanation": "Since $T = 2\\pi\\sqrt{L/g}$, squaring gives $T^2 = \\frac{4\\pi^2}{g}L$. A graph of $T^2$ against $L$ is a straight line with gradient $\\frac{4\\pi^2}{g}$, so $g = \\frac{4\\pi^2}{\\text{gradient}}$. Timing many oscillations reduces the effect of reaction time."}
+  ]
+}

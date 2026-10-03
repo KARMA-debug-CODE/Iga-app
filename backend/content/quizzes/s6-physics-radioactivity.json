@@ -1,0 +1,21 @@
+{
+  "title": "Atomic and nuclear physics — practice",
+  "subject": "physics", "grade": "S6", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Which type of radiation is stopped by a single sheet of paper?",
+     "choices": [{"text": "Alpha", "correct": true}, {"text": "Beta-minus"}, {"text": "Gamma"}, {"text": "X-rays"}],
+     "explanation": "Alpha particles are large and doubly charged, so they ionise strongly and lose their energy quickly. They are stopped by paper or a few centimetres of air."},
+    {"type": "numeric", "difficulty": 2, "prompt": "The activity of a radioactive sample falls from 800 Bq to 50 Bq in 12 hours. What is its half-life, in hours?", "answer": 3,
+     "explanation": "$800 \\rightarrow 400 \\rightarrow 200 \\rightarrow 100 \\rightarrow 50$ is 4 half-lives. So $T_{1/2} = \\frac{12}{4} = 3$ hours."},
+    {"type": "multi", "difficulty": 2, "prompt": "Which statements correctly describe **beta-minus** decay? Select all that apply.",
+     "choices": [{"text": "The nucleon number $A$ stays the same", "correct": true}, {"text": "The proton number $Z$ increases by 1", "correct": true}, {"text": "A neutron in the nucleus changes into a proton", "correct": true}, {"text": "The proton number $Z$ decreases by 2"}, {"text": "The emitted electron comes from the electron shells around the nucleus"}],
+     "explanation": "In beta-minus decay the change ${}^{1}_{0}n \\rightarrow {}^{1}_{1}p + {}^{0}_{-1}e + \\bar{\\nu}$ happens **inside the nucleus**, so $A$ is unchanged and $Z$ rises by 1. A fall of 2 in $Z$ happens in alpha decay."},
+    {"type": "true_false", "difficulty": 1, "prompt": "Heating a radioactive sample strongly will shorten its half-life.", "answer": false,
+     "explanation": "Radioactive decay is spontaneous: it is not affected by temperature, pressure or chemical changes, so the half-life stays the same."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.0005, "prompt": "A radioisotope has a half-life of 10 s. Find its decay constant $\\lambda$ in s⁻¹ (to 3 significant figures).", "answer": 0.0693,
+     "explanation": "$\\lambda = \\frac{\\ln 2}{T_{1/2}} = \\frac{0.693}{10} = 0.0693$ s⁻¹."},
+    {"type": "short", "difficulty": 1, "prompt": "An alpha particle is identical to the nucleus of which element?", "accepted": ["helium", "Helium", "He", "helium-4", "helium 4", "helium4", "He-4", "helium nucleus", "helum"],
+     "explanation": "An alpha particle is ${}^{4}_{2}\\text{He}$: two protons and two neutrons, the nucleus of a **helium** atom."}
+  ]
+}

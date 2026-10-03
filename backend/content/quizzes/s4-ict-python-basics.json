@@ -1,0 +1,22 @@
+{
+  "title": "Programming in Python — practice",
+  "subject": "ict", "grade": "S4", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "What does `print(7 / 2)` display?",
+     "choices": [{"text": "`3`"}, {"text": "`3.5`", "correct": true}, {"text": "`1`"}, {"text": "`3.0`"}],
+     "explanation": "The `/` operator always gives a float, so `7 / 2` is `3.5`. Use `//` for whole-number division (`7 // 2` is `3`) and `%` for the remainder (`7 % 2` is `1`)."},
+    {"type": "numeric", "difficulty": 2, "prompt": "What number does this program print?\n\n```python\ntotal = 0\nfor n in range(1, 5):\n    total = total + n\nprint(total)\n```", "answer": 10,
+     "explanation": "`range(1, 5)` gives 1, 2, 3, 4 (it stops before 5), so `total` becomes $1 + 2 + 3 + 4 = 10$."},
+    {"type": "multi", "difficulty": 2, "prompt": "Which of these are **valid** Python variable names? Select all that apply.",
+     "choices": [{"text": "`school_name`", "correct": true}, {"text": "`mark2`", "correct": true}, {"text": "`_total`", "correct": true}, {"text": "`2mark`"}, {"text": "`my-name`"}, {"text": "`class`"}],
+     "explanation": "Names may use letters, digits and `_` but cannot start with a digit (`2mark`), cannot contain `-` (`my-name` would mean *my minus name*), and cannot be a keyword (`class`)."},
+    {"type": "true_false", "difficulty": 1, "prompt": "`input()` returns a string, even when the user types a number.", "answer": true,
+     "explanation": "If the user types `16`, `input()` gives the string `\"16\"`. Convert it with `int()` or `float()` before doing arithmetic, for example `age = int(input())`."},
+    {"type": "short", "difficulty": 1, "prompt": "Which Python keyword is used to define (create) a function?", "accepted": ["def", "`def`", "def keyword", "the def keyword", "keyword def", "the keyword def"],
+     "explanation": "Functions are defined with `def`, for example `def average(numbers):`, and send back a result with `return`."},
+    {"type": "essay", "difficulty": 2, "marks": 4, "prompt": "Write a Python program that asks the user for the price of one exercise book in FRW and the number of books bought, then prints the total cost. Use `input()` and convert the inputs correctly.",
+     "marking_guide": "1 mark: uses `input()` twice, to read the price and the number of books. 1 mark: converts both inputs to numbers with `int()` or `float()`. 1 mark: calculates the total correctly, e.g. `total = price * books`. 1 mark: prints the total with a clear message, e.g. `print(\"Total cost:\", total, \"FRW\")`.\n\nExample answer:\n\n```python\nprice = int(input(\"Price of one book in FRW: \"))\nbooks = int(input(\"Number of books: \"))\ntotal = price * books\nprint(\"Total cost:\", total, \"FRW\")\n```\n\nDo not award the conversion mark if the program multiplies two strings (which causes a TypeError).",
+     "explanation": "A good answer: `price = int(input(\"Price in FRW: \"))`, `books = int(input(\"Number of books: \"))`, `total = price * books`, `print(\"Total cost:\", total, \"FRW\")`. For example, 400 FRW and 5 books gives `Total cost: 2000 FRW`."}
+  ]
+}

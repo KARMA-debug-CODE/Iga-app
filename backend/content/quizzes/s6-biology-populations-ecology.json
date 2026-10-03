@@ -1,0 +1,22 @@
+{
+  "title": "Populations and ecology — practice",
+  "subject": "biology", "grade": "S6", "unit": 2,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "What is meant by the **carrying capacity** of an environment?",
+     "choices": [{"text": "The maximum population of a species that the environment can support in the long term", "correct": true}, {"text": "The number of species living in the environment"}, {"text": "The fastest rate at which a population can grow"}, {"text": "The total mass of all organisms in the environment"}],
+     "explanation": "Carrying capacity, $K$, is the maximum population size that the available resources can sustain over time. In the logistic model, growth stops when $N = K$."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the factors that are **density-dependent**.",
+     "choices": [{"text": "Competition for food", "correct": true}, {"text": "Spread of an infectious disease", "correct": true}, {"text": "Predation", "correct": true}, {"text": "A severe drought"}, {"text": "A volcanic eruption"}],
+     "explanation": "Density-dependent factors have a bigger effect when a population is crowded, so they regulate it around $K$. Drought and eruptions affect the population whatever its density."},
+    {"type": "numeric", "difficulty": 2, "prompt": "In a capture–mark–release–recapture study, 80 beetles are caught, marked and released. A week later 60 beetles are caught, and 15 of them are marked. Estimate the size of the beetle population.", "answer": 320,
+     "explanation": "Lincoln index: $N = \\frac{n_1 \\times n_2}{m_2} = \\frac{80 \\times 60}{15} = \\frac{4800}{15} = 320$ beetles."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.5, "prompt": "A population grows logistically with $r = 0.5$ per year and carrying capacity $K = 1200$. Calculate the population growth rate $\\frac{dN}{dt}$, in individuals per year, when $N = 300$.", "answer": 112.5,
+     "explanation": "$\\frac{dN}{dt} = rN\\left(\\frac{K - N}{K}\\right) = 0.5 \\times 300 \\times \\frac{1200 - 300}{1200} = 150 \\times 0.75 = 112.5$ individuals per year."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the name of the square frame, often 1 m × 1 m, placed at random positions to sample plants?", "accepted": ["quadrat", "Quadrat", "quadrats", "a quadrat", "quadrat frame", "quadrate", "quadrat square"],
+     "explanation": "A **quadrat** marks out a known area. Counting the individuals in many randomly placed quadrats lets you estimate density and total population."},
+    {"type": "essay", "marks": 4, "difficulty": 3, "prompt": "Ecologists record the numbers of a predator and its prey in a national park over many years. Both populations rise and fall in cycles. Explain why the cycles happen and why the predator peaks come after the prey peaks.",
+     "marking_guide": "1 mark: when prey are plentiful, predators have more food, so more survive and breed and predator numbers rise. 1 mark: more predators eat more prey, so prey numbers fall. 1 mark: with less prey, predators starve or breed less, so predator numbers fall, allowing prey to recover and the cycle to repeat. 1 mark: predator peaks lag behind prey peaks because predators take time to respond, as breeding and growth of young take time, so predator numbers keep rising for a while after prey start to fall.",
+     "explanation": "Predator and prey numbers are linked by negative feedback: prey numbers control predator food supply, and predator numbers control prey deaths. The delay in the predators' breeding response makes their peaks lag behind."}
+  ]
+}

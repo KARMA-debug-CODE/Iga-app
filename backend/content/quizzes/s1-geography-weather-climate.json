@@ -1,0 +1,22 @@
+{
+  "title": "Weather and climate — practice",
+  "subject": "geography", "grade": "S1", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "In which months does Rwanda's **long rainy season** (Itumba) usually happen?",
+     "choices": [{"text": "December to February"}, {"text": "March to May", "correct": true}, {"text": "June to August"}, {"text": "mid-September to mid-December"}],
+     "explanation": "Itumba, the long rainy season, runs from March to May. Mid-September to mid-December is the short rainy season (Umuhindo); June to August is part of the long dry season (Icyi); December to February is mostly the short dry season (Urugaryi)."},
+    {"type": "multi", "difficulty": 1, "prompt": "Which of these are **elements of weather**? Select all that apply.",
+     "choices": [{"text": "Temperature", "correct": true}, {"text": "Rainfall", "correct": true}, {"text": "Humidity", "correct": true}, {"text": "Wind speed", "correct": true}, {"text": "Altitude"}, {"text": "Soil type"}],
+     "explanation": "Temperature, rainfall, humidity and wind speed describe the state of the atmosphere, so they are elements of weather. Altitude is a **factor** that affects climate, and soil type is a property of the land, not of the air."},
+    {"type": "true_false", "difficulty": 1, "prompt": "Weather is the average condition of the atmosphere of a place, measured over about 30 years.", "answer": false,
+     "explanation": "That is the definition of **climate**. Weather is the condition of the atmosphere at a particular place and time, and it can change within hours."},
+    {"type": "numeric", "difficulty": 2, "tolerance": 0.1, "prompt": "A town 1,400 m above sea level has a temperature of 25 °C. Temperature falls by about 6.5 °C for every 1,000 m of height. Estimate the temperature, in °C, at the top of a hill 2,600 m above sea level.", "answer": 17.2,
+     "explanation": "Height difference $= 2600 - 1400 = 1200$ m, which is $1.2 \\times 1000$ m. Temperature drop $= 1.2 \\times 6.5 = 7.8$ °C. Temperature at the top $\\approx 25 - 7.8 = 17.2$ °C."},
+    {"type": "short", "difficulty": 1, "prompt": "Which instrument shows the direction that the wind is blowing from?", "accepted": ["wind vane", "a wind vane", "the wind vane", "windvane", "wind-vane", "weather vane", "a weather vane", "the weather vane", "weathervane", "weather-vane", "vane", "weathercock", "a weathercock", "weather cock", "wind direction indicator"],
+     "explanation": "A **wind vane** (weather vane) points to the direction the wind comes from. Wind **speed** is measured with an anemometer."},
+    {"type": "essay", "difficulty": 2, "marks": 4, "prompt": "Name Rwanda's two rainy seasons and two dry seasons, giving the usual months of each. Then explain one way these seasons affect farmers.",
+     "marking_guide": "1 mark: long rainy season (Itumba), March to May. 1 mark: short rainy season (Umuhindo), about mid-September to mid-December. 1 mark: both dry seasons with months: short dry season (Urugaryi), about mid-December to February, and long dry season (Icyi), June to about mid-September. 1 mark: one correct effect on farmers, e.g. crops are planted at the start of each rainy season (Season A from September, Season B from March); crops such as beans and maize are harvested and dried in the dry seasons; or crops may need irrigation or water storage in the long dry season. Accept English or Kinyarwanda names and months that are about right (within half a month).",
+     "explanation": "Rwanda has a long rainy season (Itumba, March–May), a long dry season (Icyi, June–mid-September), a short rainy season (Umuhindo, mid-September–mid-December) and a short dry season (Urugaryi, mid-December–February). Farmers plant at the start of the rains and harvest and dry crops in the dry seasons."}
+  ]
+}

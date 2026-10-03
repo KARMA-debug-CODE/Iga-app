@@ -1,0 +1,21 @@
+{
+  "title": "Sets and Venn diagrams — practice",
+  "subject": "mathematics", "grade": "S3", "unit": 3,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "If $A = \\{2, 4, 6, 8\\}$ and $B = \\{4, 8, 12\\}$, what is $A \\cap B$?",
+     "choices": [{"text": "$\\{4, 8\\}$", "correct": true}, {"text": "$\\{2, 4, 6, 8, 12\\}$"}, {"text": "$\\{2, 6\\}$"}, {"text": "$\\{12\\}$"}],
+     "explanation": "The intersection holds the elements that are in **both** sets: only $4$ and $8$ appear in both lists. $\\{2, 4, 6, 8, 12\\}$ is the union."},
+    {"type": "multi", "difficulty": 2, "prompt": "Let $A = \\{1, 2, 3\\}$ and $B = \\{1, 2, 3, 4, 5\\}$. Select **all** the true statements.",
+     "choices": [{"text": "$A \\subseteq B$", "correct": true}, {"text": "$4 \\notin A$", "correct": true}, {"text": "$n(B) = 5$", "correct": true}, {"text": "$B \\subseteq A$"}, {"text": "$A \\cap B = \\varnothing$"}],
+     "explanation": "Every element of $A$ is in $B$, so $A \\subseteq B$. $4$ is not in $A$. $B$ has 5 elements. $B \\subseteq A$ is false because $4$ and $5$ are not in $A$, and $A \\cap B = \\{1, 2, 3\\}$, which is not empty."},
+    {"type": "numeric", "difficulty": 2, "prompt": "$n(A) = 20$, $n(B) = 15$ and $n(A \\cap B) = 6$. Find $n(A \\cup B)$.", "answer": 29,
+     "explanation": "$n(A \\cup B) = n(A) + n(B) - n(A \\cap B) = 20 + 15 - 6 = 29$."},
+    {"type": "true_false", "difficulty": 1, "prompt": "The empty set $\\varnothing$ is a subset of every set.", "answer": true,
+     "explanation": "The empty set has no elements, so there is no element of $\\varnothing$ that is missing from any other set. It is a subset of every set."},
+    {"type": "short", "difficulty": 1, "prompt": "What is the name of the set that contains all the elements under discussion, often written $\\xi$ or $U$?", "accepted": ["universal set", "the universal set", "a universal set", "universal", "universe", "universal sets"],
+     "explanation": "It is the **universal set**. In a Venn diagram it is drawn as the rectangle around the circles."},
+    {"type": "numeric", "difficulty": 3, "prompt": "In a class of 45 students in Rubavu, 28 like mathematics, 20 like physics and 8 like neither subject. How many students like **both** subjects?", "answer": 11,
+     "explanation": "Students who like at least one subject: $45 - 8 = 37$. Then $37 = 28 + 20 - n(\\text{both})$, so $n(\\text{both}) = 48 - 37 = 11$. Check: maths only $17$, both $11$, physics only $9$, neither $8$, and $17 + 11 + 9 + 8 = 45$ ✓."}
+  ]
+}

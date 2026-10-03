@@ -1,0 +1,95 @@
+{
+  "title": "Electrolysis — practice",
+  "subject": "chemistry",
+  "grade": "S3",
+  "unit": 3,
+  "kind": "practice",
+  "feedback_mode": "immediate",
+  "questions": [
+    {
+      "type": "mcq",
+      "difficulty": 1,
+      "prompt": "Molten lead(II) bromide is electrolysed with graphite electrodes. What forms at the cathode?",
+      "choices": [
+        {
+          "text": "Lead",
+          "correct": true
+        },
+        {
+          "text": "Bromine"
+        },
+        {
+          "text": "Hydrogen"
+        },
+        {
+          "text": "Oxygen"
+        }
+      ],
+      "explanation": "Positive $\\text{Pb}^{2+}$ ions move to the negative cathode and gain electrons: $\\text{Pb}^{2+} + 2e^- \\rightarrow \\text{Pb}$. Bromine forms at the anode."
+    },
+    {
+      "type": "multi",
+      "difficulty": 2,
+      "prompt": "Which of these are electrolytes? Select all that apply.",
+      "choices": [
+        {
+          "text": "Molten sodium chloride",
+          "correct": true
+        },
+        {
+          "text": "Copper(II) sulfate solution",
+          "correct": true
+        },
+        {
+          "text": "Dilute sulfuric acid",
+          "correct": true
+        },
+        {
+          "text": "Sugar solution"
+        },
+        {
+          "text": "Solid sodium chloride"
+        }
+      ],
+      "explanation": "An electrolyte has ions that are free to move. Sugar is made of molecules, not ions. In solid sodium chloride the ions are fixed in place, so it does not conduct."
+    },
+    {
+      "type": "true_false",
+      "difficulty": 1,
+      "prompt": "In electrolysis, the anode is the positive electrode.",
+      "answer": true,
+      "explanation": "The anode is positive and attracts negative ions (anions); the cathode is negative and attracts positive ions (cations)."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 2,
+      "tolerance": 0,
+      "prompt": "Dilute sulfuric acid is electrolysed and 40 cm³ of hydrogen is collected at the cathode. What volume of oxygen, in cm³, is collected at the anode at the same time?",
+      "answer": 20,
+      "explanation": "4 electrons make 2 molecules of $\\text{H}_2$ but only 1 molecule of $\\text{O}_2$, so the volumes are in the ratio 2 : 1. Oxygen $= 40 \\div 2 = 20$ cm³."
+    },
+    {
+      "type": "numeric",
+      "difficulty": 3,
+      "tolerance": 0.05,
+      "prompt": "A current of 1.0 A flows through copper(II) sulfate solution for 9 650 s. What mass of copper, in grams, is deposited on the cathode? (Cu = 64; 1 mol of electrons carries 96 500 C)",
+      "answer": 3.2,
+      "explanation": "$Q = It = 1.0 \\times 9650 = 9650$ C. Moles of electrons $= \\frac{9650}{96\\,500} = 0.10$ mol. $\\text{Cu}^{2+} + 2e^- \\rightarrow \\text{Cu}$, so moles of Cu $= 0.10 \\div 2 = 0.050$ mol. Mass $= 0.050 \\times 64 = 3.2$ g."
+    },
+    {
+      "type": "short",
+      "difficulty": 1,
+      "prompt": "What is the name of the process that uses electrolysis to coat an object, such as a moto handlebar, with a thin layer of metal?",
+      "accepted": [
+        "electroplating",
+        "electro-plating",
+        "electro plating",
+        "electroplate",
+        "plating",
+        "electroplated",
+        "electrolytic plating"
+      ],
+      "explanation": "This is **electroplating**. The object is made the cathode, and the electrolyte contains ions of the plating metal."
+    }
+  ]
+}

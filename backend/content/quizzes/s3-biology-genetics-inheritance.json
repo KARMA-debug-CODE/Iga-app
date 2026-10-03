@@ -1,0 +1,21 @@
+{
+  "title": "Genetics and inheritance — practice",
+  "subject": "biology", "grade": "S3", "unit": 4,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "In cattle, the polled (hornless) allele P is dominant to the horned allele p. A bull with genotype PP is…",
+     "choices": [{"text": "homozygous and polled", "correct": true}, {"text": "heterozygous and polled"}, {"text": "homozygous and horned"}, {"text": "heterozygous and horned"}],
+     "explanation": "PP has two identical alleles, so it is **homozygous**. P is dominant, so the bull is **polled** (hornless)."},
+    {"type": "multi", "difficulty": 2, "prompt": "Select **all** the examples of **discontinuous** variation.",
+     "choices": [{"text": "ABO blood group", "correct": true}, {"text": "Whether a cow is polled or horned", "correct": true}, {"text": "Being male or female", "correct": true}, {"text": "Height of S3 students"}, {"text": "Daily milk yield of cows"}],
+     "explanation": "Discontinuous variation falls into clear groups with nothing in between. Height and milk yield have a continuous range of values and are also affected by the environment."},
+    {"type": "true_false", "difficulty": 1, "prompt": "The sex of a baby is decided by whether the sperm that fertilises the egg carries an X or a Y chromosome.", "answer": true,
+     "explanation": "Every egg carries an X. An X sperm gives XX (a girl) and a Y sperm gives XY (a boy)."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Two heterozygous polled cattle (Pp × Pp) produce 48 calves over many years. How many of these calves would you expect to be horned?", "answer": 12,
+     "explanation": "The Punnett square gives 1 PP : 2 Pp : 1 pp, so $\\frac{1}{4}$ of the calves are horned (pp): $\\frac{1}{4} \\times 48 = 12$."},
+    {"type": "numeric", "difficulty": 3, "tolerance": 0.02, "prompt": "In one of Mendel's experiments, hybrid pea plants produced 6022 yellow seeds and 2001 green seeds. Calculate the ratio of yellow to green seeds as a single number (yellow ÷ green), to 2 decimal places.", "answer": 3.01,
+     "explanation": "$\\frac{6022}{2001} \\approx 3.01$. This is very close to the 3 : 1 ratio expected when two heterozygous plants are crossed, with yellow dominant to green."},
+    {"type": "short", "difficulty": 1, "prompt": "What word describes the characteristics of an organism that can be seen or measured, such as horned or polled?", "accepted": ["phenotype", "Phenotype", "phenotypes", "the phenotype", "phenotipe", "phynotype", "phenotyp", "phenotypic"],
+     "explanation": "The **phenotype** is what we observe. The **genotype** is the pair of alleles (for example Pp) that produces it."}
+  ]
+}
