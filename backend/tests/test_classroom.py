@@ -98,3 +98,71 @@ def test_deleting_a_class_archives_it(client_for, teacher, student, classroom):
     classroom.refresh_from_db()
     assert classroom.archived
     assert client_for(student).get("/api/classes/").data["count"] == 0
+
+
+def test_students_can_leave_an_archived_class(client_for, student, classroom):
+    Enrollment.objects.create(classroom=classroom, student=student)
+    classroom.archived = True
+    classroom.save()
+    assert client_for(student).post(f"/api/classes/{classroom.id}/leave/").status_code == 204
+    assert not Enrollment.objects.filter(classroom=classroom, student=student).exists()
+
+
+def _submit(student, quiz, when, correct):
+    from datetime import timedelta
+
+    from apps.assessments import services
+    from apps.assessments.models import Attempt
+
+    attempt = services.start_attempt(student, quiz)
+    for qid in attempt.question_order:
+        question = quiz.questions.get(pk=qid)
+        services.save_answer(attempt, qid, choice_ids=[question.choices.get(is_correct=correct).id] if correct else [])
+    services.submit_attempt(attempt)
+    Attempt.objects.filter(pk=attempt.pk).update(started_at=when - timedelta(minutes=5), submitted_at=when)
+
+
+def test_late_flag_follows_the_scored_attempt(teacher, student, classroom, quiz_factory):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.classroom.models import Assignment
+    from apps.classroom.views import assignment_status
+
+    now = timezone.now()
+    quiz = quiz_factory()
+    assignment = Assignment.objects.create(
+        classroom=classroom, quiz=quiz, title="HW", created_by=teacher, due_at=now - timedelta(days=1)
+    )
+    Assignment.objects.filter(pk=assignment.pk).update(created_at=now - timedelta(days=3))
+    assignment.refresh_from_db()
+
+    _submit(student, quiz, now - timedelta(days=2), correct=False)  # blank-ish attempt on time
+    status = assignment_status(assignment, student)
+    assert status == {"state": "done", "score": 0.0, "late": False}
+
+    _submit(student, quiz, now - timedelta(hours=1), correct=True)  # the real attempt, after the deadline
+    status = assignment_status(assignment, student)
+    assert status == {"state": "done", "score": 100.0, "late": True}
+
+
+def test_report_closes_attempts_whose_time_ran_out(client_for, teacher, student, classroom, quiz_factory):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.assessments import services
+    from apps.assessments.models import Attempt
+    from apps.classroom.models import Assignment
+
+    Enrollment.objects.create(classroom=classroom, student=student)
+    quiz = quiz_factory(time_limit_minutes=10)
+    assignment = Assignment.objects.create(classroom=classroom, quiz=quiz, title="Test", created_by=teacher)
+    attempt = services.start_attempt(student, quiz, assignment)
+    Attempt.objects.filter(pk=attempt.pk).update(deadline=timezone.now() - timedelta(minutes=5))
+
+    report = client_for(teacher).get(f"/api/classes/{classroom.id}/report/").data
+    cell = report["rows"][0]["assignments"][assignment.id]
+    assert cell["state"] == "done" and cell["score"] == 0.0
+    assert Attempt.objects.get(pk=attempt.pk).status == Attempt.Status.MARKED

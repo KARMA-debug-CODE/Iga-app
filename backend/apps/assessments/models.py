@@ -166,6 +166,13 @@ class Attempt(models.Model):
 
     class Meta:
         ordering = ["-started_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "quiz"],
+                condition=models.Q(status="in_progress"),
+                name="one_open_attempt_per_quiz",
+            )
+        ]
 
     def __str__(self):
         return f"{self.user} · {self.quiz} · {self.status}"

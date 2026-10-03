@@ -46,6 +46,16 @@ class QuestionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "status", "created_at"]
 
+    def validate_accepted_answers(self, value):
+        if value in (None, ""):
+            return []
+        if not isinstance(value, list) or not all(isinstance(a, str) for a in value):
+            raise serializers.ValidationError("Give a list of accepted answers (text).")
+        cleaned = [a.strip() for a in value if a.strip()]
+        if len(cleaned) > 50 or any(len(a) > 200 for a in cleaned):
+            raise serializers.ValidationError("Use at most 50 accepted answers of up to 200 characters each.")
+        return cleaned
+
     def validate(self, attrs):
         qtype = attrs.get("type", getattr(self.instance, "type", None))
         choices = attrs.get("choices")
@@ -77,9 +87,46 @@ class QuestionSerializer(serializers.ModelSerializer):
             )
         return question
 
+    ANSWER_KEY_FIELDS = ("type", "marks", "numeric_answer", "numeric_tolerance", "accepted_answers")
+
+    def _keep_answer_key(self, instance, validated_data, choices):
+        """Once students have answered, the marking must not change under them.
+
+        Wording can still be fixed (prompt, explanation, option text); the answer key can't.
+        Returns True when option texts should be updated in place.
+        """
+        changed = [f for f in self.ANSWER_KEY_FIELDS if f in validated_data and validated_data[f] != getattr(instance, f)]
+        if changed:
+            raise serializers.ValidationError(
+                {
+                    changed[
+                        0
+                    ]: "Students have already answered this question, so its answer can't change. Make a new question instead."
+                }
+            )
+        if choices is None:
+            return False
+        current = list(instance.choices.order_by("order", "id"))
+        same_key = len(current) == len(choices) and all(
+            bool(c.get("is_correct")) == old.is_correct for c, old in zip(choices, current, strict=True)
+        )
+        if not same_key:
+            raise serializers.ValidationError(
+                {
+                    "choices": "Students have already answered this question, so its options can't change. Make a new question instead."
+                }
+            )
+        for old, new in zip(current, choices, strict=True):
+            if old.text != new["text"]:
+                old.text = new["text"]
+                old.save(update_fields=["text"])
+        return True
+
     @transaction.atomic
     def update(self, instance, validated_data):
         choices = validated_data.pop("choices", None)
+        if instance.answers.exists() and self._keep_answer_key(instance, validated_data, choices):
+            choices = None  # option texts already updated in place; keep the same option rows
         question = super().update(instance, validated_data)
         if choices is not None:
             question.choices.all().delete()

@@ -18,6 +18,7 @@ from apps.classroom.models import Assignment
 from apps.classroom.views import assignment_status
 from apps.core import audit
 from apps.core.constants import ContentStatus
+from apps.core.throttles import JoinRateThrottle
 from apps.curriculum.models import Lesson, LessonProgress, Subject
 
 from .models import ParentInvite, ParentLink
@@ -181,7 +182,11 @@ class MyParentsView(APIView):
 
 class ChildrenView(APIView):
     permission_classes = [IsParent]
-    throttle_scope = "auth"  # slows down guessing of link codes
+
+    def get_throttles(self):
+        if self.request.method == "POST":
+            return [JoinRateThrottle()]  # slows down guessing of link codes
+        return super().get_throttles()
 
     def get(self, request):
         links = ParentLink.objects.filter(parent=request.user).select_related("student")

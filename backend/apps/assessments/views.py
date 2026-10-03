@@ -13,7 +13,7 @@ from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
 
 from . import services
 from .analytics import quiz_analytics
-from .models import Answer, Attempt, ExamPaper, Question, Quiz
+from .models import Attempt, ExamPaper, Question, Quiz
 from .serializers import (
     AnswerInputSerializer,
     AttemptListSerializer,
@@ -122,9 +122,20 @@ class QuizViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_platform_admin and serializer.instance.author_id != user.id:
             raise PermissionDenied("You can only edit quizzes you created.")
-        if serializer.instance.attempts.exists() and "question_ids" in serializer.validated_data:
-            raise ValidationError({"question_ids": "Students have started this quiz; duplicate it to change the questions."})
-        quiz = serializer.save()
+        quiz = serializer.instance
+        if quiz.attempts.exists():
+            if "question_ids" in serializer.validated_data and serializer.validated_data["question_ids"] != list(
+                quiz.quiz_questions.order_by("order").values_list("question_id", flat=True)
+            ):
+                raise ValidationError({"question_ids": "Students have started this quiz; duplicate it to change the questions."})
+            serializer.validated_data.pop("question_ids", None)
+        extra = {}
+        if not user.is_platform_admin and serializer.validated_data.get("status", quiz.status) not in (
+            ContentStatus.DRAFT,
+            ContentStatus.ARCHIVED,
+        ):
+            extra["status"] = ContentStatus.REVIEW  # like lessons: every teacher edit is re-reviewed
+        quiz = serializer.save(**extra)
         audit.record(self.request, "update_quiz", quiz, status=quiz.status)
 
     def perform_destroy(self, instance):
@@ -150,11 +161,16 @@ class QuizViewSet(viewsets.ModelViewSet):
             raise ValidationError("This quiz is no longer available.")
         assignment = None
         assignment_id = request.data.get("assignment")
-        if assignment_id:
+        if assignment_id not in (None, ""):
+            try:
+                assignment_id = int(assignment_id)
+            except (TypeError, ValueError):
+                raise ValidationError({"assignment": "Unknown assignment."})
             assignment = get_object_or_404(
-                Assignment,
+                Assignment.objects.distinct(),
                 pk=assignment_id,
                 quiz=quiz,
+                classroom__archived=False,
                 classroom__enrollments__student=request.user,
             )
         attempt = services.start_attempt(request.user, quiz, assignment)
@@ -186,7 +202,7 @@ def attempts_visible_to(user):
     if user.is_platform_admin:
         return qs
     if user.can_teach:
-        my_students = Enrollment.objects.filter(classroom__teacher=user).values("student_id")
+        my_students = Enrollment.objects.filter(classroom__teacher=user, classroom__archived=False).values("student_id")
         return qs.filter(Q(user=user) | Q(user_id__in=my_students))
     return qs.filter(user=user)
 
@@ -246,12 +262,9 @@ class MarkingViewSet(viewsets.ViewSet):
     permission_classes = [IsTeacher]
 
     def _answers(self, request):
-        qs = Answer.objects.select_related("question", "attempt", "attempt__user", "attempt__quiz", "attempt__quiz__subject")
-        qs = qs.exclude(attempt__status=Attempt.Status.IN_PROGRESS)
-        if not request.user.is_platform_admin:
-            my_students = Enrollment.objects.filter(classroom__teacher=request.user).values("student_id")
-            qs = qs.filter(attempt__user_id__in=my_students)
-        return qs
+        return services.markable_answers(request.user).select_related(
+            "question", "attempt", "attempt__user", "attempt__quiz", "attempt__quiz__subject"
+        )
 
     def list(self, request):
         pending = self._answers(request).filter(marks_awarded__isnull=True).order_by("attempt__submitted_at")[:200]

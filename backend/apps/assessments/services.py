@@ -13,7 +13,7 @@ from datetime import timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
@@ -53,13 +53,28 @@ def normalise_text(value):
 # --- Starting ---------------------------------------------------------------
 
 
-@transaction.atomic
 def start_attempt(user, quiz, assignment=None):
-    existing = Attempt.objects.filter(user=user, quiz=quiz, status=Attempt.Status.IN_PROGRESS).first()
-    if existing:
-        if not finalize_if_expired(existing):
-            return existing
+    """Return the open attempt for this quiz, or start a new one.
 
+    Expired attempts are closed first, in their own transaction, so a refusal below
+    (no attempts left) doesn't undo the automatic submission.
+    """
+    for stale in Attempt.objects.filter(user=user, quiz=quiz, status=Attempt.Status.IN_PROGRESS):
+        finalize_if_expired(stale)
+
+    with transaction.atomic():
+        # Serialise starts per user: a double-tap can't create two attempts or exceed max_attempts.
+        type(user).objects.select_for_update().only("pk").get(pk=user.pk)
+        existing = Attempt.objects.filter(user=user, quiz=quiz, status=Attempt.Status.IN_PROGRESS).first()
+        if existing:
+            if assignment is not None and existing.assignment_id is None:
+                existing.assignment = assignment
+                existing.save(update_fields=["assignment"])
+            return existing
+        return _create_attempt(user, quiz, assignment)
+
+
+def _create_attempt(user, quiz, assignment):
     if quiz.max_attempts:
         used = Attempt.objects.filter(user=user, quiz=quiz).count()
         if used >= quiz.max_attempts:
@@ -116,10 +131,18 @@ def _question_in_attempt(attempt, question_id):
     return Question.objects.prefetch_related("choices").get(pk=question_id)
 
 
+def _lock_open(attempt):
+    """Lock the attempt row so a save can't land after (or during) the submit that scored it."""
+    locked = Attempt.objects.select_for_update().get(pk=attempt.pk)
+    if locked.status != Attempt.Status.IN_PROGRESS:
+        raise ValidationError("This attempt has already been submitted.")
+    return locked
+
+
 def save_answer(attempt, question_id, choice_ids=None, text="", numeric=None):
     _ensure_open(attempt)
     with transaction.atomic():
-        return _save_answer(attempt, question_id, choice_ids, text, numeric)
+        return _save_answer(_lock_open(attempt), question_id, choice_ids, text, numeric)
 
 
 def _save_answer(attempt, question_id, choice_ids, text, numeric):
@@ -174,7 +197,10 @@ def score_answer(answer):
     if question.type == Question.Type.NUMERIC:
         if answer.numeric_answer is None or question.numeric_answer is None:
             return False, Decimal("0")
-        is_correct = abs(answer.numeric_answer - question.numeric_answer) <= question.numeric_tolerance + 1e-9
+        expected = question.numeric_answer
+        # Float noise grows with magnitude (e.g. 6.02e23), so the allowance is relative.
+        allowance = question.numeric_tolerance + 1e-9 * max(1.0, abs(expected))
+        is_correct = abs(answer.numeric_answer - expected) <= allowance
         return is_correct, full if is_correct else Decimal("0")
 
     if question.type == Question.Type.SHORT and question.accepted_answers:
@@ -192,6 +218,7 @@ def check_answer(attempt, question_id):
         raise PermissionDenied("Answers are revealed after you submit in exam mode.")
     _ensure_open(attempt)
     with transaction.atomic():
+        attempt = _lock_open(attempt)
         question = _question_in_attempt(attempt, question_id)
         if question.needs_manual_marking:
             raise ValidationError("Your teacher will mark this answer.")
@@ -254,6 +281,8 @@ def mark_answer(answer, marks, feedback, teacher):
     marks = _q(marks)
     if marks < 0 or marks > Decimal(question.marks):
         raise ValidationError(f"Marks must be between 0 and {question.marks}.")
+    # Lock the attempt so two teachers marking different answers both count in the total.
+    answer.attempt = Attempt.objects.select_for_update().get(pk=answer.attempt_id)
     if answer.attempt.status == Attempt.Status.IN_PROGRESS:
         raise ValidationError("The student hasn't submitted yet.")
     answer.marks_awarded = marks
@@ -264,6 +293,35 @@ def mark_answer(answer, marks, feedback, teacher):
     answer.save()
     _recalculate(answer.attempt)
     return answer
+
+
+def manual_questions_q(prefix=""):
+    """Questions a person marks: essays, and short answers with no accepted-answer list."""
+    p = prefix
+    return Q(**{f"{p}type": Question.Type.ESSAY}) | (
+        Q(**{f"{p}type": Question.Type.SHORT}) & (Q(**{f"{p}accepted_answers": []}) | Q(**{f"{p}accepted_answers__isnull": True}))
+    )
+
+
+def markable_answers(user):
+    """Submitted written answers this teacher may mark.
+
+    A teacher marks work for their own (current) classes: answers to an assignment they set,
+    or self-practice by one of their students in that class's subject. Auto-marked questions
+    are never re-marked by hand.
+    """
+    qs = Answer.objects.exclude(attempt__status=Attempt.Status.IN_PROGRESS).filter(manual_questions_q("question__"))
+    if user.is_platform_admin:
+        return qs
+    from apps.classroom.models import Enrollment
+
+    teaches_this = Enrollment.objects.filter(
+        classroom__teacher=user,
+        classroom__archived=False,
+        student=OuterRef("attempt__user"),
+    ).filter(Q(classroom__subject__isnull=True) | Q(classroom__subject=OuterRef("attempt__quiz__subject")))
+    own_assignment = Q(attempt__assignment__classroom__teacher=user, attempt__assignment__classroom__archived=False)
+    return qs.filter(own_assignment | Q(Exists(teaches_this)))
 
 
 def can_see_solutions(attempt, answer=None):

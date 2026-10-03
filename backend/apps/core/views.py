@@ -12,9 +12,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from apps.assessments.models import Answer, Attempt, Question, Quiz
+from apps.assessments.models import Attempt, Question, Quiz
 from apps.assessments.serializers import AttemptListSerializer
-from apps.assessments.services import visible_quizzes
+from apps.assessments.services import markable_answers, visible_quizzes
 from apps.classroom.models import Assignment, Classroom
 from apps.classroom.views import AssignmentSerializer
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
@@ -90,15 +90,15 @@ def dashboard(request):
 
     if user.can_teach:
         classes = Classroom.objects.filter(teacher=user, archived=False).annotate(student_total=Count("enrollments"))
-        my_students = User.objects.filter(enrollments__classroom__teacher=user).values("id")
+        my_students = User.objects.filter(enrollments__classroom__teacher=user, enrollments__classroom__archived=False).values(
+            "id"
+        )
         data["teacher"] = {
             "classes": [
                 {"id": c.id, "name": c.name, "grade": c.grade, "students": c.student_total, "join_code": c.join_code}
                 for c in classes
             ],
-            "pending_marking": Answer.objects.filter(marks_awarded__isnull=True, attempt__user_id__in=my_students)
-            .exclude(attempt__status=Attempt.Status.IN_PROGRESS)
-            .count(),
+            "pending_marking": markable_answers(user).filter(marks_awarded__isnull=True).count(),
             "recent_submissions": AttemptListSerializer(
                 Attempt.objects.filter(user_id__in=my_students)
                 .exclude(status=Attempt.Status.IN_PROGRESS)

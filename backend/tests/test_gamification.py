@@ -42,7 +42,7 @@ def test_levels(xp, level):
 def test_quiz_xp():
     assert services.quiz_xp(0) == 5
     assert services.quiz_xp(55) == 10
-    assert services.quiz_xp(100) == 25
+    assert services.quiz_xp(100) == 15  # the perfect-score bonus is awarded separately, once
 
 
 def test_weekly_leaderboard_is_per_grade_and_hides_surnames(client_for, student, other_student):
@@ -71,3 +71,22 @@ def test_badges_endpoint(client_for, student):
     earned = {b["code"] for b in data if b["earned"]}
     assert earned == {"first-lesson"}
     assert XPEvent.objects.count() == 0
+
+
+def test_leaderboard_lists_top_50_and_ranks_everyone(client_for, student):
+    from .conftest import make_user
+
+    for i in range(55):
+        services.award_xp(make_user(f"kid{i}"), 100 + i, "test")
+    services.award_xp(student, 1, "test")
+    for period in ("week", "all"):
+        data = client_for(student).get("/api/leaderboard/", {"period": period}).data
+        assert len(data["entries"]) == 50
+        assert data["entries"][0]["points"] == 154
+        assert "user_id" not in data["entries"][0]
+        assert data["me"]["rank"] == 56 and data["me"]["points"] == 1
+
+
+def test_teachers_only_see_class_leaderboards(client_for, teacher, student):
+    services.award_xp(student, 10, "test")
+    assert client_for(teacher).get("/api/leaderboard/").data["entries"] == []

@@ -114,6 +114,7 @@ export default {
   "groups.send": "Ohereza",
   "groups.typeMessage": "Andika ubutumwa…",
   "groups.report": "Tanga raporo",
+  "groups.removed": "[ubu butumwa bwakuweho n'umugenzuzi]",
 
   "classes.title": "Amashuri",
   "classes.join": "Injira mu ishuri",

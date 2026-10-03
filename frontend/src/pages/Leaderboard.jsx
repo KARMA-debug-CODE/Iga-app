@@ -56,8 +56,8 @@ export default function Leaderboard() {
           ) : (
             <div className="card">
               <ol className="list">
-                {board.entries.map((e) => (
-                  <li key={e.user_id} className={`row ${e.is_me ? "me-row" : ""}`} style={{ flexWrap: "nowrap" }}>
+                {board.entries.map((e, i) => (
+                  <li key={`${e.rank}-${i}`} className={`row ${e.is_me ? "me-row" : ""}`} style={{ flexWrap: "nowrap" }}>
                     <span className="rank">{MEDALS[e.rank - 1] || e.rank}</span>
                     <span style={{ flex: 1, minWidth: 0 }} className="truncate">
                       <strong>{e.name}</strong> {e.is_me && <span className="pill pill-warn">{t("board.you")}</span>}

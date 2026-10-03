@@ -74,12 +74,10 @@ def touch_activity(user, today=None):
 
 
 def quiz_xp(percentage):
+    """XP for finishing a quiz the first time: a base amount plus 1 per 10%."""
     if percentage is None:
         return XP_QUIZ_BASE
-    xp = XP_QUIZ_BASE + int(percentage // 10)
-    if percentage >= 100:
-        xp += XP_PERFECT_BONUS
-    return xp
+    return XP_QUIZ_BASE + int(percentage // 10)
 
 
 def on_lesson_completed(user, lesson):
@@ -99,11 +97,22 @@ def on_simulation_viewed(user, simulation):
     return gained
 
 
+def _attempt_was_blank(attempt):
+    return not any(
+        a.text_answer.strip() or a.numeric_answer is not None or a.selected_choices.exists() for a in attempt.answers.all()
+    )
+
+
 def on_attempt_marked(attempt):
+    """Quiz XP is earned once per quiz (retakes are for learning, not farming), plus a
+    one-off bonus the first time the student gets everything right."""
     user = attempt.user
+    if _attempt_was_blank(attempt):
+        return 0
     pct = attempt.percentage
-    gained = award_xp(user, quiz_xp(pct), "quiz", f"attempt:{attempt.pk}")
+    gained = award_xp(user, quiz_xp(pct), "quiz", f"quiz:{attempt.quiz_id}")
     if pct is not None and pct >= 100:
+        gained += award_xp(user, XP_PERFECT_BONUS, "quiz-perfect", f"quiz-perfect:{attempt.quiz_id}")
         award_badge(user, "quiz-whiz")
     if attempt.quiz.kind == "past_paper":
         award_badge(user, "exam-ready")

@@ -173,6 +173,7 @@ export default {
   "groups.report": "Report",
   "groups.reportReason": "Why are you reporting this message?",
   "groups.reported": "Thanks — a moderator will review it.",
+  "groups.removed": "[message removed by a moderator]",
   "groups.hide": "Hide",
   "groups.newNote": "Share a note",
   "groups.noteTitle": "Title",

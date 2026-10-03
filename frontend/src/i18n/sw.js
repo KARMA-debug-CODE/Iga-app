@@ -117,6 +117,7 @@ export default {
   "groups.send": "Tuma",
   "groups.typeMessage": "Andika ujumbe…",
   "groups.report": "Ripoti",
+  "groups.removed": "[ujumbe umeondolewa na msimamizi]",
 
   "classes.title": "Madarasa",
   "classes.join": "Jiunge na darasa",

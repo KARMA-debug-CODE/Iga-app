@@ -10,6 +10,12 @@ import { useI18n } from "../i18n";
 
 const POLL_MS = 4000;
 
+function mergeMessages(current, incoming) {
+  const byId = new Map(current.map((m) => [m.id, m]));
+  for (const m of incoming) byId.set(m.id, m);
+  return [...byId.values()].sort((a, b) => a.id - b.id);
+}
+
 function Chat({ group }) {
   const { user } = useAuth();
   const { t, lang } = useI18n();
@@ -26,20 +32,19 @@ function Chat({ group }) {
     if (inFlight.current) return;
     inFlight.current = true;
     try {
-      const fresh = await api(`/groups/${group.id}/messages/`, { params: lastId.current ? { after: lastId.current } : {} });
-      if (fresh.length) {
-        lastId.current = Math.max(lastId.current, ...fresh.map((m) => m.id));
-        setMessages((current) => {
-          const seen = new Set(current.map((m) => m.id));
-          return [...current, ...fresh.filter((m) => !seen.has(m.id))];
-        });
-      }
+      const data = await api(`/groups/${group.id}/messages/`, { params: lastId.current ? { after: lastId.current } : {} });
+      const fresh = data.messages || [];
+      if (fresh.length) lastId.current = Math.max(lastId.current, ...fresh.map((m) => m.id));
+      const hidden = new Set(data.hidden_ids || []);
+      setMessages((current) =>
+        mergeMessages(current, fresh).map((m) => (hidden.has(m.id) && !m.is_hidden ? { ...m, is_hidden: true, body: t("groups.removed") } : m)),
+      );
     } catch {
       /* keep polling quietly; the offline banner explains network problems */
     } finally {
       inFlight.current = false;
     }
-  }, [group.id]);
+  }, [group.id, t]);
 
   useEffect(() => {
     poll();
@@ -58,8 +63,8 @@ function Chat({ group }) {
     try {
       const sent = await api(`/groups/${group.id}/messages/`, { method: "POST", body: { body } });
       setBody("");
-      setMessages((current) => (current.some((m) => m.id === sent.id) ? current : [...current, sent]));
-      lastId.current = Math.max(lastId.current, sent.id);
+      // Don't move the poll cursor: others may have posted just before this message.
+      setMessages((current) => mergeMessages(current, [sent]));
     } catch (err) {
       setError(err);
     }
@@ -68,13 +73,21 @@ function Chat({ group }) {
   async function report(message) {
     const reason = window.prompt(t("groups.reportReason"));
     if (reason === null) return;
-    await api(`/messages/${message.id}/report/`, { method: "POST", body: { reason } });
-    showToast(t("groups.reported"));
+    try {
+      await api(`/messages/${message.id}/report/`, { method: "POST", body: { reason } });
+      showToast(t("groups.reported"));
+    } catch (err) {
+      setError(err);
+    }
   }
 
   async function hide(message) {
-    const updated = await api(`/messages/${message.id}/hide/`, { method: "POST" });
-    setMessages((list) => list.map((m) => (m.id === message.id ? updated : m)));
+    try {
+      const updated = await api(`/messages/${message.id}/hide/`, { method: "POST" });
+      setMessages((list) => list.map((m) => (m.id === message.id ? updated : m)));
+    } catch (err) {
+      setError(err);
+    }
   }
 
   return (
@@ -222,7 +235,7 @@ export default function GroupDetail() {
                         <span>
                           <strong>{m.display_name}</strong> {m.group_role === "owner" && <span className="pill pill-warn">★</span>}
                         </span>
-                        <span className="small muted">{m.xp} XP</span>
+                        <span className="small muted">{m.role === "teacher" ? `🧑🏽‍🏫 ${t("auth.teacher")}` : m.grade}</span>
                       </li>
                     ))}
                   </ul>

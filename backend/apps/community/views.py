@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status, viewsets
@@ -6,9 +7,9 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from apps.accounts.parents import NotParent
-from apps.accounts.serializers import PublicUserSerializer
 from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin
+from apps.core.throttles import JoinRateThrottle
 from apps.gamification import services as gamification
 
 from .models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
@@ -57,14 +58,14 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_author(self, message):
         if message.author is None:
             return None
-        return {"id": message.author_id, "name": message.author.display_name, "role": message.author.role}
+        return {"id": message.author_id, "name": message.author.short_name, "role": message.author.public_role}
 
     def get_body(self, message):
         return REMOVED_TEXT if message.is_hidden else message.body
 
 
 class SharedNoteSerializer(serializers.ModelSerializer):
-    author_name = serializers.CharField(source="author.display_name", read_only=True, default=None)
+    author_name = serializers.CharField(source="author.short_name", read_only=True, default=None)
 
     class Meta:
         model = SharedNote
@@ -72,10 +73,24 @@ class SharedNoteSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "author_name", "created_at"]
 
 
-def can_moderate(user, group):
-    if user.is_platform_admin or user.can_teach:
-        return True
+def is_owner(user, group):
     return GroupMembership.objects.filter(group=group, user=user, role=GroupMembership.Role.OWNER).exists()
+
+
+def can_moderate(user, group):
+    """Hide messages: the owner, platform admins, and approved teachers who are members."""
+    return user.can_teach or is_owner(user, group)
+
+
+def member_data(membership):
+    user = membership.user
+    return {
+        "id": user.id,
+        "display_name": user.short_name,
+        "role": user.public_role,
+        "grade": user.grade,
+        "group_role": membership.role,
+    }
 
 
 class StudyGroupViewSet(viewsets.ModelViewSet):
@@ -121,15 +136,13 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(group).data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
-        if not can_moderate(self.request.user, serializer.instance):
+        user = self.request.user
+        if not (user.is_platform_admin or is_owner(user, serializer.instance)):
             raise PermissionDenied("Only the group owner can edit the group.")
         serializer.save()
 
     def perform_destroy(self, instance):
-        is_owner = GroupMembership.objects.filter(
-            group=instance, user=self.request.user, role=GroupMembership.Role.OWNER
-        ).exists()
-        if not (is_owner or self.request.user.is_platform_admin):
+        if not (self.request.user.is_platform_admin or is_owner(self.request.user, instance)):
             raise PermissionDenied("Only the group owner can delete the group.")
         audit.record(self.request, "delete_group", instance, name=instance.name)
         instance.delete()
@@ -138,15 +151,18 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
         group = self.get_object()
         data = self.get_serializer(group).data
         if group.is_member or request.user.is_platform_admin:
-            members = GroupMembership.objects.filter(group=group).select_related("user")
-            data["members"] = [{**PublicUserSerializer(m.user).data, "group_role": m.role} for m in members]
+            members = GroupMembership.objects.filter(group=group).select_related("user").order_by("joined_at")
+            data["members"] = [member_data(m) for m in members]
             data["can_moderate"] = can_moderate(request.user, group)
         return Response(data)
 
     def _join(self, request, group):
-        if group.memberships.count() >= group.max_members:
-            raise ValidationError("This group is full.")
-        _, created = GroupMembership.objects.get_or_create(group=group, user=request.user)
+        with transaction.atomic():
+            StudyGroup.objects.select_for_update().filter(pk=group.pk).first()  # so two joins can't overfill it
+            already = GroupMembership.objects.filter(group=group, user=request.user).exists()
+            if not already and group.memberships.count() >= group.max_members:
+                raise ValidationError("This group is full.")
+            _, created = GroupMembership.objects.get_or_create(group=group, user=request.user)
         if created:
             gamification.on_group_joined(request.user, group)
         return Response(self.get_serializer(self.get_queryset().get(pk=group.pk)).data)
@@ -158,7 +174,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("This group is private; ask a member for the code.")
         return self._join(request, group)
 
-    @action(detail=False, methods=["post"], url_path="join-by-code")
+    @action(detail=False, methods=["post"], url_path="join-by-code", throttle_classes=[JoinRateThrottle])
     def join_by_code(self, request):
         code = (request.data.get("code") or "").strip().upper()
         group = StudyGroup.objects.filter(join_code=code).first()
@@ -170,6 +186,10 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
     def leave(self, request, pk=None):
         group = self._member_group(pk)
         GroupMembership.objects.filter(group=group, user=request.user).delete()
+        if not group.memberships.exists():
+            audit.record(request, "delete_group", group, name=group.name, reason="last member left")
+            group.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         # Hand ownership to the longest-standing member so the group stays moderated.
         if not group.memberships.filter(role=GroupMembership.Role.OWNER).exists():
             successor = group.memberships.order_by("joined_at").first()
@@ -192,10 +212,13 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
         qs = group.messages.select_related("author")
         after = request.query_params.get("after")
         if after and after.isdigit():
-            qs = qs.filter(id__gt=int(after))
-            return Response(MessageSerializer(qs[:200], many=True).data)
-        latest = list(qs.order_by("-id")[:50])[::-1]
-        return Response(MessageSerializer(latest, many=True).data)
+            fresh = qs.filter(id__gt=int(after)).order_by("id")[:200]
+        else:
+            fresh = list(qs.order_by("-id")[:50])[::-1]
+        # Messages hidden by a moderator after a client loaded them, so open chats update too.
+        recent_ids = group.messages.order_by("-id").values("id")[:200]
+        hidden = group.messages.filter(is_hidden=True, id__in=recent_ids).values_list("id", flat=True)
+        return Response({"messages": MessageSerializer(fresh, many=True).data, "hidden_ids": list(hidden)})
 
     def _post_message(self, request, group):
         body = (request.data.get("body") or "").strip()

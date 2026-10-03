@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import timedelta
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -11,9 +11,10 @@ from rest_framework.response import Response
 
 from apps.accounts.serializers import PublicUserSerializer
 from apps.assessments.models import Attempt
-from apps.assessments.services import visible_quizzes
+from apps.assessments.services import finalize_if_expired, visible_quizzes
 from apps.core import audit
 from apps.core.permissions import IsTeacher
+from apps.core.throttles import JoinRateThrottle
 from apps.curriculum.models import LessonProgress
 from apps.curriculum.views import visible_lessons
 from apps.simulations.models import SimulationView
@@ -105,35 +106,65 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
 def assignment_status(assignment, student):
     """'todo' | 'in_progress' | 'done' | 'needs_marking', plus a score for quizzes."""
-    result = {"state": "todo", "score": None, "late": False}
-    finished_at = None
-    if assignment.quiz_id:
-        attempts = Attempt.objects.filter(user=student, quiz_id=assignment.quiz_id, started_at__gte=assignment.created_at)
-        finished = [a for a in attempts if a.status != Attempt.Status.IN_PROGRESS]
-        if finished:
-            best = max(finished, key=lambda a: a.percentage or 0)
-            result["state"] = "needs_marking" if best.status == Attempt.Status.NEEDS_MARKING else "done"
-            result["score"] = best.percentage
-            finished_at = min(a.submitted_at for a in finished if a.submitted_at)
-        elif attempts:
-            result["state"] = "in_progress"
-    elif assignment.lesson_id:
-        progress = LessonProgress.objects.filter(user=student, lesson_id=assignment.lesson_id).first()
-        if progress:
-            result["state"] = "done"
-            finished_at = progress.completed_at
-    elif assignment.simulation_id:
-        view = SimulationView.objects.filter(
-            user=student, simulation_id=assignment.simulation_id, viewed_at__gte=assignment.created_at
-        ).first()
-        if view:
-            result["state"] = "done"
-            finished_at = view.viewed_at
-    if assignment.due_at:
-        if finished_at:
-            result["late"] = finished_at > assignment.due_at
-        else:
-            result["late"] = timezone.now() > assignment.due_at
+    return assignment_statuses([assignment], [student])[(assignment.id, student.id)]
+
+
+def assignment_statuses(assignments, students):
+    """{(assignment_id, student_id): status} for a whole gradebook in a few queries."""
+    student_ids = [s.id for s in students]
+    quiz_ids = {a.quiz_id for a in assignments if a.quiz_id}
+    lesson_ids = {a.lesson_id for a in assignments if a.lesson_id}
+    sim_ids = {a.simulation_id for a in assignments if a.simulation_id}
+
+    attempts = defaultdict(list)
+    if quiz_ids:
+        for attempt in Attempt.objects.filter(user_id__in=student_ids, quiz_id__in=quiz_ids):
+            finalize_if_expired(attempt)  # time ran out but the student never came back
+            attempts[(attempt.user_id, attempt.quiz_id)].append(attempt)
+    completed = {}
+    if lesson_ids:
+        for row in LessonProgress.objects.filter(user_id__in=student_ids, lesson_id__in=lesson_ids):
+            completed[(row.user_id, row.lesson_id)] = row.completed_at
+    views = defaultdict(list)
+    if sim_ids:
+        for row in SimulationView.objects.filter(user_id__in=student_ids, simulation_id__in=sim_ids):
+            views[(row.user_id, row.simulation_id)].append(row.viewed_at)
+
+    result = {}
+    for assignment in assignments:
+        for sid in student_ids:
+            status_ = {"state": "todo", "score": None, "late": False}
+            finished_at = None
+            if assignment.quiz_id:
+                mine = [
+                    a
+                    for a in attempts[(sid, assignment.quiz_id)]
+                    if a.started_at >= assignment.created_at or a.assignment_id == assignment.id
+                ]
+                finished = [a for a in mine if a.status != Attempt.Status.IN_PROGRESS and a.submitted_at]
+                marked = [a for a in finished if a.status == Attempt.Status.MARKED]
+                if marked:
+                    # Best fully-marked score; on a tie, the earlier submission (so a late retake can't hide).
+                    scored = max(marked, key=lambda a: (a.percentage or 0, -a.submitted_at.timestamp()))
+                    status_.update(state="done", score=scored.percentage)
+                    finished_at = scored.submitted_at
+                elif finished:
+                    status_["state"] = "needs_marking"
+                    finished_at = min(a.submitted_at for a in finished)
+                elif mine:
+                    status_["state"] = "in_progress"
+            elif assignment.lesson_id:
+                finished_at = completed.get((sid, assignment.lesson_id))
+                if finished_at:
+                    status_["state"] = "done"
+            elif assignment.simulation_id:
+                seen = [t for t in views[(sid, assignment.simulation_id)] if t >= assignment.created_at]
+                if seen:
+                    status_["state"] = "done"
+                    finished_at = min(seen)
+            if assignment.due_at:
+                status_["late"] = (finished_at or timezone.now()) > assignment.due_at
+            result[(assignment.id, sid)] = status_
     return result
 
 
@@ -152,7 +183,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             return qs
         if user.can_teach:
             return qs.filter(teacher=user)
-        return qs.filter(enrollments__student=user, archived=False)
+        mine = qs.filter(enrollments__student=user)
+        # Students can still leave a class after it was archived.
+        return mine if self.action == "leave" else mine.filter(archived=False)
 
     def perform_create(self, serializer):
         classroom = serializer.save(teacher=self.request.user)
@@ -177,7 +210,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             data["students"] = PublicUserSerializer(students, many=True).data
         return Response(data)
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], throttle_classes=[JoinRateThrottle])
     def join(self, request):
         if not request.user.is_student:
             raise PermissionDenied("Only students join classes with a code.")
@@ -217,9 +250,13 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         students = [e.student for e in classroom.enrollments.select_related("student")]
         assignments = list(classroom.assignments.select_related("quiz", "lesson", "simulation"))
 
+        statuses = assignment_statuses(assignments, students)
+        lesson_counts = dict(
+            LessonProgress.objects.filter(user__in=students).values("user").annotate(n=Count("id")).values_list("user", "n")
+        )
         rows = []
         for student in students:
-            cells = {a.id: assignment_status(a, student) for a in assignments}
+            cells = {a.id: statuses[(a.id, student.id)] for a in assignments}
             scores = [c["score"] for c in cells.values() if c["score"] is not None]
             rows.append(
                 {
@@ -227,7 +264,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
                     "assignments": cells,
                     "completed": sum(1 for c in cells.values() if c["state"] in ("done", "needs_marking")),
                     "average_score": round(sum(scores) / len(scores), 1) if scores else None,
-                    "lessons_completed": LessonProgress.objects.filter(user=student).count(),
+                    "lessons_completed": lesson_counts.get(student.id, 0),
                 }
             )
 

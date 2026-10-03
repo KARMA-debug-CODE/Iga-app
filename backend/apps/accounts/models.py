@@ -64,6 +64,23 @@ class User(AbstractUser):
     def display_name(self):
         return self.get_full_name() or self.username
 
+    @property
+    def short_name(self):
+        """First name + initial: what other students see, so minors' full names aren't shown to strangers."""
+        if self.first_name:
+            initial = f" {self.last_name[0]}." if self.last_name else ""
+            return f"{self.first_name}{initial}"
+        return self.username
+
+    @property
+    def public_role(self):
+        """The role shown to others. A teacher badge only appears once the account is approved."""
+        if self.is_platform_admin:
+            return "admin"
+        if self.can_teach:
+            return "teacher"
+        return "student" if self.role == self.Role.TEACHER else self.role
+
     def save(self, *args, **kwargs):
         # Store empty emails as NULL so the unique constraint allows many blanks.
         if not self.email:
