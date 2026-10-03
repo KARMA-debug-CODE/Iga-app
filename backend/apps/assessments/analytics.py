@@ -20,7 +20,8 @@ def _students_for(user, classroom_id):
         return set(classroom.enrollments.values_list("student_id", flat=True)), classroom
     if user.is_platform_admin:
         return None, None  # everyone
-    return set(Enrollment.objects.filter(classroom__teacher=user).values_list("student_id", flat=True)), None
+    current = Enrollment.objects.filter(classroom__teacher=user, classroom__archived=False)
+    return set(current.values_list("student_id", flat=True)), None
 
 
 def quiz_analytics(quiz, user, classroom_id=None):

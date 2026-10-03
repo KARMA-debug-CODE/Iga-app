@@ -23,6 +23,9 @@
   --warn-bg: #fff8d6;
   --warn: #7a5d00;
   --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 4px 16px rgb(16 24 40 / 6%);
+  /* Chart series (contrast-checked against the light and dark surfaces). */
+  --chart-1: #0077a8;
+  --chart-2: #2e8b57;
 
   --radius: 14px;
   --radius-sm: 10px;
@@ -51,6 +54,8 @@
     --warn-bg: #3a3210;
     --warn: #fde68a;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 25%);
+    --chart-1: #0284c7;
+    --chart-2: #16a34a;
     color-scheme: dark;
   }
 }
@@ -71,6 +76,8 @@
   --warn-bg: #3a3210;
   --warn: #fde68a;
   --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 25%);
+  --chart-1: #0284c7;
+  --chart-2: #16a34a;
   color-scheme: dark;
 }
 
@@ -1457,4 +1464,115 @@ tr:last-child td {
   border-color: #23333f;
   font-family: var(--mono);
   font-size: 0.85rem;
+}
+
+
+/* Quiz analytics charts: bars at most 24px thick, 4px rounded ends, 2px gaps. */
+
+.histogram {
+  margin: 16px 0 0;
+}
+
+.histogram-plot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 160px;
+  padding-left: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.histogram-max {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.histogram-col {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 24px;
+  height: 100%;
+  border-radius: 4px 4px 0 0;
+  outline-offset: 2px;
+}
+
+.chart-bar-v {
+  width: 100%;
+  min-height: 2px;
+  background: var(--chart-1);
+  border-radius: 4px 4px 0 0;
+}
+
+.histogram-axis {
+  display: flex;
+  justify-content: space-between;
+  width: calc(28px + 10 * 24px + 9 * 2px);
+  padding-left: 28px;
+  margin-top: 4px;
+}
+
+.chart-row {
+  position: relative;
+  margin-top: 4px;
+}
+
+.chart-track {
+  height: 16px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chart-bar-h {
+  height: 100%;
+  background: var(--chart-1);
+  border-radius: 4px;
+}
+
+.chart-bar-h.is-correct {
+  background: var(--chart-2);
+}
+
+/* Tooltips: shown on hover and keyboard focus. */
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.question-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.question-stat-prompt {
+  max-height: 7.5em;
+  overflow: hidden;
+  margin: 4px 0 8px;
+}
+
+.option-stat-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.option-stat-text p {
+  margin: 0;
 }

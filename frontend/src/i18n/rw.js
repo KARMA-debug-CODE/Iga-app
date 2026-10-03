@@ -164,4 +164,15 @@ export default {
   "parent.link": "Huza umwana",
   "parent.linkButton": "Huza",
   "parent.access": "Uburenganzira bw'ababyeyi",
+
+  "analytics.title": "Isesengura ry'amanota",
+  "analytics.attempted": "abanyeshuri babikoze",
+  "analytics.average": "Amanota y'ikigereranyo",
+  "analytics.median": "Amanota yo hagati",
+  "analytics.distribution": "Uko amanota ateye",
+  "analytics.byQuestion": "Ikibazo ku kindi",
+  "analytics.question": "Ikibazo cya {n}",
+  "analytics.correct": "Ni cyo",
+  "analytics.showTable": "Imbonerahamwe",
+  "analytics.showChart": "Igishushanyo",
 };

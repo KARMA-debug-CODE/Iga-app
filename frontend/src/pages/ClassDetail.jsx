@@ -224,6 +224,11 @@ export default function ClassDetail() {
                       {a.instructions && <p className="small" style={{ margin: "6px 0" }}>{a.instructions}</p>}
                       <div className="spread small muted" style={{ marginTop: 6 }}>
                         <span>{a.due_at ? t("classes.due", { date: formatDate(a.due_at, lang) }) : t("classes.noDue")}</span>
+                        {owner && a.quiz && (
+                          <Link className="btn btn-sm btn-secondary" to={`/classes/${id}/quizzes/${a.quiz}/analytics`}>
+                            📊 {t("analytics.title")}
+                          </Link>
+                        )}
                         {user.role === "student" && (
                           <button
                             className="btn btn-sm"

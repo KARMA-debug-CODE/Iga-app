@@ -365,7 +365,12 @@ function QuizBuilder() {
                     {q.subject.name} · {q.grade} · {q.question_count} Q
                   </div>
                 </div>
-                <span className={`pill ${q.status === "published" ? "pill-success" : "pill-warn"}`}>{q.status}</span>
+                <div className="row" style={{ gap: 6 }}>
+                  <Link className="btn btn-sm btn-ghost" to={`/teach/quizzes/${q.id}/analytics`} aria-label={`${t("analytics.title")}: ${q.title}`}>
+                    📊
+                  </Link>
+                  <span className={`pill ${q.status === "published" ? "pill-success" : "pill-warn"}`}>{q.status}</span>
+                </div>
               </div>
             ))}
           </div>
