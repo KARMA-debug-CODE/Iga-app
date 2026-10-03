@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers, viewsets
@@ -16,7 +16,7 @@ from apps.assessments.models import Attempt, Question, Quiz
 from apps.assessments.serializers import AttemptListSerializer
 from apps.assessments.services import markable_answers, visible_quizzes
 from apps.classroom.models import Assignment, Classroom
-from apps.classroom.views import AssignmentSerializer
+from apps.classroom.views import AssignmentSerializer, assignment_statuses
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
 from apps.curriculum.views import visible_lessons
 from apps.simulations.models import Simulation, SimulationView
@@ -86,7 +86,7 @@ def _continue_learning(user):
 @api_view(["GET"])
 def dashboard(request):
     user = request.user
-    data = {"level": level_from_xp(user.xp), "xp": user.xp, "streak_days": user.streak_days}
+    data = {"level": level_from_xp(user.xp), "xp": user.xp, "streak_days": user.current_streak}
 
     if user.can_teach:
         classes = Classroom.objects.filter(teacher=user, archived=False).annotate(student_total=Count("enrollments"))
@@ -117,14 +117,17 @@ def dashboard(request):
     if user.is_teacher and not user.teacher_approved:
         data["teacher"] = {"approved": False}
 
-    assignments = (
+    # Work out what is still to do first, then take the soonest six (not the other way round,
+    # or six finished assignments could hide an unfinished one).
+    candidates = list(
         Assignment.objects.filter(classroom__enrollments__student=user, classroom__archived=False)
         .filter(Q(due_at__isnull=True) | Q(due_at__gte=timezone.now() - timedelta(days=7)))
         .select_related("classroom", "quiz", "lesson", "simulation")
-        .order_by("due_at")[:20]
+        .order_by(F("due_at").asc(nulls_last=True), "-created_at")[:200]
     )
-    serialized = AssignmentSerializer(assignments, many=True, context={"request": request}).data
-    data["assignments"] = [a for a in serialized if a["my_status"]["state"] in ("todo", "in_progress")][:6]
+    statuses = assignment_statuses(candidates, [user])
+    open_ones = [a for a in candidates if statuses[(a.id, user.id)]["state"] in ("todo", "in_progress")][:6]
+    data["assignments"] = AssignmentSerializer(open_ones, many=True, context={"request": request}).data
     data["recent_attempts"] = AttemptListSerializer(
         Attempt.objects.filter(user=user)
         .exclude(status=Attempt.Status.IN_PROGRESS)

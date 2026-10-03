@@ -166,3 +166,18 @@ def test_report_closes_attempts_whose_time_ran_out(client_for, teacher, student,
     cell = report["rows"][0]["assignments"][assignment.id]
     assert cell["state"] == "done" and cell["score"] == 0.0
     assert Attempt.objects.get(pk=attempt.pk).status == Attempt.Status.MARKED
+
+
+def test_dashboard_lists_unfinished_work_behind_finished_work(client_for, teacher, student, classroom, lesson):
+    from apps.classroom.models import Assignment
+
+    Enrollment.objects.create(classroom=classroom, student=student)
+    for i in range(25):
+        Assignment.objects.create(classroom=classroom, lesson=lesson, title=f"Read {i}", created_by=teacher)
+    LessonProgress.objects.create(user=student, lesson=lesson)  # all 25 are done
+    from apps.curriculum.models import Lesson
+
+    other = Lesson.objects.create(unit=lesson.unit, slug="other", title="Other", body="x", status="published")
+    Assignment.objects.create(classroom=classroom, lesson=other, title="Still to do", created_by=teacher)
+    titles = [a["title"] for a in client_for(student).get("/api/dashboard/").data["assignments"]]
+    assert titles == ["Still to do"]

@@ -1,6 +1,7 @@
 from collections import defaultdict
 
-from django.db.models import Count, Q
+from django.db.models import Count, IntegerField, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -38,6 +39,11 @@ def visible_lessons(user):
     return qs.filter(rule)
 
 
+def _count_per_subject(qs, subject_path):
+    counts = qs.filter(**{subject_path: OuterRef("pk")}).order_by().values(subject_path).annotate(n=Count("pk")).values("n")
+    return Coalesce(Subquery(counts[:1], output_field=IntegerField()), 0)
+
+
 class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
     """Subjects with the current user's progress. `?grade=S3` filters to one grade."""
 
@@ -49,19 +55,21 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
         grade = request_grade(self.request)
         user = self.request.user
         qs = Subject.objects.all()
-        lessons = visible_lessons(user).values("id")
-        unit_filter = Q(units__grade=grade) if grade else Q()
-        lesson_filter = Q(units__lessons__in=lessons) & (Q(units__grade=grade) if grade else Q())
+        if self.action == "retrieve":
+            return qs  # opening a subject directly works whatever the grade filter
+        units = Unit.objects.all()
+        lessons = visible_lessons(user)
+        progress = LessonProgress.objects.filter(user=user, lesson__in=visible_lessons(user).values("id"))
         if grade:
             qs = qs.filter(offered_o_level=True) if grade in ("S1", "S2", "S3") else qs.filter(offered_a_level=True)
+            units = units.filter(grade=grade)
+            lessons = lessons.filter(unit__grade=grade)
+            progress = progress.filter(lesson__unit__grade=grade)
+        # Separate counting subqueries: one join across units, lessons and progress multiplies rows.
         return qs.annotate(
-            unit_count=Count("units", filter=unit_filter, distinct=True),
-            lesson_count=Count("units__lessons", filter=lesson_filter, distinct=True),
-            completed_count=Count(
-                "units__lessons__progress",
-                filter=lesson_filter & Q(units__lessons__progress__user=user),
-                distinct=True,
-            ),
+            unit_count=_count_per_subject(units, "subject"),
+            lesson_count=_count_per_subject(lessons, "unit__subject"),
+            completed_count=_count_per_subject(progress, "lesson__unit__subject"),
         )
 
     def get_serializer_context(self):
@@ -75,7 +83,7 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
             units = units.filter(grade=grade)
         units = list(units)
 
-        lessons = visible_lessons(request.user).filter(unit__in=units).order_by("order")
+        lessons = list(visible_lessons(request.user).filter(unit__in=units).order_by("order"))
         lessons_by_unit = defaultdict(list)
         for lesson in lessons:
             lessons_by_unit[lesson.unit_id].append(lesson)
@@ -92,6 +100,7 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
         }
         data = SubjectSerializer(subject, context=context).data
         data["units"] = UnitSerializer(units, many=True, context=context).data
+        data.update(unit_count=len(units), lesson_count=len(lessons), completed_count=len(completed_ids))
         data["grades"] = sorted(set(subject.units.values_list("grade", flat=True)))
         return Response(data)
 

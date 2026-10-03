@@ -102,3 +102,49 @@ def test_pdf_only_paper_creates_library_entry_without_quiz(tmp_path):
     exam, created = import_quiz_file(path)
     assert not created
     assert not Quiz.objects.filter(title="Physics 2018 P1").exists()
+
+
+def _paper_file(tmp_path, name, questions):
+    data = {
+        "paper": {
+            "level": "O",
+            "year": 2021,
+            "paper_code": "P1",
+            "title": "Maths 2021",
+            "paper_url": "https://example.org/m.pdf",
+        },
+        "title": "Maths 2021",
+        "subject": "mathematics",
+        "grade": "S3",
+        "kind": "past_paper",
+        "questions": questions,
+    }
+    path = tmp_path / name
+    path.write_text(json.dumps(data))
+    return path
+
+
+@pytest.mark.parametrize("pdf_first", [True, False])
+def test_pdf_only_and_digitised_versions_become_one_paper(tmp_path, pdf_first):
+    load_all(log=lambda *_: None)
+    pdf = _paper_file(tmp_path, "pdf.json", [])
+    digitised = _paper_file(tmp_path, "full.json", [{"type": "numeric", "prompt": "2+2", "answer": 4}])
+    for path in (pdf, digitised) if pdf_first else (digitised, pdf):
+        import_quiz_file(path)
+    papers = ExamPaper.objects.filter(year=2021, paper_code="P1")
+    assert papers.count() == 1
+    assert papers.get().quiz is not None and papers.get().paper_url.endswith("m.pdf")
+
+
+def test_reloading_content_keeps_admin_status_changes():
+    load_all(log=lambda *_: None)
+    lesson = Lesson.objects.first()
+    lesson.status = "archived"
+    lesson.save()
+    quiz = Quiz.objects.first()
+    quiz.status = "archived"
+    quiz.save()
+    load_all(log=lambda *_: None)
+    lesson.refresh_from_db()
+    quiz.refresh_from_db()
+    assert lesson.status == "archived" and quiz.status == "archived"

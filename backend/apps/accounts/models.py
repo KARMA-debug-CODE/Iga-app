@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils import timezone
 
 from apps.core.constants import GRADES, LANGUAGES
 
@@ -63,6 +64,13 @@ class User(AbstractUser):
     @property
     def display_name(self):
         return self.get_full_name() or self.username
+
+    @property
+    def current_streak(self):
+        """The streak as it stands today: it lapses once a whole day passes without learning."""
+        if not self.last_active_date or (timezone.localdate() - self.last_active_date).days > 1:
+            return 0
+        return self.streak_days
 
     @property
     def short_name(self):

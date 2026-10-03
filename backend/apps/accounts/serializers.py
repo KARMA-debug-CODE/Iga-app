@@ -7,6 +7,7 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    streak_days = serializers.IntegerField(source="current_streak", read_only=True)
     display_name = serializers.CharField(read_only=True)
     badges = serializers.SerializerMethodField()
 

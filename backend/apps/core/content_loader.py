@@ -124,18 +124,18 @@ def load_lessons(directory, status=ContentStatus.PUBLISHED):
         for key in ("slug", "subject", "grade", "unit", "title"):
             if not meta.get(key):
                 raise ContentError(f"{path.name}: missing '{key}'")
+        fields = {
+            "unit": _unit(meta["subject"], meta["grade"], meta["unit"], path.name),
+            "order": int(meta.get("order", 1)),
+            "title": meta["title"],
+            "summary": meta.get("summary", ""),
+            "body": body,
+            "video_url": meta.get("video", ""),
+            "estimated_minutes": int(meta.get("minutes", 15)),
+        }
+        # Re-running the loader updates the text but keeps a lesson an admin archived or unpublished.
         lesson, _ = Lesson.objects.update_or_create(
-            slug=meta["slug"],
-            defaults={
-                "unit": _unit(meta["subject"], meta["grade"], meta["unit"], path.name),
-                "order": int(meta.get("order", 1)),
-                "title": meta["title"],
-                "summary": meta.get("summary", ""),
-                "body": body,
-                "video_url": meta.get("video", ""),
-                "estimated_minutes": int(meta.get("minutes", 15)),
-                "status": status,
-            },
+            slug=meta["slug"], defaults=fields, create_defaults={**fields, "status": status}
         )
         slugs = [s.strip() for s in meta.get("simulations", "").split(",") if s.strip()]
         sims = list(Simulation.objects.filter(slug__in=slugs))
@@ -210,6 +210,9 @@ def _build_question(data, subject, grade, default_unit, source, source_name):
     return question
 
 
+PAPER_KEY = ("subject", "level", "year", "paper_code")
+
+
 def _paper_fields(paper, subject, fallback_title):
     return {
         "subject": subject,
@@ -238,7 +241,15 @@ def import_quiz_file(path, status=ContentStatus.PUBLISHED):
 
     if paper and not data.get("questions"):
         fields = _paper_fields(paper, subject, data.get("title", ""))
-        key = {k: fields.pop(k) for k in ("subject", "level", "year", "paper_code")}
+        key = {k: fields.pop(k) for k in PAPER_KEY}
+        # If the paper was already digitised, add the PDF links to that one instead of a second entry.
+        digitised = ExamPaper.objects.filter(**key, quiz__isnull=False).first()
+        if digitised:
+            for name, value in fields.items():
+                if value and (name not in ("title",) or not digitised.title):
+                    setattr(digitised, name, value)
+            digitised.save()
+            return digitised, False
         return ExamPaper.objects.update_or_create(**key, quiz=None, defaults=fields)
 
     grade = data["grade"]
@@ -247,21 +258,22 @@ def import_quiz_file(path, status=ContentStatus.PUBLISHED):
     if paper and paper.get("is_official"):
         source = Question.Source.PAST_PAPER
 
+    quiz_fields = {
+        "description": data.get("description", ""),
+        "unit": default_unit,
+        "kind": data.get("kind", Quiz.Kind.PRACTICE),
+        "time_limit_minutes": data.get("time_limit_minutes"),
+        "shuffle_questions": data.get("shuffle_questions", True),
+        "shuffle_choices": data.get("shuffle_choices", True),
+        "feedback_mode": data.get("feedback_mode", Quiz.FeedbackMode.IMMEDIATE),
+        "max_attempts": data.get("max_attempts"),
+    }
     quiz, created = Quiz.objects.update_or_create(
         title=data["title"],
         subject=subject,
         grade=grade,
-        defaults={
-            "description": data.get("description", ""),
-            "unit": default_unit,
-            "kind": data.get("kind", Quiz.Kind.PRACTICE),
-            "time_limit_minutes": data.get("time_limit_minutes"),
-            "shuffle_questions": data.get("shuffle_questions", True),
-            "shuffle_choices": data.get("shuffle_choices", True),
-            "feedback_mode": data.get("feedback_mode", Quiz.FeedbackMode.IMMEDIATE),
-            "max_attempts": data.get("max_attempts"),
-            "status": status,
-        },
+        defaults=quiz_fields,
+        create_defaults={**quiz_fields, "status": status},
     )
 
     # Questions are only rebuilt while nobody has attempted the quiz, so results stay valid.
@@ -274,7 +286,17 @@ def import_quiz_file(path, status=ContentStatus.PUBLISHED):
             QuizQuestion.objects.create(quiz=quiz, question=question, order=order)
 
     if paper:
-        ExamPaper.objects.update_or_create(quiz=quiz, defaults=_paper_fields(paper, subject, data["title"]))
+        fields = _paper_fields(paper, subject, data["title"])
+        # A PDF-only entry for the same paper is merged into the digitised one.
+        pdf_only = ExamPaper.objects.filter(quiz=None, **{k: fields[k] for k in PAPER_KEY}).first()
+        if pdf_only:
+            for name in ("paper_url", "marking_guide_url", "source_note"):
+                fields[name] = fields[name] or getattr(pdf_only, name)
+            for name in ("paper_file", "marking_guide_file"):
+                if getattr(pdf_only, name):
+                    fields[name] = getattr(pdf_only, name)
+            pdf_only.delete()
+        ExamPaper.objects.update_or_create(quiz=quiz, defaults=fields)
     return quiz, created
 
 

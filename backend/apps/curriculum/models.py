@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.core.constants import GRADES, LANGUAGES, ContentStatus
+from apps.core.uploads import RandomName, validate_upload
 
 
 class Subject(models.Model):
@@ -123,7 +124,7 @@ class Resource(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     url = models.URLField(blank=True)
-    file = models.FileField(upload_to="resources/", blank=True)
+    file = models.FileField(upload_to=RandomName("resources"), blank=True, validators=[validate_upload])
     language = models.CharField(max_length=2, choices=LANGUAGES, default="en")
     is_official = models.BooleanField(default=False, help_text="Published by REB/NESA")
     status = models.CharField(max_length=10, choices=ContentStatus.CHOICES, default=ContentStatus.PUBLISHED)

@@ -203,6 +203,9 @@ TUTOR_EFFORT = os.environ.get("TUTOR_EFFORT", "low")
 TUTOR_MAX_TOKENS = int(os.environ.get("TUTOR_MAX_TOKENS", "4000"))
 TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
 
+# Largest file a teacher may upload as a resource (nginx allows 25 MB per request).
+UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
+
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).
 EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"))

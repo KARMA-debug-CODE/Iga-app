@@ -104,3 +104,24 @@ def test_units_endpoint_filters(client_for, teacher, subject):
     Unit.objects.create(subject=subject, grade="S3", number=1, title="Quadratics")
     data = client_for(teacher).get("/api/units/?subject=mathematics&grade=S3").data
     assert [u["title"] for u in data] == ["Quadratics"]
+
+
+def test_subject_opens_even_when_not_offered_in_my_grade(client_for, student, subject, lesson):
+    subject.offered_o_level = False
+    subject.offered_a_level = True
+    subject.save()
+    client = client_for(student)  # an S2 student
+    assert [s["code"] for s in client.get("/api/subjects/").data] == []
+    detail = client.get(f"/api/subjects/{subject.code}/", {"grade": "S2"}).data
+    assert detail["lesson_count"] == 1 and detail["completed_count"] == 0
+
+
+def test_subject_counts_per_grade(client_for, student, subject, unit, lesson):
+    from apps.curriculum.models import Lesson, LessonProgress, Unit
+
+    other = Unit.objects.create(subject=subject, grade="S2", number=2, title="Angles")
+    for i in range(3):
+        Lesson.objects.create(unit=other, slug=f"angles-{i}", title="Angles", body="x", status="published")
+    LessonProgress.objects.create(user=student, lesson=lesson)
+    row = client_for(student).get("/api/subjects/", {"grade": "S2"}).data[0]
+    assert (row["unit_count"], row["lesson_count"], row["completed_count"]) == (2, 4, 1)

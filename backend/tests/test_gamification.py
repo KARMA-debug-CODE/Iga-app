@@ -90,3 +90,16 @@ def test_leaderboard_lists_top_50_and_ranks_everyone(client_for, student):
 def test_teachers_only_see_class_leaderboards(client_for, teacher, student):
     services.award_xp(student, 10, "test")
     assert client_for(teacher).get("/api/leaderboard/").data["entries"] == []
+
+
+def test_streak_shown_lapses_after_a_missed_day(client_for, student):
+    from django.utils import timezone
+
+    student.streak_days = 5
+    student.last_active_date = timezone.localdate() - timedelta(days=1)
+    student.save()
+    assert client_for(student).get("/api/auth/me/").data["streak_days"] == 5
+    student.last_active_date = timezone.localdate() - timedelta(days=2)
+    student.save()
+    assert client_for(student).get("/api/auth/me/").data["streak_days"] == 0
+    assert client_for(student).get("/api/dashboard/").data["streak_days"] == 0

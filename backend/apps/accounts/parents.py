@@ -72,7 +72,7 @@ def child_summary(student):
         "school": student.school,
         "xp": student.xp,
         "level": level_info(student.xp)["level"],
-        "streak_days": student.streak_days,
+        "streak_days": student.current_streak,
         "last_active": student.last_active_date,
         "lessons_this_week": LessonProgress.objects.filter(user=student, completed_at__gte=week_ago).count(),
         "latest_result": {"quiz": last.quiz.title, "percentage": last.percentage, "submitted_at": last.submitted_at}
