@@ -192,7 +192,8 @@ class ChangePasswordView(APIView):
         serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data["new_password"])
-        request.user.save(update_fields=["password"])
+        request.user.must_change_password = False
+        request.user.save(update_fields=["password", "must_change_password"])
         audit.record(request, "change_password", request.user)
         return _with_fresh_session(Response({"detail": "Password updated. You were logged out on other devices."}), request.user)
 

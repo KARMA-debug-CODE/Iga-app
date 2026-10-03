@@ -25,15 +25,8 @@ function discriminationLabel(d) {
 function ViewToggle({ table, onChange }) {
   const { t } = useI18n();
   return (
-    <button
-      type="button"
-      className="btn btn-ghost btn-sm"
-      aria-pressed={table}
-      onClick={() => onChange(!table)}
-    >
-      {table
-        ? `📊 ${t("analytics.showChart")}`
-        : `▦ ${t("analytics.showTable")}`}
+    <button type="button" className="btn btn-ghost btn-sm" aria-pressed={table} onClick={() => onChange(!table)}>
+      {table ? `📊 ${t("analytics.showChart")}` : `▦ ${t("analytics.showTable")}`}
     </button>
   );
 }
@@ -42,8 +35,7 @@ function Histogram({ bins, total }) {
   const { t } = useI18n();
   const [table, setTable] = useState(false);
   const max = Math.max(1, ...bins.map((b) => b.count));
-  const label = (b) =>
-    t("analytics.binLabel", { from: b.from, to: b.to, n: b.count });
+  const label = (b) => t("analytics.binLabel", { from: b.from, to: b.to, n: b.count });
   return (
     <section className="card">
       <div className="spread">
@@ -72,25 +64,12 @@ function Histogram({ bins, total }) {
           </table>
         </div>
       ) : (
-        <figure
-          className="histogram"
-          aria-label={t("analytics.distributionOf", { n: total })}
-        >
+        <figure className="histogram" aria-label={t("analytics.distributionOf", { n: total })}>
           <div className="histogram-plot">
             <span className="histogram-max small muted">{max}</span>
             {bins.map((b) => (
-              <div
-                key={b.from}
-                className="histogram-col"
-                tabIndex={0}
-                role="img"
-                aria-label={label(b)}
-                data-tip={label(b)}
-              >
-                <div
-                  className="chart-bar-v"
-                  style={{ height: `${(b.count / max) * 100}%` }}
-                />
+              <div key={b.from} className="histogram-col" tabIndex={0} role="img" aria-label={label(b)} data-tip={label(b)}>
+                <div className="chart-bar-v" style={{ height: `${(b.count / max) * 100}%` }} />
               </div>
             ))}
           </div>
@@ -128,21 +107,12 @@ function OptionBreakdown({ question }) {
           <div key={c.id} className="option-stat">
             <div className="spread small">
               <span className="option-stat-text">
-                {c.is_correct && (
-                  <span className="pill pill-success">
-                    ✓ {t("analytics.correct")}
-                  </span>
-                )}{" "}
+                {c.is_correct && <span className="pill pill-success">✓ {t("analytics.correct")}</span>}{" "}
                 <Markdown interactive={false}>{c.text}</Markdown>
               </span>
               <span className="muted">{label}</span>
             </div>
-            <Bar
-              value={c.count}
-              max={total}
-              tone={c.is_correct ? "is-correct" : ""}
-              label={label}
-            />
+            <Bar value={c.count} max={total} tone={c.is_correct ? "is-correct" : ""} label={label} />
           </div>
         );
       })}
@@ -157,19 +127,14 @@ function QuestionRow({ q, hardest }) {
     <li className="card question-stat">
       <div className="spread small muted">
         <span>
-          {t("analytics.question", { n: q.number })} ·{" "}
-          {t("quiz.marks", { n: Number(q.marks) })}
+          {t("analytics.question", { n: q.number })} · {t("quiz.marks", { n: Number(q.marks) })}
           {hardest && (
             <span className="pill pill-warn" style={{ marginLeft: 6 }}>
               {t("analytics.hard")}
             </span>
           )}
         </span>
-        {q.pending_marking > 0 && (
-          <span className="pill">
-            {t("analytics.pending", { n: q.pending_marking })}
-          </span>
-        )}
+        {q.pending_marking > 0 && <span className="pill">{t("analytics.pending", { n: q.pending_marking })}</span>}
       </div>
       <div className="question-stat-prompt">
         <Markdown interactive={false}>{q.prompt}</Markdown>
@@ -178,10 +143,7 @@ function QuestionRow({ q, hardest }) {
         <span>{t("analytics.average")}</span>
         <strong>{pct(q.average_pct)}</strong>
       </div>
-      <Bar
-        value={q.average_pct ?? 0}
-        label={`${t("analytics.average")}: ${pct(q.average_pct)}`}
-      />
+      <Bar value={q.average_pct ?? 0} label={`${t("analytics.average")}: ${pct(q.average_pct)}`} />
       <div className="row small" style={{ marginTop: 8, gap: 8 }}>
         <span className="muted">
           {t("analytics.fullMarks")}: <strong>{pct(q.full_marks_pct)}</strong>
@@ -239,11 +201,7 @@ export default function QuizAnalytics() {
   const { id: classroomId, quizId } = useParams();
   const { t } = useI18n();
   const [table, setTable] = useState(false);
-  const state = useApi(
-    `/quizzes/${quizId}/analytics/`,
-    { params: { classroom: classroomId } },
-    [quizId, classroomId],
-  );
+  const state = useApi(`/quizzes/${quizId}/analytics/`, { params: { classroom: classroomId } }, [quizId, classroomId]);
 
   return (
     <Loader state={state}>
@@ -255,9 +213,7 @@ export default function QuizAnalytics() {
               {data.classroom ? (
                 <>
                   <Link to="/classes">{t("classes.title")}</Link> <span>›</span>{" "}
-                  <Link to={`/classes/${data.classroom.id}`}>
-                    {data.classroom.name}
-                  </Link>
+                  <Link to={`/classes/${data.classroom.id}`}>{data.classroom.name}</Link>
                 </>
               ) : (
                 <Link to="/teach">{t("nav.teach")}</Link>
@@ -294,10 +250,7 @@ export default function QuizAnalytics() {
               <Empty icon="📭">{t("analytics.none")}</Empty>
             ) : (
               <>
-                <Histogram
-                  bins={data.histogram}
-                  total={data.students_attempted}
-                />
+                <Histogram bins={data.histogram} total={data.students_attempted} />
                 <section className="section">
                   <div className="section-title">
                     <h2>{t("analytics.byQuestion")}</h2>
@@ -308,11 +261,7 @@ export default function QuizAnalytics() {
                   ) : (
                     <ul className="stack question-stats">
                       {data.questions.map((q) => (
-                        <QuestionRow
-                          key={q.id}
-                          q={q}
-                          hardest={hardest.has(q.number)}
-                        />
+                        <QuestionRow key={q.id} q={q} hardest={hardest.has(q.number)} />
                       ))}
                     </ul>
                   )}

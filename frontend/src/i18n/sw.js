@@ -198,4 +198,11 @@ export default {
   "analytics.options": "Chaguo walizochagua wanafunzi",
   "analytics.correct": "Sahihi",
   "analytics.d.negative": "Kagua swali hili",
+
+  "firstLogin.title": "Karibu, {name}!",
+  "firstLogin.intro": "Mwalimu wako amekupa nenosiri la muda. Chagua lako sasa, na ulitunze kuwa siri.",
+  "firstLogin.temporary": "Nenosiri la muda (kutoka kwa mwalimu wako)",
+  "firstLogin.repeat": "Nenosiri jipya tena",
+  "firstLogin.save": "Hifadhi nenosiri langu",
+  "firstLogin.mismatch": "Manenosiri mawili mapya ni tofauti.",
 };

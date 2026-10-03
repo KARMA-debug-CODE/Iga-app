@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { useI18n } from "./i18n";
 import Dashboard from "./pages/Dashboard";
+import FirstLogin from "./pages/FirstLogin";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -79,6 +80,9 @@ export default function App() {
   }, [user?.id]);
 
   if (!ready) return <Spinner />;
+
+  // A temporary password from a teacher must be replaced before anything else.
+  if (user?.must_change_password && !user.offline) return <FirstLogin />;
 
   const page = (element, opts) => (
     <RequireAuth {...opts}>{element}</RequireAuth>

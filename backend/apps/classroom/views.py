@@ -19,6 +19,7 @@ from apps.curriculum.models import LessonProgress
 from apps.curriculum.views import visible_lessons
 from apps.simulations.models import SimulationView
 
+from . import roster
 from .models import Assignment, Classroom, Enrollment
 
 
@@ -172,7 +173,17 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     serializer_class = ClassroomSerializer
 
     def get_permissions(self):
-        if self.action in ("create", "update", "partial_update", "destroy", "report", "remove_student", "new_code"):
+        if self.action in (
+            "create",
+            "update",
+            "partial_update",
+            "destroy",
+            "report",
+            "remove_student",
+            "new_code",
+            "import_roster",
+            "reset_password",
+        ):
             return [IsTeacher()]
         return [IsAuthenticated()]
 
@@ -207,7 +218,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         ).data
         if classroom.teacher_id == request.user.id or request.user.is_platform_admin:
             students = [e.student for e in classroom.enrollments.select_related("student").order_by("student__first_name")]
-            data["students"] = PublicUserSerializer(students, many=True).data
+            data["students"] = [
+                {**PublicUserSerializer(s).data, "awaiting_first_login": s.must_change_password} for s in students
+            ]
         return Response(data)
 
     @action(detail=False, methods=["post"], throttle_classes=[JoinRateThrottle])
@@ -235,6 +248,38 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             raise ValidationError({"student": "That student is not in this class."})
         audit.record(request, "remove_student", classroom, student=request.data.get("student"))
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def import_roster(self, request, pk=None):
+        """Create student accounts from CSV text. {"csv": "...", "confirm": false} previews only."""
+        classroom = self.get_object()
+        if classroom.archived:
+            raise ValidationError("This class is archived.")
+        try:
+            rows = roster.parse(request.data.get("csv", ""))
+        except roster.RosterError as exc:
+            raise ValidationError({"csv": str(exc)})
+        ok = roster.check(rows)
+        if not ok or not request.data.get("confirm"):
+            return Response({"valid": ok, "rows": rows})
+        created = roster.create_accounts(rows, classroom, request.user)
+        audit.record(request, "import_roster", classroom, count=len(created), usernames=[r["username"] for r in created])
+        return Response({"valid": True, "created": created}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"])
+    def reset_password(self, request, pk=None):
+        """Give a student in this class a new temporary password (they choose their own at next login)."""
+        classroom = self.get_object()
+        enrollment = (
+            Enrollment.objects.filter(classroom=classroom, classroom__archived=False, student_id=request.data.get("student"))
+            .select_related("student")
+            .first()
+        )
+        if enrollment is None or not enrollment.student.is_student:
+            raise ValidationError({"student": "That student is not in this class."})
+        password = roster.reset_password(enrollment.student)
+        audit.record(request, "reset_student_password", enrollment.student, classroom=classroom.id)
+        return Response({"username": enrollment.student.username, "temporary_password": password})
 
     @action(detail=True, methods=["post"])
     def new_code(self, request, pk=None):

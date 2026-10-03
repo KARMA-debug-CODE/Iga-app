@@ -28,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
             "streak_days",
             "teacher_approved",
             "totp_enabled",
+            "must_change_password",
             "badges",
             "date_joined",
         ]
@@ -39,6 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
             "xp",
             "streak_days",
             "totp_enabled",
+            "must_change_password",
             "badges",
             "date_joined",
         ]
@@ -138,6 +140,8 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.context["request"].user
         if not user.check_password(attrs["current_password"]):
             raise serializers.ValidationError({"current_password": "Incorrect password."})
+        if attrs["new_password"] == attrs["current_password"]:
+            raise serializers.ValidationError({"new_password": "Choose a password different from the current one."})
         password_validation.validate_password(attrs["new_password"], user)
         return attrs
 

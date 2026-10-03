@@ -1576,3 +1576,32 @@ tr:last-child td {
 .option-stat-text p {
   margin: 0;
 }
+
+.row-error td {
+  background: var(--danger-bg);
+}
+
+/* Printing (e.g. a class's new account list): just the page content. */
+@media print {
+  .topbar,
+  .sidebar,
+  .bottom-nav,
+  .flag-stripe,
+  .offline-banner,
+  .tabs,
+  .btn {
+    display: none !important;
+  }
+
+  .layout,
+  .main {
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #999;
+  }
+}

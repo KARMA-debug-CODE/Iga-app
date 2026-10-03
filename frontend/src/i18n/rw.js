@@ -175,4 +175,8 @@ export default {
   "analytics.correct": "Ni cyo",
   "analytics.showTable": "Imbonerahamwe",
   "analytics.showChart": "Igishushanyo",
+
+  "firstLogin.title": "Murakaza neza, {name}!",
+  "firstLogin.intro": "Umwarimu wawe yaguhaye ijambo ry'ibanga ry'agateganyo. Hitamo iryawe ubu, kandi urigumane ibanga.",
+  "firstLogin.save": "Bika ijambo ry'ibanga",
 };

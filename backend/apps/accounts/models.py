@@ -32,6 +32,8 @@ class User(AbstractUser):
     totp_secret = models.CharField(max_length=64, blank=True)
     totp_enabled = models.BooleanField(default=False)
     # Last 30-second time step accepted, so a code can't be used twice.
+    # Set when a teacher creates the account or resets its password: the student must pick their own.
+    must_change_password = models.BooleanField(default=False)
     totp_last_step = models.BigIntegerField(null=True, blank=True)
 
     class Meta(AbstractUser.Meta):
