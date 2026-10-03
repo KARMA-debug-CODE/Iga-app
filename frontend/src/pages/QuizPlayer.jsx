@@ -10,6 +10,7 @@ import { useI18n } from "../i18n";
 import { useStartQuiz } from "./Practice";
 
 const CHOICE_TYPES = ["mcq", "multi", "true_false"];
+const RETRY_MS = 5000;
 
 function isAnswered(question, answer) {
   if (!answer) return false;
@@ -37,13 +38,15 @@ function formatClock(ms) {
 
 function Timer({ deadline, offset, onExpire }) {
   const { t } = useI18n();
-  const [now, setNow] = useState(() => Date.now());
+  // Count down on the monotonic clock: changing the phone's time can't end the exam early.
+  const [end] = useState(() => performance.now() + (new Date(deadline).getTime() - (Date.now() + offset)));
+  const [now, setNow] = useState(() => performance.now());
   const fired = useRef(false);
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const id = setInterval(() => setNow(performance.now()), 1000);
     return () => clearInterval(id);
   }, []);
-  const left = new Date(deadline).getTime() - (now + offset);
+  const left = end - now;
   useEffect(() => {
     if (left <= 0 && !fired.current) {
       fired.current = true;
@@ -198,7 +201,7 @@ function SolutionPanel({ question, answer }) {
 
 function Results({ attempt }) {
   const { t } = useI18n();
-  const { start, busy } = useStartQuiz();
+  const { start, busy, error } = useStartQuiz();
   const pct = attempt.percentage;
   return (
     <div className="quiz-shell">
@@ -214,6 +217,7 @@ function Results({ attempt }) {
           {t("quiz.yourScore")}: <strong>{Number(attempt.score ?? 0)}</strong> / {Number(attempt.max_score)}
         </p>
         {attempt.status === "needs_marking" && <div className="alert alert-warn">{t("quiz.awaitingMarking")}</div>}
+        <ErrorMessage error={error} />
         <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
           <Link className="btn btn-secondary" to="/practice">
             ← {t("quiz.back")}
@@ -266,7 +270,8 @@ function Player({ initial, onFinished }) {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const timers = useRef({});
-  const pending = useRef({});
+  const pending = useRef({}); // newest answer not yet sent, per question
+  const inflight = useRef({}); // the save currently running, per question
   // Server clock minus browser clock, so the countdown is right even if the phone's time is off.
   const offset = useMemo(() => new Date(initial.server_now).getTime() - Date.now(), [initial.server_now]);
 
@@ -274,36 +279,69 @@ function Player({ initial, onFinished }) {
   const immediate = attempt.quiz.feedback_mode === "immediate";
   const total = attempt.questions.length;
 
-  const save = useCallback(
-    async (questionId) => {
-      const answer = pending.current[questionId];
-      if (!answer) return;
-      delete pending.current[questionId];
-      setSaving("saving");
-      try {
-        await api(`/attempts/${attempt.id}/answer/`, {
-          method: "POST",
-          body: {
-            question: questionId,
-            choice_ids: answer.choice_ids || [],
-            text: answer.text || "",
-            numeric: answer.numeric === "" || answer.numeric === undefined ? null : answer.numeric,
-          },
-        });
-        setSaving("saved");
-      } catch (e) {
-        setError(e);
-        setSaving("idle");
-        if (e.status === 400 && /time is up/i.test(e.message)) onFinished();
+  const closedByServer = useCallback(
+    (e) => {
+      if (e?.status === 400 && /time is up|already been submitted/i.test(e.message)) {
+        onFinished(/time is up/i.test(e.message) ? t("quiz.timeUp") : null);
+        return true;
       }
+      return false;
     },
-    [attempt.id, onFinished],
+    [onFinished, t],
   );
 
+  const save = useCallback(
+    (questionId) => {
+      const send = async () => {
+        const answer = pending.current[questionId];
+        if (!answer) return;
+        delete pending.current[questionId];
+        setSaving("saving");
+        try {
+          await api(`/attempts/${attempt.id}/answer/`, {
+            method: "POST",
+            body: {
+              question: questionId,
+              choice_ids: answer.choice_ids || [],
+              text: answer.text || "",
+              numeric: answer.numeric === "" || answer.numeric === undefined ? null : answer.numeric,
+            },
+          });
+          if (!Object.keys(pending.current).length) setSaving("saved");
+        } catch (e) {
+          if (closedByServer(e)) return;
+          if (e.status === 400) {
+            setError(e); // the answer itself was refused; resending won't help
+            setSaving("idle");
+            return;
+          }
+          // Network or server trouble: keep the answer (unless a newer one is waiting) and retry.
+          if (!pending.current[questionId]) pending.current[questionId] = answer;
+          setSaving("failed");
+          clearTimeout(timers.current[questionId]);
+          timers.current[questionId] = setTimeout(() => save(questionId), RETRY_MS);
+          throw e;
+        }
+      };
+      // One request per question at a time, in order, so an older answer never lands last.
+      const run = (inflight.current[questionId] || Promise.resolve()).catch(() => {}).then(send);
+      inflight.current[questionId] = run;
+      run
+        .finally(() => {
+          if (inflight.current[questionId] === run) delete inflight.current[questionId];
+        })
+        .catch(() => {});
+      return run;
+    },
+    [attempt.id, closedByServer],
+  );
+
+  // Send everything waiting and wait for saves already on their way. Rejects if any failed.
   const flush = useCallback(async () => {
     Object.values(timers.current).forEach(clearTimeout);
     timers.current = {};
-    await Promise.all(Object.keys(pending.current).map((id) => save(Number(id))));
+    Object.keys(pending.current).forEach((id) => save(Number(id)));
+    await Promise.all(Object.values(inflight.current));
   }, [save]);
 
   function change(patch) {
@@ -318,12 +356,12 @@ function Player({ initial, onFinished }) {
 
   async function check() {
     setError(null);
-    await flush();
     try {
+      await flush();
       const updated = await api(`/attempts/${attempt.id}/check/`, { method: "POST", body: { question: question.id } });
       setAttempt((a) => ({ ...a, questions: a.questions.map((q) => (q.id === updated.id ? updated : q)) }));
     } catch (e) {
-      setError(e);
+      if (!closedByServer(e)) setError(e);
     }
   }
 
@@ -333,23 +371,34 @@ function Player({ initial, onFinished }) {
       const message = `${t("quiz.confirmSubmit")}${unanswered ? `\n\n${t("quiz.unanswered", { n: unanswered })}` : ""}`;
       if (!force && !window.confirm(message)) return;
       setSubmitting(true);
+      setError(null);
       try {
         await flush();
+      } catch (e) {
+        // Out of time: submit what the server has. Otherwise stop, so no answer is lost.
+        if (!force) {
+          setError(e);
+          setSubmitting(false);
+          return;
+        }
+      }
+      try {
         await api(`/attempts/${attempt.id}/submit/`, { method: "POST" });
         onFinished(force ? t("quiz.timeUp") : null);
       } catch (e) {
+        if (closedByServer(e)) return;
         setError(e);
         setSubmitting(false);
       }
     },
-    [attempt, answers, flush, onFinished, t],
+    [attempt, answers, flush, onFinished, closedByServer, t],
   );
 
   const onExpire = useCallback(() => submit(true), [submit]);
 
   useEffect(() => {
     const warn = (e) => {
-      if (Object.keys(pending.current).length) {
+      if (Object.keys(pending.current).length || Object.keys(inflight.current).length) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -369,7 +418,13 @@ function Player({ initial, onFinished }) {
           </strong>
           <div className="row">
             <span className="small muted" aria-live="polite">
-              {saving === "saving" ? t("quiz.saving") : saving === "saved" ? `✓ ${t("quiz.saved")}` : ""}
+              {saving === "saving"
+                ? t("quiz.saving")
+                : saving === "saved"
+                  ? `✓ ${t("quiz.saved")}`
+                  : saving === "failed"
+                    ? `⚠ ${t("quiz.notSaved")}`
+                    : ""}
             </span>
             {attempt.deadline && <Timer deadline={attempt.deadline} offset={offset} onExpire={onExpire} />}
           </div>

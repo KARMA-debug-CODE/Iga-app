@@ -95,6 +95,7 @@ export default {
   "quiz.correctAnswer": "Jibu sahihi",
   "quiz.yourAnswer": "Jibu lako",
   "quiz.saved": "Imehifadhiwa",
+  "quiz.notSaved": "Bado haijahifadhiwa — inajaribu tena…",
   "quiz.back": "Rudi kwenye mazoezi",
   "quiz.tryAgain": "Jaribu tena",
   "quiz.prev": "Iliyotangulia",

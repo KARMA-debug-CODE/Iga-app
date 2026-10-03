@@ -161,6 +161,7 @@ export default function ClassDetail() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const [tab, setTab] = useState("assignments");
+  const [actionError, setActionError] = useState(null);
   const state = useApi(`/classes/${id}/`);
   const subjects = useApi("/subjects/");
 
@@ -247,6 +248,7 @@ export default function ClassDetail() {
 
             {tab === "students" && owner && (
               <div className="card">
+                <ErrorMessage error={actionError} />
                 <ul className="list">
                   {(c.students || []).map((s) => (
                     <li key={s.id} className="spread">
@@ -256,8 +258,14 @@ export default function ClassDetail() {
                       <button
                         className="btn btn-sm btn-danger"
                         onClick={async () => {
-                          await api(`/classes/${id}/remove_student/`, { method: "POST", body: { student: s.id } });
-                          state.reload();
+                          if (!window.confirm(t("classes.removeConfirm", { name: s.display_name }))) return;
+                          setActionError(null);
+                          try {
+                            await api(`/classes/${id}/remove_student/`, { method: "POST", body: { student: s.id } });
+                            state.reload();
+                          } catch (err) {
+                            setActionError(err);
+                          }
                         }}
                       >
                         {t("classes.remove")}

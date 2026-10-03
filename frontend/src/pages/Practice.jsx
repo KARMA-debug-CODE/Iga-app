@@ -12,7 +12,7 @@ export function useStartQuiz() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
-  async function start(quizId, assignmentId) {
+  async function start(quizId, assignmentId, { replace = false } = {}) {
     setBusy(true);
     setError(null);
     try {
@@ -20,7 +20,7 @@ export function useStartQuiz() {
         method: "POST",
         body: assignmentId ? { assignment: assignmentId } : {},
       });
-      navigate(`/attempts/${attempt.id}`, { replace: false });
+      navigate(`/attempts/${attempt.id}`, { replace });
     } catch (e) {
       setError(e);
     } finally {
@@ -173,7 +173,8 @@ export default function Practice() {
     const quiz = params.get("start");
     if (quiz && !started.current) {
       started.current = true;
-      start(quiz, params.get("assignment"));
+      // Replace the ?start= entry so Back from the quiz doesn't land here and start it again.
+      start(quiz, params.get("assignment"), { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

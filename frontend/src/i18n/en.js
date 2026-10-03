@@ -132,6 +132,7 @@ export default {
   "quiz.markingGuide": "Marking guide",
   "quiz.teacherFeedback": "Teacher's feedback",
   "quiz.saved": "Saved",
+  "quiz.notSaved": "Not saved yet — retrying…",
   "quiz.saving": "Saving…",
   "quiz.numberPlaceholder": "Type a number",
   "quiz.textPlaceholder": "Type your answer",
@@ -211,6 +212,7 @@ export default {
   "classes.dueDate": "Due date",
   "classes.share": "Share this code with your students:",
   "classes.remove": "Remove",
+  "classes.removeConfirm": "Remove {name} from this class? Their past results are kept.",
 
   "teach.title": "Teacher tools",
   "teach.questions": "Question bank",
@@ -236,6 +238,7 @@ export default {
   "teach.body": "Lesson (Markdown)",
   "teach.preview": "Preview",
   "teach.slug": "Web address (e.g. s2-maths-ratios)",
+  "teach.maxAttempts": "Attempts allowed",
   "teach.summary": "Summary",
   "teach.notApproved": "Teacher tools unlock once an administrator approves your account.",
   "teach.url": "Link (https://…)",

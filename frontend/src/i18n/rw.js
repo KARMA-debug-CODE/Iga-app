@@ -93,6 +93,7 @@ export default {
   "quiz.correctAnswer": "Igisubizo nyacyo",
   "quiz.yourAnswer": "Igisubizo cyawe",
   "quiz.saved": "Byabitswe",
+  "quiz.notSaved": "Ntibirabikwa — turongera tugerageze…",
   "quiz.back": "Subira ku myitozo",
   "quiz.tryAgain": "Ongera ugerageze",
   "quiz.prev": "Ibanjirije",

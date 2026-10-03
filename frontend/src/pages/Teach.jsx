@@ -245,8 +245,23 @@ function QuestionBank() {
 function QuizBuilder() {
   const { t } = useI18n();
   const { scope, subject, picker } = useScope();
-  const [form, setForm] = useState({ title: "", description: "", time_limit_minutes: "", feedback_mode: "immediate", kind: "practice" });
-  const [selected, setSelected] = useState([]);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    time_limit_minutes: "",
+    max_attempts: "",
+    feedback_mode: "immediate",
+    kind: "practice",
+  });
+  // Picked questions belong to the subject and grade they were picked from; changing either starts afresh.
+  const scopeKey = `${scope.subject}|${scope.grade}`;
+  const [selection, setSelection] = useState({ key: scopeKey, ids: [] });
+  const selected = selection.key === scopeKey ? selection.ids : [];
+  const setSelected = (update) =>
+    setSelection((current) => {
+      const ids = current.key === scopeKey ? current.ids : [];
+      return { key: scopeKey, ids: typeof update === "function" ? update(ids) : update };
+    });
   const [error, setError] = useState(null);
   const [toast, showToast] = useToast();
   const bank = useApi("/questions/", { params: { subject: subject?.code, grade: scope.grade }, skip: !subject });
@@ -264,6 +279,7 @@ function QuizBuilder() {
           grade: scope.grade,
           unit: scope.unit ? Number(scope.unit) : null,
           time_limit_minutes: form.time_limit_minutes ? Number(form.time_limit_minutes) : null,
+          max_attempts: form.max_attempts ? Number(form.max_attempts) : null,
           status: "published",
           question_ids: selected,
         },
@@ -307,6 +323,10 @@ function QuizBuilder() {
           <label>
             ⏱ min
             <input type="number" min="1" value={form.time_limit_minutes} onChange={(e) => setForm({ ...form, time_limit_minutes: e.target.value })} placeholder="—" />
+          </label>
+          <label>
+            {t("teach.maxAttempts")}
+            <input type="number" min="1" value={form.max_attempts} onChange={(e) => setForm({ ...form, max_attempts: e.target.value })} placeholder="∞" />
           </label>
         </div>
         <div>
@@ -359,6 +379,7 @@ function LessonEditor() {
   const { t } = useI18n();
   const { scope, picker } = useScope();
   const [form, setForm] = useState({ title: "", slug: "", summary: "", body: "## Introduction\n\nWrite your lesson here. Use $E = mc^2$ for maths.\n", estimated_minutes: 20 });
+  const [slugTouched, setSlugTouched] = useState(false);
   const [preview, setPreview] = useState(false);
   const [error, setError] = useState(null);
   const [toast, showToast] = useToast();
@@ -392,11 +413,22 @@ function LessonEditor() {
         <div className="form-row">
           <label>
             {t("classes.title.field")}
-            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value, slug: form.slug || slugify(e.target.value) })} required />
+            <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value, slug: slugTouched ? form.slug : slugify(e.target.value) })}
+              required
+            />
           </label>
           <label>
             {t("teach.slug")}
-            <input value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} required />
+            <input
+              value={form.slug}
+              onChange={(e) => {
+                setSlugTouched(e.target.value !== "");
+                setForm({ ...form, slug: slugify(e.target.value) });
+              }}
+              required
+            />
           </label>
         </div>
         <label>
