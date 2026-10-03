@@ -12,6 +12,7 @@ from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
 
 from . import services
+from .analytics import quiz_analytics
 from .models import Answer, Attempt, ExamPaper, Question, Quiz
 from .serializers import (
     AnswerInputSerializer,
@@ -136,6 +137,11 @@ class QuizViewSet(viewsets.ModelViewSet):
         else:
             instance.delete()
         audit.record(self.request, "delete_quiz", instance)
+
+    @action(detail=True, permission_classes=[IsTeacher])
+    def analytics(self, request, pk=None):
+        """Item analysis for the teacher's students (optionally one class: ?classroom=<id>)."""
+        return Response(quiz_analytics(self.get_object(), request.user, request.query_params.get("classroom")))
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def start(self, request, pk=None):

@@ -4,6 +4,7 @@ import { useAuth } from "../auth";
 import { Empty, Loader, Progress, scoreClass } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { ParentDashboard } from "./Children";
 
 export function SubjectCard({ subject, grade }) {
   const { t } = useI18n();
@@ -254,7 +255,7 @@ function TeacherDashboard({ data }) {
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useI18n();
-  const state = useApi("/dashboard/");
+  const state = useApi("/dashboard/", { skip: user.role === "parent" });
   return (
     <>
       <div className="page-header">
@@ -262,9 +263,13 @@ export default function Dashboard() {
         <p>{t("app.tagline")}</p>
       </div>
       {user.role === "teacher" && !user.teacher_approved && <div className="alert alert-warn" style={{ marginBottom: 16 }}>{t("auth.teacherPending")}</div>}
-      <Loader state={state}>
-        {(data) => (data.teacher?.classes ? <TeacherDashboard data={data} /> : <StudentDashboard data={data} user={user} />)}
-      </Loader>
+      {user.role === "parent" ? (
+        <ParentDashboard />
+      ) : (
+        <Loader state={state}>
+          {(data) => (data.teacher?.classes ? <TeacherDashboard data={data} /> : <StudentDashboard data={data} user={user} />)}
+        </Loader>
+      )}
     </>
   );
 }

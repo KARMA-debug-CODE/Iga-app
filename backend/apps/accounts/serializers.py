@@ -66,7 +66,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    role = serializers.ChoiceField(choices=[User.Role.STUDENT, User.Role.TEACHER], default=User.Role.STUDENT)
+    role = serializers.ChoiceField(choices=[User.Role.STUDENT, User.Role.TEACHER, User.Role.PARENT], default=User.Role.STUDENT)
 
     class Meta:
         model = User
@@ -83,8 +83,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        if attrs.get("role", User.Role.STUDENT) == User.Role.STUDENT and not attrs.get("grade"):
+        role = attrs.get("role", User.Role.STUDENT)
+        if role == User.Role.STUDENT and not attrs.get("grade"):
             raise serializers.ValidationError({"grade": "Students must choose their grade (S1–S6)."})
+        if role != User.Role.STUDENT:
+            attrs["grade"] = ""
         candidate = User(**{k: v for k, v in attrs.items() if k != "password"})
         password_validation.validate_password(attrs["password"], candidate)
         return attrs

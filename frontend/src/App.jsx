@@ -30,6 +30,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Search = lazy(() => import("./pages/Search"));
 const Playground = lazy(() => import("./pages/Playground"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ChildReport = lazy(() => import("./pages/Children"));
 
 function RequireAuth({ children, teacher = false, admin = false }) {
   const { user, isTeacher, isAdmin } = useAuth();
@@ -114,6 +115,7 @@ export default function App() {
               <Route path="/profile" element={page(<Profile />)} />
               <Route path="/search" element={page(<Search />)} />
               <Route path="/playground" element={page(<Playground />)} />
+            <Route path="/children/:id" element={page(<ChildReport />)} />
               <Route
                 path="/teach"
                 element={page(<Teach />, { teacher: true })}

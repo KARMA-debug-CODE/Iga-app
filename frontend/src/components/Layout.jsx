@@ -15,16 +15,21 @@ export default function Layout() {
   const location = useLocation();
   const [query, setQuery] = useState("");
 
+  const isParent = user?.role === "parent";
   const primary = [
     { to: "/", icon: "🏠", label: t("nav.home"), end: true },
     { to: "/learn", icon: "📚", label: t("nav.learn") },
     { to: "/labs", icon: "🔬", label: t("nav.labs") },
     { to: "/practice", icon: "📝", label: t("nav.practice") },
-    { to: "/groups", icon: "👥", label: t("nav.groups") },
+    isParent ? { to: "/profile", icon: "⚙️", label: t("nav.profile") } : { to: "/groups", icon: "👥", label: t("nav.groups") },
   ];
   const secondary = [
-    { to: "/classes", icon: "🏫", label: t("nav.classes") },
-    { to: "/leaderboard", icon: "🏆", label: t("nav.leaderboard") },
+    ...(isParent
+      ? []
+      : [
+          { to: "/classes", icon: "🏫", label: t("nav.classes") },
+          { to: "/leaderboard", icon: "🏆", label: t("nav.leaderboard") },
+        ]),
     { to: "/playground", icon: "💻", label: t("nav.playground") },
     ...(isTeacher
       ? [
@@ -33,7 +38,7 @@ export default function Layout() {
         ]
       : []),
     ...(isAdmin ? [{ to: "/admin", icon: "🛡️", label: t("nav.admin") }] : []),
-    { to: "/profile", icon: "⚙️", label: t("nav.profile") },
+    ...(isParent ? [] : [{ to: "/profile", icon: "⚙️", label: t("nav.profile") }]),
   ];
 
   const initials = (user?.first_name?.[0] || user?.username?.[0] || "?").toUpperCase();

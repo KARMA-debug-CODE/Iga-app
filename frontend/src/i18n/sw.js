@@ -168,4 +168,13 @@ export default {
 
   "errors.loadTitle": "Sehemu hii haikuweza kufunguka",
   "errors.loadBody": "Huenda inahitaji mtandao mara ya kwanza, au programu imesasishwa. Angalia mtandao wako kisha ujaribu tena.",
+
+  "auth.parent": "Mzazi / mlezi",
+  "parent.children": "Watoto wangu",
+  "parent.link": "Unganisha mtoto",
+  "parent.code": "Msimbo kutoka kwa mtoto wako",
+  "parent.linkButton": "Unganisha",
+  "parent.subjects": "Maendeleo kwa somo",
+  "parent.access": "Ufikiaji wa mzazi",
+  "parent.makeCode": "Unda msimbo kwa mzazi wangu",
 };

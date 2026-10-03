@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from apps.accounts import parents
 from apps.assessments.views import AttemptViewSet, ExamPaperViewSet, MarkingViewSet, QuestionViewSet, QuizViewSet
 from apps.classroom.views import AssignmentViewSet, ClassroomViewSet
 from apps.community.views import MessageViewSet, ModerationViewSet, StudyGroupViewSet
@@ -34,6 +35,8 @@ router.register("admin/moderation", ModerationViewSet, basename="admin-moderatio
 api = [
     path("auth/", include("apps.accounts.urls")),
     path("tutor/", include("apps.tutor.urls")),
+    path("children/", parents.ChildrenView.as_view(), name="children"),
+    path("children/<int:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
     path("health/", core_views.health, name="health"),
     path("meta/", core_views.meta, name="meta"),
     path("dashboard/", core_views.dashboard, name="dashboard"),

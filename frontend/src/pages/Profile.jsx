@@ -73,6 +73,54 @@ function TwoFactor() {
   );
 }
 
+function ParentAccess() {
+  const { t, lang } = useI18n();
+  const parents = useApi("/auth/parents/");
+  const [invite, setInvite] = useState(null);
+  const [error, setError] = useState(null);
+  async function makeCode() {
+    setError(null);
+    try {
+      setInvite(await api("/auth/parent-code/", { method: "POST" }));
+    } catch (e) {
+      setError(e);
+    }
+  }
+  async function remove(id) {
+    await api(`/auth/parents/${id}/`, { method: "DELETE" });
+    parents.reload();
+  }
+  return (
+    <div className="card">
+      <h2>👨‍👩‍👧 {t("parent.access")}</h2>
+      <p className="muted small">{t("parent.accessHelp")}</p>
+      {invite ? (
+        <div className="stack">
+          <span className="code-display">{invite.code}</span>
+          <span className="small muted">{t("parent.expires", { date: new Date(invite.expires_at).toLocaleDateString(lang) })}</span>
+        </div>
+      ) : (
+        <button className="btn btn-secondary" onClick={makeCode}>
+          {t("parent.makeCode")}
+        </button>
+      )}
+      <ErrorMessage error={error} />
+      {(parents.data || []).length > 0 && (
+        <ul className="list" style={{ marginTop: 12 }}>
+          {parents.data.map((p) => (
+            <li key={p.id} className="spread">
+              <span>{p.name}</span>
+              <button className="btn btn-sm btn-danger" onClick={() => remove(p.id)}>
+                {t("classes.remove")}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function ChangePassword() {
   const { t } = useI18n();
   const [form, setForm] = useState({ current_password: "", new_password: "" });
@@ -242,6 +290,7 @@ export default function Profile() {
       <div className="grid-2">
         <ChangePassword />
         <TwoFactor />
+        {user.role === "student" && <ParentAccess />}
       </div>
     </>
   );

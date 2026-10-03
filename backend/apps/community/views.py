@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
+from apps.accounts.parents import NotParent
 from apps.accounts.serializers import PublicUserSerializer
 from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin
@@ -79,6 +80,7 @@ def can_moderate(user, group):
 
 class StudyGroupViewSet(viewsets.ModelViewSet):
     serializer_class = StudyGroupSerializer
+    permission_classes = [NotParent]
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
@@ -217,6 +219,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.GenericViewSet):
     queryset = Message.objects.select_related("group")
+    permission_classes = [NotParent]
 
     def get_object(self):
         message = get_object_or_404(self.queryset, pk=self.kwargs["pk"])

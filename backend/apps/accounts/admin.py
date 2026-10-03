@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import ParentInvite, ParentLink, User
 
 
 @admin.register(User)
@@ -23,3 +23,16 @@ class UserAdmin(BaseUserAdmin):
     @admin.action(description="Approve selected teachers")
     def approve_teachers(self, request, queryset):
         queryset.filter(role=User.Role.TEACHER).update(teacher_approved=True)
+
+
+@admin.register(ParentLink)
+class ParentLinkAdmin(admin.ModelAdmin):
+    list_display = ("parent", "student", "created_at")
+    search_fields = ("parent__username", "student__username")
+    raw_id_fields = ("parent", "student")
+
+
+@admin.register(ParentInvite)
+class ParentInviteAdmin(admin.ModelAdmin):
+    list_display = ("student", "code", "expires_at", "used_by")
+    readonly_fields = ("code",)

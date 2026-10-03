@@ -8,6 +8,7 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         STUDENT = "student", "Student"
         TEACHER = "teacher", "Teacher"
+        PARENT = "parent", "Parent or guardian"
         ADMIN = "admin", "Administrator"
 
     email = models.EmailField(unique=True, null=True, blank=True)
@@ -38,6 +39,10 @@ class User(AbstractUser):
         return self.role == self.Role.TEACHER
 
     @property
+    def is_parent(self):
+        return self.role == self.Role.PARENT
+
+    @property
     def is_platform_admin(self):
         return self.role == self.Role.ADMIN or self.is_superuser
 
@@ -54,3 +59,30 @@ class User(AbstractUser):
         if not self.email:
             self.email = None
         super().save(*args, **kwargs)
+
+
+class ParentInvite(models.Model):
+    """A short-lived code a student gives to a parent or guardian so they can follow their progress."""
+
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="parent_invites")
+    code = models.CharField(max_length=12, unique=True)
+    expires_at = models.DateTimeField()
+    used_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student} → {self.code}"
+
+
+class ParentLink(models.Model):
+    """Read-only access for a parent/guardian to one student's progress. Either side can remove it."""
+
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="children_links")
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="parent_links")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["parent", "student"], name="unique_parent_link")]
+
+    def __str__(self):
+        return f"{self.parent} → {self.student}"

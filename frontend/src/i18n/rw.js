@@ -156,4 +156,10 @@ export default {
 
   "errors.loadTitle": "Iki gice nticyafunguka",
   "errors.loadBody": "Gishobora gukenera murandasi ubwa mbere. Reba murandasi yawe wongere ugerageze.",
+
+  "auth.parent": "Umubyeyi",
+  "parent.children": "Abana banjye",
+  "parent.link": "Huza umwana",
+  "parent.linkButton": "Huza",
+  "parent.access": "Uburenganzira bw'ababyeyi",
 };

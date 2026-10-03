@@ -27,6 +27,8 @@ def leaderboard(request):
     user = request.user
     scope = request.query_params.get("scope", "grade")
     period = request.query_params.get("period", "week")
+    if user.is_parent:
+        return Response({"scope": scope, "period": period, "entries": [], "me": None})
 
     students = User.objects.filter(role=User.Role.STUDENT, is_active=True)
     if scope == "class":

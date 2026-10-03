@@ -30,7 +30,7 @@ export default function Register() {
     setError("");
     try {
       const payload = { ...form, preferred_language: lang };
-      if (payload.role === "teacher") payload.grade = "";
+      if (payload.role !== "student") payload.grade = "";
       if (!payload.email) delete payload.email;
       await register(payload);
       navigate("/", { replace: true });
@@ -47,7 +47,7 @@ export default function Register() {
         <div>
           <div style={{ fontWeight: 600, fontSize: "0.92rem", marginBottom: 6 }}>{t("auth.iAm")}</div>
           <div className="chips">
-            {["student", "teacher"].map((role) => (
+            {["student", "teacher", "parent"].map((role) => (
               <button
                 type="button"
                 key={role}
@@ -55,7 +55,7 @@ export default function Register() {
                 aria-pressed={form.role === role}
                 onClick={() => setForm((f) => ({ ...f, role }))}
               >
-                {role === "student" ? "🎒 " : "🧑🏽‍🏫 "}
+                {{ student: "🎒 ", teacher: "🧑🏽‍🏫 ", parent: "👨‍👩‍👧 " }[role]}
                 {t(`auth.${role}`)}
               </button>
             ))}

@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
-from apps.accounts.models import User
+from apps.accounts.models import ParentLink, User
 from apps.assessments.models import Quiz
 from apps.classroom.models import Assignment, Classroom, Enrollment
 from apps.community.models import GroupMembership, Message, SharedNote, StudyGroup
@@ -57,6 +57,8 @@ class Command(BaseCommand):
         admin = make("admin", "Ada", "Admin", User.Role.ADMIN, is_staff=True, is_superuser=True)
         teacher = make("teacher", "Jean", "Habimana", User.Role.TEACHER, teacher_approved=True)
         students = [make(u, first, last, User.Role.STUDENT, g) for u, first, last, g in STUDENTS]
+        parent = make("parent", "Claudine", "Uwase", User.Role.PARENT)
+        ParentLink.objects.get_or_create(parent=parent, student=students[0])
 
         maths = Subject.objects.get(code="mathematics")
         classroom, _ = Classroom.objects.get_or_create(
@@ -123,5 +125,5 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS(f"Demo data ready. Log in with any of these (password {DEMO_PASSWORD}):"))
-        for user in [admin, teacher, *students]:
+        for user in [admin, teacher, parent, *students]:
             self.stdout.write(f"  {user.username:<8} {user.role:<8} {user.grade}")
