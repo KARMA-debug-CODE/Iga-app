@@ -75,13 +75,15 @@ The Playwright run starts its own Django server (fresh database with demo data) 
 ## Production-like run with Docker
 
 ```bash
+cp .env.docker.example .env
+echo "DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" >> .env
 docker compose up --build
 docker compose exec backend python manage.py load_curriculum
 docker compose exec backend python manage.py seed_demo --force   # optional demo accounts
 # open http://localhost:8080
 ```
 
-This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, and nginx serving the built app. For a real deployment, put it behind HTTPS, set a long random `DJANGO_SECRET_KEY`, and leave `HTTPS` unset (it defaults to on). See [`backend/.env.example`](backend/.env.example) for every setting.
+This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, and nginx serving the built app. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
 
 ## Repository layout
 
