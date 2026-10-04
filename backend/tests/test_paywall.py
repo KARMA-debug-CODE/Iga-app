@@ -50,6 +50,7 @@ def free_lesson(unit):
         ("grace", True, ""),
         ("pending", False, "pending_approval"),
         ("unverified", False, "school_not_verified"),
+        ("suspended", False, "school_suspended"),
         ("parent", False, "not_eligible"),
     ],
 )
@@ -72,6 +73,8 @@ def test_access_rule(setup, premium, reason, settings):
         user.save()
     elif setup == "unverified":
         user = make_user("u", school=make_school(paid_until=now + timedelta(days=30), status="pending"))
+    elif setup == "suspended":
+        user = make_user("u", school=make_school(paid_until=now + timedelta(days=30), status="suspended"))
     else:
         user = make_user("u", role="parent")
     result = content_access(user)

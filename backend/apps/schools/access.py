@@ -15,7 +15,8 @@ ELIGIBLE_ROLES = {"student", "teacher", "school_admin"}
 @dataclass(frozen=True)
 class Access:
     premium: bool
-    # Why premium is unavailable: no_school | pending_approval | rejected | school_not_verified |
+    # Why premium is unavailable: no_school | pending_approval | rejected | school_suspended |
+    # school_not_verified |
     # not_subscribed | expired | not_eligible | "" when premium.
     reason: str = ""
 
@@ -50,6 +51,8 @@ def _compute(user):
     if user.school_status != "approved":
         return Access(False, "rejected")
     school = user.school
+    if school.status == school.Status.SUSPENDED:
+        return Access(False, "school_suspended")
     if not school.is_verified:
         return Access(False, "school_not_verified")
     if school.paid_until is None:

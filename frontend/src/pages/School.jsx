@@ -30,6 +30,14 @@ function WaitingForVerification() {
   const { user } = useAuth();
   const { t } = useI18n();
   const schoolPending = user.school && !user.school.verified;
+  if (user.school?.suspended) {
+    return (
+      <div className="card" style={{ maxWidth: 640 }}>
+        <h1 style={{ marginTop: 0 }}>⚠️ {t("school.suspendedTitle")}</h1>
+        <p>{t("school.suspendedText", { school: user.school.name })}</p>
+      </div>
+    );
+  }
   return (
     <div className="card" style={{ maxWidth: 640 }}>
       <h1 style={{ marginTop: 0 }}>⏳ {t("school.waitingTitle")}</h1>

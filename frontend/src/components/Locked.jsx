@@ -12,6 +12,7 @@ const ACTIONS = {
   expired: null,
   pending_approval: null,
   school_not_verified: null,
+  school_suspended: null,
   not_eligible: null,
 };
 

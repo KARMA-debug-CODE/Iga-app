@@ -15,7 +15,13 @@ def school_summary(user):
     school = user.school
     if school is None:
         return None
-    data = {"id": school.id, "name": school.name, "district": school.district, "verified": school.is_verified}
+    data = {
+        "id": school.id,
+        "name": school.name,
+        "district": school.district,
+        "verified": school.is_verified,
+        "suspended": school.status == school.Status.SUSPENDED,
+    }
     if user.school_status == User.SchoolStatus.APPROVED:
         data["subscription"] = {"state": school.subscription_state(), "paid_until": school.paid_until}
     return data
