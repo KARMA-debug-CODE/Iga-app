@@ -381,6 +381,7 @@ p {
 
 .stack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* wide children (chip rows, tables) can't push past the screen */
   gap: 12px;
 }
 
@@ -1712,7 +1713,7 @@ tr:last-child td {
 
 .receipt-lines {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 8px 16px;
   margin: 16px 0;
 }
@@ -1723,6 +1724,7 @@ tr:last-child td {
 
 .receipt-lines dd {
   margin: 0;
+  overflow-wrap: anywhere; /* long references and date ranges wrap on phones */
 }
 
 @media print {

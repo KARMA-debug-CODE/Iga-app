@@ -46,9 +46,13 @@ export default function SchoolPicker({ value, onChange }) {
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    if (value) return undefined;
+    if (value) {
+      setSearching(false);
+      return undefined;
+    }
     if (query.trim().length < 2 && !district) {
       setFound([]);
+      setSearching(false); // a search cancelled by this change must not leave "Loading…" behind
       return undefined;
     }
     let alive = true;

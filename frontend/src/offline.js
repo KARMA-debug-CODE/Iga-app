@@ -75,6 +75,48 @@ export async function saveUnitOffline(unit, lang, onProgress = () => {}) {
   return saved[unit.id];
 }
 
+/** True when every lesson of the unit the user can open now is in the saved copy. */
+export function unitIsSaved(unit) {
+  const record = readSaved()[unit.id];
+  if (!record) return false;
+  const kept = new Set(record.slugs);
+  return unit.lessons.filter((l) => !l.locked).every((l) => kept.has(l.slug));
+}
+
+function lessonSlug(url) {
+  const match = /\/api\/lessons\/([^/]+)\/$/.exec(new URL(url).pathname);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/**
+ * Delete saved copies of premium lessons when the user no longer has the subscription (the school
+ * stopped paying, the student left it, or someone else signed in on this device), so they can't be
+ * read by going offline. Free lessons stay saved.
+ */
+export async function forgetPremiumLessons() {
+  if (typeof caches === "undefined") return;
+  const gone = new Set();
+  for (const name of (await caches.keys()).filter((n) => n.startsWith("iga-"))) {
+    const cache = await caches.open(name);
+    for (const request of await cache.keys()) {
+      const slug = lessonSlug(request.url);
+      if (!slug) continue;
+      const response = await cache.match(request);
+      const lesson = await response?.json().catch(() => null);
+      if (lesson && !lesson.locked && lesson.is_free) continue;
+      await cache.delete(request);
+      gone.add(slug);
+    }
+  }
+  if (!gone.size) return;
+  const saved = readSaved();
+  for (const [id, record] of Object.entries(saved)) {
+    record.slugs = record.slugs.filter((slug) => !gone.has(slug));
+    if (!record.slugs.length) delete saved[id];
+  }
+  writeSaved(saved);
+}
+
 export async function clearOfflineData() {
   try {
     localStorage.removeItem(KEY);

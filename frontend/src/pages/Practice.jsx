@@ -175,7 +175,7 @@ export default function Practice() {
   const { t } = useI18n();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") || "quizzes";
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(params.get("subject") || "");
   const [grade, setGrade] = useState(user.grade || "");
   const { start, error } = useStartQuiz();
   const started = useRef(false);

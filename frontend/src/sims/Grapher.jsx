@@ -28,6 +28,8 @@ function equation(mode, p) {
 export default function Grapher() {
   const { t, lang } = useI18n();
   const decimal = lang === "fr" ? "," : ".";
+  const num = (value, digits = 2) => round(value, digits, decimal);
+  const sep = lang === "fr" ? " ; " : ", "; // (2,5 ; 0) in French, since "," is the decimal mark
   const [mode, setMode] = useState("linear");
   const [params, setParams] = useState(MODES.linear.params);
   const [canvasRef, size] = useCanvas(0.75, 260);
@@ -128,31 +130,38 @@ export default function Grapher() {
       </div>
       <div className="lab-readout">
         <div>
-          <span style={{ color: "#2E8B57" }}>●</span> {t("sim.grapher.yIntercept")} <strong>(0, {round(fn(mode, params)(0))})</strong>
+          <span style={{ color: "#2E8B57" }}>●</span> {t("sim.grapher.yIntercept")} <strong>
+            (0{sep}
+            {num(fn(mode, params)(0))})
+          </strong>
         </div>
         {mode === "linear" && (
           <div>
             <span style={{ color: "#FAD201" }}>●</span> {t("sim.grapher.xIntercept")}{" "}
-            <strong>{params.m === 0 ? t("sim.grapher.none") : `(${round(-params.c / params.m)}, 0)`}</strong>
+            <strong>{params.m === 0 ? t("sim.grapher.none") : `(${num(-params.c / params.m)}${sep}0)`}</strong>
           </div>
         )}
         {q && (
           <>
             <div>
-              <span style={{ color: "#D64545" }}>●</span> {t("sim.grapher.vertex")} <strong>({round(q.vertex.x)}, {round(q.vertex.y)})</strong>
+              <span style={{ color: "#D64545" }}>●</span> {t("sim.grapher.vertex")} <strong>
+                ({num(q.vertex.x)}
+                {sep}
+                {num(q.vertex.y)})
+              </strong>
               <span className="small muted">{q.opensUp ? t("sim.grapher.minimum") : t("sim.grapher.maximum")}</span>
             </div>
             <div>
-              {t("sim.grapher.discriminant")} <strong>{round(q.discriminant)}</strong>
+              {t("sim.grapher.discriminant")} <strong>{num(q.discriminant)}</strong>
               <span className="small muted">
-                {q.roots.length === 0 ? t("sim.grapher.noRoots") : t("sim.grapher.roots", { roots: q.roots.map((r) => round(r)).join(", ") })}
+                {q.roots.length === 0 ? t("sim.grapher.noRoots") : t("sim.grapher.roots", { roots: q.roots.map((r) => num(r)).join(sep) })}
               </span>
             </div>
           </>
         )}
         {mode === "sine" && (
           <div>
-            {t("sim.grapher.period")} <strong>{round((2 * Math.PI) / params.B)}</strong>
+            {t("sim.grapher.period")} <strong>{num((2 * Math.PI) / params.B)}</strong>
             <span className="small muted">2π / B</span>
           </div>
         )}

@@ -5,31 +5,26 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { Empty, ErrorMessage, Loader, Tabs, useToast } from "../components/ui";
-import { formatDate, useApi } from "../hooks";
+import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
 function daysUntil(date) {
   return Math.ceil((new Date(date).getTime() - Date.now()) / 86_400_000);
 }
 
-function money(amount, currency, lang) {
-  const value = Number(amount);
-  try {
-    return new Intl.NumberFormat(lang === "fr" ? "fr-FR" : "en-GB", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: currency === "RWF" ? 0 : 2,
-    }).format(value);
-  } catch {
-    return `${value} ${currency}`;
-  }
-}
 
 // Shown instead of the dashboard while the school or this administrator waits for verification.
 function WaitingForVerification() {
-  const { user } = useAuth();
+  const { user, reloadUser } = useAuth();
   const { t } = useI18n();
+  const [checking, setChecking] = useState(false);
   const schoolPending = user.school && !user.school.verified;
+  const checkAgain = () => {
+    setChecking(true);
+    reloadUser()
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  };
   if (user.school?.suspended) {
     return (
       <div className="card" style={{ maxWidth: 640 }}>
@@ -43,6 +38,9 @@ function WaitingForVerification() {
       <h1 style={{ marginTop: 0 }}>⏳ {t("school.waitingTitle")}</h1>
       <p>{schoolPending ? t("school.waitingSchool", { school: user.school.name }) : t("school.waitingAdmin", { school: user.school?.name || "" })}</p>
       <p className="small muted">{t("school.waitingHelp")}</p>
+      <button className="btn btn-secondary" onClick={checkAgain} disabled={checking}>
+        ↻ {t("school.checkAgain")}
+      </button>
     </div>
   );
 }
@@ -59,13 +57,13 @@ export function SubscriptionCard({ school }) {
         <span className={`pill ${tone === "good" ? "pill-success" : tone === "warn" ? "pill-warn" : "pill-danger"}`}>{t(`billing.state.${sub.state}`)}</span>
       </div>
       <p style={{ margin: "10px 0" }}>
-        {sub.state === "active" && t("billing.activeUntil", { date: formatDate(sub.paid_until, lang), n: left })}
-        {sub.state === "grace" && t("billing.graceUntil", { date: formatDate(sub.grace_ends, lang) })}
-        {sub.state === "expired" && t("billing.expiredOn", { date: formatDate(sub.paid_until, lang) })}
+        {sub.state === "active" && t("billing.activeUntil", { date: formatDay(sub.paid_until, lang), n: left })}
+        {sub.state === "grace" && t("billing.graceUntil", { date: formatDay(sub.grace_ends, lang) })}
+        {sub.state === "expired" && t("billing.expiredOn", { date: formatDay(sub.paid_until, lang) })}
         {sub.state === "none" && t("billing.never")}
       </p>
       <p className="small muted" style={{ marginTop: 0 }}>
-        {t("billing.priceLine", { price: money(school.pricing.prices.USD || Object.values(school.pricing.prices)[0], school.pricing.prices.USD ? "USD" : Object.keys(school.pricing.prices)[0], lang) })}
+        {t("billing.priceLine", { price: formatMoney(school.pricing.prices.USD || Object.values(school.pricing.prices)[0], school.pricing.prices.USD ? "USD" : Object.keys(school.pricing.prices)[0], lang) })}
       </p>
       <Link className="btn" to="/school/billing">
         {sub.state === "active" ? t("billing.renew") : t("billing.subscribeNow")}
@@ -238,7 +236,13 @@ export function SchoolMembers() {
         </label>
         <label>
           {t("school.searchMembers")}
-          <input value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input
+            value={query}
+            onChange={(e) => {
+              setSelected(new Set()); // never act on people the search has hidden
+              setQuery(e.target.value);
+            }}
+          />
         </label>
       </div>
       <ErrorMessage error={error} />
@@ -362,7 +366,7 @@ export function SchoolBilling() {
                 )}
                 <div className="billing-total">
                   <span>{t("billing.total")}</span>
-                  <strong>{money(unit * months, currency, lang)}</strong>
+                  <strong>{formatMoney(unit * months, currency, lang)}</strong>
                 </div>
                 <p className="small muted" style={{ margin: 0 }}>
                   {t("billing.covers", { n: months })}
@@ -405,9 +409,9 @@ export function SchoolBilling() {
                 <tbody>
                   {list.map((p) => (
                     <tr key={p.reference}>
-                      <td>{formatDate(p.paid_at || p.created_at, lang)}</td>
-                      <td>{p.period_start ? `${formatDate(p.period_start, lang)} → ${formatDate(p.period_end, lang)}` : t("billing.monthsN", { n: p.months })}</td>
-                      <td>{money(p.amount, p.currency, lang)}</td>
+                      <td>{formatDay(p.paid_at || p.created_at, lang)}</td>
+                      <td>{p.period_start ? `${formatDay(p.period_start, lang)} → ${formatDay(p.period_end, lang)}` : t("billing.monthsN", { n: p.months })}</td>
+                      <td>{formatMoney(p.amount, p.currency, lang)}</td>
                       <td>
                         <span className={`pill ${p.status === "succeeded" ? "pill-success" : p.status === "pending" ? "pill-warn" : ""}`}>
                           {t(`billing.paymentStatus.${p.status}`)}
@@ -535,7 +539,7 @@ export function DevCheckout() {
           <>
             <h1>{p.school_name}</h1>
             <p>
-              {t("billing.monthsN", { n: p.months })} · <strong>{money(p.amount, p.currency, lang)}</strong>
+              {t("billing.monthsN", { n: p.months })} · <strong>{formatMoney(p.amount, p.currency, lang)}</strong>
             </p>
             <ErrorMessage error={error} />
             <div className="row">
@@ -575,14 +579,14 @@ export function Receipt() {
               <code>{p.reference}</code>
             </dd>
             <dt>{t("billing.date")}</dt>
-            <dd>{formatDate(p.paid_at, lang)}</dd>
+            <dd>{formatDay(p.paid_at, lang)}</dd>
             <dt>{t("billing.period")}</dt>
             <dd>
-              {formatDate(p.period_start, lang)} → {formatDate(p.period_end, lang)} ({t("billing.monthsN", { n: p.months })})
+              {formatDay(p.period_start, lang)} → {formatDay(p.period_end, lang)} ({t("billing.monthsN", { n: p.months })})
             </dd>
             <dt>{t("billing.amount")}</dt>
             <dd>
-              <strong>{money(p.amount, p.currency, lang)}</strong>
+              <strong>{formatMoney(p.amount, p.currency, lang)}</strong>
             </dd>
             <dt>{t("billing.method")}</dt>
             <dd>

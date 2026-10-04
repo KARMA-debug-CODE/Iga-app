@@ -1,7 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { api, ApiError, refreshSession, setAccessToken, setSessionExpiredHandler } from "./api";
-import { clearOfflineData } from "./offline";
+import { clearOfflineData, forgetPremiumLessons } from "./offline";
 
 const AuthContext = createContext(null);
 const USER_KEY = "iga.user";
@@ -28,10 +28,16 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
+  const lastLoaded = useRef(0);
+
   const startSession = useCallback((data) => {
     setAccessToken(data.access);
+    // Someone else used this device before: their saved pages must not be shown to this user.
+    const previous = rememberedUser();
+    if (previous && previous.id !== data.user.id) clearOfflineData().catch(() => {});
     setUser(data.user);
     rememberUser(data.user);
+    lastLoaded.current = Date.now();
     return data.user;
   }, []);
 
@@ -43,16 +49,33 @@ export function AuthProvider({ children }) {
     });
     refreshSession()
       .then((data) => {
+        const previous = rememberedUser();
+        if (previous && previous.id !== data.user.id) clearOfflineData().catch(() => {});
         setUser(data.user);
         rememberUser(data.user);
+        lastLoaded.current = Date.now();
       })
       .catch((err) => {
+        if (err instanceof ApiError) {
+          // The server says this session is over (expired or revoked) without anyone pressing
+          // Log out: don't leave that person's saved pages for whoever signs in next.
+          clearOfflineData().catch(() => {});
+          setUser(null);
+          return;
+        }
         // No network (rather than "not logged in"): open in offline mode with saved lessons.
-        const saved = !(err instanceof ApiError) ? rememberedUser() : null;
+        const saved = rememberedUser();
         setUser(saved ? { ...saved, offline: true } : null);
       })
       .finally(() => setReady(true));
   }, []);
+
+  // Without the subscription, saved copies of premium lessons are deleted.
+  const premium = Boolean(user?.access?.premium);
+  const online = Boolean(user) && !user.offline;
+  useEffect(() => {
+    if (online && !premium) forgetPremiumLessons().catch(() => {});
+  }, [online, premium]);
 
   const login = useCallback(
     async (identifier, password, otp) =>
@@ -77,8 +100,27 @@ export function AuthProvider({ children }) {
     const me = await api("/auth/me/");
     setUser(me);
     rememberUser(me);
+    lastLoaded.current = Date.now();
     return me;
   }, []);
+
+  // Access changes when someone else acts (the school approves the student, the Iga team verifies
+  // the school, the school pays): pick that up when the user comes back to the app.
+  useEffect(() => {
+    if (!online) return undefined;
+    const refresh = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastLoaded.current > 60_000) {
+        lastLoaded.current = Date.now();
+        reloadUser().catch(() => {});
+      }
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [online, reloadUser]);
 
   const value = useMemo(
     () => ({

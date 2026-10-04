@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useI18n } from "../i18n";
+
 /** Theme-aware colours read from CSS variables at draw time. */
 export function palette() {
   const css = getComputedStyle(document.documentElement);
@@ -116,12 +118,13 @@ export function drawAxes(ctx, view, { xStep, yStep, xLabel = "", yLabel = "", co
 }
 
 export function Slider({ label, value, min, max, step = 1, unit = "", onChange }) {
+  const { lang } = useI18n();
   return (
     <label>
       <span className="range-label">
         <span>{label}</span>
         <span>
-          {value}
+          {lang === "fr" ? String(value).replace(".", ",") : value}
           {unit}
         </span>
       </span>

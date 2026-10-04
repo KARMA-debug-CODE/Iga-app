@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
 import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
-import { formatDate, useApi } from "../hooks";
+import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
 const ROLE_KEYS = { student: "auth.student", teacher: "auth.teacher", parent: "auth.parent", school_admin: "auth.schoolAdmin", admin: "auth.admin" };
@@ -357,7 +357,7 @@ function SchoolDetail({ id, onChanged }) {
           <div className="small">
             {t(`billing.state.${school.subscription.state}`)}
             {school.subscription.paid_until &&
-              ` · ${t("billing.until", { date: formatDate(school.subscription.paid_until, lang) })}`} ·{" "}
+              ` · ${t("billing.until", { date: formatDay(school.subscription.paid_until, lang) })}`} ·{" "}
             {t("admin.codeIs", { code: school.join_code })}
           </div>
           <div className="small">
@@ -466,10 +466,8 @@ function SchoolDetail({ id, onChanged }) {
                 <tbody>
                   {school.payments.map((p) => (
                     <tr key={p.reference}>
-                      <td>{formatDate(p.paid_at || p.created_at, lang)}</td>
-                      <td>
-                        {p.amount} {p.currency}
-                      </td>
+                      <td>{formatDay(p.paid_at || p.created_at, lang)}</td>
+                      <td>{formatMoney(p.amount, p.currency, lang)}</td>
                       <td>{p.months}</td>
                       <td>
                         {t(`billing.provider.${p.provider}`)}
@@ -538,7 +536,7 @@ function Schools() {
                     </span>
                     <span className="small">
                       {t(`billing.state.${s.subscription.state}`)}
-                      {s.subscription.paid_until && ` · ${formatDate(s.subscription.paid_until, lang)}`}
+                      {s.subscription.paid_until && ` · ${formatDay(s.subscription.paid_until, lang)}`}
                     </span>
                   </button>
                   {open === s.id && <SchoolDetail id={s.id} onChanged={state.reload} />}
@@ -553,10 +551,10 @@ function Schools() {
 }
 
 function SubscriptionStats({ subs }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const fmt = (byCurrency) =>
     Object.entries(byCurrency)
-      .map(([c, v]) => `${v} ${c}`)
+      .map(([currency, value]) => formatMoney(value, currency, lang))
       .join(" + ") || "0";
   return (
     <div className="stats">

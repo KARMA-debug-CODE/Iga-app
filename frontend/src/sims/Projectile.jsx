@@ -9,6 +9,7 @@ const TRAIL_COLOURS = ["#00A1DE", "#2E8B57", "#D97706", "#9333EA", "#D64545"];
 export default function Projectile() {
   const { t, lang } = useI18n();
   const decimal = lang === "fr" ? "," : ".";
+  const num = (value, digits = 2) => round(value, digits, decimal);
   const [angle, setAngle] = useState(45);
   const [speed, setSpeed] = useState(20);
   const [planet, setPlanet] = useState("earth");
@@ -123,21 +124,21 @@ export default function Projectile() {
       </div>
       <div className="lab-readout" aria-live="polite">
         <div>
-          {t("sim.projectile.time")} <strong>{round(prediction.time)} s</strong>
+          {t("sim.projectile.time")} <strong>{num(prediction.time)} s</strong>
           <span className="small muted">T = 2u sinθ / g</span>
         </div>
         <div>
-          {t("sim.projectile.maxHeight")} <strong>{round(prediction.maxHeight)} m</strong>
+          {t("sim.projectile.maxHeight")} <strong>{num(prediction.maxHeight)} m</strong>
           <span className="small muted">H = u² sin²θ / 2g</span>
         </div>
         <div>
-          {t("sim.projectile.range")} <strong>{round(prediction.range)} m</strong>
+          {t("sim.projectile.range")} <strong>{num(prediction.range)} m</strong>
           <span className="small muted">R = u² sin2θ / g</span>
         </div>
         {last && (
           <div>
             {t("sim.projectile.lastShot")} <strong>{last.angle}° · {last.speed} m/s</strong>
-            <span className="small muted">{t("sim.projectile.landedAt", { x: round(last.range) })}</span>
+            <span className="small muted">{t("sim.projectile.landedAt", { x: num(last.range) })}</span>
           </div>
         )}
       </div>

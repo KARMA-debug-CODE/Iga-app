@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
 
+import { LockBadge } from "../components/Locked";
 import { Empty, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -7,8 +8,8 @@ import { useI18n } from "../i18n";
 export default function Search() {
   const [params] = useSearchParams();
   const q = params.get("q") || "";
-  const { t } = useI18n();
-  const state = useApi("/search/", { params: { q } });
+  const { t, lang } = useI18n();
+  const state = useApi("/search/", { params: { q, lang } });
   return (
     <>
       <div className="page-header">
@@ -47,7 +48,8 @@ export default function Search() {
                         </Link>{" "}
                         <span className="small muted">
                           · {l.subject} {l.grade}
-                        </span>
+                        </span>{" "}
+                        {l.locked && <LockBadge />}
                       </li>
                     ))}
                   </ul>
@@ -71,7 +73,9 @@ export default function Search() {
                   <ul className="list">
                     {r.quizzes.map((q2) => (
                       <li key={q2.id}>
-                        <Link to={`/practice?start=${q2.id}`}>{q2.title}</Link> <span className="small muted">· {q2.subject}</span>
+                        {/* A locked quiz can't be started: show it with its lock instead of a start link. */}
+                        <Link to={q2.locked ? "/practice" : `/practice?start=${q2.id}`}>{q2.title}</Link>{" "}
+                        <span className="small muted">· {q2.subject}</span> {q2.locked && <LockBadge />}
                       </li>
                     ))}
                   </ul>

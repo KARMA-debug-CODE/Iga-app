@@ -16,10 +16,20 @@ export function translate(lang, key, vars) {
   return text.replace(/\{(\w+)\}/g, (_, name) => (vars[name] ?? `{${name}}`));
 }
 
+/** The language the page is shown in right now (for code outside React, e.g. api.js). */
+export function currentLanguage() {
+  const lang = typeof document !== "undefined" ? document.documentElement.lang : "";
+  return DICTIONARIES[lang] ? lang : "en";
+}
+
 /** Translate outside React (e.g. in api.js), in the language the page is shown in right now. */
 export function translateNow(key, vars) {
-  const lang = typeof document !== "undefined" ? document.documentElement.lang : "en";
-  return translate(lang, key, vars);
+  return translate(currentLanguage(), key, vars);
+}
+
+/** True when the dictionaries have a text for this key (English counts). */
+export function hasTranslation(key) {
+  return key in en;
 }
 
 function storedLanguage() {

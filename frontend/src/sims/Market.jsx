@@ -10,6 +10,7 @@ const D = 2;
 export default function Market() {
   const { t, lang } = useI18n();
   const decimal = lang === "fr" ? "," : ".";
+  const num = (value, digits = 2) => round(value, digits, decimal);
   const [demandShift, setDemandShift] = useState(100);
   const [supplyShift, setSupplyShift] = useState(20);
   const [price, setPrice] = useState(25);
@@ -92,8 +93,8 @@ export default function Market() {
 
   const statusText = {
     equilibrium: t("sim.market.equilibrium"),
-    shortage: t("sim.market.shortage", { n: round(atPrice.gap, 0) }),
-    surplus: t("sim.market.surplus", { n: round(atPrice.gap, 0) }),
+    shortage: t("sim.market.shortage", { n: num(atPrice.gap, 0) }),
+    surplus: t("sim.market.surplus", { n: num(atPrice.gap, 0) }),
   }[atPrice.status];
 
   return (
@@ -106,14 +107,14 @@ export default function Market() {
       </div>
       <div className="lab-readout" aria-live="polite">
         <div>
-          {t("sim.market.eqPrice")} <strong>{round(eq.price, 1)}</strong>
+          {t("sim.market.eqPrice")} <strong>{num(eq.price, 1)}</strong>
         </div>
         <div>
-          {t("sim.market.eqQuantity")} <strong>{round(eq.quantity, 1)}</strong>
+          {t("sim.market.eqQuantity")} <strong>{num(eq.quantity, 1)}</strong>
         </div>
         <div>
-          {t("sim.market.atPrice", { price })} <strong>{round(atPrice.demanded, 0)}</strong>
-          <span className="small muted">{t("sim.market.supplied", { n: round(atPrice.supplied, 0) })}</span>
+          {t("sim.market.atPrice", { price })} <strong>{num(atPrice.demanded, 0)}</strong>
+          <span className="small muted">{t("sim.market.supplied", { n: num(atPrice.supplied, 0) })}</span>
         </div>
       </div>
       <div className={`alert ${atPrice.status === "equilibrium" ? "alert-success" : "alert-warn"}`}>{statusText}</div>

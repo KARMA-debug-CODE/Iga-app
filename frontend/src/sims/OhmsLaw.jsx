@@ -7,7 +7,9 @@ import { ohmsLaw, round } from "./physics";
 const WIRE = "M60 40 H340 V220 H60 Z";
 
 export default function OhmsLaw() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const decimal = lang === "fr" ? "," : ".";
+  const num = (value, digits = 2) => round(value, digits, decimal);
   const [voltage, setVoltage] = useState(6);
   const [resistance, setResistance] = useState(10);
   const [readings, setReadings] = useState([]);
@@ -33,7 +35,7 @@ export default function OhmsLaw() {
 
   return (
     <div className="lab">
-      <svg viewBox="0 0 400 260" role="img" aria-label={t("sim.ohms.aria", { voltage, resistance, current: round(current, 3) })}>
+      <svg viewBox="0 0 400 260" role="img" aria-label={t("sim.ohms.aria", { voltage, resistance, current: num(current, 3) })}>
         <path d={WIRE} fill="none" stroke="var(--text-soft)" strokeWidth="6" strokeLinejoin="round" />
         <path ref={flow} d={WIRE} fill="none" stroke="#00A1DE" strokeWidth="6" strokeDasharray="4 18" strokeLinecap="round" />
 
@@ -63,7 +65,7 @@ export default function OhmsLaw() {
         {/* Ammeter */}
         <circle cx="340" cy="130" r="24" fill="var(--surface)" stroke="var(--text)" strokeWidth="3" />
         <text x="340" y="136" fontSize="18" fontWeight="800" textAnchor="middle" fill="var(--text)">A</text>
-        <text x="300" y="175" fontSize="15" fontWeight="700" textAnchor="end" fill="var(--text)">{round(current, 3)} A</text>
+        <text x="300" y="175" fontSize="15" fontWeight="700" textAnchor="end" fill="var(--text)">{num(current, 3)} A</text>
       </svg>
 
       <div className="lab-controls">
@@ -72,11 +74,11 @@ export default function OhmsLaw() {
       </div>
       <div className="lab-readout" aria-live="polite">
         <div>
-          {t("sim.ohms.current")} <strong>{round(current, 3)} A</strong>
+          {t("sim.ohms.current")} <strong>{num(current, 3)} A</strong>
           <span className="small muted">I = V / R</span>
         </div>
         <div>
-          {t("sim.ohms.power")} <strong>{round(power, 2)} W</strong>
+          {t("sim.ohms.power")} <strong>{num(power, 2)} W</strong>
           <span className="small muted">P = V × I</span>
         </div>
       </div>
@@ -106,8 +108,8 @@ export default function OhmsLaw() {
                 <tr key={i}>
                   <td>{r.voltage}</td>
                   <td>{r.resistance}</td>
-                  <td>{round(r.current, 3)}</td>
-                  <td>{r.current ? round(r.voltage / r.current, 1) : "—"}</td>
+                  <td>{num(r.current, 3)}</td>
+                  <td>{r.current ? num(r.voltage / r.current, 1) : "—"}</td>
                 </tr>
               ))}
             </tbody>

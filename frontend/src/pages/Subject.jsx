@@ -7,11 +7,13 @@ import { GradeChips, Loader, Progress } from "../components/ui";
 import { results } from "../api";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
-import { offlineSupported, saveUnitOffline, savedUnits } from "../offline";
+import { offlineSupported, saveUnitOffline, unitIsSaved } from "../offline";
 
 function SaveOffline({ unit }) {
   const { t, lang } = useI18n();
-  const [state, setState] = useState(() => (savedUnits()[unit.id] ? "saved" : "idle"));
+  // "Saved" only while the saved copy has every lesson the user can open now (more unlock when
+  // the school subscribes, so the unit can be saved again).
+  const [state, setState] = useState(() => (unitIsSaved(unit) ? "saved" : "idle"));
   const [progress, setProgress] = useState("");
   if (!offlineSupported() || !unit.lessons.some((l) => !l.locked)) return null;
   async function save() {

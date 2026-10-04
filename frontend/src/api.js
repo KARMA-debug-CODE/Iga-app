@@ -2,7 +2,7 @@
 // The access token lives only in memory; the refresh token is an httpOnly
 // cookie the browser sends to /api/auth/refresh/ automatically.
 
-import { translateNow } from "./i18n";
+import { currentLanguage, hasTranslation, translateNow } from "./i18n";
 
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
@@ -29,16 +29,30 @@ export class ApiError extends Error {
   }
 }
 
+/** The server couldn't be reached (offline, or the connection dropped): not an answer from it. */
+export class NetworkError extends Error {
+  constructor() {
+    super(translateNow("errors.network"));
+  }
+}
+
+// Field names in validation errors, shown as the form's labels rather than as code.
+function fieldLabel(field) {
+  const key = `field.${field}`;
+  return hasTranslation(key) ? translateNow(key) : field.replace(/_/g, " ");
+}
+
 function messageFrom(data) {
   if (!data) return "";
   if (typeof data === "string") return data;
   if (data.detail) return data.detail;
-  if (Array.isArray(data)) return data.join(" ");
+  if (Array.isArray(data)) return data.map((item) => (typeof item === "object" ? messageFrom(item) : item)).join(" ");
   const first = Object.entries(data)[0];
   if (!first) return "";
   const [field, value] = first;
-  const text = Array.isArray(value) ? value.join(" ") : typeof value === "object" ? messageFrom(value) : value;
-  return field === "non_field_errors" ? text : `${field}: ${text}`;
+  if (value && typeof value === "object" && !Array.isArray(value)) return messageFrom(value); // nested form, e.g. new_school
+  const text = Array.isArray(value) ? value.join(" ") : value;
+  return field === "non_field_errors" ? text : `${fieldLabel(field)}: ${text}`;
 }
 
 // Refresh tokens work once. Tabs take turns (Web Locks) so a second tab sends
@@ -70,18 +84,25 @@ export async function api(path, { method = "GET", body, params, retry = true, si
     const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
     if ([...query].length) url += `?${query}`;
   }
-  const headers = {};
+  // The server answers in the reader's language (its own error messages included).
+  const headers = { "Accept-Language": currentLanguage() };
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    credentials: "include",
-    signal,
-    body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      method,
+      headers,
+      credentials: "include",
+      signal,
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
+    });
+  } catch (err) {
+    if (err?.name === "AbortError") throw err;
+    throw new NetworkError(); // instead of the browser's English "Failed to fetch"
+  }
 
   if (res.status === 401 && retry && !NO_REFRESH.has(path)) {
     try {

@@ -68,8 +68,9 @@ export function niceStep(span, target = 8) {
   return nice * power;
 }
 
-export function round(value, digits = 2) {
+/** A readout: rounded, with the reader's decimal mark ("," in French). */
+export function round(value, digits = 2, decimal = ".") {
   if (!Number.isFinite(value)) return "—";
   const f = 10 ** digits;
-  return String(Math.round(value * f) / f);
+  return String(Math.round(value * f) / f).replace(".", decimal);
 }

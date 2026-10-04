@@ -57,8 +57,24 @@ function RedirectToLogin() {
 }
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return undefined;
+    }
+    // Links like /profile#school go to that section once the page has rendered it.
+    const id = decodeURIComponent(hash.slice(1));
+    let tries = 0;
+    const timer = setInterval(() => {
+      const element = document.getElementById(id);
+      if (element || ++tries > 20) {
+        clearInterval(timer);
+        element?.scrollIntoView({ block: "start" });
+      }
+    }, 100);
+    return () => clearInterval(timer);
+  }, [pathname, hash]);
   return null;
 }
 

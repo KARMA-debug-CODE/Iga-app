@@ -1,23 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api";
+import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
 import Markdown from "./Markdown";
 import { ErrorMessage } from "./ui";
 
-let statusRequest = null;
+const statusRequests = new Map();
 
-/** Whether the school has switched the AI tutor on (asked once per page load). */
+/** Whether the tutor is on and this user may use it (asked once per user and access state). */
 export function useTutorEnabled() {
+  const { user } = useAuth();
+  const key = user ? `${user.id}:${user.access?.premium ? 1 : 0}` : "";
   const [enabled, setEnabled] = useState(false);
   useEffect(() => {
-    statusRequest ??= api("/tutor/status/").then((s) => Boolean(s?.enabled)).catch(() => false);
+    if (!key) {
+      setEnabled(false);
+      return undefined;
+    }
+    if (!statusRequests.has(key)) {
+      statusRequests.set(key, api("/tutor/status/").then((s) => Boolean(s?.enabled)).catch(() => false));
+    }
     let alive = true;
-    statusRequest.then((value) => alive && setEnabled(value));
+    statusRequests.get(key).then((value) => alive && setEnabled(value));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [key]);
   return enabled;
 }
 
