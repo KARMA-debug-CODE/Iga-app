@@ -18,6 +18,7 @@ RELAXED_RATES = {
     "chat": "1000/min",
     "sensitive": "1000/min",
     "join": "1000/min",
+    "billing_confirm": "1000/min",
     "tutor": "1000/min",
 }
 

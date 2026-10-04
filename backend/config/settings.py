@@ -170,6 +170,8 @@ REST_FRAMEWORK = {
         # Per user: password / 2FA changes, and guessing class, group or parent codes.
         "sensitive": os.environ.get("THROTTLE_SENSITIVE", "5/min"),
         "join": os.environ.get("THROTTLE_JOIN", "10/min"),
+        # The billing return page asks every few seconds while mobile money is confirmed.
+        "billing_confirm": os.environ.get("THROTTLE_BILLING_CONFIRM", "30/min"),
         "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
     },
 }
@@ -223,6 +225,12 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/
 FLUTTERWAVE_SECRET_KEY = os.environ.get("FLUTTERWAVE_SECRET_KEY", "")
 FLUTTERWAVE_WEBHOOK_HASH = os.environ.get("FLUTTERWAVE_WEBHOOK_HASH", "")
 FLUTTERWAVE_BASE_URL = os.environ.get("FLUTTERWAVE_BASE_URL", "https://api.flutterwave.com/v3")
+FLUTTERWAVE_MAX_RETRIES = int(os.environ.get("FLUTTERWAVE_MAX_RETRIES", "5"))
+# How long a hosted checkout stays open (minutes). Payments still open after it are re-checked and
+# closed by `manage.py reconcile_payments`; a success reported later is still applied.
+CHECKOUT_SESSION_MINUTES = int(os.environ.get("CHECKOUT_SESSION_MINUTES", "60"))
+# How far back reconcile_payments re-checks open payments with the provider.
+BILLING_RECONCILE_DAYS = int(os.environ.get("BILLING_RECONCILE_DAYS", "3"))
 # Used as the payer's email when the school administrator has none (providers require one).
 BILLING_FALLBACK_EMAIL = os.environ.get("BILLING_FALLBACK_EMAIL", "billing@iga.rw")
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

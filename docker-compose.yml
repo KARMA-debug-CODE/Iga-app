@@ -48,6 +48,7 @@ services:
       BILLING_DEV_MODE: ${BILLING_DEV_MODE:-false}
       FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
       FLUTTERWAVE_WEBHOOK_HASH: ${FLUTTERWAVE_WEBHOOK_HASH:-}
+      CHECKOUT_SESSION_MINUTES: ${CHECKOUT_SESSION_MINUTES:-60}
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
       EMAIL_HOST: ${EMAIL_HOST:-}
       EMAIL_PORT: ${EMAIL_PORT:-587}
@@ -67,7 +68,9 @@ services:
   # Sends subscription reminders to school administrators once a day.
   scheduler:
     build: ./backend
-    command: sh -c "while true; do python manage.py billing_reminders; sleep 86400; done"
+    # Every 10 minutes: re-check open payments (lost webhooks, abandoned checkouts) and send any
+    # subscription reminders that are due (each is sent once, so running often is safe).
+    command: sh -c "while true; do python manage.py reconcile_payments; python manage.py billing_reminders; sleep 600; done"
     environment: *backend-env
     depends_on:
       db:

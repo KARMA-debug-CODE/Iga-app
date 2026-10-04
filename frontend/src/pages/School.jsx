@@ -404,7 +404,11 @@ export function BillingReturn() {
   const { t } = useI18n();
   const { reloadUser } = useAuth();
   const [params] = useSearchParams();
-  const reference = params.get("ref");
+  // Flutterwave adds status, tx_ref and transaction_id to our return link. Only the server's
+  // answer counts; the transaction id just tells it which attempt to check.
+  const reference = (params.get("tx_ref") || params.get("ref") || "").split("?")[0];
+  const transactionId = params.get("transaction_id") || "";
+  const gatewayCancelled = params.get("status") === "cancelled";
   const [payment, setPayment] = useState(null);
   const [error, setError] = useState(null);
   const tries = useRef(0);
@@ -415,12 +419,15 @@ export function BillingReturn() {
     let timer;
     async function check() {
       try {
-        const data = await api(`/billing/payments/${reference}/confirm/`, { method: "POST" });
+        const data = await api(`/billing/payments/${encodeURIComponent(reference)}/confirm/`, {
+          method: "POST",
+          body: transactionId ? { transaction_id: transactionId } : {},
+        });
         if (!alive) return;
         setPayment(data);
         if (data.status === "succeeded") reloadUser().catch(() => {});
-        // Mobile money can take a moment: keep asking for about a minute.
-        if (data.status === "pending" && tries.current < 12) {
+        // Mobile money approvals can take a while: keep asking for about two minutes.
+        if (data.status === "pending" && !gatewayCancelled && tries.current < 24) {
           tries.current += 1;
           timer = setTimeout(check, 5000);
         }
@@ -433,9 +440,10 @@ export function BillingReturn() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [reference, reloadUser]);
+  }, [reference, transactionId, gatewayCancelled, reloadUser]);
 
-  const status = payment?.status;
+  // The payer left the checkout: say so rather than "being confirmed" (the server closes it later).
+  const status = payment?.status === "pending" && gatewayCancelled ? "cancelled" : payment?.status;
   return (
     <div className="card" style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
       {error ? (
@@ -456,7 +464,7 @@ export function BillingReturn() {
           {t("billing.backToBilling")}
         </Link>
         {status === "succeeded" && (
-          <Link className="btn btn-secondary" to={`/school/billing/receipt/${reference}`}>
+          <Link className="btn btn-secondary" to={`/school/billing/receipt/${encodeURIComponent(reference)}`}>
             🧾 {t("billing.receipt")}
           </Link>
         )}

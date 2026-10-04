@@ -45,12 +45,23 @@ If access ends while a student is in the middle of a premium quiz, the attempt i
 
 ### Online (Flutterwave: cards, MTN MoMo and Airtel Money)
 
-1. Create a Flutterwave business account and get the secret key (test keys start with `FLWSECK_TEST-`).
-2. In the Flutterwave dashboard, set the webhook URL to `https://<your-domain>/api/billing/webhooks/flutterwave/` and choose a long random **secret hash**.
-3. Set `BILLING_PROVIDER=flutterwave`, `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH` (the same secret hash) and `FRONTEND_URL` (where people come back after paying).
-4. To accept mobile money in francs, also set `SUBSCRIPTION_PRICE_RWF` (for example the USD price at your chosen rate). Cards are charged in USD.
+1. Create a Flutterwave business account on the **v3 API** (secret keys look like `FLWSECK-...`; test keys `FLWSECK_TEST-...`). Flutterwave accounts use one API version; if the dashboard only offers v4 client credentials, the provider needs porting first.
+2. In the dashboard under **Settings → Webhooks**, in both test and live mode:
+   - set the URL to `https://<your-domain>/api/billing/webhooks/flutterwave/` and choose a long random **secret hash**;
+   - tick **Receive webhook response in JSON format**, **Enable v3 webhooks**, **Enable webhook retries** and **Enable resend webhook from the dashboard**. (Iga also understands Flutterwave's form-encoded and legacy bodies, and logs a warning when a webhook carries no reference, but JSON v3 is the tested setup.)
+3. Set `BILLING_PROVIDER=flutterwave`, `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH` (the same secret hash) and `FRONTEND_URL` (the public HTTPS address people come back to after paying).
+4. **Set `SUBSCRIPTION_PRICE_RWF`** (whole francs, e.g. the USD price at your chosen rate). Rwandan mobile money (MTN MoMo, Airtel Money) only works in francs, so with a USD price alone schools can only pay by card. Card payments in USD keep working alongside.
+5. Make sure the `scheduler` service (or a cron job) runs `python manage.py reconcile_payments` every few minutes; see below.
 
-What happens: Iga creates a pending payment with its own reference and sends the administrator to Flutterwave's hosted page. When they come back, and when Flutterwave's webhook arrives, the server asks Flutterwave's API about that reference and only extends the subscription if the transaction is successful **for the expected amount and currency**. Redirect parameters and webhook bodies are never trusted on their own, webhooks must carry the dashboard's secret hash, and each payment is applied exactly once whatever arrives first.
+What happens:
+
+- Iga creates a pending payment with its own reference (`tx_ref`) and sends the administrator to Flutterwave's hosted page, which stays open for `CHECKOUT_SESSION_MINUTES` (60) and allows `FLUTTERWAVE_MAX_RETRIES` (5) attempts.
+- When they come back, and whenever Flutterwave's webhook arrives, the server asks Flutterwave's API about the transaction (the one the redirect or webhook names, otherwise by reference). It only extends the subscription if the transaction carries **our reference** and is successful **for the expected currency and at least the expected amount**. Redirect parameters and webhook bodies are never trusted on their own, and webhooks must carry the dashboard's secret hash.
+- **A declined attempt is not a failed payment.** The hosted page lets the payer try another card or number with the same reference, so a payment stays pending while its checkout is open and is only marked failed afterwards.
+- **A school that paid always gets its months.** A successful transaction confirmed by Flutterwave is applied even if it is reported late, after the payment was marked failed or cancelled. Each payment is applied exactly once, whatever arrives first and however often.
+- `reconcile_payments` covers lost webhooks and closed browser tabs: it re-checks open payments from the last `BILLING_RECONCILE_DAYS` (3) days, applies any that succeeded, and marks as cancelled those whose checkout closed without a successful transaction.
+
+**Testing with Flutterwave's test mode:** use test keys, `BILLING_DEV_MODE=false` and a public `FRONTEND_URL` (for example a tunnel). The test cards are listed at developer.flutterwave.com (Testing); expiry dates change, so check them there. To exercise the retry path, pay with the "insufficient funds" test card first and then with a good test card in the same checkout: the subscription must be extended once.
 
 ### Bank transfer, cash or free months
 
@@ -63,7 +74,9 @@ With `BILLING_DEV_MODE=true` (the default when `DJANGO_DEBUG` is on), a test che
 ## Receipts and reminders
 
 - School administrators see every payment under **Subscription**, with printable receipts. These are not official tax invoices: if the business must issue EBM invoices (Rwanda Revenue Authority), issue them separately.
-- `python manage.py billing_reminders` emails school administrators 7, 3 and 1 day(s) before the subscription ends and when it has ended. It is safe to run repeatedly (each reminder is sent once per end date). The Docker setup runs it daily in the `scheduler` service; elsewhere, use cron.
+- `python manage.py billing_reminders` emails school administrators 7, 3 and 1 day(s) before the subscription ends and when it has ended. It is safe to run repeatedly (each reminder is sent once per end date).
+- `python manage.py reconcile_payments` re-checks open online payments (see *Paying*). It is also safe to run repeatedly.
+- The Docker setup runs both every 10 minutes in the `scheduler` service; elsewhere, use cron.
 - Configure email with `EMAIL_BACKEND` and the `EMAIL_*` settings (the default prints emails to the console).
 
 ## Demo accounts (`seed_demo`, password `Iga-demo-2026`)
@@ -79,6 +92,6 @@ With `BILLING_DEV_MODE=true` (the default when `DJANGO_DEBUG` is on), a test che
 
 ## Where it lives in the code
 
-- `backend/apps/schools/`: `models.py` (School, Payment, BillingReminder), `access.py` (the one access rule), `membership.py` (joining, approving, removing), `billing.py` (prices, applying payments), `providers.py` and `flutterwave.py` (payment providers), `downloads.py` (signed past-paper downloads), `views.py` and `urls.py` (API), `notify.py` (emails), `management/commands/billing_reminders.py`.
+- `backend/apps/schools/`: `models.py` (School, Payment, BillingReminder), `access.py` (the one access rule), `membership.py` (joining, approving, removing), `billing.py` (prices, applying payments), `providers.py` and `flutterwave.py` (payment providers), `downloads.py` (signed past-paper downloads), `views.py` and `urls.py` (API), `notify.py` (emails), `management/commands/billing_reminders.py` and `reconcile_payments.py`.
 - Gating is applied in the curriculum, assessments, tutor, search and dashboard views; `backend/tests/test_paywall.py` and `test_schools.py` cover it.
 - Frontend: `src/components/Locked.jsx`, `src/components/SchoolPicker.jsx`, `src/pages/School.jsx`, the Schools tab in `src/pages/Admin.jsx`.

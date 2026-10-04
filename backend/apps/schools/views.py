@@ -1,4 +1,3 @@
-import json
 import logging
 
 from django.db.models import Count, Q, Sum
@@ -239,14 +238,22 @@ class PaymentDetailView(APIView):
 
 
 class ConfirmPaymentView(APIView):
-    """Called when the browser comes back from the provider. Asks the provider; never trusts the redirect."""
+    """Called when the browser comes back from the provider. Asks the provider; never trusts the redirect.
+
+    Body (optional): {"transaction_id": "..."} from the provider's redirect, so the attempt that
+    just finished is the one checked. A payment marked failed or cancelled is checked again too,
+    because the payer may have succeeded on a later attempt in the same checkout.
+    """
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "billing_confirm"
 
     def post(self, request, reference):
         payment = _payment_for(request, reference)
-        if payment.status == Payment.Status.PENDING and payment.provider != Payment.Provider.MANUAL:
-            verification = providers.get(payment.provider).verify(payment)
+        if payment.status != Payment.Status.SUCCEEDED and payment.provider != Payment.Provider.MANUAL:
+            transaction_id = str(request.data.get("transaction_id") or "")[:40]
+            verification = providers.get(payment.provider).verify(payment, transaction_id)
             payment = billing.settle(payment, verification, request=request)
         return Response(PaymentSerializer(payment).data)
 
@@ -282,15 +289,21 @@ class FlutterwaveWebhookView(APIView):
             log.warning("Rejected a Flutterwave webhook with a bad signature")
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
-            payload = json.loads(request.body or b"{}")
+            payload = provider.parse_webhook(request.content_type, request.body)
         except ValueError:
+            log.warning("Unreadable Flutterwave webhook (content type %s)", request.content_type)
             return Response(status=status.HTTP_400_BAD_REQUEST)
         reference = provider.webhook_reference(payload)
+        if not reference:
+            # Acknowledge so it isn't retried, but say so: usually the dashboard isn't set to v3 JSON webhooks.
+            log.warning("Flutterwave webhook without a transaction reference; fields: %s", sorted(payload)[:12])
+            return Response({"ignored": True})
         payment = Payment.objects.filter(reference=reference, provider=Payment.Provider.FLUTTERWAVE).first()
         if payment is None:
-            return Response({"ignored": True})  # not ours (or already gone): acknowledge so it isn't retried
-        if payment.status == Payment.Status.PENDING:
-            billing.settle(payment, provider.verify(payment))
+            log.info("Flutterwave webhook for an unknown reference %s", reference[:60])
+            return Response({"ignored": True})  # not ours: acknowledge so it isn't retried
+        if payment.status != Payment.Status.SUCCEEDED:
+            billing.settle(payment, provider.verify(payment, provider.webhook_transaction_id(payload)))
         return Response({"received": True})
 
 

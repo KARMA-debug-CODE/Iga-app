@@ -6,8 +6,10 @@ or a webhook body claims). `billing.apply_payment` does the rest, exactly once.
 """
 
 from dataclasses import dataclass, field
+from datetime import timedelta
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from .models import Payment
@@ -24,6 +26,16 @@ def return_url(payment):
     return f"{settings.FRONTEND_URL}/school/billing/return?ref={payment.reference}"
 
 
+# An attempt begun just before the session ends can finish a little after it.
+CLOSE_MARGIN = timedelta(minutes=15)
+
+
+def checkout_closed(payment, now=None):
+    """True once the hosted checkout for this payment can no longer take a new attempt."""
+    now = now or timezone.now()
+    return now >= payment.created_at + timedelta(minutes=settings.CHECKOUT_SESSION_MINUTES) + CLOSE_MARGIN
+
+
 class DevProvider:
     """A fake checkout for local demos and automated tests. Refuses to work unless BILLING_DEV_MODE."""
 
@@ -36,7 +48,7 @@ class DevProvider:
         # A page of our own app, so a relative link works whatever host the app is served from.
         return f"/school/billing/dev-checkout?ref={payment.reference}"
 
-    def verify(self, payment):
+    def verify(self, payment, transaction_id=""):
         outcome = (payment.provider_data or {}).get("dev_outcome")
         if outcome == "success":
             return Verification("succeeded", f"dev-{payment.reference}", {"dev_outcome": outcome})

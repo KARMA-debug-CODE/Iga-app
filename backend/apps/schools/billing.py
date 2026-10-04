@@ -18,6 +18,9 @@ from rest_framework.exceptions import ValidationError
 
 from .models import Payment, School
 
+# Currencies without a minor unit: prices are whole francs.
+ZERO_DECIMAL_CURRENCIES = {"RWF"}
+
 
 def add_months(moment: datetime, months: int) -> datetime:
     """Same day-of-month N months later, clamped to the month's last day (31 Jan + 1 = 28/29 Feb)."""
@@ -37,7 +40,8 @@ def price(months: int, currency: str) -> Decimal:
         raise ValidationError({"months": f"Choose one of {settings.SUBSCRIPTION_MONTH_OPTIONS} months."})
     if currency not in settings.SUBSCRIPTION_PRICES:
         raise ValidationError({"currency": f"Choose one of {currencies()}."})
-    return (settings.SUBSCRIPTION_PRICES[currency] * months).quantize(Decimal("0.01"))
+    step = Decimal("1") if currency in ZERO_DECIMAL_CURRENCIES else Decimal("0.01")
+    return (settings.SUBSCRIPTION_PRICES[currency] * months).quantize(step)
 
 
 def new_reference():
@@ -59,14 +63,17 @@ def start_payment(school: School, user, months: int, currency: str, provider: st
 
 
 def apply_payment(payment: Payment, transaction_id: str = "", data: dict | None = None, now=None) -> bool:
-    """Mark a pending payment as paid and extend the school's subscription.
+    """Mark a payment as paid and extend the school's subscription.
 
-    Returns True if this call applied it, False if it had already been applied (or isn't pending).
+    Only ever called once the provider's own API has confirmed the money arrived (or for a payment
+    an administrator recorded), so it also applies to a payment already marked failed or
+    cancelled: a success reported late, after the checkout closed, must still give the school its
+    months. Returns True if this call applied it, False if it had already been applied.
     """
     now = now or timezone.now()
     with transaction.atomic():
         payment = Payment.objects.select_for_update().get(pk=payment.pk)
-        if payment.status != Payment.Status.PENDING:
+        if payment.status == Payment.Status.SUCCEEDED:
             return False
         school = School.objects.select_for_update().get(pk=payment.school_id)
         start = max(now, school.paid_until) if school.paid_until else now

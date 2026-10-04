@@ -30,6 +30,11 @@ def lycee_admin(lycee):
     return make_user("lkadmin", role="school_admin", school=lycee)
 
 
+@pytest.fixture
+def apade(db):
+    return make_school("APADE", "Kicukiro")
+
+
 def register(client, **data):
     payload = {"username": "newkid", "password": PASSWORD, "first_name": "New", "grade": "S2"}
     payload.update(data)
@@ -291,6 +296,8 @@ def test_flutterwave_checkout_and_redirect_confirmation(client_for, lycee, lycee
     assert (method, path) == ("POST", "/payments")
     assert payload["tx_ref"] == start["reference"] and payload["amount"] == "200.00" and payload["currency"] == "USD"
     assert payload["redirect_url"].endswith(f"/school/billing/return?ref={start['reference']}")
+    assert payload["session_duration"] == 60 and payload["max_retry_attempt"] == 5
+    assert "phonenumber" not in payload["customer"]  # the school gave no phone: don't send null
 
     fw["responses"]["/transactions/verify_by_reference"] = {
         "status": "success",
@@ -319,7 +326,7 @@ def test_flutterwave_webhook(client_for, lycee, lycee_admin, fw):
         "event": "charge.completed",
         "data": {"id": 55, "tx_ref": payment.reference, "status": "successful", "amount": 999999},
     }
-    fw["responses"]["/transactions/verify_by_reference"] = {
+    fw["responses"]["/transactions/55/verify"] = {
         "status": "success",
         "data": {"id": 55, "tx_ref": payment.reference, "status": "successful", "amount": "200.00", "currency": "USD"},
     }
@@ -356,6 +363,139 @@ def test_flutterwave_hmac_signature(client_for, lycee, lycee_admin, fw):
     assert response.status_code == 200
     payment.refresh_from_db()
     assert payment.status == "pending"  # still pending at Flutterwave: nothing applied
+
+
+def _verify_response(payment, status, transaction_id=1, amount="200.00", currency="USD"):
+    return {
+        "status": "success",
+        "data": {"id": transaction_id, "tx_ref": payment.reference, "status": status, "amount": amount, "currency": currency},
+    }
+
+
+def test_a_declined_card_then_a_successful_retry_is_applied(client_for, lycee, lycee_admin, fw):
+    """Flutterwave's page lets the payer try again with the same reference after a decline."""
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    client = client_for(lycee_admin)
+    confirm = f"/api/billing/payments/{payment.reference}/confirm/"
+    fw["responses"]["/transactions/verify_by_reference"] = _verify_response(payment, "failed", 10)
+    assert client.post(confirm).data["status"] == "pending"  # the checkout is still open
+
+    fw["responses"]["/transactions/11/verify"] = _verify_response(payment, "successful", 11)
+    data = client.post(confirm, {"transaction_id": "11"}, format="json").data
+    assert data["status"] == "succeeded"
+    lycee.refresh_from_db()
+    assert lycee.paid_until is not None
+    assert Payment.objects.get(pk=payment.pk).provider_transaction_id == "11"
+
+
+def test_a_success_reported_after_the_payment_was_closed_still_counts(client_for, lycee, lycee_admin, fw):
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    Payment.objects.filter(pk=payment.pk).update(created_at=timezone.now() - timedelta(hours=3))
+    fw["responses"]["/transactions/verify_by_reference"] = _verify_response(payment, "failed", 20)
+    client = client_for(lycee_admin)
+    assert client.post(f"/api/billing/payments/{payment.reference}/confirm/").data["status"] == "failed"
+
+    # A late webhook for a successful attempt: the money arrived, so the school gets its month.
+    fw["responses"]["/transactions/21/verify"] = _verify_response(payment, "successful", 21)
+    body = {"event": "charge.completed", "data": {"id": 21, "tx_ref": payment.reference, "status": "successful"}}
+    hook = client_for().post("/api/billing/webhooks/flutterwave/", body, format="json", HTTP_VERIF_HASH="webhook-secret")
+    assert hook.status_code == 200
+    payment.refresh_from_db()
+    lycee.refresh_from_db()
+    assert payment.status == "succeeded" and lycee.paid_until is not None
+    first = lycee.paid_until
+    # And never twice.
+    client_for().post("/api/billing/webhooks/flutterwave/", body, format="json", HTTP_VERIF_HASH="webhook-secret")
+    lycee.refresh_from_db()
+    assert lycee.paid_until == first
+
+
+def test_a_transaction_for_another_reference_is_not_applied(client_for, lycee, lycee_admin, apade, fw):
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    other = billing.start_payment(apade, lycee_admin, 1, "USD", "flutterwave")
+    fw["responses"]["/transactions/30/verify"] = _verify_response(other, "successful", 30)
+    fw["responses"]["/transactions/verify_by_reference"] = {
+        "status": "error",
+        "message": "No transaction was found",
+        "data": None,
+    }
+    data = (
+        client_for(lycee_admin)
+        .post(f"/api/billing/payments/{payment.reference}/confirm/", {"transaction_id": "30"}, format="json")
+        .data
+    )
+    assert data["status"] == "pending"
+    lycee.refresh_from_db()
+    assert lycee.paid_until is None
+
+
+def test_form_encoded_and_legacy_webhooks_are_understood(client_for, lycee, lycee_admin, fw):
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    fw["responses"]["/transactions/40/verify"] = _verify_response(payment, "pending", 40)
+    url = "/api/billing/webhooks/flutterwave/"
+    anon = client_for()
+    # Flutterwave's default: form-encoded. Legacy (v2) bodies are flat, with txRef.
+    form = f"txRef={payment.reference}&id=40&status=pending"
+    response = anon.post(url, form, content_type="application/x-www-form-urlencoded", HTTP_VERIF_HASH="webhook-secret")
+    assert response.data == {"received": True}
+    nested = f"event=charge.completed&data[tx_ref]={payment.reference}&data[id]=40"
+    response = anon.post(url, nested, content_type="application/x-www-form-urlencoded", HTTP_VERIF_HASH="webhook-secret")
+    assert response.data == {"received": True}
+    assert [c[1] for c in fw["calls"]].count("/transactions/40/verify") == 2
+    # Nothing to go on: acknowledged (so it isn't retried) and logged.
+    response = anon.post(url, {"event": "charge.completed"}, format="json", HTTP_VERIF_HASH="webhook-secret")
+    assert response.data == {"ignored": True}
+    bad = anon.post(url, "{not json", content_type="application/json", HTTP_VERIF_HASH="webhook-secret")
+    assert bad.status_code == 400
+
+
+def test_mobile_money_is_charged_in_whole_francs(client_for, lycee, lycee_admin, fw, settings):
+    settings.SUBSCRIPTION_PRICES = {"USD": Decimal("200"), "RWF": Decimal("265000.40")}
+    lycee.phone = "+250788000000"
+    lycee.save()
+    fw["responses"]["/payments"] = {"status": "success", "data": {"link": "https://checkout.flutterwave.com/v3/hosted/pay/rwf"}}
+    start = client_for(lycee_admin).post("/api/billing/checkout/", {"months": 3, "currency": "RWF"}, format="json").data
+    payload = fw["calls"][0][2]
+    assert payload["amount"] == "795001" and payload["currency"] == "RWF"
+    assert "mobilemoneyrwanda" in payload["payment_options"]
+    assert payload["customer"]["phonenumber"] == "+250788000000"
+    assert Payment.objects.get(reference=start["reference"]).amount == Decimal("795001")
+
+
+def test_reconcile_applies_lost_webhooks_and_closes_abandoned_checkouts(lycee, lycee_admin, apade, fw):
+    from apps.schools.management.commands.reconcile_payments import reconcile
+
+    paid = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    abandoned = billing.start_payment(apade, lycee_admin, 1, "USD", "flutterwave")
+    still_open = billing.start_payment(apade, lycee_admin, 3, "USD", "flutterwave")
+    ancient = billing.start_payment(apade, lycee_admin, 1, "USD", "flutterwave")
+    now = timezone.now()
+    Payment.objects.filter(pk=abandoned.pk).update(created_at=now - timedelta(hours=2))
+    Payment.objects.filter(pk=ancient.pk).update(created_at=now - timedelta(days=10))
+
+    def by_reference(path, payload):
+        if paid.reference in path:
+            return _verify_response(paid, "successful", 50)
+        return {"status": "error", "message": "No transaction was found", "data": None}
+
+    fw["responses"]["/transactions/verify_by_reference"] = by_reference
+    counts = reconcile(now)
+    statuses = dict(Payment.objects.values_list("reference", "status"))
+    assert statuses[paid.reference] == "succeeded"
+    assert statuses[abandoned.reference] == "cancelled"
+    assert statuses[still_open.reference] == "pending"  # its checkout may still be in use
+    assert statuses[ancient.reference] == "cancelled"
+    assert counts["expired"] == 1 and counts["succeeded"] == 1
+    lycee.refresh_from_db()
+    assert lycee.paid_until is not None
+
+    # The provider is down: nothing changes, and the next run tries again.
+    def down(path, payload):
+        raise flutterwave.ProviderUnavailable()
+
+    fw["responses"]["/transactions/verify_by_reference"] = down
+    assert reconcile(now)["unreachable"] == 1
+    assert Payment.objects.get(pk=still_open.pk).status == "pending"
 
 
 def test_flutterwave_outage_cancels_the_checkout(client_for, lycee_admin, fw):
