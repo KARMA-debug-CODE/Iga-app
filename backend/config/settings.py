@@ -219,6 +219,15 @@ BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "")
 # A fake checkout for local demos and tests. Never enable it in production.
 BILLING_DEV_MODE = env_bool("BILLING_DEV_MODE", DEBUG)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+# Flutterwave (cards and MTN/Airtel mobile money). Test keys start with FLWSECK_TEST-.
+FLUTTERWAVE_SECRET_KEY = os.environ.get("FLUTTERWAVE_SECRET_KEY", "")
+FLUTTERWAVE_WEBHOOK_HASH = os.environ.get("FLUTTERWAVE_WEBHOOK_HASH", "")
+FLUTTERWAVE_BASE_URL = os.environ.get("FLUTTERWAVE_BASE_URL", "https://api.flutterwave.com/v3")
+# Used as the payer's email when the school administrator has none (providers require one).
+BILLING_FALLBACK_EMAIL = os.environ.get("BILLING_FALLBACK_EMAIL", "billing@iga.rw")
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Iga <no-reply@iga.rw>")
+
 # Behind the bundled nginx, protected files (uploaded past papers) are sent by nginx from an
 # internal location after Django has checked access. Without nginx, Django streams them.
 PROTECTED_MEDIA_ACCEL = env_bool("PROTECTED_MEDIA_ACCEL", False)

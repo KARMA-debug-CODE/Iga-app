@@ -20,6 +20,7 @@ from apps.classroom.views import AssignmentSerializer, assignment_statuses
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
 from apps.curriculum.views import visible_lessons
 from apps.schools.access import has_premium
+from apps.schools.views import revenue_summary
 from apps.simulations.models import Simulation, SimulationView
 
 from . import audit
@@ -336,6 +337,7 @@ def admin_stats(request):
             "students_by_grade": students_by_grade,
             "active_last_7_days": active_week,
             "pending_teachers": User.objects.filter(role=User.Role.TEACHER, teacher_approved=False).count(),
+            "subscriptions": revenue_summary(),
             "content": {
                 "subjects": Subject.objects.count(),
                 "lessons_published": Lesson.objects.filter(status=ContentStatus.PUBLISHED).count(),

@@ -119,3 +119,29 @@ def record_manual_payment(school: School, admin, months: int, amount: Decimal, c
     apply_payment(payment)
     payment.refresh_from_db()
     return payment
+
+
+def settle(payment: Payment, verification, request=None) -> Payment:
+    """Act on what the provider says about a payment. Safe to call any number of times."""
+    from apps.core import audit
+
+    from . import notify
+
+    if verification.status == "succeeded":
+        if apply_payment(payment, verification.transaction_id, verification.data):
+            payment.refresh_from_db()
+            audit.record(
+                request,
+                "subscription_paid",
+                payment.school,
+                reference=payment.reference,
+                months=payment.months,
+                amount=str(payment.amount),
+                currency=payment.currency,
+                provider=payment.provider,
+            )
+            notify.payment_received(payment)
+    elif verification.status == "failed":
+        fail_payment(payment, data=verification.data)
+    payment.refresh_from_db()
+    return payment

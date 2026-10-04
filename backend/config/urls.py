@@ -48,6 +48,7 @@ api = [
     path("admin/stats/", core_views.admin_stats, name="admin-stats"),
     path("admin/audit/", core_views.admin_audit, name="admin-audit"),
     path("files/papers/<str:token>/", PaperDownloadView.as_view(), name="paper-download"),
+    path("", include("apps.schools.urls")),
     path("", include(router.urls)),
 ]
 
