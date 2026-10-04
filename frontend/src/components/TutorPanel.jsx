@@ -26,8 +26,9 @@ export function useTutorEnabled() {
  * Pass `lesson` (slug) and/or `attempt` + `question` (ids); the server decides what
  * the tutor may see, so answers stay hidden until the student is allowed to see them.
  */
-export default function TutorPanel({ lesson, attempt, question, starters = [], label, defaultOpen = false }) {
-  const { t } = useI18n();
+export default function TutorPanel({ lesson, attempt, question, starters = [], label, defaultOpen = false, lang: readingLang }) {
+  const { t, lang: uiLang } = useI18n();
+  const lang = readingLang || uiLang; // the tutor answers in the language the student is reading
   const enabled = useTutorEnabled();
   const [open, setOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState([]);
@@ -53,7 +54,7 @@ export default function TutorPanel({ lesson, attempt, question, starters = [], l
     try {
       const res = await api("/tutor/ask/", {
         method: "POST",
-        body: { message, history, lesson, attempt, question },
+        body: { message, history, lesson, attempt, question, lang },
       });
       setMessages((current) => [...current, { role: "assistant", content: res.reply }]);
     } catch (err) {

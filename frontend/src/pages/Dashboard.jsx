@@ -72,8 +72,8 @@ function AssignmentItem({ assignment }) {
 }
 
 function StudentDashboard({ data, user }) {
-  const { t } = useI18n();
-  const subjects = useApi("/subjects/", { params: { grade: user.grade } });
+  const { t, lang } = useI18n();
+  const subjects = useApi("/subjects/", { params: { grade: user.grade, lang } });
   return (
     <>
       <div className="grid-2">
@@ -112,7 +112,7 @@ function StudentDashboard({ data, user }) {
               <div style={{ minWidth: 0 }}>
                 <strong style={{ display: "block" }}>{data.continue_learning.title}</strong>
                 <span className="small muted">
-                  {data.continue_learning.subject} · {data.continue_learning.unit}
+                  {data.continue_learning.subject} · {t("learn.unit", { n: data.continue_learning.unit_number })}: {data.continue_learning.unit_title}
                 </span>
               </div>
             </div>

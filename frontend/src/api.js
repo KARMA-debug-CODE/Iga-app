@@ -2,6 +2,8 @@
 // The access token lives only in memory; the refresh token is an httpOnly
 // cookie the browser sends to /api/auth/refresh/ automatically.
 
+import { translateNow } from "./i18n";
+
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
 // Auth endpoints where a 401 is the answer itself rather than an expired access token.
@@ -21,7 +23,7 @@ export function setSessionExpiredHandler(fn) {
 
 export class ApiError extends Error {
   constructor(status, data) {
-    super(messageFrom(data) || `Request failed (${status})`);
+    super(messageFrom(data) || translateNow("errors.requestFailed", { status }));
     this.status = status;
     this.data = data;
   }
@@ -88,7 +90,7 @@ export async function api(path, { method = "GET", body, params, retry = true, si
       // Only a refusal from the server means the session is over; a network blip or 5xx doesn't.
       if (!(err instanceof ApiError) || ![401, 403].includes(err.status)) throw err;
       onSessionExpired();
-      throw new ApiError(401, { detail: "Your session has expired. Please log in again." });
+      throw new ApiError(401, { detail: translateNow("errors.sessionExpired") });
     }
     return api(path, { method, body, params, retry: false, signal });
   }

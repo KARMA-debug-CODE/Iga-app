@@ -96,7 +96,7 @@ export default function Lesson() {
                 </div>
 
                 <div className="section">
-                  <TutorPanel lesson={lesson.slug} starters={[t("tutor.s.simpler"), t("tutor.s.example"), t("tutor.s.quizme")]} />
+                  <TutorPanel lesson={lesson.slug} lang={lesson.language} starters={[t("tutor.s.simpler"), t("tutor.s.example"), t("tutor.s.quizme")]} />
                 </div>
               </>
             )}

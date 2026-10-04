@@ -16,6 +16,12 @@ export function translate(lang, key, vars) {
   return text.replace(/\{(\w+)\}/g, (_, name) => (vars[name] ?? `{${name}}`));
 }
 
+/** Translate outside React (e.g. in api.js), in the language the page is shown in right now. */
+export function translateNow(key, vars) {
+  const lang = typeof document !== "undefined" ? document.documentElement.lang : "en";
+  return translate(lang, key, vars);
+}
+
 function storedLanguage() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);

@@ -369,12 +369,12 @@ export default function Profile() {
               {(list) => (
                 <div className="badge-grid">
                   {list.map((b) => (
-                    <div key={b.code} className={`badge-tile ${b.earned ? "" : "locked"}`} title={b.description}>
+                    <div key={b.code} className={`badge-tile ${b.earned ? "" : "locked"}`} title={t(`badge.${b.code}.desc`)}>
                       <div className="big" aria-hidden>
                         {b.icon}
                       </div>
-                      <strong className="small">{b.name}</strong>
-                      <div className="small muted">{b.description}</div>
+                      <strong className="small">{t(`badge.${b.code}.name`)}</strong>
+                      <div className="small muted">{t(`badge.${b.code}.desc`)}</div>
                     </div>
                   ))}
                 </div>

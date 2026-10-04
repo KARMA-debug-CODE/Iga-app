@@ -6,7 +6,16 @@ import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
+const ROLE_KEYS = { student: "auth.student", teacher: "auth.teacher", parent: "auth.parent", school_admin: "auth.schoolAdmin", admin: "auth.admin" };
+
+/** Translate a key built from an API value, showing `fallback` for values the dictionaries don't know yet. */
+function tOr(t, key, fallback) {
+  const text = t(key);
+  return text === key ? fallback : text;
+}
+
 function Stats() {
+  const { t } = useI18n();
   const state = useApi("/admin/stats/");
   return (
     <Loader state={state}>
@@ -17,41 +26,41 @@ function Stats() {
             {Object.entries(s.users_by_role).map(([role, n]) => (
               <div className="card stat" key={role}>
                 <strong>{n}</strong>
-                <span className="muted small">{role}s</span>
+                <span className="muted small">{tOr(t, `admin.roleCount.${role}`, `${role}s`)}</span>
               </div>
             ))}
             <div className="card stat">
               <strong>{s.active_last_7_days}</strong>
-              <span className="muted small">active this week</span>
+              <span className="muted small">{t("admin.activeWeek")}</span>
             </div>
             <div className="card stat">
               <strong>{s.content.awaiting_review}</strong>
-              <span className="muted small">awaiting review</span>
+              <span className="muted small">{t("admin.awaitingReview")}</span>
             </div>
           </div>
           <div className="grid-2">
             <div className="card">
-              <h3>Content</h3>
+              <h3>{t("admin.content")}</h3>
               <ul className="list">
                 {Object.entries(s.content).map(([k, v]) => (
                   <li key={k} className="spread">
-                    <span>{k.replace(/_/g, " ")}</span>
+                    <span>{tOr(t, `admin.count.${k}`, k.replace(/_/g, " "))}</span>
                     <strong>{v}</strong>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="card">
-              <h3>Activity (7 days)</h3>
+              <h3>{t("admin.activity7")}</h3>
               <ul className="list">
                 {Object.entries(s.activity_last_7_days).map(([k, v]) => (
                   <li key={k} className="spread">
-                    <span>{k.replace(/_/g, " ")}</span>
+                    <span>{tOr(t, `admin.count.${k}`, k.replace(/_/g, " "))}</span>
                     <strong>{v}</strong>
                   </li>
                 ))}
               </ul>
-              <h3 style={{ marginTop: 16 }}>Students by grade</h3>
+              <h3 style={{ marginTop: 16 }}>{t("admin.studentsByGrade")}</h3>
               <div className="row">
                 {Object.entries(s.students_by_grade).map(([g, n]) => (
                   <span key={g} className="pill">
@@ -61,7 +70,7 @@ function Stats() {
               </div>
             </div>
             <div className="card">
-              <h3>Popular lessons</h3>
+              <h3>{t("admin.popularLessons")}</h3>
               <ol>
                 {s.popular_lessons.map((l) => (
                   <li key={l.title}>
@@ -71,7 +80,7 @@ function Stats() {
               </ol>
             </div>
             <div className="card">
-              <h3>Popular labs</h3>
+              <h3>{t("admin.popularLabs")}</h3>
               <ol>
                 {s.popular_simulations.map((l) => (
                   <li key={l.title}>
@@ -103,7 +112,7 @@ function Users() {
           <input type="checkbox" checked={pending} onChange={(e) => setPending(e.target.checked)} />
           {t("admin.pendingTeachers")}
         </label>
-        <input type="search" placeholder="Search users" value={q} onChange={(e) => setQ(e.target.value)} style={{ maxWidth: 260 }} />
+        <input type="search" placeholder={t("admin.searchUsers")} value={q} onChange={(e) => setQ(e.target.value)} style={{ maxWidth: 260 }} />
       </div>
       <Loader state={state}>
         {(data) => {
@@ -114,10 +123,10 @@ function Users() {
               <table>
                 <thead>
                   <tr>
-                    <th>User</th>
-                    <th>Role</th>
-                    <th>School</th>
-                    <th>Joined</th>
+                    <th>{t("admin.col.user")}</th>
+                    <th>{t("admin.col.role")}</th>
+                    <th>{t("admin.col.school")}</th>
+                    <th>{t("admin.col.joined")}</th>
                     <th />
                   </tr>
                 </thead>
@@ -133,9 +142,9 @@ function Users() {
                         </div>
                       </td>
                       <td>
-                        {u.role} {u.grade}
-                        {u.role === "teacher" && !u.teacher_approved && <span className="pill pill-warn">pending</span>}
-                        {!u.is_active && <span className="pill pill-danger">disabled</span>}
+                        {ROLE_KEYS[u.role] ? t(ROLE_KEYS[u.role]) : u.role} {u.grade}
+                        {u.role === "teacher" && !u.teacher_approved && <span className="pill pill-warn">{t("admin.pending")}</span>}
+                        {!u.is_active && <span className="pill pill-danger">{t("admin.disabled")}</span>}
                       </td>
                       <td>{u.school}</td>
                       <td className="small">{formatDate(u.date_joined)}</td>
@@ -147,7 +156,7 @@ function Users() {
                             </button>
                           )}
                           <button className="btn btn-sm btn-secondary" onClick={() => update(u, { is_active: !u.is_active })}>
-                            {u.is_active ? "Disable" : "Enable"}
+                            {u.is_active ? t("admin.disable") : t("admin.enable")}
                           </button>
                         </div>
                       </td>
@@ -180,11 +189,11 @@ function Review() {
             {items.map((item) => (
               <div className="card spread" key={`${item.type}-${item.id}`}>
                 <div>
-                  <span className="pill">{item.type}</span> <strong>{item.title}</strong>
+                  <span className="pill">{tOr(t, `admin.type.${item.type}`, item.type)}</span> <strong>{item.title}</strong>
                   <div className="small muted">
                     {item.subject} · {item.grade} · {item.author} · {formatDate(item.updated_at)}
                   </div>
-                  {item.type === "lesson" && <Link to={`/lessons/${item.slug}`}>Preview →</Link>}
+                  {item.type === "lesson" && <Link to={`/lessons/${item.slug}`}>{t("teach.preview")} →</Link>}
                   {item.url && (
                     <a href={item.url} target="_blank" rel="noopener noreferrer">
                       {item.url}
@@ -225,12 +234,12 @@ function Moderation() {
             {reports.map((r) => (
               <div className="card" key={r.id}>
                 <div className="small muted">
-                  {r.message.group} · reported by {r.reporter} · {formatDate(r.created_at)}
+                  {r.message.group} · {t("admin.reportedBy", { name: r.reporter })} · {formatDate(r.created_at)}
                 </div>
                 <blockquote className="alert" style={{ margin: "8px 0" }}>
                   <strong>{r.message.author}:</strong> {r.message.body}
                 </blockquote>
-                <div className="small">Reason: {r.reason}</div>
+                <div className="small">{t("admin.reason", { reason: r.reason })}</div>
                 <div className="row" style={{ marginTop: 10 }}>
                   <button className="btn btn-sm btn-danger" onClick={() => resolve(r, true)}>
                     {t("admin.hideMessage")}
@@ -249,6 +258,7 @@ function Moderation() {
 }
 
 function Audit() {
+  const { t } = useI18n();
   const state = useApi("/admin/audit/");
   return (
     <Loader state={state}>
@@ -257,11 +267,11 @@ function Audit() {
           <table>
             <thead>
               <tr>
-                <th>When</th>
-                <th>Who</th>
-                <th>Action</th>
-                <th>Target</th>
-                <th>Details</th>
+                <th>{t("admin.col.when")}</th>
+                <th>{t("admin.col.who")}</th>
+                <th>{t("admin.col.action")}</th>
+                <th>{t("admin.col.target")}</th>
+                <th>{t("admin.col.details")}</th>
               </tr>
             </thead>
             <tbody>

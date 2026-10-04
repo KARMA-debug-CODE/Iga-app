@@ -22,7 +22,7 @@ La parabole est symétrique par rapport à la droite verticale
 
 $$x = -\frac{b}{2a}$$
 
-Le **sommet** se trouve sur cette droite. Remplacez $x$ par $x = -\frac{b}{2a}$ dans $f$ pour trouver son ordonnée ($y$).
+Le **sommet** se trouve sur cette droite. Substituez $x = -\frac{b}{2a}$ dans l'expression de $f$ pour trouver son ordonnée ($y$).
 
 **Exemple.** Pour $f(x) = x^2 - 4x + 3$ : $a = 1$, $b = -4$, donc l'axe est $x = 2$ et $f(2) = 4 - 8 + 3 = -1$. Le sommet est $(2, -1)$ ; c'est un minimum.
 

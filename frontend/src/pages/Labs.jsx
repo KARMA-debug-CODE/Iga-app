@@ -8,8 +8,8 @@ import { useI18n } from "../i18n";
 const PROVIDER_ICON = { builtin: "⚡", phet: "🧪", geogebra: "📈", external: "🌐" };
 
 export function SubjectSelect({ value, onChange, label }) {
-  const { t } = useI18n();
-  const meta = useApi("/meta/");
+  const { t, lang } = useI18n();
+  const meta = useApi("/meta/", { params: { lang } });
   return (
     <label>
       {label || t("practice.subject")}

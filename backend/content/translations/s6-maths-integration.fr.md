@@ -86,7 +86,7 @@ Elle parcourt **25 m**. Sa vitesse à $t = 5$ est $v = 3(5) - 0.3(25) = 15 - 7.5
 
 ## Les volumes de révolution
 
-Faire tourner de $360^\circ$ autour de l'axe des abscisses le domaine situé sous $y = f(x)$, de $x = a$ à $x = b$, engendre un solide de volume
+Lorsqu'on fait tourner le domaine situé sous $y = f(x)$, de $x = a$ à $x = b$, d'un angle de $360^\circ$ autour de l'axe des abscisses, on engendre un solide de volume
 
 $$V = \pi \int_a^b y^2\,dx$$
 

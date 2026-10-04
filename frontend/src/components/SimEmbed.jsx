@@ -35,6 +35,7 @@ function loadGeoGebra() {
 }
 
 function GeoGebraApp({ app }) {
+  const { lang } = useI18n();
   const holder = useRef(null);
   const id = `ggb-${useId().replace(/:/g, "")}`;
   const [error, setError] = useState(null);
@@ -48,6 +49,7 @@ function GeoGebraApp({ app }) {
         const applet = new window.GGBApplet(
           {
             appName: app,
+            language: lang, // GeoGebra speaks English and French
             width,
             height: Math.max(380, Math.round(width * 0.65)),
             showToolBar: true,
@@ -65,7 +67,7 @@ function GeoGebraApp({ app }) {
     return () => {
       cancelled = true;
     };
-  }, [app, id]);
+  }, [app, id, lang]);
 
   return (
     <div ref={holder} className="ggb-holder" style={{ width: "100%" }}>
