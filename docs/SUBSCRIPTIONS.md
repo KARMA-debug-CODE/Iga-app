@@ -19,10 +19,10 @@ Content files decide what is free: `access: free` in a lesson's front matter, `"
 ## How a school joins
 
 1. **The school administrator registers** on the sign-up page as *School staff* and chooses **Register my school** (name, district, phone). The school waits for verification.
-2. **The Iga team verifies** the school under **Admin → Schools**. Verifying also approves the person who registered it as the school's first administrator. More administrators can register by choosing the school; an existing administrator or the Iga team approves them.
+2. **The Iga team verifies** the school under **Admin → Schools**. Verifying also approves the person who registered it as the school's first administrator. More administrators can register by choosing the school; an existing administrator or the Iga team approves them. A registration that isn't a real school can be **rejected** (deleted) while it is still waiting, so it doesn't keep the name taken.
 3. **Students and teachers choose their school** when they sign up (or later, under *Profile → My school*):
    - with the **school code** (shown on the administrator's home page), they are approved straight away;
-   - without it, they wait until a school administrator approves them under **Members**. Approving a teacher also approves them as a teacher.
+   - without it, they wait until a school administrator approves them under **Members**. Approving a teacher also confirms them as a teacher (they can create classes); teachers who joined with the code are confirmed with **Confirm as teacher**. A school's confirmation lasts while the teacher is a member: if they leave or are removed, it ends. Teachers approved by the Iga team keep their approval, and a school can't restore an approval the Iga team withdrew.
    - Students created by a teacher from a class list join the teacher's school automatically.
 4. **The administrator pays** under **Subscription**: 1, 3, 6 or 12 months. Renewing early adds to the current end date, so no days are lost.
 
@@ -37,7 +37,7 @@ A school administrator can remove members and issue a new school code at any tim
 | Grace | Ended less than `SUBSCRIPTION_GRACE_DAYS` (3) ago | Everything, while the school renews |
 | Ended | Ended longer ago | Free part only |
 
-A suspended school (Admin → Schools → Suspend) loses access whatever it paid.
+A suspended school (Admin → Schools → Suspend) loses access whatever it paid, and its administrators lose their administrator pages until the Iga team reinstates it.
 
 If access ends while a student is in the middle of a premium quiz, the attempt is closed with what they answered, and their result stays visible (without the premium explanations).
 
@@ -70,6 +70,10 @@ Under **Admin → Schools → (school) → Record a payment**, the Iga team reco
 ### Development and demos
 
 With `BILLING_DEV_MODE=true` (the default when `DJANGO_DEBUG` is on), a test checkout page stands in for Flutterwave. It is refused when the setting is off; never enable it on a real server.
+
+## Upgrading an existing installation
+
+`python manage.py migrate` (run by the Docker image on start) does everything access needs: it adds the school tables, opens the free starter lesson and quiz of each subject, makes teachers' own material free (but not teacher quizzes that reuse library questions), and moves Kinyarwanda and Kiswahili interface settings to English. Then run `python manage.py load_curriculum` once to load the French lesson translations, unit and subject names; it is safe to run again. Nobody has premium access until their school is verified, they are approved members, and the school has paid (or the Iga team records a payment).
 
 ## Receipts and reminders
 

@@ -1,6 +1,6 @@
 """Choosing a school, school administration, paying, webhooks and reminders."""
 
-from datetime import timedelta
+from datetime import UTC, timedelta
 from decimal import Decimal
 
 import pytest
@@ -274,7 +274,8 @@ def fw(settings, monkeypatch):
     settings.FLUTTERWAVE_SECRET_KEY = "FLWSECK_TEST-x"
     settings.FLUTTERWAVE_WEBHOOK_HASH = "webhook-secret"
     calls = []
-    responses = {}
+    # The list of a reference's attempts (consulted when the lookup by reference shows a failure).
+    responses = {"/transactions?": {"status": "success", "data": []}}
 
     def fake_request(method, path, payload=None):
         calls.append((method, path, payload))
@@ -494,7 +495,7 @@ def test_reconcile_applies_lost_webhooks_and_closes_abandoned_checkouts(lycee, l
         raise flutterwave.ProviderUnavailable()
 
     fw["responses"]["/transactions/verify_by_reference"] = down
-    assert reconcile(now)["unreachable"] == 1
+    assert reconcile(now)["unreachable"] == 2  # the open payment and the one closed today
     assert Payment.objects.get(pk=still_open.pk).status == "pending"
 
 
@@ -577,3 +578,276 @@ def test_no_reminders_far_from_the_end_date(lycee, lycee_admin):
     lycee.save()
     call_command("billing_reminders")
     assert mail.outbox == []
+
+
+# --- Review fixes: payments ---------------------------------------------------------------
+
+
+def test_a_good_card_after_a_declined_one_is_found_once_the_checkout_closed(lycee, lycee_admin, fw):
+    """The lookup by reference may return the declined attempt; the successful one must still count."""
+    from apps.schools.management.commands.reconcile_payments import reconcile
+
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    Payment.objects.filter(pk=payment.pk).update(created_at=timezone.now() - timedelta(minutes=80))
+    fw["responses"]["/transactions/verify_by_reference"] = _verify_response(payment, "failed", 10)
+    fw["responses"]["/transactions?"] = {
+        "status": "success",
+        "data": [
+            {"id": 10, "tx_ref": payment.reference, "status": "failed"},
+            {"id": 11, "tx_ref": payment.reference, "status": "successful"},
+            {"id": 12, "tx_ref": "someone-else", "status": "successful"},
+        ],
+    }
+    fw["responses"]["/transactions/11/verify"] = _verify_response(payment, "successful", 11)
+    reconcile()
+    payment.refresh_from_db()
+    lycee.refresh_from_db()
+    assert payment.status == "succeeded" and payment.provider_transaction_id == "11"
+    assert lycee.paid_until is not None
+    assert not any(path.startswith("/transactions/12") for _, path, _ in fw["calls"])
+
+
+def test_reconcile_rechecks_payments_closed_in_the_last_day(lycee, lycee_admin, fw):
+    from apps.schools.management.commands.reconcile_payments import reconcile
+
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    Payment.objects.filter(pk=payment.pk).update(created_at=timezone.now() - timedelta(hours=5), status="cancelled")
+    fw["responses"]["/transactions/verify_by_reference"] = _verify_response(payment, "successful", 60)
+    reconcile()
+    payment.refresh_from_db()
+    assert payment.status == "succeeded"
+    old = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    Payment.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=2), status="cancelled")
+    calls = len(fw["calls"])
+    reconcile()
+    assert len(fw["calls"]) == calls  # older closed payments are left alone
+
+
+def _http_error(code, body):
+    import io
+    import urllib.error
+
+    return urllib.error.HTTPError("https://api.flutterwave.com/v3/x", code, "error", {}, io.BytesIO(body.encode()))
+
+
+@pytest.mark.parametrize(
+    ("failure", "unavailable"),
+    [
+        ("503-json", True),
+        ("429-json", True),
+        ("401-json", True),
+        ("400-json", False),  # e.g. "no transaction found": an answer, not an outage
+        ("reset", True),
+        ("disconnected", True),
+        ("garbled", True),
+    ],
+)
+def test_flutterwave_failures_are_never_read_as_answers(failure, unavailable, settings, monkeypatch):
+    import http.client
+    import urllib.request
+
+    settings.FLUTTERWAVE_SECRET_KEY = "FLWSECK_TEST-x"
+
+    class Garbled:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return b"<html>gateway</html>"
+
+    def fake_urlopen(request, timeout=None):
+        if failure.endswith("-json"):
+            raise _http_error(int(failure[:3]), '{"status": "error", "message": "nope", "data": null}')
+        if failure == "reset":
+            raise ConnectionResetError("reset by peer")
+        if failure == "disconnected":
+            raise http.client.RemoteDisconnected("closed")
+        return Garbled()
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    if unavailable:
+        with pytest.raises(flutterwave.ProviderUnavailable):
+            flutterwave._request("GET", "/transactions/1/verify")
+    else:
+        assert flutterwave._request("GET", "/transactions/1/verify")["status"] == "error"
+
+
+def test_webhook_asks_flutterwave_to_retry_when_its_api_is_down(client_for, lycee, lycee_admin, fw):
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+
+    def down(path, payload):
+        raise flutterwave.ProviderUnavailable()
+
+    fw["responses"]["/transactions/77/verify"] = down
+    body = {"event": "charge.completed", "data": {"id": 77, "tx_ref": payment.reference}}
+    response = client_for().post("/api/billing/webhooks/flutterwave/", body, format="json", HTTP_VERIF_HASH="webhook-secret")
+    assert response.status_code == 503  # Flutterwave retries later
+    assert Payment.objects.get(pk=payment.pk).status == "pending"
+
+
+def test_months_are_counted_in_kigali_time(lycee, lycee_admin):
+    from datetime import datetime
+
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "dev")
+    # 1 March 2026, 01:00 in Kigali is still 28 February in UTC.
+    billing.apply_payment(payment, now=datetime(2026, 2, 28, 23, 0, tzinfo=UTC))
+    lycee.refresh_from_db()
+    end = timezone.localtime(lycee.paid_until)
+    assert (end.year, end.month, end.day, end.hour) == (2026, 4, 1, 1)
+
+
+def test_reminders_tell_the_truth_about_the_grace_period(lycee, lycee_admin, settings):
+    from apps.schools.management.commands.billing_reminders import due_reminders
+
+    settings.SUBSCRIPTION_GRACE_DAYS = 3
+    now = timezone.now()
+    lycee.paid_until = now - timedelta(hours=1)
+    assert due_reminders(lycee, now) == "expired"
+    lycee.paid_until = now - timedelta(days=4)
+    assert due_reminders(lycee, now) == "access_ended"
+    lycee.paid_until = now - timedelta(days=30)
+    assert due_reminders(lycee, now) is None
+
+    lycee.paid_until = now - timedelta(hours=1)
+    lycee.save()
+    call_command("billing_reminders")
+    assert "keep full access until" in mail.outbox[-1].body
+    lycee.paid_until = now - timedelta(days=4)
+    lycee.save()
+    call_command("billing_reminders")
+    assert "now only see the free lessons" in mail.outbox[-1].body
+
+
+def test_manual_payment_receipts_do_not_name_the_iga_staff_member(client_for, admin_user, lycee, lycee_admin):
+    client_for(admin_user).post(
+        f"/api/admin/schools/{lycee.id}/payments/",
+        {"months": 1, "amount": "200", "currency": "USD", "note": "Bank ref 123"},
+        format="json",
+    )
+    payment = client_for(lycee_admin).get("/api/school/payments/").data[0]
+    assert payment["provider"] == "manual" and payment["paid_by"] is None
+
+
+# --- Review fixes: membership -------------------------------------------------------------
+
+
+def test_a_suspended_schools_admin_has_no_powers(client_for, admin_user, lycee, lycee_admin):
+    teacher = make_user("newteacher", role="teacher", school=None)
+    client_for(teacher).post("/api/my-school/", {"school": lycee.id}, format="json")
+    client_for(admin_user).post(f"/api/admin/schools/{lycee.id}/suspend/")
+    admin = client_for(User.objects.get(pk=lycee_admin.pk))
+    assert admin.get("/api/school/").status_code == 403
+    assert admin.post("/api/school/members/decide/", {"ids": [teacher.id], "approve": True}, format="json").status_code == 403
+    assert admin.post("/api/school/new-code/").status_code == 403
+    teacher.refresh_from_db()
+    assert teacher.teacher_approved is False
+
+
+def test_teacher_approval_from_a_school_ends_when_they_leave_it(client_for, lycee, lycee_admin):
+    teacher = make_user("newteacher", role="teacher", school=None)
+    client_for(teacher).post("/api/my-school/", {"school": lycee.id}, format="json")
+    admin = client_for(lycee_admin)
+    admin.post("/api/school/members/decide/", {"ids": [teacher.id], "approve": True}, format="json")
+    teacher.refresh_from_db()
+    assert teacher.teacher_approved and teacher.teacher_approved_by_school_id == lycee.id
+    assert admin.post(f"/api/school/members/{teacher.id}/remove/").status_code == 204
+    teacher.refresh_from_db()
+    assert teacher.teacher_approved is False and teacher.can_teach is False
+    # A teacher the Iga team approved keeps that approval whatever school they join or leave.
+    approved = make_user("igateacher", role="teacher", teacher_approved=True, school=lycee)
+    admin.post(f"/api/school/members/{approved.id}/remove/")
+    approved.refresh_from_db()
+    assert approved.teacher_approved is True
+
+
+def test_a_school_cannot_undo_the_iga_teams_withdrawal(client_for, admin_user, lycee, lycee_admin):
+    teacher = make_user("flagged", role="teacher", teacher_approved=True, school=None)
+    client_for(admin_user).patch(f"/api/admin/users/{teacher.id}/", {"teacher_approved": False}, format="json")
+    client_for(teacher).post("/api/my-school/", {"school": lycee.id}, format="json")
+    client_for(lycee_admin).post("/api/school/members/decide/", {"ids": [teacher.id], "approve": True}, format="json")
+    teacher.refresh_from_db()
+    assert teacher.school_status == "approved"  # still a member of the school...
+    assert teacher.teacher_approved is False and teacher.teacher_revoked is True  # ...but not a teacher
+
+
+def test_a_school_confirms_teachers_who_joined_with_the_code(client_for, lycee, lycee_admin):
+    teacher = make_user("coded", role="teacher", school=None)
+    client_for(teacher).post("/api/my-school/", {"school": lycee.id, "school_code": lycee.join_code}, format="json")
+    teacher.refresh_from_db()
+    assert teacher.school_status == "approved" and teacher.teacher_approved is False
+    admin = client_for(lycee_admin)
+    member = next(m for m in admin.get("/api/school/members/").data if m["id"] == teacher.id)
+    assert member["needs_teacher_confirmation"] is True
+    changed = admin.post("/api/school/members/decide/", {"ids": [teacher.id], "approve": True}, format="json").data
+    teacher.refresh_from_db()
+    assert teacher.teacher_approved is True and changed
+    member = next(m for m in admin.get("/api/school/members/").data if m["id"] == teacher.id)
+    assert member["needs_teacher_confirmation"] is False
+
+
+def test_choosing_your_own_school_again_keeps_you_approved(client_for, lycee, student):
+    client = client_for(student)
+    client.post("/api/my-school/", {"school": lycee.id, "school_code": lycee.join_code}, format="json")
+    assert client.post("/api/my-school/", {"school": lycee.id}, format="json").data["school_status"] == "approved"
+
+
+def test_a_squatted_school_name_can_be_rejected(client_for, admin_user):
+    def register(username):
+        return client_for().post(
+            "/api/auth/register/",
+            {
+                "username": username,
+                "password": "Str0ng-pass-123",
+                "email": f"{username}@example.com",
+                "role": "school_admin",
+                "new_school": {"name": "GS Remera", "district": "Gasabo", "phone": "+250788000000"},
+            },
+            format="json",
+        )
+
+    assert register("squatter").status_code == 201
+    second = register("realhead")
+    assert second.status_code == 400 and "waiting for the Iga team" in str(second.data)
+    school = School.objects.get(name="GS Remera")
+    platform = client_for(admin_user)
+    assert platform.post(f"/api/admin/schools/{school.id}/reject/").status_code == 204
+    squatter = User.objects.get(username="squatter")
+    assert squatter.school_id is None and squatter.school_status == ""
+    assert register("realhead").status_code == 201
+    verified = make_school("Verified", "Huye")
+    assert platform.post(f"/api/admin/schools/{verified.id}/reject/").status_code == 400
+
+
+def test_renaming_a_school_onto_another_is_refused(client_for, admin_user, lycee):
+    other = make_school("APADE", "Nyarugenge")
+    response = client_for(admin_user).patch(f"/api/admin/schools/{other.id}/", {"name": "lycée de kigali"}, format="json")
+    assert response.status_code == 400
+
+
+def test_admins_of_a_deleted_school_can_choose_another(client_for, lycee):
+    stray = make_school("Duplicate", "Huye")
+    admin = make_user("strayadmin", role="school_admin", school=stray)
+    stray.delete()
+    admin = User.objects.get(pk=admin.pk)
+    assert admin.school_id is None and admin.school_status == ""
+    assert client_for(admin).post("/api/my-school/", {"school": lycee.id}, format="json").status_code == 200
+
+
+def test_school_admins_keep_an_email(client_for, lycee_admin):
+    response = client_for(lycee_admin).patch("/api/auth/me/", {"email": ""}, format="json")
+    assert response.status_code == 400
+
+
+def test_seed_demo_can_run_again_after_the_pending_admin_left(client_for):
+    import io
+
+    call_command("seed_demo", force=True, stdout=io.StringIO())
+    gsadmin = User.objects.get(username="gsadmin")
+    assert client_for(gsadmin).delete("/api/my-school/").status_code == 200
+    call_command("seed_demo", force=True, stdout=io.StringIO())
+    gsadmin.refresh_from_db()
+    assert gsadmin.school.name == "GS Remera Catholique" and gsadmin.school_status == "pending"
+    assert School.objects.filter(name="GS Remera Catholique").count() == 1

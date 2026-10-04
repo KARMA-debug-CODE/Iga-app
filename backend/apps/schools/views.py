@@ -89,7 +89,7 @@ class MySchoolView(APIView):
 
     def post(self, request):
         user = request.user
-        if user.is_school_admin and user.school_status == User.SchoolStatus.APPROVED:
+        if user.is_school_admin and user.school_id and user.school_status == User.SchoolStatus.APPROVED:
             raise ValidationError({"school": "School administrators change school through the Iga team."})
         data = ChooseSchoolSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -98,7 +98,7 @@ class MySchoolView(APIView):
 
     def delete(self, request):
         user = request.user
-        if user.is_school_admin and user.school_status == User.SchoolStatus.APPROVED:
+        if user.is_school_admin and user.school_id and user.school_status == User.SchoolStatus.APPROVED:
             raise ValidationError({"school": "School administrators leave a school through the Iga team."})
         membership.leave_school(user, request=request)
         return Response(self._payload(user))
@@ -365,7 +365,7 @@ class PlatformSchoolDetailView(APIView):
 
 
 class PlatformSchoolActionView(APIView):
-    """POST verify | suspend | reinstate."""
+    """POST verify | suspend | reinstate | reject (a pending registration that isn't a real school)."""
 
     permission_classes = [IsPlatformAdmin]
 
@@ -386,6 +386,12 @@ class PlatformSchoolActionView(APIView):
         elif action == "reinstate":
             school.status = School.Status.VERIFIED
             school.save(update_fields=["status"])
+        elif action == "reject":
+            if school.status != School.Status.PENDING or school.payments.exists():
+                raise ValidationError("Only a school waiting for verification, with no payments, can be rejected.")
+            audit.record(request, "reject_school", school, name=school.name, district=school.district)
+            school.delete()  # its members are released (signals.release_members)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             raise ValidationError("Unknown action.")
         audit.record(request, f"{action}_school", school)

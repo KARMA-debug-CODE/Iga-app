@@ -77,7 +77,8 @@ def apply_payment(payment: Payment, transaction_id: str = "", data: dict | None 
             return False
         school = School.objects.select_for_update().get(pk=payment.school_id)
         start = max(now, school.paid_until) if school.paid_until else now
-        end = add_months(start, payment.months)
+        # Calendar months in Kigali time: a payment just after midnight belongs to the new day.
+        end = add_months(timezone.localtime(start), payment.months)
         school.paid_until = end
         school.save(update_fields=["paid_until"])
         payment.status = Payment.Status.SUCCEEDED

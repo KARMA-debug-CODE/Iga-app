@@ -319,6 +319,19 @@ function SchoolDetail({ id, onChanged }) {
     }
   }
   const act = (action) => run(() => api(`/admin/schools/${id}/${action}/`, { method: "POST" }));
+  // A registration that isn't a real school: deleted, and whoever registered it is released.
+  async function reject() {
+    if (!window.confirm(t("admin.rejectSchoolConfirm"))) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api(`/admin/schools/${id}/reject/`, { method: "POST" });
+      onChanged();
+    } catch (err) {
+      setError(err);
+      setBusy(false);
+    }
+  }
   const recordPayment = (e) => {
     e.preventDefault();
     run(async () => {
@@ -362,6 +375,11 @@ function SchoolDetail({ id, onChanged }) {
                 onClick={() => act(school.status === "pending" ? "verify" : "reinstate")}
               >
                 ✓ {t(school.status === "pending" ? "admin.verify" : "admin.reinstate")}
+              </button>
+            )}
+            {school.status === "pending" && (
+              <button className="btn btn-sm btn-danger" disabled={busy} onClick={reject}>
+                {t("admin.rejectSchool")}
               </button>
             )}
             {school.status === "verified" && (

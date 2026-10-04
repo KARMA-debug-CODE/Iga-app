@@ -170,8 +170,10 @@ class QuizViewSet(viewsets.ModelViewSet):
     def analytics(self, request, pk=None):
         """Item analysis for the teacher's students (optionally one class: ?classroom=<id>)."""
         quiz = self.get_object()
-        if quiz.author_id != request.user.id:
-            access.require(request.user, quiz)  # the analysis shows the answer key
+        # The analysis shows the answer key. Authors see their own free material; a quiz holding
+        # library questions needs the subscription, even for the teacher who built it.
+        if not (quiz.author_id == request.user.id and quiz.is_free):
+            access.require(request.user, quiz)
         return Response(quiz_analytics(quiz, request.user, request.query_params.get("classroom")))
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
@@ -310,7 +312,8 @@ class MarkingViewSet(viewsets.ViewSet):
                     "submitted_at": a.attempt.submitted_at,
                     "question": a.question.prompt,
                     "max_marks": a.question.marks,
-                    "marking_guide": a.question.marking_guide,
+                    # Marking guides are premium, like the explanations students see.
+                    "marking_guide": a.question.marking_guide if access.can_open(request.user, a.attempt.quiz) else "",
                     "answer_text": a.text_answer,
                 }
                 for a in pending

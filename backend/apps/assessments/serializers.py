@@ -393,9 +393,14 @@ class AttemptSerializer(serializers.ModelSerializer):
         return paper_link(_viewer(self), paper, "marking_guide", self.context.get("request"))
 
     def get_questions(self, attempt):
+        full = self._full_solutions(attempt)
+        viewer = _viewer(self)
+        if not full and (viewer is None or viewer.id != attempt.user_id):
+            # A teacher (or anyone but the student) without the subscription sees the score only:
+            # the questions and answer key of a premium quiz stay locked.
+            return []
         questions = {q.id: q for q in Question.objects.filter(id__in=attempt.question_order).prefetch_related("choices")}
         answers = {a.question_id: a for a in attempt.answers.prefetch_related("selected_choices")}
-        full = self._full_solutions(attempt)
         result = []
         for number, qid in enumerate(attempt.question_order, start=1):
             question = questions.get(qid)

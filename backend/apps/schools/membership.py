@@ -40,6 +40,11 @@ def choose_school(user, school, code="", request=None, approved_by=None):
                 "school_code": "That code doesn't match this school. Check it with your school, or leave it empty to ask for approval."
             }
         )
+    if user.school_id == school.pk and user.school_status == user.SchoolStatus.APPROVED:
+        return user  # already an approved member: picking the same school again changes nothing
+    fields = ["school", "school_status", "school_approved_at", "school_approved_by"]
+    if user.school_id != school.pk:
+        fields += _drop_school_teacher_approval(user)
     user.school = school
     if code_ok or approved_by is not None:
         _approve(user, approved_by)
@@ -47,7 +52,7 @@ def choose_school(user, school, code="", request=None, approved_by=None):
         user.school_status = user.SchoolStatus.PENDING
         user.school_approved_at = None
         user.school_approved_by = None
-    user.save(update_fields=["school", "school_status", "school_approved_at", "school_approved_by"])
+    user.save(update_fields=fields)
     access.forget(user)
     if request is not None:
         audit.record(request, "choose_school", user, school=school.id, status=user.school_status, by_code=code_ok)
@@ -60,13 +65,24 @@ def _approve(user, approver):
     user.school_approved_by = approver
 
 
+def _drop_school_teacher_approval(user):
+    """A teacher approved by their school stops being approved when they leave it.
+    Returns the fields to save."""
+    if user.teacher_approved_by_school_id is None:
+        return []
+    user.teacher_approved = False
+    user.teacher_approved_by_school = None
+    return ["teacher_approved", "teacher_approved_by_school"]
+
+
 def leave_school(user, request=None):
     old = user.school_id
+    fields = ["school", "school_status", "school_approved_at", "school_approved_by", *_drop_school_teacher_approval(user)]
     user.school = None
     user.school_status = user.SchoolStatus.NONE
     user.school_approved_at = None
     user.school_approved_by = None
-    user.save(update_fields=["school", "school_status", "school_approved_at", "school_approved_by"])
+    user.save(update_fields=fields)
     access.forget(user)
     if request is not None and old:
         audit.record(request, "leave_school", user, school=old)
@@ -84,21 +100,33 @@ def require_manager(actor, school):
         raise PermissionDenied("Only this school's administrators can do that.")
 
 
+def needs_teacher_confirmation(user):
+    """A teacher the school could vouch for: not yet approved, and not stopped by the Iga team."""
+    return user.role == "teacher" and not user.teacher_approved and not user.teacher_revoked
+
+
 @transaction.atomic
 def decide(actor, school, members, approve, request=None):
-    """Approve or reject pending requests for `school`. Returns the users changed."""
+    """Approve or reject pending requests for `school`, and confirm approved members who are
+    teachers (for example, teachers who joined with the code). Returns the users changed."""
     require_manager(actor, school)
     changed = []
     for user in members:
-        if user.school_id != school.pk or user.school_status != user.SchoolStatus.PENDING:
+        if user.school_id != school.pk:
+            continue
+        confirm_teacher_only = approve and user.school_status == user.SchoolStatus.APPROVED and needs_teacher_confirmation(user)
+        if user.school_status != user.SchoolStatus.PENDING and not confirm_teacher_only:
             continue
         if approve:
-            _approve(user, actor)
-            fields = ["school_status", "school_approved_at", "school_approved_by"]
-            if user.role == "teacher" and not user.teacher_approved:
-                # The school vouches for its own teachers.
+            fields = []
+            if not confirm_teacher_only:
+                _approve(user, actor)
+                fields += ["school_status", "school_approved_at", "school_approved_by"]
+            if needs_teacher_confirmation(user):
+                # The school vouches for its own teachers, for as long as they stay members.
                 user.teacher_approved = True
-                fields.append("teacher_approved")
+                user.teacher_approved_by_school = school
+                fields += ["teacher_approved", "teacher_approved_by_school"]
             user.save(update_fields=fields)
         else:
             user.school_status = user.SchoolStatus.REJECTED

@@ -253,6 +253,10 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         if serializer.instance == self.request.user and serializer.validated_data.get("role", "admin") != "admin":
             raise ValidationError("You can't remove your own administrator role.")
         user = serializer.save()
+        if before["teacher_approved"] != user.teacher_approved:
+            # The Iga team's decision replaces any school's, and a withdrawal sticks.
+            user.set_teacher_approval(user.teacher_approved)
+            user.save(update_fields=["teacher_approved", "teacher_approved_by_school", "teacher_revoked"])
         changes = {f: [before[f], getattr(user, f)] for f in before if before[f] != getattr(user, f)}
         if changes:
             audit.record(self.request, "update_user", user, **{k: [str(v) for v in pair] for k, pair in changes.items()})

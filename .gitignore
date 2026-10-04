@@ -1,7 +1,7 @@
 # Python
 __pycache__/
 *.pyc
-.venv/
+.venv
 backend/*.sqlite3
 backend/media/
 backend/staticfiles/

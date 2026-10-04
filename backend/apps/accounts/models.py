@@ -36,6 +36,13 @@ class User(AbstractUser):
     # Self-registered teachers must be approved by an administrator before they
     # can create classes or author content (safeguarding: classes contain minors).
     teacher_approved = models.BooleanField(default=False)
+    # Set when a school administrator confirmed the teacher (the school vouches for its own staff):
+    # that approval lasts only while the teacher stays an approved member of that school.
+    teacher_approved_by_school = models.ForeignKey(
+        "schools.School", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    # Set when the Iga team withdraws teacher approval: a school can't grant it back.
+    teacher_revoked = models.BooleanField(default=False)
 
     # Gamification counters, denormalised from the XP ledger for fast reads.
     xp = models.PositiveIntegerField(default=0)
@@ -84,8 +91,17 @@ class User(AbstractUser):
 
     @property
     def managed_school(self):
-        """The school this user administers (approved school admins only)."""
-        return self.school_member if self.is_school_admin else None
+        """The school this user administers: approved school admins of a verified school only
+        (a suspended or not yet verified school has no administrator powers)."""
+        school = self.school_member if self.is_school_admin else None
+        return school if school is not None and school.is_verified else None
+
+    def set_teacher_approval(self, approved):
+        """The Iga team's decision on teacher approval, which overrides any school's.
+        The caller saves (fields: teacher_approved, teacher_approved_by_school, teacher_revoked)."""
+        self.teacher_approved = approved
+        self.teacher_approved_by_school = None
+        self.teacher_revoked = not approved
 
     @property
     def can_teach(self):

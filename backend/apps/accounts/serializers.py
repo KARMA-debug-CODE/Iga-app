@@ -1,5 +1,5 @@
 from django.contrib.auth import password_validation
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from rest_framework import serializers
 
 from apps.core.constants import GRADE_CODES
@@ -91,6 +91,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         if not value:
+            if self.instance is not None and self.instance.is_school_admin:
+                raise serializers.ValidationError("School administrators need an email address for receipts and reminders.")
             return None
         value = value.lower()
         others = User.objects.filter(email__iexact=value)
@@ -172,8 +174,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         elif attrs.get("new_school"):
             raise serializers.ValidationError({"new_school": "Only school administrators register schools."})
         new_school = attrs.get("new_school")
-        if new_school and School.objects.filter(name__iexact=new_school["name"], district=new_school["district"]).exists():
-            raise serializers.ValidationError({"new_school": "That school is already on Iga. Choose it from the list instead."})
+        existing = (
+            School.objects.filter(name__iexact=new_school["name"], district=new_school["district"]).first()
+            if new_school
+            else None
+        )
+        if existing is not None:
+            if existing.is_verified:
+                raise serializers.ValidationError(
+                    {"new_school": "That school is already on Iga. Choose it from the list instead."}
+                )
+            raise serializers.ValidationError(
+                {
+                    "new_school": "That school has already been registered and is waiting for the Iga team. "
+                    "If you run it, contact the Iga team."
+                }
+            )
         candidate = User(**{k: v for k, v in attrs.items() if k not in ("password", "school", "school_code", "new_school")})
         password_validation.validate_password(attrs["password"], candidate)
         return attrs
@@ -201,7 +217,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         if new_school:
             # Waits for the Iga team to verify the school (and this administrator).
-            created = School.objects.create(created_by=user, **new_school)
+            try:
+                with transaction.atomic():
+                    created = School.objects.create(created_by=user, **new_school)
+            except IntegrityError:  # registered by someone else a moment ago
+                raise serializers.ValidationError(
+                    {"new_school": "That school has just been registered. Choose it from the list."}
+                )
             user.school = created
             user.school_status = User.SchoolStatus.PENDING
             user.save(update_fields=["school", "school_status"])

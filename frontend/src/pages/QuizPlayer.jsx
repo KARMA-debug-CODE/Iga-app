@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import Markdown from "../components/Markdown";
 import TutorPanel from "../components/TutorPanel";
+import { LockedNotice } from "../components/Locked";
 import { ErrorMessage, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -234,6 +235,7 @@ function Results({ attempt }) {
       </div>
 
       <h2 className="section">{t("quiz.review")}</h2>
+      {attempt.quiz.locked && attempt.questions.length === 0 && <LockedNotice compact />}
       <div className="stack">
         {attempt.questions.map((q) => (
           <div className="card" key={q.id}>

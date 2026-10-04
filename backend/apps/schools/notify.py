@@ -53,11 +53,18 @@ def reminder(school, kind):
     if days:
         subject = f"{settings.APP_NAME}: {school.name}'s subscription ends in {days} day(s)"
         lead = f"{school.name}'s {settings.APP_NAME} subscription is paid until {_date(school.paid_until)}."
-    else:
+    elif kind == "expired":
         subject = f"{settings.APP_NAME}: {school.name}'s subscription has ended"
         lead = (
             f"{school.name}'s {settings.APP_NAME} subscription ended on {_date(school.paid_until)}. "
-            "Students now only see the free lessons."
+            f"Students keep full access until {_date(school.grace_ends())}; after that they will only see "
+            "the free lessons."
+        )
+    else:
+        subject = f"{settings.APP_NAME}: {school.name}'s students no longer have full access"
+        lead = (
+            f"{school.name}'s {settings.APP_NAME} subscription ended on {_date(school.paid_until)}. "
+            "Students now only see the free lessons until the school renews."
         )
     body = f"{lead}\n\nRenew here: {settings.FRONTEND_URL}/school/billing\n"
     return _send(school, subject, body)

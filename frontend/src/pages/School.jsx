@@ -180,6 +180,17 @@ export function SchoolMembers() {
     }
   }
 
+  async function confirmTeacher(member) {
+    setError(null);
+    try {
+      await api("/school/members/decide/", { method: "POST", body: { ids: [member.id], approve: true } });
+      showToast(t("school.teacherConfirmed", { name: member.display_name }));
+      state.reload();
+    } catch (err) {
+      setError(err);
+    }
+  }
+
   async function remove(member) {
     if (!window.confirm(t("school.removeConfirm", { name: member.display_name }))) return;
     setError(null);
@@ -261,13 +272,21 @@ export function SchoolMembers() {
                           {t(`auth.${m.role === "school_admin" ? "schoolAdmin" : m.role}`)}
                           {m.grade && ` · ${m.grade}`} · {formatDate(m.school_approved_at || m.date_joined, lang)}
                         </div>
+                        {m.needs_teacher_confirmation && <span className="pill pill-warn small">{t("school.teacherUnconfirmed")}</span>}
                       </span>
                     </label>
-                    {statusFilter !== "pending" && m.role !== "school_admin" && (
-                      <button className="btn btn-sm btn-ghost" onClick={() => remove(m)}>
-                        {t("classes.remove")}
-                      </button>
-                    )}
+                    <div className="row" style={{ flexWrap: "nowrap" }}>
+                      {m.needs_teacher_confirmation && (
+                        <button className="btn btn-sm btn-success" onClick={() => confirmTeacher(m)}>
+                          ✓ {t("school.confirmTeacher")}
+                        </button>
+                      )}
+                      {statusFilter !== "pending" && m.role !== "school_admin" && (
+                        <button className="btn btn-sm btn-ghost" onClick={() => remove(m)}>
+                          {t("classes.remove")}
+                        </button>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -412,11 +431,15 @@ export function BillingReturn() {
   const { t } = useI18n();
   const { reloadUser } = useAuth();
   const [params] = useSearchParams();
-  // Flutterwave adds status, tx_ref and transaction_id to our return link. Only the server's
-  // answer counts; the transaction id just tells it which attempt to check.
-  const reference = (params.get("tx_ref") || params.get("ref") || "").split("?")[0];
-  const transactionId = params.get("transaction_id") || "";
-  const gatewayCancelled = params.get("status") === "cancelled";
+  // Flutterwave adds status, tx_ref and transaction_id to our return link (with "&", or a second
+  // "?" that ends up inside ref). Only the server's answer counts: the transaction id tells it which
+  // attempt to check, and the status only decides what to say while the server still says pending.
+  const [refValue, extra = ""] = (params.get("ref") || "").split("?");
+  const extraParams = new URLSearchParams(extra);
+  const gateway = (name) => params.get(name) || extraParams.get(name) || "";
+  const reference = gateway("tx_ref") || refValue;
+  const transactionId = gateway("transaction_id");
+  const gatewayCancelled = ["cancelled", "failed"].includes(gateway("status"));
   const [payment, setPayment] = useState(null);
   const [error, setError] = useState(null);
   const tries = useRef(0);
@@ -450,7 +473,8 @@ export function BillingReturn() {
     };
   }, [reference, transactionId, gatewayCancelled, reloadUser]);
 
-  // The payer left the checkout: say so rather than "being confirmed" (the server closes it later).
+  // The payer left the checkout or ran out of attempts: say so rather than "being confirmed"
+  // (the server closes the payment later, and still applies a success if one turns up).
   const status = payment?.status === "pending" && gatewayCancelled ? "cancelled" : payment?.status;
   return (
     <div className="card" style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>

@@ -295,3 +295,124 @@ def test_tutor_needs_a_subscription(client_for, apade_student, settings, monkeyp
     assert client.get("/api/tutor/status/").data == {"enabled": False, "reason": "subscription_required"}
     response = client.post("/api/tutor/ask/", {"message": "help"}, format="json")
     assert response.status_code == 403 and response.data["detail"].code == "subscription_required"
+
+
+# --- Teachers see premium answer keys only with the subscription ---------------------------
+
+
+@pytest.fixture
+def unpaid_teacher(db):
+    return make_user("unpaidteacher", role="teacher", teacher_approved=True, school=make_school("Unpaid", "Huye"))
+
+
+def _premium_essay_attempt(client_for, student, teacher, subject, unit):
+    from apps.classroom.models import Classroom, Enrollment
+
+    essay = Question.objects.create(
+        subject=subject,
+        grade="S2",
+        unit=unit,
+        type=Question.Type.ESSAY,
+        prompt="PREMIUM ESSAY",
+        marks=4,
+        marking_guide="PREMIUM GUIDE",
+    )
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit, "PREMIUM MCQ"), essay], feedback_mode="after_submit")
+    classroom = Classroom.objects.create(name="Maths", grade="S2", teacher=teacher, subject=subject)
+    Enrollment.objects.create(classroom=classroom, student=student)
+    client = client_for(student)  # a student of a subscribed school
+    attempt = client.post(f"/api/quizzes/{quiz.id}/start/").data
+    essay_id = next(q["id"] for q in attempt["questions"] if q["type"] == "essay")
+    client.post(f"/api/attempts/{attempt['id']}/answer/", {"question": essay_id, "text": "Because..."}, format="json")
+    client.post(f"/api/attempts/{attempt['id']}/submit/")
+    return quiz, attempt["id"]
+
+
+def test_unsubscribed_teachers_get_no_premium_marking_guides(client_for, student, teacher, unpaid_teacher, subject, unit):
+    _premium_essay_attempt(client_for, student, unpaid_teacher, subject, unit)
+    item = client_for(unpaid_teacher).get("/api/marking/").data[0]
+    assert item["answer_text"] == "Because..." and item["marking_guide"] == ""
+    from apps.classroom.models import Classroom, Enrollment
+
+    classroom = Classroom.objects.create(name="Paid", grade="S2", teacher=teacher, subject=subject)
+    Enrollment.objects.create(classroom=classroom, student=student)
+    assert client_for(teacher).get("/api/marking/").data[0]["marking_guide"] == "PREMIUM GUIDE"
+
+
+def test_unsubscribed_teachers_see_only_the_score_of_premium_attempts(client_for, student, unpaid_teacher, subject, unit):
+    _, attempt_id = _premium_essay_attempt(client_for, student, unpaid_teacher, subject, unit)
+    seen = client_for(unpaid_teacher).get(f"/api/attempts/{attempt_id}/").data
+    assert seen["questions"] == [] and seen["quiz"]["locked"] is True
+    assert "PREMIUM" not in str(seen)
+    own = client_for(student).get(f"/api/attempts/{attempt_id}/").data
+    assert {q["prompt"] for q in own["questions"]} == {"PREMIUM MCQ", "PREMIUM ESSAY"}
+
+
+def test_authors_lose_library_answer_keys_with_the_subscription(client_for, subject, unit):
+    school = make_school("Lapsing", "Huye", paid_until=timezone.now() + timedelta(days=30))
+    author = make_user("author", role="teacher", teacher_approved=True, school=school)
+    library = add_mcq(subject, unit, "Library question?")
+    library.status = "published"
+    library.save()
+    own = add_mcq(subject, unit, "My question?")
+    own.author = author
+    own.save()
+    client = client_for(author)
+    mixed = client.post(
+        "/api/quizzes/", {"title": "Mixed", "subject": subject.id, "grade": "S2", "question_ids": [library.id]}, format="json"
+    ).data
+    mine = client.post(
+        "/api/quizzes/", {"title": "Mine", "subject": subject.id, "grade": "S2", "question_ids": [own.id]}, format="json"
+    ).data
+    assert client.get(f"/api/quizzes/{mixed['id']}/analytics/").status_code == 200
+    school.paid_until = timezone.now() - timedelta(days=30)
+    school.save()
+    from apps.accounts.models import User
+
+    client = client_for(User.objects.get(pk=author.pk))  # a new request, without the cached access
+    assert client.get(f"/api/quizzes/{mixed['id']}/analytics/").status_code == 403
+    assert client.get(f"/api/quizzes/{mine['id']}/analytics/").status_code == 200  # their own free material
+
+
+# --- Upgrading an existing database --------------------------------------------------------
+
+
+def _migration(name):
+    import importlib
+
+    return importlib.import_module(f"apps.assessments.migrations.{name}")
+
+
+def test_upgrade_keeps_repackaged_library_questions_premium(teacher, subject, unit):
+    from django.apps import apps as registry
+
+    from apps.assessments.models import Quiz
+
+    library = add_mcq(subject, unit, "Library?")
+    own = add_mcq(subject, unit, "Mine?")
+    own.author = teacher
+    own.save()
+    repack = make_quiz(subject, unit, [own, library], title="Repack", author=teacher)
+    mine = make_quiz(subject, unit, [own], title="Mine", author=teacher)
+    _migration("0005_quiz_is_free").teacher_content_is_free(registry, None)
+    assert Quiz.objects.get(pk=mine.pk).is_free is True
+    assert Quiz.objects.get(pk=repack.pk).is_free is False
+    # Databases that ran the earlier version of 0005 are corrected.
+    Quiz.objects.filter(pk=repack.pk).update(is_free=True)
+    _migration("0006_recheck_teacher_quizzes").lock_repackaged_library_questions(registry, None)
+    assert Quiz.objects.get(pk=repack.pk).is_free is False
+    assert Quiz.objects.get(pk=mine.pk).is_free is True
+
+
+def test_upgrade_opens_the_starter_lessons_and_quizzes(subject, unit):
+    from django.apps import apps as registry
+
+    from apps.assessments.models import Quiz
+
+    starter = Lesson.objects.create(unit=unit, slug="s1-maths-integers", title="Integers", body="x", status="published")
+    other = Lesson.objects.create(unit=unit, slug="s1-maths-other", title="Other", body="x", status="published")
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], title="Integers — quick practice", grade="S1")
+    _migration("0007_open_starter_content").open_starter_content(registry, None)
+    assert Lesson.objects.get(pk=starter.pk).is_free is True
+    assert Lesson.objects.get(pk=other.pk).is_free is False
+    assert Quiz.objects.get(pk=quiz.pk).is_free is True

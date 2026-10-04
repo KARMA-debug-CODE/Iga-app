@@ -88,8 +88,10 @@ class Command(BaseCommand):
         # A school waiting for the Iga team to verify it (shows up under Admin → Schools).
         pending_admin = make("gsadmin", "Alice", "Uwimana", User.Role.SCHOOL_ADMIN)
         if pending_admin.school_id is None:
-            pending = School.objects.create(
-                name="GS Remera Catholique", district="Gasabo", phone="+250 788 000 003", created_by=pending_admin
+            pending, _ = School.objects.get_or_create(
+                name="GS Remera Catholique",
+                district="Gasabo",
+                defaults={"phone": "+250 788 000 003", "created_by": pending_admin},
             )
             pending_admin.school = pending
             pending_admin.school_status = User.SchoolStatus.PENDING

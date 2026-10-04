@@ -14,16 +14,34 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             "Learning profile",
-            {"fields": ("role", "teacher_approved", "grade", "school", "school_status", "preferred_language")},
+            {
+                "fields": (
+                    "role",
+                    "teacher_approved",
+                    "teacher_approved_by_school",
+                    "teacher_revoked",
+                    "grade",
+                    "school",
+                    "school_status",
+                    "preferred_language",
+                )
+            },
         ),
         ("Progress", {"fields": ("xp", "streak_days", "last_active_date")}),
         ("Security", {"fields": ("totp_enabled",)}),
     )
-    readonly_fields = ("totp_enabled",)
+    readonly_fields = ("totp_enabled", "teacher_approved_by_school")
 
     @admin.action(description="Approve selected teachers")
     def approve_teachers(self, request, queryset):
-        queryset.filter(role=User.Role.TEACHER).update(teacher_approved=True)
+        queryset.filter(role=User.Role.TEACHER).update(
+            teacher_approved=True, teacher_approved_by_school=None, teacher_revoked=False
+        )
+
+    def save_model(self, request, obj, form, change):
+        if change and "teacher_approved" in form.changed_data:
+            obj.set_teacher_approval(obj.teacher_approved)  # the Iga team's decision overrides a school's
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(ParentLink)

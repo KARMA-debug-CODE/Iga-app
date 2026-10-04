@@ -26,6 +26,7 @@ handler also copes with form-encoded and legacy flat bodies, but JSON v3 is what
 import base64
 import hashlib
 import hmac
+import http.client
 import json
 import logging
 import urllib.error
@@ -68,13 +69,22 @@ def _request(method, path, payload=None):
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as response:
             return json.loads(response.read().decode() or "{}")
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode(errors="replace")
+        try:
+            body = exc.read().decode(errors="replace")
+        except (OSError, http.client.HTTPException):
+            body = ""
+        if exc.code >= 500 or exc.code in (401, 403, 408, 429):
+            # Flutterwave (or our key) is failing, which is not the same as "no such transaction":
+            # callers must not act on it, and the webhook must answer 503 so Flutterwave retries.
+            log.warning("Flutterwave %s %s failed: %s %s", method, path, exc.code, body[:300])
+            raise ProviderUnavailable()
         try:
             return json.loads(body)
         except ValueError:
             log.warning("Flutterwave %s %s failed: %s %s", method, path, exc.code, body[:300])
             raise ProviderUnavailable()
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+    except (OSError, http.client.HTTPException, ValueError) as exc:
+        # Connection refused, reset or dropped mid-answer, TLS errors, timeouts, a garbled body.
         log.warning("Flutterwave %s %s unreachable: %s", method, path, exc)
         raise ProviderUnavailable()
 
@@ -144,7 +154,28 @@ class FlutterwaveProvider:
             data = body.get("data") or {}
             if body.get("status") != "success" or not data:
                 return Verification("pending")
+            if str(data.get("status", "")).lower() in ("failed", "cancelled"):
+                # The lookup by reference returns one attempt, but a checkout can hold several
+                # (a declined card, then a good one). Look for a successful one before judging.
+                data = self._successful_attempt(payment) or data
         return self._judge(payment, data)
+
+    def _successful_attempt(self, payment):
+        """A successful transaction for our reference among all its attempts, verified by id, or None."""
+        query = urllib.parse.urlencode({"tx_ref": payment.reference})
+        body = _request("GET", f"/transactions?{query}")
+        items = body.get("data") if body.get("status") == "success" else None
+        for item in items if isinstance(items, list) else []:
+            found_id = str(item.get("id", "")) if isinstance(item, dict) else ""
+            if not found_id.isdigit() or item.get("tx_ref") != payment.reference:
+                continue
+            if str(item.get("status", "")).lower() != "successful":
+                continue
+            checked = _request("GET", f"/transactions/{found_id}/verify")
+            data = checked.get("data") or {}
+            if checked.get("status") == "success" and data.get("tx_ref") == payment.reference:
+                return data
+        return None
 
     def _judge(self, payment, data):
         found_id = str(data.get("id", ""))

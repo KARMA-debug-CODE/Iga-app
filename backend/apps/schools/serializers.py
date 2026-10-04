@@ -87,6 +87,8 @@ class SchoolAdminSerializer(serializers.ModelSerializer):
 
 class MemberSerializer(serializers.ModelSerializer):
     display_name = serializers.CharField(read_only=True)
+    # An approved member who is a teacher the school can still confirm (see membership.decide).
+    needs_teacher_confirmation = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -99,14 +101,20 @@ class MemberSerializer(serializers.ModelSerializer):
             "school_status",
             "school_approved_at",
             "teacher_approved",
+            "needs_teacher_confirmation",
             "date_joined",
             "last_login",
         ]
 
+    def get_needs_teacher_confirmation(self, user):
+        from .membership import needs_teacher_confirmation
+
+        return user.school_status == User.SchoolStatus.APPROVED and needs_teacher_confirmation(user)
+
 
 class PaymentSerializer(serializers.ModelSerializer):
     school_name = serializers.CharField(source="school.name", read_only=True)
-    paid_by = serializers.CharField(source="created_by.display_name", read_only=True, default=None)
+    paid_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
@@ -128,6 +136,12 @@ class PaymentSerializer(serializers.ModelSerializer):
             "paid_at",
         ]
 
+    def get_paid_by(self, payment):
+        # A manual payment is recorded by the Iga team, so its creator is not the payer.
+        if payment.provider == Payment.Provider.MANUAL or payment.created_by is None:
+            return None
+        return payment.created_by.display_name
+
 
 class PlatformSchoolSerializer(SchoolAdminSerializer):
     """Platform administrators see and edit everything about a school."""
@@ -137,6 +151,16 @@ class PlatformSchoolSerializer(SchoolAdminSerializer):
     class Meta(SchoolAdminSerializer.Meta):
         fields = SchoolAdminSerializer.Meta.fields + ["admins", "verified_at"]
         read_only_fields = ["id", "status", "join_code", "created_at", "verified_at"]
+
+    def validate(self, attrs):
+        name = attrs.get("name", getattr(self.instance, "name", ""))
+        district = attrs.get("district", getattr(self.instance, "district", ""))
+        clash = School.objects.filter(name__iexact=name, district=district)
+        if self.instance is not None:
+            clash = clash.exclude(pk=self.instance.pk)
+        if clash.exists():
+            raise serializers.ValidationError({"name": "Another school in this district already has this name."})
+        return attrs
 
     def get_admins(self, school):
         admins = school.members.filter(role=User.Role.SCHOOL_ADMIN).order_by("date_joined")

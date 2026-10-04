@@ -5,6 +5,8 @@ or cron: `python manage.py reconcile_payments`.
 - A payment the provider now reports as successful is applied (once, as always).
 - A payment whose checkout has closed without a successful transaction is marked cancelled.
 - Open payments older than BILLING_RECONCILE_DAYS are closed without asking the provider.
+- Payments closed in the last CLOSED_RECHECK are asked about again, in case a mobile money approval
+  completed after the checkout closed and its webhook never arrived.
 
 Closing a payment never loses money: if the provider later reports a successful transaction for
 it (webhook or the return page), billing.apply_payment still applies it.
@@ -23,6 +25,7 @@ from apps.schools import billing, providers
 from apps.schools.models import Payment
 
 log = logging.getLogger(__name__)
+CLOSED_RECHECK = timedelta(days=1)
 
 
 def reconcile(now=None):
@@ -32,7 +35,11 @@ def reconcile(now=None):
     since = now - timedelta(days=settings.BILLING_RECONCILE_DAYS)
     counts["expired"] = open_payments.filter(created_at__lt=since).update(status=Payment.Status.CANCELLED)
 
-    for payment in open_payments.filter(created_at__gte=since).select_related("school"):
+    online = Payment.objects.exclude(provider=Payment.Provider.MANUAL)
+    to_check = online.filter(status=Payment.Status.PENDING, created_at__gte=since) | online.filter(
+        status__in=[Payment.Status.FAILED, Payment.Status.CANCELLED], created_at__gte=now - CLOSED_RECHECK
+    )
+    for payment in to_check.select_related("school").order_by("created_at"):
         try:
             provider = providers.get(payment.provider)
         except APIException:
@@ -44,6 +51,10 @@ def reconcile(now=None):
         except APIException as exc:  # the provider is down: try again next run
             log.warning("Could not re-check payment %s: %s", payment.reference, exc)
             counts["unreachable"] += 1
+            continue
+        except Exception:  # one odd payment must not stop the others from being reconciled
+            log.exception("Unexpected error re-checking payment %s", payment.reference)
+            counts["errors"] += 1
             continue
         if payment.status == Payment.Status.PENDING and providers.checkout_closed(payment, now):
             billing.fail_payment(payment, status=Payment.Status.CANCELLED)
