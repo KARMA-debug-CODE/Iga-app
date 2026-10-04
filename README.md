@@ -11,7 +11,9 @@
 - **Study groups** with moderated chat and shared notes
 - **XP, streaks, badges and leaderboards** to keep students motivated
 
-It is mobile-first, installable as an app (PWA), works in **English, Kinyarwanda and Kiswahili**, and whole units can be saved for offline study.
+It is mobile-first, installable as an app (PWA), works in **English and French**, and whole units can be saved for offline study.
+
+**Schools pay, students learn.** Students and teachers choose their school; the school administrator pays one monthly subscription (USD 200 by default) and every approved member of that school gets the full library. Members of schools that haven't subscribed get the free starter lessons. See [School subscriptions](docs/SUBSCRIPTIONS.md).
 
 > This repository also contains some older, unrelated files (`robot.py.4`, `crypto.py.3`, …). They are untouched.
 
@@ -21,7 +23,7 @@ It is mobile-first, installable as an app (PWA), works in **English, Kinyarwanda
 
 | Area | What works today |
 |---|---|
-| **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, a Kiswahili translation, and resources (with a link to the REB e-learning portal) |
+| **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, all 39 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
 | **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
 | **Coding** | HTML/CSS/JS playground, and real Python in the browser (Pyodide, self-hosted, works offline) inside lessons and in the playground |
 | **AI tutor** | Lesson and question help from Claude, with context the server controls: switched off during exams and timed tests, never shown answers before the student may see them, rate-limited, and off unless an Anthropic API key is configured |
@@ -29,6 +31,7 @@ It is mobile-first, installable as an app (PWA), works in **English, Kinyarwanda
 | **Assessment** | 6 question types (MCQ, multi-select, true/false, numeric with tolerance, short answer, essay); practice and exam modes; server-enforced time limits; per-attempt shuffling; answers never sent before submit; partial credit; teacher marking queue; explanations and marking guides |
 | **Past papers** | Library filtered by level, year and subject; PDF and marking-guide links; interactive versions. Ships with **2 clearly-labelled unofficial sample papers**. Real NESA papers go in through the importer |
 | **Teachers** | Classes with readable join codes, student accounts created from a CSV list (temporary passwords, changed at first login) and password resets, assignments (quiz, lesson or lab) with due dates, gradebook, "hardest topics" report, per-quiz results analysis (score distribution, question difficulty and discrimination, option choices), question-bank and quiz builder, lesson editor with live preview, resource sharing |
+| **Schools & billing** | Verified school directory; membership by school code or administrator approval; school administrators manage members, the school code and the subscription (1, 3, 6 or 12 months by card or mobile money through Flutterwave, or bank transfer recorded by the Iga team); receipts and email reminders; premium content locked for everyone else, including past-paper files served only through access-checked links |
 | **Parents** | A student creates a one-time code; the linked parent sees a read-only progress report (subjects, recent scores, assignments) and can unlink at any time |
 | **Community** | Public and private study groups, polling chat, shared Markdown notes, message reporting, moderator hiding, an admin moderation queue |
 | **Motivation** | XP ledger (never double-awarded), levels, daily streaks, 8 badges, weekly leaderboards by grade, school or class (surnames shortened for privacy) |
@@ -63,6 +66,9 @@ npm run dev
 | `kevin` | Student, S4 | |
 | `teacher` | Teacher | Owns "S2 Mathematics — Stream A" |
 | `parent` | Parent | Linked to Aline |
+| `lkadmin` | School administrator | Lycée de Kigali (subscribed) — all students above belong to it |
+| `apadeadmin`, `samuel` | School administrator, student | APADE (not subscribed): `samuel` sees locked lessons |
+| `gsadmin` | School administrator | GS Remera Catholique, waiting for the Iga team to verify it |
 | `admin` | Admin | Also has the Django admin at `/django-admin/` |
 
 To load only the curriculum (no demo users), for example on a pilot server, run `python manage.py load_curriculum`.
@@ -104,13 +110,14 @@ backend/                 Django + Django REST Framework API
   apps/community         study groups, chat, notes, reports
   apps/gamification      XP ledger, streaks, badges, leaderboards
   apps/tutor             AI study tutor (Claude API)
+  apps/schools           schools, memberships, subscriptions, payments, access rule
   apps/core              shared constants, permissions, audit log, dashboard, admin API, content loader
   content/               curriculum content as files (JSON + Markdown), loaded by `load_curriculum`
   tests/                 pytest suite
 frontend/                React 19 + Vite single-page app (PWA)
   src/pages              one file per screen
   src/sims               built-in offline labs and their maths
-  src/i18n               en / rw / sw interface strings
+  src/i18n               en / fr interface strings
   tests/e2e              Playwright journeys
 docs/                    architecture, content guide, roadmap
 docker-compose.yml       PostgreSQL + Redis + backend + nginx
@@ -120,6 +127,7 @@ docker-compose.yml       PostgreSQL + Redis + backend + nginx
 
 - [Architecture](docs/ARCHITECTURE.md): components, data model, API, security and scaling
 - [Content guide](docs/CONTENT_GUIDE.md): how teachers and editors add lessons, translations, quizzes and exam papers
+- [School subscriptions](docs/SUBSCRIPTIONS.md): how schools join and pay, what's free, setting up Flutterwave, reminders
 - [Roadmap](docs/ROADMAP.md): what's done, what's next, and the decisions still to make
 
 ## Important notes on content
@@ -127,5 +135,5 @@ docker-compose.yml       PostgreSQL + Redis + backend + nginx
 - **Curriculum alignment.** Unit titles follow the usual progression of the Rwandan competence-based curriculum, but they **have not yet been checked line by line against the official REB syllabi**. Every unit is flagged `alignment_verified = false` and the app shows a "draft outline" notice until a teacher verifies it.
 - **Past papers.** The two bundled papers are **unofficial practice papers** written for this project and are labelled as such everywhere. Official national exam papers belong to NESA; import them with `import_exam_paper` once you have permission to publish them.
 - **Textbooks.** REB textbooks are linked from the REB e-learning portal rather than copied. Confirm redistribution rights before uploading PDFs.
-- **Translations.** The Kinyarwanda and Kiswahili interface strings, and the Kiswahili lesson, are drafts. Have a fluent speaker review them before a pilot.
+- **Translations.** The French interface strings, unit titles and lesson translations were machine-translated and checked, but not yet by a fluent teacher. Have them reviewed before a pilot (lessons carry `reviewed: false` until then). Quizzes are in English only for now.
 - **Simulations.** PhET simulations are © University of Colorado Boulder, licensed CC-BY 4.0. GeoGebra apps are loaded from geogebra.org under GeoGebra's terms.

@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.core.utils import request_language
 from apps.schools import access
 from apps.schools.downloads import signed_download_url
 
@@ -238,7 +239,9 @@ class QuizSummarySerializer(serializers.ModelSerializer):
 
     def get_subject(self, quiz):
         s = quiz.subject
-        return {"code": s.code, "name": s.name, "icon": s.icon, "color": s.color}
+        request = self.context.get("request")
+        lang = request_language(request) if request is not None else "en"
+        return {"code": s.code, "name": s.localized_name(lang), "icon": s.icon, "color": s.color}
 
     def _my_attempts(self, quiz):
         stats = self.context.get("attempt_stats", {})

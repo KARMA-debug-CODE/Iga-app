@@ -16,7 +16,7 @@ Both commands are **idempotent**: running them again updates existing items, mat
 
 ## Subjects and units
 
-- `content/subjects.json` holds code, names in English/Kinyarwanda/Kiswahili, icon, colour, and whether the subject is offered at O-level and/or A-level.
+- `content/subjects.json` holds code, names in English and French (`name_fr`), icon, colour, and whether the subject is offered at O-level and/or A-level.
 - `content/units.json` maps `{subject_code: {grade: [unit titles in order]}}`.
 
 After checking a unit against the official REB syllabus, tick **alignment verified** in the Django admin (and fill in *syllabus reference* and *key unit competence*). The "draft outline" notice then disappears for that unit.
@@ -67,9 +67,15 @@ Writing tips:
 - Use local contexts: FRW prices, moto fares, Lake Kivu, Mount Karisimbi, farming in Musanze.
 - Raw HTML is ignored for safety. Use Markdown only.
 
-## Translations: `content/translations/<slug>.<lang>.md`
+## Free or premium
 
-The front matter holds `slug`, `language` (`rw` or `sw`), `title` and `summary`, and optionally `reviewed: true` once a fluent speaker has checked it. The body is the translated Markdown. Students see a language switch on the lesson, and the lesson falls back to English when there is no translation.
+Library lessons and quizzes are part of the school subscription unless marked free: add `access: free` to a lesson's front matter, or `"access": "free"` to a quiz file. Keep one starter lesson and quiz per subject free so every student can try Iga. Lessons and quizzes that teachers write in the app are free automatically (unless a quiz reuses library questions). See [School subscriptions](SUBSCRIPTIONS.md).
+
+## Translations: `content/translations/<slug>.fr.md`
+
+Unit titles in French live in `content/units.fr.json`, with exactly the same structure (subject → grade → list of titles) as `units.json`; the loader checks the lists have the same length.
+
+The front matter holds `slug`, `language` (`fr`), `title` and `summary`, and optionally `reviewed: true` once a fluent speaker has checked it. The body is the translated Markdown. Students see a language switch on the lesson, and the lesson falls back to English when there is no translation.
 
 ## Quizzes: `content/quizzes/<name>.json`
 
@@ -131,7 +137,7 @@ Same format as a quiz plus a `paper` block:
 | provider | `provider_id` | Notes |
 |---|---|---|
 | `builtin` | `projectile`, `grapher`, `ohms`, `market` | Our own React labs in `frontend/src/sims/`; work offline |
-| `phet` | the sim's name in its PhET URL, e.g. `circuit-construction-kit-dc` | Embedded as `https://phet.colorado.edu/sims/html/<name>/latest/<name>_all.html?locale=…`. Set `supports_kinyarwanda` once you've confirmed a Kinyarwanda translation exists |
+| `phet` | the sim's name in its PhET URL, e.g. `circuit-construction-kit-dc` | Embedded as `https://phet.colorado.edu/sims/html/<name>/latest/<name>_all.html?locale=…`, in French when the student reads in French (PhET falls back to English where a translation is missing) |
 | `geogebra` | `graphing`, `geometry`, `3d`, `scientific`, or a GeoGebra material ID | Apps load via GeoGebra's official deploy script |
 | `external` | a full `https://` URL | Must allow embedding in an iframe |
 

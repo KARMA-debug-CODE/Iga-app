@@ -39,19 +39,20 @@
 | App | Responsibility | Key models |
 |---|---|---|
 | `accounts` | Users and roles (student, teacher, parent, admin), registration, JWT login, refresh cookie with rotation and revocation, TOTP 2FA, per-account login throttle, parent links | `User`, `ParentInvite`, `ParentLink` |
-| `curriculum` | Subjects (names in en/rw/sw), units per grade, lessons (Markdown) with translations, resources, completion tracking | `Subject`, `Unit`, `Lesson`, `LessonTranslation`, `Resource`, `LessonProgress` |
+| `curriculum` | Subjects and units (English and French names), lessons (Markdown) with French translations and a free/premium flag, resources, completion tracking | `Subject`, `Unit`, `Lesson`, `LessonTranslation`, `Resource`, `LessonProgress` |
 | `simulations` | Lab catalogue; builds PhET/GeoGebra embed URLs with the right locale | `Simulation`, `SimulationView` |
 | `assessments` | Question bank, quizzes, exam papers, attempts, scoring, teacher marking | `Question`, `Choice`, `Quiz`, `QuizQuestion`, `ExamPaper`, `Attempt`, `Answer` |
 | `classroom` | Classes with join codes, enrolment, CSV roster import and password resets, assignments, gradebook | `Classroom`, `Enrollment`, `Assignment` |
 | `community` | Study groups, chat, shared notes, reports | `StudyGroup`, `GroupMembership`, `Message`, `SharedNote`, `MessageReport` |
 | `gamification` | XP ledger, streaks, badges, leaderboards | `XPEvent`, `Badge`, `UserBadge` |
+| `schools` | Schools (verification, join code, paid-through date), memberships, payments (Flutterwave, manual, test), reminders, and the single access rule every content endpoint uses | `School`, `Payment`, `BillingReminder` |
 | `tutor` | AI study tutor: builds the context the model may see (lesson, or a question once its solution is visible), calls the Claude API, logs exchanges | `TutorExchange` |
 | `core` | Constants, permissions, audit log, dashboard, search, admin API, content loader and management commands | `AuditLog` |
 
 ### Data model (simplified)
 
 ```
-Subject ─< Unit (grade S1–S6, number) ─< Lesson ─< LessonTranslation (rw, sw)
+Subject ─< Unit (grade S1–S6, number) ─< Lesson ─< LessonTranslation (fr)
    │          │                           │ >─< Simulation
    │          │                           └─< LessonProgress >─ User
    │          └─< Question ─< Choice
@@ -64,7 +65,23 @@ User (role) ─< Classroom (teacher) ─< Enrollment >─ User (student)
 User ─< GroupMembership >─ StudyGroup ─< Message ─< MessageReport
 User ─< XPEvent    User ─< UserBadge >─ Badge    User ─< AuditLog (actor)
 User (parent) ─< ParentLink >─ User (student)    User ─< TutorExchange
+School ─< User (school, school_status)    School ─< Payment    School ─< BillingReminder
 ```
+
+## Schools and the paywall
+
+One function, `apps/schools/access.content_access(user)`, decides whether someone has premium access: platform admins always; students, teachers and school administrators when their membership is approved and their school is verified with an active subscription (`paid_until` plus a grace period). Everything else on the platform stays open. The rule is enforced on the server at every place premium value leaves it:
+
+| Surface | Locked behaviour |
+|---|---|
+| Lesson lists and detail | Title and summary with `locked: true`; no body or translated body; "complete" refused |
+| Quizzes | Listed with `locked: true`; `start` refused (an assignment never grants access); an attempt left open when access ends is closed on the next request |
+| Attempt results | Score and answers stay; explanations and marking guides withheld |
+| Past papers | Links withheld; uploaded files only through signed 10-minute links that re-check access (nginx `X-Accel-Redirect` from an internal location; `/media/exam_papers/` is not served) |
+| Question bank | Library questions hidden from teachers without access, and can't be put in their quizzes |
+| AI tutor, search, dashboard | Tutor refused; locked lesson text not searchable; "continue learning" suggests lessons the student can open |
+
+Payments are applied by `billing.apply_payment` inside a transaction that locks the payment and school rows, so a redirect, a webhook retry and an administrator can't extend a subscription twice. See [School subscriptions](SUBSCRIPTIONS.md).
 
 ## The assessment engine
 
@@ -109,7 +126,13 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET/POST groups/` · `POST groups/{id}/join/` · `GET/POST groups/{id}/messages/?after=` · `GET/POST groups/{id}/notes/` | user | Study groups |
 | `POST messages/{id}/report/` · `POST messages/{id}/hide/` | member / moderator | Moderation |
 | `GET dashboard/` · `GET search/?q=` · `GET leaderboard/` · `GET badges/` | user | Home screen, search, motivation |
-| `GET tutor/status/` · `POST tutor/ask/` | user | AI tutor (lesson or question context; off during timed attempts) |
+| `GET tutor/status/` · `POST tutor/ask/` | user | AI tutor (lesson or question context; off during timed attempts; needs the school subscription) |
+| `GET schools/?q=&district=` · `GET schools/districts/` | anyone | Verified school directory for the sign-up picker |
+| `GET/POST/DELETE my-school/` | user | See, choose (optionally with the school code) or leave a school |
+| `GET/PATCH school/` · `GET school/members/` · `POST school/members/decide/` · `POST school/members/{id}/remove/` · `POST school/new-code/` · `GET school/payments/` | school admin | Manage the school |
+| `POST billing/checkout/` · `GET billing/payments/{ref}/` · `POST billing/payments/{ref}/confirm/` | school admin | Pay and confirm |
+| `POST billing/webhooks/flutterwave/` | Flutterwave | Payment notifications (secret hash checked, then verified with the API) |
+| `GET admin/schools/` · `GET/PATCH admin/schools/{id}/` · `POST admin/schools/{id}/{verify,suspend,reinstate}/` · `POST admin/schools/{id}/payments/` · `GET/POST admin/schools/{id}/members/` | admin | Run schools and record payments |
 | `GET admin/stats/` · `admin/users/` · `admin/review/` · `admin/moderation/` · `admin/audit/` | admin | Administration |
 
 ## Security and privacy

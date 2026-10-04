@@ -18,6 +18,7 @@ class AskSerializer(serializers.Serializer):
     lesson = serializers.SlugField(required=False, allow_blank=True)
     attempt = serializers.IntegerField(required=False, allow_null=True)
     question = serializers.IntegerField(required=False, allow_null=True)
+    lang = serializers.ChoiceField(choices=list(services.LANGUAGE_NAMES), required=False)
 
 
 class TutorStatusView(APIView):
@@ -52,6 +53,7 @@ class TutorAskView(APIView):
                 lesson_slug=v.get("lesson") or None,
                 attempt_id=v.get("attempt"),
                 question_id=v.get("question"),
+                lang=v.get("lang"),
             )
         except anthropic.RateLimitError:
             return Response(

@@ -163,3 +163,19 @@ def test_replies_in_the_students_language(client_for, student, tutor):
     student.save()
     client_for(student).post("/api/tutor/ask/", {"message": "Seli ni nini?"}, format="json")
     assert "Reply in French" in system_text(tutor.calls[0])
+
+
+def test_tutor_follows_the_reading_language(client_for, student, lesson, tutor):
+    from apps.curriculum.models import LessonTranslation
+
+    LessonTranslation.objects.create(lesson=lesson, language="fr", title="Graphiques", body="CORPS EN FRANÇAIS")
+    response = client_for(student).post(
+        "/api/tutor/ask/", {"message": "Explique", "lesson": lesson.slug, "lang": "fr"}, format="json"
+    )
+    assert response.status_code == 200
+    context = system_text(tutor.calls[0])
+    assert "Reply in French" in context and "CORPS EN FRANÇAIS" in context and "# Hello" not in context
+
+    tutor.response = fake_response(text="", stop_reason="refusal")
+    refused = client_for(student).post("/api/tutor/ask/", {"message": "hors sujet", "lang": "fr"}, format="json")
+    assert refused.data["reply"] == services.REFUSAL_REPLIES["fr"]

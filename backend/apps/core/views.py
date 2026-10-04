@@ -17,6 +17,7 @@ from apps.assessments.serializers import AttemptListSerializer
 from apps.assessments.services import markable_answers, visible_quizzes
 from apps.classroom.models import Assignment, Classroom
 from apps.classroom.views import AssignmentSerializer, assignment_statuses
+from apps.core.utils import request_language
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
 from apps.curriculum.views import visible_lessons
 from apps.schools.access import has_premium
@@ -47,7 +48,16 @@ def meta(request):
             "app_name": settings.APP_NAME,
             "grades": [{"code": c, "name": n} for c, n in GRADES],
             "languages": [{"code": c, "name": n} for c, n in LANGUAGES],
-            "subjects": list(Subject.objects.values("code", "name", "icon", "offered_o_level", "offered_a_level")),
+            "subjects": [
+                {
+                    "code": s.code,
+                    "name": s.localized_name(request_language(request)),
+                    "icon": s.icon,
+                    "offered_o_level": s.offered_o_level,
+                    "offered_a_level": s.offered_a_level,
+                }
+                for s in Subject.objects.all()
+            ],
         }
     )
 
@@ -62,7 +72,7 @@ def level_from_xp(xp):
     return {"level": level, "current": xp - floor, "needed": needed}
 
 
-def _continue_learning(user):
+def _continue_learning(user, lang="en"):
     last = LessonProgress.objects.filter(user=user).select_related("lesson__unit").order_by("-completed_at").first()
     done = LessonProgress.objects.filter(user=user).values("lesson_id")
     lessons = (
@@ -80,12 +90,14 @@ def _continue_learning(user):
         candidate = lessons.order_by("unit__grade", "unit__subject__order", "unit__number", "order").first()
     if candidate is None:
         return None
+    translation = candidate.translations.filter(language=lang).first() if lang != "en" else None
     return {
         "slug": candidate.slug,
-        "title": candidate.title,
-        "subject": candidate.unit.subject.name,
+        "title": translation.title if translation else candidate.title,
+        "subject": candidate.unit.subject.localized_name(lang),
         "icon": candidate.unit.subject.icon,
-        "unit": f"Unit {candidate.unit.number}: {candidate.unit.title}",
+        "unit_number": candidate.unit.number,
+        "unit_title": candidate.unit.localized_title(lang),
     }
 
 
@@ -141,7 +153,7 @@ def dashboard(request):
         .order_by("-submitted_at")[:5],
         many=True,
     ).data
-    data["continue_learning"] = _continue_learning(user)
+    data["continue_learning"] = _continue_learning(user, request_language(request))
     data["lessons_completed"] = LessonProgress.objects.filter(user=user).count()
     data["badges_earned"] = user.badges.count()
     return Response(data)

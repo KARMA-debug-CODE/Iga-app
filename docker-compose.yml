@@ -26,7 +26,7 @@ services:
 
   backend:
     build: ./backend
-    environment:
+    environment: &backend-env
       DJANGO_DEBUG: "false"
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env - see .env.docker.example}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
@@ -38,6 +38,23 @@ services:
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Protected past-paper files are sent by nginx after Django checks access.
+      PROTECTED_MEDIA_ACCEL: "true"
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      # School subscriptions (see .env.docker.example).
+      SUBSCRIPTION_PRICE_USD: ${SUBSCRIPTION_PRICE_USD:-200}
+      SUBSCRIPTION_PRICE_RWF: ${SUBSCRIPTION_PRICE_RWF:-}
+      BILLING_PROVIDER: ${BILLING_PROVIDER:-}
+      BILLING_DEV_MODE: ${BILLING_DEV_MODE:-false}
+      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
+      FLUTTERWAVE_WEBHOOK_HASH: ${FLUTTERWAVE_WEBHOOK_HASH:-}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Iga <no-reply@iga.rw>}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
     volumes:
       - media:/app/media
@@ -46,6 +63,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+
+  # Sends subscription reminders to school administrators once a day.
+  scheduler:
+    build: ./backend
+    command: sh -c "while true; do python manage.py billing_reminders; sleep 86400; done"
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
 
   web:
     build: ./frontend

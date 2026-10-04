@@ -45,6 +45,18 @@ Safety:
 - If a student says they are unsafe, being hurt, or thinking of hurting themselves, respond with care, encourage them to talk to a trusted adult or teacher straight away, and mention that in Rwanda they can call the free child helpline 116."""
 
 REFUSAL_REPLY = "I can't help with that one. Try asking about your lesson or a practice question, or ask your teacher."
+REFUSAL_REPLIES = {
+    "en": REFUSAL_REPLY,
+    "fr": "Je ne peux pas t'aider sur ce point. Pose une question sur ta leçon ou un exercice, ou demande à ton enseignant.",
+}
+OUT_OF_SPACE = {
+    "en": "*(I ran out of space — ask me to continue.)*",
+    "fr": "*(Je n'ai plus de place — demande-moi de continuer.)*",
+}
+
+
+def reply_language(user, lang=None):
+    return lang if lang in LANGUAGE_NAMES else (user.preferred_language if user.preferred_language in LANGUAGE_NAMES else "en")
 
 
 def tutor_enabled():
@@ -118,9 +130,12 @@ def _solution_text(question, answer):
     return "\n".join(parts)
 
 
-def build_context(user, lesson_slug=None, attempt_id=None, question_id=None):
-    """Return (context_text, lesson, attempt, question) for what the student is looking at."""
-    lang = LANGUAGE_NAMES.get(user.preferred_language, "English")
+def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lang=None):
+    """Return (context_text, lesson, attempt, question) for what the student is looking at.
+
+    `lang` is the language the student is reading in (defaults to their saved preference)."""
+    code = reply_language(user, lang)
+    lang = LANGUAGE_NAMES[code]
     grade = user.grade or "secondary school"
     sections = [
         f"The student is in {grade}. Reply in {lang} unless the student writes in another language; then reply in theirs."
@@ -132,9 +147,12 @@ def build_context(user, lesson_slug=None, attempt_id=None, question_id=None):
         if lesson is None:
             raise NotFound("Lesson not found.")
         unit = lesson.unit
+        # Quote the lesson in the language the student is reading, when it has been translated.
+        translation = lesson.translations.filter(language=code).first() if code != "en" else None
+        title, body = (translation.title, translation.body) if translation else (lesson.title, lesson.body)
         sections.append(
             f"The student is studying this lesson ({unit.subject.name}, {unit.grade}, unit {unit.number}: {unit.title}).\n"
-            f'<lesson title="{lesson.title}">\n{lesson.body}\n</lesson>'
+            f'<lesson title="{title}">\n{body}\n</lesson>'
         )
 
     if attempt_id:
@@ -174,14 +192,15 @@ def build_context(user, lesson_slug=None, attempt_id=None, question_id=None):
     return "\n\n".join(sections), lesson, attempt, question
 
 
-def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question_id=None):
+def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question_id=None, lang=None):
     message = (message or "").strip()
     if not message:
         raise ValidationError({"message": "Write a question for the tutor."})
     if len(message) > MAX_MESSAGE_CHARS:
         raise ValidationError({"message": f"Please keep questions under {MAX_MESSAGE_CHARS} characters."})
     history = clean_history(history)
-    context, lesson, attempt, question = build_context(user, lesson_slug, attempt_id, question_id)
+    context, lesson, attempt, question = build_context(user, lesson_slug, attempt_id, question_id, lang)
+    code = reply_language(user, lang)
 
     response = get_client().beta.messages.create(
         model=settings.TUTOR_MODEL,
@@ -195,13 +214,13 @@ def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question
     )
 
     if response.stop_reason == "refusal":
-        reply = REFUSAL_REPLY
+        reply = REFUSAL_REPLIES[code]
     else:
         reply = "\n\n".join(block.text for block in response.content if block.type == "text").strip()
         if response.stop_reason == "max_tokens":
-            reply += "\n\n*(I ran out of space — ask me to continue.)*"
+            reply += "\n\n" + OUT_OF_SPACE[code]
         if not reply:
-            reply = REFUSAL_REPLY
+            reply = REFUSAL_REPLIES[code]
 
     usage = getattr(response, "usage", None)
     TutorExchange.objects.create(
