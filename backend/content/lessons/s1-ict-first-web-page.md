@@ -8,6 +8,7 @@ title: Your first web page with HTML
 summary: Build a real web page using HTML tags for headings, paragraphs, lists, links and images, and see the result live.
 minutes: 30
 simulations:
+access: free
 ---
 ## What is HTML?
 

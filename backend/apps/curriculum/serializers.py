@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.schools.access import content_access
 
 from .models import Lesson, LessonTranslation, Resource, Subject, Unit
 
@@ -33,17 +34,34 @@ class SubjectSerializer(serializers.ModelSerializer):
         return subject.localized_name(self.context.get("lang", "en"))
 
 
+def is_locked(serializer, item):
+    """Free items are open to everyone; the rest need premium access (decided once per request)."""
+    if item.is_free:
+        return False
+    request = serializer.context.get("request")
+    return not content_access(request.user if request else None).premium
+
+
 class LessonSummarySerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    summary = serializers.SerializerMethodField()
     completed = serializers.SerializerMethodField()
+    locked = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ["id", "slug", "order", "title", "summary", "estimated_minutes", "status", "completed"]
+        fields = ["id", "slug", "order", "title", "summary", "estimated_minutes", "status", "completed", "is_free", "locked"]
 
     def get_title(self, lesson):
         translation = self.context.get("translations", {}).get(lesson.id)
         return translation.title if translation else lesson.title
+
+    def get_summary(self, lesson):
+        translation = self.context.get("translations", {}).get(lesson.id)
+        return translation.summary if translation and translation.summary else lesson.summary
+
+    def get_locked(self, lesson):
+        return is_locked(self, lesson)
 
     def get_completed(self, lesson):
         return lesson.id in self.context.get("completed_ids", set())
@@ -124,6 +142,7 @@ class LessonDetailSerializer(serializers.ModelSerializer):
     unit = serializers.SerializerMethodField()
     subject = serializers.SerializerMethodField()
     completed = serializers.SerializerMethodField()
+    locked = serializers.SerializerMethodField()
     author_name = serializers.CharField(source="author.display_name", read_only=True, default=None)
 
     class Meta:
@@ -134,6 +153,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             "order",
             "title",
             "summary",
+            "is_free",
+            "locked",
             "body",
             "language",
             "available_languages",
@@ -161,7 +182,12 @@ class LessonDetailSerializer(serializers.ModelSerializer):
         t = self._translation(lesson)
         return t.summary if t else lesson.summary
 
+    def get_locked(self, lesson):
+        return is_locked(self, lesson)
+
     def get_body(self, lesson):
+        if is_locked(self, lesson):
+            return ""  # the full lesson needs a school subscription
         t = self._translation(lesson)
         return t.body if t else lesson.body
 
@@ -200,6 +226,7 @@ class LessonListSerializer(serializers.ModelSerializer):
     subject_code = serializers.CharField(source="unit.subject.code", read_only=True)
     grade = serializers.CharField(source="unit.grade", read_only=True)
     unit_title = serializers.CharField(source="unit.title", read_only=True)
+    locked = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
@@ -209,6 +236,8 @@ class LessonListSerializer(serializers.ModelSerializer):
             "title",
             "summary",
             "status",
+            "is_free",
+            "locked",
             "subject",
             "subject_code",
             "grade",
@@ -216,6 +245,9 @@ class LessonListSerializer(serializers.ModelSerializer):
             "unit_title",
             "updated_at",
         ]
+
+    def get_locked(self, lesson):
+        return is_locked(self, lesson)
 
 
 class LessonTranslationSerializer(serializers.ModelSerializer):
@@ -243,6 +275,7 @@ class LessonWriteSerializer(serializers.ModelSerializer):
             "video_url",
             "estimated_minutes",
             "status",
+            "is_free",
             "simulations",
             "translations",
         ]

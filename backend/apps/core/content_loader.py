@@ -140,6 +140,8 @@ def load_lessons(directory, status=ContentStatus.PUBLISHED):
             "body": body,
             "video_url": meta.get("video", ""),
             "estimated_minutes": int(meta.get("minutes", 15)),
+            # "access: free" opens a lesson to everyone; the rest need a school subscription.
+            "is_free": meta.get("access", "premium").strip().lower() == "free",
         }
         # Re-running the loader updates the text but keeps a lesson an admin archived or unpublished.
         lesson, _ = Lesson.objects.update_or_create(
@@ -275,6 +277,7 @@ def import_quiz_file(path, status=ContentStatus.PUBLISHED):
         "shuffle_choices": data.get("shuffle_choices", True),
         "feedback_mode": data.get("feedback_mode", Quiz.FeedbackMode.IMMEDIATE),
         "max_attempts": data.get("max_attempts"),
+        "is_free": data.get("access", "premium") == "free",
     }
     quiz, created = Quiz.objects.update_or_create(
         title=data["title"],

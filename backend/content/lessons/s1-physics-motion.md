@@ -8,6 +8,7 @@ title: Speed, velocity and acceleration
 summary: How fast, in which direction, and how quickly that changes — the three ideas that describe all motion.
 minutes: 25
 simulations: phet-forces-and-motion-basics
+access: free
 ---
 ## Distance and displacement
 

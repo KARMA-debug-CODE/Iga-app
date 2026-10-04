@@ -8,6 +8,7 @@ title: The eight parts of speech
 summary: Nouns, pronouns, verbs, adjectives, adverbs, prepositions, conjunctions and interjections — what they do in a sentence.
 minutes: 20
 simulations:
+access: free
 ---
 ## Words have jobs
 

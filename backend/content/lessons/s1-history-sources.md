@@ -8,6 +8,7 @@ title: How do we know about the past?
 summary: Oral tradition, written documents, archaeology and other sources of history — and how to judge if a source is reliable.
 minutes: 20
 simulations:
+access: free
 ---
 ## What is history?
 

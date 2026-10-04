@@ -14,6 +14,7 @@ from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacherOrReadOnly
 from apps.core.utils import request_grade, request_language
 from apps.gamification import services as gamification
+from apps.schools.access import content_access, has_premium, require
 
 from .models import Lesson, LessonProgress, LessonTranslation, Resource, Subject, Unit
 from .serializers import (
@@ -165,16 +166,26 @@ class LessonViewSet(
             many=True,
             context={"request": request},
         ).data
+        premium = has_premium(request.user)
         data["quizzes"] = [
-            {"id": q.id, "title": q.title, "kind": q.kind, "question_count": q.quiz_questions.count()}
+            {
+                "id": q.id,
+                "title": q.title,
+                "kind": q.kind,
+                "question_count": q.quiz_questions.count(),
+                "locked": not (q.is_free or premium),
+            }
             for q in visible_quizzes(request.user).filter(unit=lesson.unit)
         ]
+        if data["locked"]:
+            data["access_reason"] = content_access(request.user).reason
         return Response(data)
 
     def perform_create(self, serializer):
         user = self.request.user
         status_value = serializer.validated_data.get("status", ContentStatus.REVIEW)
-        lesson = serializer.save(author=user, status=status_value)
+        extra = {} if user.is_platform_admin else {"is_free": True}  # a teacher's own material stays open
+        lesson = serializer.save(author=user, status=status_value, **extra)
         audit.record(self.request, "create_lesson", lesson, status=lesson.status)
 
     def perform_update(self, serializer):
@@ -183,14 +194,17 @@ class LessonViewSet(
         if not user.is_platform_admin and lesson.author_id != user.id:
             raise PermissionDenied("You can only edit lessons you wrote.")
         extra = {}
-        if not user.is_platform_admin and serializer.validated_data.get("status") != ContentStatus.DRAFT:
-            extra["status"] = ContentStatus.REVIEW  # every teacher edit is re-reviewed
+        if not user.is_platform_admin:
+            extra["is_free"] = True
+            if serializer.validated_data.get("status") != ContentStatus.DRAFT:
+                extra["status"] = ContentStatus.REVIEW  # every teacher edit is re-reviewed
         lesson = serializer.save(**extra)
         audit.record(self.request, "update_lesson", lesson, status=lesson.status)
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def complete(self, request, slug=None):
         lesson = self.get_object()
+        require(request.user, lesson)  # no XP for lessons the student can't open
         _, created = LessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
         xp = gamification.on_lesson_completed(request.user, lesson) if created else 0
         return Response({"completed": True, "xp_gained": xp, "xp": request.user.xp}, status=status.HTTP_200_OK)

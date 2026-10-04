@@ -8,6 +8,7 @@ title: Map scale and measuring distance
 summary: The three ways of showing scale on a map and how to use them to find real distances.
 minutes: 25
 simulations:
+access: free
 ---
 ## Why maps need a scale
 

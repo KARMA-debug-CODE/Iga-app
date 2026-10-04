@@ -8,6 +8,7 @@ title: Inside the atom
 summary: Protons, neutrons and electrons; atomic number and mass number; and how electrons are arranged in shells.
 minutes: 25
 simulations: phet-build-an-atom, phet-isotopes-and-atomic-mass
+access: free
 ---
 ## Three sub-atomic particles
 

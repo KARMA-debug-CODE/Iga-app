@@ -8,6 +8,7 @@ title: Saving and making a budget
 summary: Needs versus wants, how to plan a simple personal budget, and why saving matters for every entrepreneur.
 minutes: 20
 simulations:
+access: free
 ---
 ## Needs and wants
 

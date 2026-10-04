@@ -8,6 +8,7 @@ title: Demand, supply and market equilibrium
 summary: The laws of demand and supply, what shifts each curve, and how the market finds an equilibrium price.
 minutes: 35
 simulations: supply-demand-lab, geogebra-graphing
+access: free
 ---
 ## Demand
 

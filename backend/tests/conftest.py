@@ -1,11 +1,15 @@
+from datetime import timedelta
+
 import pytest
 from django.core.cache import cache
+from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework.throttling import SimpleRateThrottle
 
 from apps.accounts.models import User
 from apps.assessments.models import Choice, Question, Quiz, QuizQuestion
 from apps.curriculum.models import Lesson, Subject, Unit
+from apps.schools.models import School
 
 RELAXED_RATES = {
     "auth": "1000/min",
@@ -25,7 +29,26 @@ def _no_throttling(monkeypatch):
     cache.clear()
 
 
-def make_user(username, role=User.Role.STUDENT, grade="S2", **extra):
+_SUBSCRIBED = object()
+
+
+def subscribed_school():
+    """A verified school paid well into the future, shared by the default test users."""
+    school, _ = School.objects.get_or_create(
+        name="Test Subscribed School",
+        district="Gasabo",
+        defaults={"status": School.Status.VERIFIED, "paid_until": timezone.now() + timedelta(days=365)},
+    )
+    return school
+
+
+def make_school(name="APADE", district="Kicukiro", paid_until=None, status=None):
+    return School.objects.create(name=name, district=district, status=status or School.Status.VERIFIED, paid_until=paid_until)
+
+
+def make_user(username, role=User.Role.STUDENT, grade="S2", school=_SUBSCRIBED, **extra):
+    """Students and teachers belong to a subscribed school unless `school` says otherwise
+    (pass school=None for someone without a school, or another School)."""
     user = User.objects.create_user(
         username=username,
         password="Str0ng-pass-123",
@@ -34,6 +57,12 @@ def make_user(username, role=User.Role.STUDENT, grade="S2", **extra):
         grade=grade if role == User.Role.STUDENT else "",
         **extra,
     )
+    if school is _SUBSCRIBED:
+        school = subscribed_school() if role in (User.Role.STUDENT, User.Role.TEACHER) else None
+    if school is not None:
+        user.school = school
+        user.school_status = User.SchoolStatus.APPROVED
+        user.save(update_fields=["school", "school_status"])
     return user
 
 

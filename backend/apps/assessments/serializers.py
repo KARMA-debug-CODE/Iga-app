@@ -4,6 +4,8 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.schools import access
+from apps.schools.downloads import signed_download_url
 
 from . import services
 from .models import Attempt, Choice, ExamPaper, Question, Quiz, QuizQuestion
@@ -140,12 +142,33 @@ class QuestionSerializer(serializers.ModelSerializer):
         return question
 
 
+def _viewer(serializer):
+    request = serializer.context.get("request")
+    return request.user if request else None
+
+
+def paper_is_free(paper):
+    return bool(paper.quiz_id and paper.quiz.is_free)
+
+
+def paper_link(viewer, paper, kind, request=None):
+    """Link to a paper or marking guide: withheld when locked; uploaded files go through a
+    short-lived signed download instead of a public /media URL."""
+    if not (paper_is_free(paper) or access.has_premium(viewer)):
+        return None
+    file = paper.paper_file if kind == "paper" else paper.marking_guide_file
+    if file:
+        return signed_download_url(request, paper, kind, viewer)
+    return (paper.paper_url if kind == "paper" else paper.marking_guide_url) or None
+
+
 class ExamPaperSerializer(serializers.ModelSerializer):
     subject_code = serializers.CharField(source="subject.code", read_only=True)
     subject_name = serializers.CharField(source="subject.name", read_only=True)
     subject_icon = serializers.CharField(source="subject.icon", read_only=True)
     paper_link = serializers.SerializerMethodField()
     marking_guide_link = serializers.SerializerMethodField()
+    locked = serializers.SerializerMethodField()
 
     class Meta:
         model = ExamPaper
@@ -164,19 +187,17 @@ class ExamPaperSerializer(serializers.ModelSerializer):
             "paper_link",
             "marking_guide_link",
             "quiz",
+            "locked",
         ]
 
-    def _link(self, url, file):
-        if file:
-            request = self.context.get("request")
-            return request.build_absolute_uri(file.url) if request else file.url
-        return url or None
+    def get_locked(self, paper):
+        return not (paper_is_free(paper) or access.has_premium(_viewer(self)))
 
     def get_paper_link(self, paper):
-        return self._link(paper.paper_url, paper.paper_file)
+        return paper_link(_viewer(self), paper, "paper", self.context.get("request"))
 
     def get_marking_guide_link(self, paper):
-        return self._link(paper.marking_guide_url, paper.marking_guide_file)
+        return paper_link(_viewer(self), paper, "marking_guide", self.context.get("request"))
 
 
 class QuizSummarySerializer(serializers.ModelSerializer):
@@ -186,6 +207,7 @@ class QuizSummarySerializer(serializers.ModelSerializer):
     my_best = serializers.SerializerMethodField()
     my_attempts = serializers.SerializerMethodField()
     exam_paper = serializers.SerializerMethodField()
+    locked = serializers.SerializerMethodField()
 
     class Meta:
         model = Quiz
@@ -207,7 +229,12 @@ class QuizSummarySerializer(serializers.ModelSerializer):
             "my_attempts",
             "exam_paper",
             "author",
+            "is_free",
+            "locked",
         ]
+
+    def get_locked(self, quiz):
+        return not access.can_open(_viewer(self), quiz)
 
     def get_subject(self, quiz):
         s = quiz.subject
@@ -255,6 +282,7 @@ class QuizWriteSerializer(serializers.ModelSerializer):
             "feedback_mode",
             "max_attempts",
             "status",
+            "is_free",
             "question_ids",
         ]
         read_only_fields = ["id"]
@@ -274,6 +302,8 @@ class QuizWriteSerializer(serializers.ModelSerializer):
         allowed = Question.objects.filter(id__in=ids)
         if not user.is_platform_admin:
             allowed = allowed.filter(Q(status=ContentStatus.PUBLISHED) | Q(author=user))
+            if not access.has_premium(user):
+                allowed = allowed.exclude(services.library_questions_q())
         found = set(allowed.values_list("id", flat=True))
         missing = [i for i in ids if i not in found]
         if missing:
@@ -331,6 +361,14 @@ class AttemptSerializer(serializers.ModelSerializer):
     def get_server_now(self, attempt):
         return timezone.now()
 
+    def _full_solutions(self, attempt):
+        """Explanations and marking guides are premium: shown when the viewer may open the quiz."""
+        if not hasattr(self, "_solutions_cache"):
+            self._solutions_cache = {}
+        if attempt.quiz_id not in self._solutions_cache:
+            self._solutions_cache[attempt.quiz_id] = access.can_open(_viewer(self), attempt.quiz)
+        return self._solutions_cache[attempt.quiz_id]
+
     def get_quiz(self, attempt):
         q = attempt.quiz
         paper = getattr(q, "exam_paper", None)
@@ -342,21 +380,19 @@ class AttemptSerializer(serializers.ModelSerializer):
             "time_limit_minutes": q.time_limit_minutes,
             "subject": {"code": q.subject.code, "name": q.subject.name, "icon": q.subject.icon},
             "grade": q.grade,
-            "marking_guide_link": self._marking_guide(paper) if attempt.status != Attempt.Status.IN_PROGRESS else None,
+            "marking_guide_link": self._marking_guide(attempt, paper) if attempt.status != Attempt.Status.IN_PROGRESS else None,
+            "locked": not self._full_solutions(attempt),
         }
 
-    def _marking_guide(self, paper):
-        if paper is None:
+    def _marking_guide(self, attempt, paper):
+        if paper is None or not self._full_solutions(attempt):
             return None
-        if paper.marking_guide_file:
-            request = self.context.get("request")
-            url = paper.marking_guide_file.url
-            return request.build_absolute_uri(url) if request else url
-        return paper.marking_guide_url or None
+        return paper_link(_viewer(self), paper, "marking_guide", self.context.get("request"))
 
     def get_questions(self, attempt):
         questions = {q.id: q for q in Question.objects.filter(id__in=attempt.question_order).prefetch_related("choices")}
         answers = {a.question_id: a for a in attempt.answers.prefetch_related("selected_choices")}
+        full = self._full_solutions(attempt)
         result = []
         for number, qid in enumerate(attempt.question_order, start=1):
             question = questions.get(qid)
@@ -386,8 +422,8 @@ class AttemptSerializer(serializers.ModelSerializer):
                     "correct_choice_ids": services.correct_choice_ids(question),
                     "numeric_answer": question.numeric_answer,
                     "accepted_answers": question.accepted_answers,
-                    "explanation": question.explanation,
-                    "marking_guide": question.marking_guide if attempt.status != Attempt.Status.IN_PROGRESS else "",
+                    "explanation": question.explanation if full else "",
+                    "marking_guide": question.marking_guide if full and attempt.status != Attempt.Status.IN_PROGRESS else "",
                     "is_correct": answer.is_correct if answer else False,
                     "marks_awarded": answer.marks_awarded if answer else 0,
                     "teacher_feedback": answer.teacher_feedback if answer else "",

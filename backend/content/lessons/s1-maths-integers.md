@@ -8,6 +8,7 @@ title: Integers and the number line
 summary: Positive and negative whole numbers, how to order them, and how to add and subtract them using a number line.
 minutes: 20
 simulations: phet-equality-explorer
+access: free
 ---
 ## What is an integer?
 

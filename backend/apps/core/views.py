@@ -19,6 +19,7 @@ from apps.classroom.models import Assignment, Classroom
 from apps.classroom.views import AssignmentSerializer, assignment_statuses
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
 from apps.curriculum.views import visible_lessons
+from apps.schools.access import has_premium
 from apps.simulations.models import Simulation, SimulationView
 
 from . import audit
@@ -67,11 +68,15 @@ def _continue_learning(user):
         visible_lessons(user).filter(status=ContentStatus.PUBLISHED).exclude(id__in=done).select_related("unit", "unit__subject")
     )
     candidate = None
+    if not has_premium(user):
+        lessons = lessons.filter(is_free=True)  # suggest something the student can actually open
     if last:
         unit = last.lesson.unit
         candidate = lessons.filter(unit__subject=unit.subject, unit__grade=unit.grade).order_by("unit__number", "order").first()
     if candidate is None and user.grade:
         candidate = lessons.filter(unit__grade=user.grade).order_by("unit__subject__order", "unit__number", "order").first()
+    if candidate is None and not user.grade:
+        candidate = lessons.order_by("unit__grade", "unit__subject__order", "unit__number", "order").first()
     if candidate is None:
         return None
     return {
@@ -147,9 +152,12 @@ def search(request):
     if len(term) < 2:
         return Response({"lessons": [], "simulations": [], "quizzes": [], "subjects": []})
     user = request.user
+    premium = has_premium(user)
+    # Without a subscription, premium lesson text isn't searchable (it would reveal what's inside).
+    body_match = Q(body__icontains=term) if premium else Q(body__icontains=term, is_free=True)
     lessons = (
         visible_lessons(user)
-        .filter(Q(title__icontains=term) | Q(summary__icontains=term) | Q(body__icontains=term))
+        .filter(Q(title__icontains=term) | Q(summary__icontains=term) | body_match)
         .select_related("unit", "unit__subject")[:10]
     )
     sims = Simulation.objects.filter(Q(title__icontains=term) | Q(topics__icontains=term))[:8]
@@ -164,11 +172,15 @@ def search(request):
                     "subject": les.unit.subject.name,
                     "grade": les.unit.grade,
                     "icon": les.unit.subject.icon,
+                    "locked": not (les.is_free or premium),
                 }
                 for les in lessons
             ],
             "simulations": [{"slug": s.slug, "title": s.title, "provider": s.provider} for s in sims],
-            "quizzes": [{"id": q.id, "title": q.title, "kind": q.kind, "subject": q.subject.name} for q in quizzes],
+            "quizzes": [
+                {"id": q.id, "title": q.title, "kind": q.kind, "subject": q.subject.name, "locked": not (q.is_free or premium)}
+                for q in quizzes
+            ],
             "subjects": [{"code": s.code, "name": s.name, "icon": s.icon} for s in subjects],
         }
     )

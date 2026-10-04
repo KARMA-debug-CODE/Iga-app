@@ -12,6 +12,7 @@ from apps.core import admin_login
 from apps.core import views as core_views
 from apps.curriculum.views import LessonViewSet, ResourceViewSet, SubjectViewSet, UnitViewSet
 from apps.gamification import views as gamification_views
+from apps.schools.downloads import PaperDownloadView
 from apps.simulations.views import SimulationViewSet
 
 router = DefaultRouter()
@@ -46,6 +47,7 @@ api = [
     path("badges/", gamification_views.badges, name="badges"),
     path("admin/stats/", core_views.admin_stats, name="admin-stats"),
     path("admin/audit/", core_views.admin_audit, name="admin-audit"),
+    path("files/papers/<str:token>/", PaperDownloadView.as_view(), name="paper-download"),
     path("", include(router.urls)),
 ]
 

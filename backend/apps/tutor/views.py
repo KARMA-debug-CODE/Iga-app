@@ -5,6 +5,8 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.schools import access
+
 from . import services
 
 log = logging.getLogger(__name__)
@@ -20,7 +22,14 @@ class AskSerializer(serializers.Serializer):
 
 class TutorStatusView(APIView):
     def get(self, request):
-        return Response({"enabled": services.tutor_enabled()})
+        premium = access.has_premium(request.user)
+        return Response(
+            {
+                "enabled": services.tutor_enabled() and premium,
+                # Set when the tutor exists but this account's school hasn't subscribed.
+                "reason": "" if premium or not services.tutor_enabled() else "subscription_required",
+            }
+        )
 
 
 class TutorAskView(APIView):
@@ -31,6 +40,7 @@ class TutorAskView(APIView):
             return Response(
                 {"detail": "The AI tutor is not switched on for this school yet."}, status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
+        access.require(request.user)  # the tutor is part of the school subscription
         data = AskSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         v = data.validated_data

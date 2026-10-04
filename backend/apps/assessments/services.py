@@ -41,6 +41,19 @@ def visible_quizzes(user):
     return qs.filter(published | Q(id__in=assigned_ids)).exclude(status=ContentStatus.ARCHIVED)
 
 
+def library_questions_q(prefix=""):
+    """Questions from the Iga library (imported or written by platform admins): premium material.
+    Questions written by teachers are their school's own work."""
+    p = prefix
+    return Q(**{f"{p}author__isnull": True}) | Q(**{f"{p}author__role": "admin"}) | Q(**{f"{p}author__is_superuser": True})
+
+
+def quiz_is_teacher_material(quiz):
+    """A teacher's quiz is free only if none of its questions come from the premium library,
+    so library questions can't be repackaged into a free quiz."""
+    return not quiz.quiz_questions.filter(library_questions_q("question__")).exists()
+
+
 def _q(value):
     return Decimal(value).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
 

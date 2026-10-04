@@ -1,0 +1,114 @@
+{
+  "_note": "Canevas des unités de S1 à S6. Les titres suivent la progression habituelle du programme rwandais fondé sur les compétences, mais n'ont PAS encore été vérifiés ligne par ligne par rapport aux programmes officiels du REB ; chaque unité est chargée avec alignment_verified=false jusqu'à ce qu'un enseignant la relise.",
+  "mathematics": {
+    "S1": ["Les entiers relatifs et les opérations", "Fractions, nombres décimaux et pourcentages", "Puissances et exposants", "Expressions algébriques", "Équations et inéquations du premier degré", "Angles et polygones", "Collecte et présentation de données"],
+    "S2": ["Bases de numération", "Rapports, proportions et taux", "Systèmes d'équations du premier degré", "Fonctions affines et leurs représentations graphiques", "Le théorème de Pythagore", "Aires et volumes", "Introduction aux probabilités"],
+    "S3": ["Puissances, radicaux et logarithmes", "Équations du second degré", "Ensembles et diagrammes de Venn", "Rapports trigonométriques", "Cercles et constructions géométriques", "Vecteurs et transformations", "Moyennes et mesures de dispersion"],
+    "S4": ["Logique et ensembles de nombres", "Fonctions polynômes", "Fonctions du second degré", "Fonctions trigonométriques", "Suites et séries", "Matrices et déterminants", "Statistique descriptive"],
+    "S5": ["Limites de fonctions", "Dérivation", "Vecteurs de l'espace", "Nombres complexes", "Fonctions exponentielles et logarithmes", "Dénombrement et probabilités"],
+    "S6": ["Calcul intégral et applications", "Équations différentielles", "Coniques", "Applications linéaires", "Statistique à deux variables", "Lois de probabilité"]
+  },
+  "physics": {
+    "S1": ["Introduction à la physique et à la mesure", "Le mouvement : vitesse et accélération", "Les forces et leurs effets", "Masse volumique et pression", "Chaleur et température", "La réflexion de la lumière"],
+    "S2": ["Travail, énergie et puissance", "Les machines simples", "L'électricité statique", "Le courant électrique et la loi d'Ohm", "Le magnétisme", "La réfraction de la lumière et les lentilles"],
+    "S3": ["Les lois de Newton", "Moment d'une force et équilibre", "Ondes et son", "L'électromagnétisme", "Propriétés thermiques de la matière", "Introduction à la physique atomique"],
+    "S4": ["Mouvement d'un projectile et cinématique dans le plan", "Dynamique et quantité de mouvement", "Mouvement circulaire et gravitation", "Élasticité et loi de Hooke", "Champ électrique et potentiel électrique", "Optique géométrique"],
+    "S5": ["Mouvement harmonique simple", "Mécanique des fluides", "Thermodynamique", "Circuits en courant continu et lois de Kirchhoff", "Les condensateurs", "Optique ondulatoire"],
+    "S6": ["Induction électromagnétique", "Le courant alternatif", "Physique atomique et nucléaire", "Effet photoélectrique et notions de physique quantique", "Semi-conducteurs et électronique", "Introduction à l'astrophysique"]
+  },
+  "chemistry": {
+    "S1": ["Introduction à la chimie et sécurité au laboratoire", "Les états de la matière", "La séparation des mélanges", "La structure de l'atome", "Éléments, composés et tableau périodique"],
+    "S2": ["La liaison chimique", "Formules et équations chimiques", "Acides, bases et sels", "La notion de mole", "L'air et la combustion"],
+    "S3": ["L'évolution des propriétés dans le tableau périodique", "La vitesse des réactions", "L'électrolyse", "Introduction à la chimie organique", "L'eau et les solutions"],
+    "S4": ["La configuration électronique", "Liaisons chimiques et géométrie des molécules", "La stœchiométrie", "Les lois des gaz", "Les hydrocarbures"],
+    "S5": ["Énergétique chimique", "L'équilibre chimique", "Équilibres acido-basiques et pH", "Les réactions d'oxydoréduction", "Les groupes fonctionnels en chimie organique"],
+    "S6": ["Cinétique chimique", "Électrochimie", "Les éléments de transition", "Polymères et synthèse organique", "Techniques d'analyse"]
+  },
+  "biology": {
+    "S1": ["Caractéristiques et classification des êtres vivants", "La cellule", "La nutrition chez les végétaux et les animaux", "Santé, hygiène et prévention des maladies", "Les écosystèmes"],
+    "S2": ["Le transport chez les végétaux et les animaux", "La respiration", "L'appareil digestif humain", "La reproduction chez les plantes à fleurs", "Les micro-organismes et les maladies"],
+    "S3": ["La reproduction humaine et la santé sexuelle", "Excrétion et homéostasie", "Coordination nerveuse et hormonale", "Génétique et hérédité", "La protection de l'environnement"],
+    "S4": ["Structure de la cellule et biochimie", "Les enzymes", "Classification et biodiversité", "Les échanges gazeux", "Les systèmes de transport"],
+    "S5": ["L'ADN et la génétique", "Évolution et sélection naturelle", "La photosynthèse", "La respiration cellulaire", "L'immunité"],
+    "S6": ["Expression des gènes et biotechnologies", "Populations et écologie", "La coordination nerveuse", "La régulation hormonale", "Biologie appliquée et santé publique"]
+  },
+  "ict": {
+    "S1": ["Les systèmes informatiques : matériel et logiciels", "Systèmes d'exploitation et gestion des fichiers", "Le traitement de texte", "Sécurité sur Internet et citoyenneté numérique", "Votre première page web : HTML"],
+    "S2": ["Les tableurs", "Les logiciels de présentation", "Mettre en forme des pages web avec CSS", "Introduction aux algorithmes", "Les réseaux informatiques"],
+    "S3": ["Introduction aux bases de données", "Programmer en JavaScript", "Résoudre des problèmes avec des organigrammes", "Le multimédia", "Les TIC et la société"],
+    "S4": ["Architecture des ordinateurs", "Systèmes de numération et représentation des données", "Programmer en Python", "Le développement web approfondi", "Notions fondamentales sur les réseaux"],
+    "S5": ["Structures de données", "Programmation orientée objet", "Bases de données et SQL", "Les systèmes d'exploitation", "Programmation web en JavaScript"],
+    "S6": ["Algorithmique et complexité", "Génie logiciel", "Applications web dynamiques", "Sécurité informatique", "Projet de synthèse"]
+  },
+  "english": {
+    "S1": ["Les classes de mots", "Lire pour comprendre", "La description écrite", "Se présenter et présenter les autres"],
+    "S2": ["Les temps verbaux", "La rédaction de lettres", "Lire des textes de fiction", "Discussion et débat"],
+    "S3": ["La voix active et la voix passive", "Le discours rapporté", "La rédaction d'essais", "La poésie"],
+    "S4": ["Grammaire avancée", "La rédaction de rapports", "L'analyse de textes", "La prise de parole en public"],
+    "S5": ["Le texte argumentatif", "Le résumé", "L'éducation aux médias", "Le théâtre"],
+    "S6": ["La lecture critique", "Recherche documentaire et citation des sources", "La communication formelle", "Techniques d'examen"]
+  },
+  "kinyarwanda": {
+    "S1": ["Les classes de mots (grammaire)", "La littérature orale", "Lecture et compréhension", "La rédaction"],
+    "S2": ["Les verbes et les temps", "Contes, proverbes et devinettes", "L'art de bien parler", "Les écrits administratifs"],
+    "S3": ["La phrase et sa structure", "La littérature écrite", "L'échange d'idées", "La rédaction"],
+    "S4": ["Grammaire approfondie", "La poésie", "Le théâtre", "La communication professionnelle"],
+    "S5": ["Le roman", "L'art et la création rwandais", "L'analyse de textes", "La prise de parole en public"],
+    "S6": ["Recherche sur la langue", "La littérature contemporaine", "La rédaction de textes longs", "Préparation aux examens"]
+  },
+  "kiswahili": {
+    "S1": ["Grammaire : les classes de mots", "Conversations et salutations", "Compréhension de texte", "La rédaction"],
+    "S2": ["Les classes nominales", "La littérature orale", "La lettre", "Proverbes et devinettes"],
+    "S3": ["Temps et modes", "La poésie", "La nouvelle", "La rédaction d'imagination"],
+    "S4": ["Grammaire et usage de la langue", "Le roman", "Le théâtre", "La rédaction de rapports"],
+    "S5": ["Sociolinguistique", "La poésie moderne", "L'analyse littéraire", "Le débat"],
+    "S6": ["La traduction", "La littérature d'Afrique de l'Est", "La rédaction académique", "Préparation à l'examen"]
+  },
+  "french": {
+    "S1": ["Se présenter", "Les articles et les noms", "Compréhension écrite", "La vie quotidienne"],
+    "S2": ["Le présent et le passé composé", "Décrire une personne", "La lettre amicale", "Les loisirs"],
+    "S3": ["L'imparfait et le futur", "Le récit", "Exprimer son opinion", "La santé"],
+    "S4": ["Grammaire avancée", "Le texte argumentatif", "La littérature francophone", "L'exposé oral"],
+    "S5": ["Le résumé", "Le débat", "Les médias", "Le théâtre"],
+    "S6": ["La dissertation", "La correspondance formelle", "Analyse de textes", "Préparation à l'examen"]
+  },
+  "history": {
+    "S1": ["Les sources de l'histoire", "Les premières sociétés humaines", "Le Rwanda précolonial", "Citoyenneté et identité nationale"],
+    "S2": ["La traite des esclaves", "La colonisation de l'Afrique", "Le Rwanda sous la domination coloniale", "Les droits de l'homme"],
+    "S3": ["Les mouvements d'indépendance en Afrique", "La Première et la Seconde Guerre mondiale", "Le génocide perpétré contre les Tutsi", "Unité et réconciliation"],
+    "S4": ["Les civilisations antiques", "La Révolution française et la révolution industrielle", "Le partage de l'Afrique", "La société rwandaise avant 1900"],
+    "S5": ["L'administration coloniale en Afrique", "Nationalisme et décolonisation", "Les guerres mondiales et la Société des Nations", "La guerre froide"],
+    "S6": ["L'Afrique après les indépendances", "Étude et prévention des génocides", "L'intégration régionale : la CAE et l'UA", "Le Rwanda depuis 1994"]
+  },
+  "geography": {
+    "S1": ["Lecture de cartes et échelle", "La Terre et le système solaire", "Le temps et le climat", "Le relief et les caractéristiques physiques du Rwanda"],
+    "S2": ["Roches et sols", "La végétation", "L'agriculture au Rwanda", "La population"],
+    "S3": ["Ressources naturelles et conservation", "Industrie et commerce", "L'urbanisation", "Les risques environnementaux"],
+    "S4": ["Géographie pratique : cartes et photographies", "Géomorphologie", "Climatologie", "Géographie de la population"],
+    "S5": ["Hydrologie", "Biogéographie et sols", "Géographie économique de l'Afrique", "L'habitat et les établissements humains"],
+    "S6": ["Géographie régionale de l'Afrique de l'Est", "Gestion de l'environnement", "Travail de terrain et SIG", "Développement et mondialisation"]
+  },
+  "economics": {
+    "S4": ["Introduction à l'économie", "La demande et l'offre", "L'élasticité", "Théorie de la production et des coûts"],
+    "S5": ["Les structures de marché", "Le revenu national", "La monnaie et les banques", "Finances publiques et fiscalité"],
+    "S6": ["Le commerce international", "Croissance économique et développement", "Inflation et chômage", "L'économie du Rwanda et la Vision 2050"]
+  },
+  "entrepreneurship": {
+    "S1": ["Qu'est-ce que l'entrepreneuriat ?", "Trouver des idées d'entreprise", "Épargne et budget"],
+    "S2": ["Planifier une petite entreprise", "Les bases du marketing", "La tenue des documents de l'entreprise"],
+    "S3": ["Les coopératives", "Les institutions financières", "Les impôts et la collectivité"],
+    "S4": ["L'esprit d'entreprise", "Analyser les opportunités d'affaires", "La tenue de la comptabilité"],
+    "S5": ["La gestion du marketing", "La gestion financière", "Le droit des affaires"],
+    "S6": ["Rédiger un plan d'affaires", "Les décisions d'investissement", "Développer une entreprise"]
+  },
+  "literature": {
+    "S4": ["Introduction à la littérature et aux genres littéraires", "Lire la fiction en prose"],
+    "S5": ["La poésie", "Le théâtre"],
+    "S6": ["La littérature africaine", "La critique littéraire"]
+  },
+  "general-studies": {
+    "S4": ["Techniques de communication", "Culture et société rwandaises"],
+    "S5": ["Esprit critique et résolution de problèmes", "Genre et développement"],
+    "S6": ["Santé et bien-être", "Science, technologie et société"]
+  }
+}

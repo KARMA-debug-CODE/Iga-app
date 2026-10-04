@@ -17,6 +17,7 @@ from apps.core.permissions import IsTeacher
 from apps.core.throttles import JoinRateThrottle
 from apps.curriculum.models import LessonProgress
 from apps.curriculum.views import visible_lessons
+from apps.schools import access
 from apps.simulations.models import SimulationView
 
 from . import roster
@@ -62,6 +63,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
     lesson_slug = serializers.CharField(source="lesson.slug", read_only=True, default=None)
     simulation_slug = serializers.CharField(source="simulation.slug", read_only=True, default=None)
     my_status = serializers.SerializerMethodField()
+    locked = serializers.SerializerMethodField()
 
     class Meta:
         model = Assignment
@@ -81,6 +83,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "due_at",
             "created_at",
             "my_status",
+            "locked",
         ]
         read_only_fields = ["id", "created_at"]
 
@@ -103,6 +106,11 @@ class AssignmentSerializer(serializers.ModelSerializer):
         if not user.is_student:
             return None
         return assignment_status(assignment, user)
+
+    def get_locked(self, assignment):
+        """True when the viewer can't open the assigned lesson or quiz (their school hasn't subscribed)."""
+        target = assignment.quiz or assignment.lesson
+        return target is not None and not access.can_open(self.context["request"].user, target)
 
 
 def assignment_status(assignment, student):

@@ -8,6 +8,7 @@ title: The cell, the unit of life
 summary: The parts of animal and plant cells, what each part does, and how cells are organised into tissues and organs.
 minutes: 25
 simulations:
+access: free
 ---
 ## All living things are made of cells
 

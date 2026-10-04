@@ -10,6 +10,7 @@ from apps.classroom.models import Assignment, Enrollment
 from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
+from apps.schools import access
 
 from . import services
 from .analytics import quiz_analytics
@@ -37,6 +38,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         qs = Question.objects.select_related("subject").prefetch_related("choices")
         if not user.is_platform_admin:
             qs = qs.filter(Q(status=ContentStatus.PUBLISHED) | Q(author=user))
+            if not access.has_premium(user):
+                # Library questions (and their answers) are part of the subscription.
+                qs = qs.exclude(services.library_questions_q())
         params = self.request.query_params
         for field, param in (
             ("subject__code", "subject"),
@@ -114,8 +118,18 @@ class QuizViewSet(viewsets.ModelViewSet):
             context["attempt_stats"] = {row["quiz_id"]: {"count": row["count"], "best": row["best"]} for row in stats}
         return context
 
+    def _set_free_flag(self, quiz):
+        if not self.request.user.is_platform_admin:
+            free = services.quiz_is_teacher_material(quiz)
+            if quiz.is_free != free:
+                quiz.is_free = free
+                quiz.save(update_fields=["is_free"])
+
     def perform_create(self, serializer):
-        quiz = serializer.save(author=self.request.user)
+        user = self.request.user
+        extra = {} if user.is_platform_admin else {"is_free": False}
+        quiz = serializer.save(author=user, **extra)
+        self._set_free_flag(quiz)
         audit.record(self.request, "create_quiz", quiz, status=quiz.status)
 
     def perform_update(self, serializer):
@@ -135,7 +149,10 @@ class QuizViewSet(viewsets.ModelViewSet):
             ContentStatus.ARCHIVED,
         ):
             extra["status"] = ContentStatus.REVIEW  # like lessons: every teacher edit is re-reviewed
+        if not user.is_platform_admin:
+            serializer.validated_data.pop("is_free", None)
         quiz = serializer.save(**extra)
+        self._set_free_flag(quiz)
         audit.record(self.request, "update_quiz", quiz, status=quiz.status)
 
     def perform_destroy(self, instance):
@@ -152,13 +169,17 @@ class QuizViewSet(viewsets.ModelViewSet):
     @action(detail=True, permission_classes=[IsTeacher])
     def analytics(self, request, pk=None):
         """Item analysis for the teacher's students (optionally one class: ?classroom=<id>)."""
-        return Response(quiz_analytics(self.get_object(), request.user, request.query_params.get("classroom")))
+        quiz = self.get_object()
+        if quiz.author_id != request.user.id:
+            access.require(request.user, quiz)  # the analysis shows the answer key
+        return Response(quiz_analytics(quiz, request.user, request.query_params.get("classroom")))
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def start(self, request, pk=None):
         quiz = self.get_object()
         if quiz.status == ContentStatus.ARCHIVED:
             raise ValidationError("This quiz is no longer available.")
+        access.require(request.user, quiz)  # an assignment never grants access by itself
         assignment = None
         assignment_id = request.data.get("assignment")
         if assignment_id not in (None, ""):
@@ -222,12 +243,23 @@ class AttemptViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
     def get_object(self):
         attempt = super().get_object()
         services.finalize_if_expired(attempt)
+        user = self.request.user
+        if (
+            attempt.status == Attempt.Status.IN_PROGRESS
+            and attempt.user_id == user.id
+            and not access.can_open(user, attempt.quiz)
+        ):
+            # Access ended (e.g. the subscription lapsed) mid-attempt: close it with what was
+            # answered, so it can't be kept open to read the questions.
+            attempt = services.submit_attempt(attempt)
         return attempt
 
-    def _own_attempt(self):
+    def _own_attempt(self, needs_access=True):
         attempt = self.get_object()
         if attempt.user_id != self.request.user.id:
             raise PermissionDenied("This is not your attempt.")
+        if needs_access and attempt.status == Attempt.Status.IN_PROGRESS:
+            access.require(self.request.user, attempt.quiz)
         return attempt
 
     @action(detail=True, methods=["post"])
@@ -251,7 +283,7 @@ class AttemptViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
 
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
-        attempt = self._own_attempt()
+        attempt = self._own_attempt(needs_access=False)  # finishing is always allowed
         attempt = services.submit_attempt(attempt)
         return Response(AttemptSerializer(attempt, context={"request": request}).data)
 

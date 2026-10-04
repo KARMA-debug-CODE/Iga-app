@@ -219,6 +219,9 @@ BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "")
 # A fake checkout for local demos and tests. Never enable it in production.
 BILLING_DEV_MODE = env_bool("BILLING_DEV_MODE", DEBUG)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+# Behind the bundled nginx, protected files (uploaded past papers) are sent by nginx from an
+# internal location after Django has checked access. Without nginx, Django streams them.
+PROTECTED_MEDIA_ACCEL = env_bool("PROTECTED_MEDIA_ACCEL", False)
 
 # Largest file a teacher may upload as a resource (nginx allows 25 MB per request).
 UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))

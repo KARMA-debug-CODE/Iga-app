@@ -49,7 +49,7 @@ def system_text(call):
 def test_status_and_disabled(client_for, student, settings):
     settings.TUTOR_ENABLED = False
     client = client_for(student)
-    assert client.get("/api/tutor/status/").data == {"enabled": False}
+    assert client.get("/api/tutor/status/").data == {"enabled": False, "reason": ""}
     assert client.post("/api/tutor/ask/", {"message": "hi"}, format="json").status_code == 503
 
 
