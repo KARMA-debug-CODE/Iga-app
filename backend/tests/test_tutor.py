@@ -159,7 +159,7 @@ def test_rate_limited_api_returns_503(client_for, student, tutor):
 
 
 def test_replies_in_the_students_language(client_for, student, tutor):
-    student.preferred_language = "sw"
+    student.preferred_language = "fr"
     student.save()
     client_for(student).post("/api/tutor/ask/", {"message": "Seli ni nini?"}, format="json")
-    assert "Reply in Kiswahili" in system_text(tutor.calls[0])
+    assert "Reply in French" in system_text(tutor.calls[0])

@@ -18,7 +18,6 @@ export default function Register() {
     email: "",
     password: "",
     grade: "S1",
-    school: "",
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -97,10 +96,6 @@ export default function Register() {
               </select>
             </label>
           )}
-          <label>
-            {t("auth.school")}
-            <input value={form.school} onChange={update("school")} />
-          </label>
         </div>
         {error && (
           <div className="alert alert-error" role="alert">

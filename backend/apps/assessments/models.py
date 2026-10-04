@@ -95,6 +95,8 @@ class Quiz(models.Model):
     feedback_mode = models.CharField(max_length=14, choices=FeedbackMode.choices, default=FeedbackMode.IMMEDIATE)
     max_attempts = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Empty = unlimited")
     status = models.CharField(max_length=10, choices=ContentStatus.CHOICES, default=ContentStatus.DRAFT, db_index=True)
+    # Free quizzes are open to everyone; the rest need a school subscription.
+    is_free = models.BooleanField(default=False, db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="quizzes")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

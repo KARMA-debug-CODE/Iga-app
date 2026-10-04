@@ -49,9 +49,9 @@ def leaderboard(request):
     elif not (user.is_student or user.is_platform_admin):
         return _empty(scope, period)
     elif scope == "school":
-        if not user.school:
+        if user.school_member is None:
             return _empty(scope, period)
-        students = students.filter(school__iexact=user.school)
+        students = students.filter(school=user.school_member, school_status=User.SchoolStatus.APPROVED)
     else:
         grade = request.query_params.get("grade") or user.grade
         if grade:

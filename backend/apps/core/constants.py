@@ -15,7 +15,7 @@ A_LEVEL_GRADES = ("S4", "S5", "S6")
 
 LEVELS = [("O", "O-Level (S1–S3)"), ("A", "A-Level (S4–S6)")]
 
-LANGUAGES = [("en", "English"), ("rw", "Kinyarwanda"), ("sw", "Kiswahili")]
+LANGUAGES = [("en", "English"), ("fr", "Français")]
 LANGUAGE_CODES = [code for code, _ in LANGUAGES]
 
 

@@ -6,14 +6,15 @@ from .models import ParentInvite, ParentLink, User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ("username", "email", "role", "teacher_approved", "grade", "school", "xp", "is_active")
-    list_filter = ("role", "teacher_approved", "grade", "is_active")
-    search_fields = ("username", "email", "first_name", "last_name", "school")
+    list_display = ("username", "email", "role", "teacher_approved", "grade", "school", "school_status", "xp", "is_active")
+    list_filter = ("role", "teacher_approved", "school_status", "grade", "is_active")
+    autocomplete_fields = ("school",)
+    search_fields = ("username", "email", "first_name", "last_name", "school__name")
     actions = ["approve_teachers"]
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             "Learning profile",
-            {"fields": ("role", "teacher_approved", "grade", "school", "preferred_language")},
+            {"fields": ("role", "teacher_approved", "grade", "school", "school_status", "preferred_language")},
         ),
         ("Progress", {"fields": ("xp", "streak_days", "last_active_date")}),
         ("Security", {"fields": ("totp_enabled",)}),

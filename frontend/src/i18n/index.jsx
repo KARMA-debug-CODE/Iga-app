@@ -1,15 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import en from "./en";
-import rw from "./rw";
-import sw from "./sw";
+import fr from "./fr";
 
 export const LANGUAGES = [
   { code: "en", name: "English" },
-  { code: "rw", name: "Kinyarwanda" },
-  { code: "sw", name: "Kiswahili" },
+  { code: "fr", name: "Français" },
 ];
-const DICTIONARIES = { en, rw, sw };
+const DICTIONARIES = { en, fr };
 const STORAGE_KEY = "iga.lang";
 
 export function translate(lang, key, vars) {

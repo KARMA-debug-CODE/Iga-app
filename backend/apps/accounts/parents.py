@@ -69,7 +69,7 @@ def child_summary(student):
         "name": student.display_name,
         "first_name": student.first_name or student.username,
         "grade": student.grade,
-        "school": student.school,
+        "school": student.school.name if student.school_id else "",
         "xp": student.xp,
         "level": level_info(student.xp)["level"],
         "streak_days": student.current_streak,

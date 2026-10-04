@@ -51,6 +51,7 @@ class LessonSummarySerializer(serializers.ModelSerializer):
 
 class UnitSerializer(serializers.ModelSerializer):
     lessons = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
 
     class Meta:
         model = Unit
@@ -65,6 +66,9 @@ class UnitSerializer(serializers.ModelSerializer):
             "alignment_verified",
             "lessons",
         ]
+
+    def get_title(self, unit):
+        return unit.localized_title(self.context.get("lang", "en"))
 
     def get_lessons(self, unit):
         lessons = self.context["lessons_by_unit"].get(unit.id, [])
@@ -170,7 +174,12 @@ class LessonDetailSerializer(serializers.ModelSerializer):
 
     def get_unit(self, lesson):
         unit = lesson.unit
-        return {"id": unit.id, "number": unit.number, "title": unit.title, "grade": unit.grade}
+        return {
+            "id": unit.id,
+            "number": unit.number,
+            "title": unit.localized_title(self.context.get("lang", "en")),
+            "grade": unit.grade,
+        }
 
     def get_subject(self, lesson):
         subject = lesson.unit.subject

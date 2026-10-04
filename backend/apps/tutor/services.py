@@ -22,7 +22,7 @@ from .models import TutorExchange
 
 log = logging.getLogger(__name__)
 
-LANGUAGE_NAMES = {"en": "English", "rw": "Kinyarwanda", "sw": "Kiswahili"}
+LANGUAGE_NAMES = {"en": "English", "fr": "French"}
 MAX_HISTORY_MESSAGES = 10
 MAX_MESSAGE_CHARS = 2000
 

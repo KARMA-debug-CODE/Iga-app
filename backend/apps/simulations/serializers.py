@@ -23,7 +23,6 @@ class SimulationSerializer(serializers.ModelSerializer):
             "grades",
             "topics",
             "learning_goals",
-            "supports_kinyarwanda",
         ]
 
     def get_embed_url(self, sim):

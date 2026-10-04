@@ -29,7 +29,6 @@ class Simulation(models.Model):
     grades = models.JSONField(default=list, blank=True, help_text='e.g. ["S1", "S2"]')
     topics = models.CharField(max_length=300, blank=True, help_text="Comma-separated keywords")
     learning_goals = models.TextField(blank=True)
-    supports_kinyarwanda = models.BooleanField(default=False)
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -43,7 +42,7 @@ class Simulation(models.Model):
     def embed_url(self, lang="en"):
         if self.provider == self.Provider.PHET:
             name = quote(self.provider_id)
-            locale = "rw" if lang == "rw" and self.supports_kinyarwanda else lang if lang in ("en", "sw") else "en"
+            locale = "fr" if lang == "fr" else "en"  # PhET sims are translated into French
             return f"https://phet.colorado.edu/sims/html/{name}/latest/{name}_all.html?locale={locale}"
         if self.provider == self.Provider.GEOGEBRA:
             if self.provider_id in self.GEOGEBRA_APPS:

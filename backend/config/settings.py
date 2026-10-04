@@ -8,6 +8,7 @@ See backend/.env.example for the full list.
 
 import os
 from datetime import timedelta
+from decimal import Decimal
 from pathlib import Path
 
 import dj_database_url
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     "apps.community",
     "apps.gamification",
     "apps.tutor",
+    "apps.schools",
 ]
 
 MIDDLEWARE = [
@@ -112,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "en"
-LANGUAGES = [("en", "English"), ("rw", "Kinyarwanda"), ("sw", "Kiswahili")]
+LANGUAGES = [("en", "English"), ("fr", "Français")]
 TIME_ZONE = "Africa/Kigali"
 USE_I18N = True
 USE_TZ = True
@@ -202,6 +204,21 @@ TUTOR_MODEL = os.environ.get("TUTOR_MODEL", "claude-opus-5-5")
 TUTOR_EFFORT = os.environ.get("TUTOR_EFFORT", "low")
 TUTOR_MAX_TOKENS = int(os.environ.get("TUTOR_MAX_TOKENS", "4000"))
 TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
+
+# --- School subscriptions -------------------------------------------------
+# Each school pays a flat monthly price for all its members. Prices per currency:
+# USD for cards; set SUBSCRIPTION_PRICE_RWF to also accept mobile money in francs.
+SUBSCRIPTION_PRICES = {"USD": Decimal(os.environ.get("SUBSCRIPTION_PRICE_USD", "200"))}
+if os.environ.get("SUBSCRIPTION_PRICE_RWF"):
+    SUBSCRIPTION_PRICES["RWF"] = Decimal(os.environ["SUBSCRIPTION_PRICE_RWF"])
+SUBSCRIPTION_MONTH_OPTIONS = [1, 3, 6, 12]
+# Days a lapsed subscription keeps working while the school renews.
+SUBSCRIPTION_GRACE_DAYS = int(os.environ.get("SUBSCRIPTION_GRACE_DAYS", "3"))
+# Online payments: "flutterwave" (cards and mobile money) or "" for manual payments only.
+BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "")
+# A fake checkout for local demos and tests. Never enable it in production.
+BILLING_DEV_MODE = env_bool("BILLING_DEV_MODE", DEBUG)
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 
 # Largest file a teacher may upload as a resource (nginx allows 25 MB per request).
 UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))

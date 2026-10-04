@@ -5,8 +5,8 @@ import { login } from "./helpers";
 test("landing page switches language", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Every subject");
-  await page.getByRole("button", { name: "Kiswahili" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Jifunze");
+  await page.getByRole("button", { name: "Français" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Toutes les matières");
   await page.getByRole("button", { name: "English" }).click();
 });
 

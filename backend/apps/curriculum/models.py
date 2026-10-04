@@ -16,8 +16,7 @@ class Subject(models.Model):
 
     code = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
-    name_rw = models.CharField("Name (Kinyarwanda)", max_length=100, blank=True)
-    name_sw = models.CharField("Name (Kiswahili)", max_length=100, blank=True)
+    name_fr = models.CharField("Name (French)", max_length=100, blank=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER)
     icon = models.CharField(max_length=8, default="📘", help_text="An emoji shown on subject cards")
@@ -33,7 +32,7 @@ class Subject(models.Model):
         return self.name
 
     def localized_name(self, lang):
-        return {"rw": self.name_rw, "sw": self.name_sw}.get(lang) or self.name
+        return (self.name_fr if lang == "fr" else "") or self.name
 
     def offered_in(self, grade):
         return self.offered_o_level if grade in ("S1", "S2", "S3") else self.offered_a_level
@@ -46,6 +45,7 @@ class Unit(models.Model):
     grade = models.CharField(max_length=2, choices=GRADES, db_index=True)
     number = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=200)
+    title_fr = models.CharField("Title (French)", max_length=200, blank=True)
     summary = models.TextField(blank=True)
     key_unit_competence = models.TextField(blank=True, help_text="The competence-based-curriculum statement for this unit")
     syllabus_reference = models.CharField(
@@ -61,6 +61,9 @@ class Unit(models.Model):
 
     def __str__(self):
         return f"{self.subject} {self.grade} · Unit {self.number}: {self.title}"
+
+    def localized_title(self, lang):
+        return (self.title_fr if lang == "fr" else "") or self.title
 
 
 class Lesson(models.Model):
@@ -78,6 +81,8 @@ class Lesson(models.Model):
     video_url = models.URLField(blank=True)
     estimated_minutes = models.PositiveSmallIntegerField(default=15)
     status = models.CharField(max_length=10, choices=ContentStatus.CHOICES, default=ContentStatus.DRAFT, db_index=True)
+    # Free lessons are open to everyone; the rest need a school subscription.
+    is_free = models.BooleanField(default=False, db_index=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="lessons")
     simulations = models.ManyToManyField("simulations.Simulation", blank=True, related_name="lessons")
     created_at = models.DateTimeField(auto_now_add=True)

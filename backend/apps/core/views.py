@@ -154,7 +154,7 @@ def search(request):
     )
     sims = Simulation.objects.filter(Q(title__icontains=term) | Q(topics__icontains=term))[:8]
     quizzes = visible_quizzes(user).filter(title__icontains=term).select_related("subject")[:8]
-    subjects = Subject.objects.filter(Q(name__icontains=term) | Q(name_rw__icontains=term) | Q(name_sw__icontains=term))[:5]
+    subjects = Subject.objects.filter(Q(name__icontains=term) | Q(name_fr__icontains=term))[:5]
     return Response(
         {
             "lessons": [
@@ -178,6 +178,8 @@ def search(request):
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
+    school = serializers.CharField(source="school.name", read_only=True, default=None)
+
     class Meta:
         model = User
         fields = [
@@ -190,12 +192,13 @@ class AdminUserSerializer(serializers.ModelSerializer):
             "teacher_approved",
             "grade",
             "school",
+            "school_status",
             "is_active",
             "xp",
             "last_login",
             "date_joined",
         ]
-        read_only_fields = ["id", "username", "email", "xp", "last_login", "date_joined"]
+        read_only_fields = ["id", "username", "email", "school_status", "xp", "last_login", "date_joined"]
 
 
 class AdminUserViewSet(viewsets.ModelViewSet):

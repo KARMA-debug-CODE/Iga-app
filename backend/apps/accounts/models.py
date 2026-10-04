@@ -11,12 +11,26 @@ class User(AbstractUser):
         STUDENT = "student", "Student"
         TEACHER = "teacher", "Teacher"
         PARENT = "parent", "Parent or guardian"
+        SCHOOL_ADMIN = "school_admin", "School administrator"
         ADMIN = "admin", "Administrator"
+
+    class SchoolStatus(models.TextChoices):
+        NONE = "", "No school"
+        PENDING = "pending", "Waiting for the school to approve"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Not approved"
 
     email = models.EmailField(unique=True, null=True, blank=True)
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.STUDENT, db_index=True)
     grade = models.CharField(max_length=2, choices=GRADES, blank=True)
-    school = models.CharField(max_length=200, blank=True)
+    # The school the user belongs to. Membership only counts once the school approves it
+    # (or the user entered the school's code), because membership unlocks the school's subscription.
+    school = models.ForeignKey("schools.School", null=True, blank=True, on_delete=models.SET_NULL, related_name="members")
+    school_status = models.CharField(max_length=10, choices=SchoolStatus.choices, blank=True, default="")
+    school_approved_at = models.DateTimeField(null=True, blank=True)
+    school_approved_by = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    # What the user typed before schools were a list (kept for reference, not used for access).
+    school_name = models.CharField(max_length=200, blank=True)
     preferred_language = models.CharField(max_length=2, choices=LANGUAGES, default="en")
 
     # Self-registered teachers must be approved by an administrator before they
@@ -32,9 +46,9 @@ class User(AbstractUser):
     totp_secret = models.CharField(max_length=64, blank=True)
     totp_enabled = models.BooleanField(default=False)
     # Last 30-second time step accepted, so a code can't be used twice.
+    totp_last_step = models.BigIntegerField(null=True, blank=True)
     # Set when a teacher creates the account or resets its password: the student must pick their own.
     must_change_password = models.BooleanField(default=False)
-    totp_last_step = models.BigIntegerField(null=True, blank=True)
 
     class Meta(AbstractUser.Meta):
         constraints = [
@@ -58,6 +72,20 @@ class User(AbstractUser):
     @property
     def is_platform_admin(self):
         return self.role == self.Role.ADMIN or self.is_superuser
+
+    @property
+    def is_school_admin(self):
+        return self.role == self.Role.SCHOOL_ADMIN
+
+    @property
+    def school_member(self):
+        """The school whose membership is approved, or None."""
+        return self.school if self.school_id and self.school_status == self.SchoolStatus.APPROVED else None
+
+    @property
+    def managed_school(self):
+        """The school this user administers (approved school admins only)."""
+        return self.school_member if self.is_school_admin else None
 
     @property
     def can_teach(self):

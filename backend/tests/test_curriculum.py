@@ -23,14 +23,14 @@ def test_subject_detail_lists_units_and_lessons(client_for, student, subject, le
 
 
 def test_lesson_translation(client_for, student, lesson):
-    LessonTranslation.objects.create(lesson=lesson, language="sw", title="Grafu", body="Habari")
+    LessonTranslation.objects.create(lesson=lesson, language="fr", title="Graphiques", body="Bonjour")
     client = client_for(student)
-    data = client.get(f"/api/lessons/{lesson.slug}/?lang=sw").data
-    assert data["title"] == "Grafu" and data["language"] == "sw"
-    assert data["available_languages"] == ["en", "sw"]
-    assert data["subject"]["name"] == "Hisabati"
+    data = client.get(f"/api/lessons/{lesson.slug}/?lang=fr").data
+    assert data["title"] == "Graphiques" and data["language"] == "fr"
+    assert data["available_languages"] == ["en", "fr"]
+    assert data["subject"]["name"] == "Mathématiques"
     # Falls back to English when no translation exists.
-    assert client.get(f"/api/lessons/{lesson.slug}/?lang=rw").data["title"] == "Linear graphs"
+    assert client.get(f"/api/lessons/{lesson.slug}/?lang=en").data["title"] == "Linear graphs"
 
 
 def test_draft_lessons_hidden_from_students(client_for, student, unit):

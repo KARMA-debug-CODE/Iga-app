@@ -163,7 +163,6 @@ export default function Profile() {
     first_name: user.first_name,
     last_name: user.last_name,
     grade: user.grade,
-    school: user.school,
     preferred_language: user.preferred_language,
   }));
   const [theme, setThemeState] = useState(getTheme);
@@ -226,7 +225,7 @@ export default function Profile() {
             )}
             <label>
               {t("auth.school")}
-              <input value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} />
+              <input value={user.school?.name || ""} readOnly />
             </label>
           </div>
           <label>

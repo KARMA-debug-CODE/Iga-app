@@ -87,10 +87,10 @@ def test_refresh_without_cookie(client_for):
 
 def test_profile_update_cannot_change_role(client_for, student):
     client = client_for(student)
-    response = client.patch("/api/auth/me/", {"preferred_language": "rw", "role": "admin", "xp": 9999}, format="json")
+    response = client.patch("/api/auth/me/", {"preferred_language": "fr", "role": "admin", "xp": 9999}, format="json")
     assert response.status_code == 200
     student.refresh_from_db()
-    assert student.preferred_language == "rw"
+    assert student.preferred_language == "fr"
     assert student.role == "student"
     assert student.xp == 0
 

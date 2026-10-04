@@ -4,7 +4,7 @@ Content lives in files so teachers can contribute through pull requests and so
 the same content can be re-imported into any environment. Every loader is
 idempotent: running it twice updates rather than duplicates.
 
-    content/subjects.json          subjects with names in en/rw/sw
+    content/subjects.json          subjects with names in English and French
     content/units.json             unit titles per subject per grade
     content/simulations.json       virtual-lab catalogue
     content/lessons/*.md           lessons (front matter + Markdown)
@@ -59,8 +59,7 @@ def load_subjects(path):
             code=item["code"],
             defaults={
                 "name": item["name"],
-                "name_rw": item.get("name_rw", ""),
-                "name_sw": item.get("name_sw", ""),
+                "name_fr": item.get("name_fr", ""),
                 "description": item.get("description", ""),
                 "category": item.get("category", Subject.Category.OTHER),
                 "icon": item.get("icon", "📘"),
@@ -74,7 +73,11 @@ def load_subjects(path):
 
 
 def load_units(path):
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    """units.json, plus French titles from units.fr.json next to it (same structure) when present."""
+    path = Path(path)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    french_path = path.with_name(path.stem + ".fr.json")
+    french = json.loads(french_path.read_text(encoding="utf-8")) if french_path.exists() else {}
     count = 0
     for code, grades in data.items():
         if code.startswith("_"):
@@ -83,8 +86,14 @@ def load_units(path):
         for grade, titles in grades.items():
             if grade not in GRADE_CODES:
                 raise ContentError(f"units.json: unknown grade {grade} for {code}")
+            titles_fr = french.get(code, {}).get(grade, [])
+            if titles_fr and len(titles_fr) != len(titles):
+                raise ContentError(f"units.fr.json: {code} {grade} has {len(titles_fr)} titles, units.json has {len(titles)}")
             for number, title in enumerate(titles, start=1):
-                Unit.objects.update_or_create(subject=subject, grade=grade, number=number, defaults={"title": title})
+                title_fr = titles_fr[number - 1] if titles_fr else ""
+                Unit.objects.update_or_create(
+                    subject=subject, grade=grade, number=number, defaults={"title": title, "title_fr": title_fr}
+                )
                 count += 1
     return count
 
@@ -102,7 +111,6 @@ def load_simulations(path):
                 "grades": item.get("grades", []),
                 "topics": item.get("topics", ""),
                 "learning_goals": item.get("learning_goals", ""),
-                "supports_kinyarwanda": item.get("supports_kinyarwanda", False),
                 "order": order,
             },
         )

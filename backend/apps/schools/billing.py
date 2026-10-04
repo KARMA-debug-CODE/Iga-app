@@ -1,0 +1,121 @@
+"""School subscriptions: prices, payments and how a payment extends a school's access.
+
+A school is "paid through" `School.paid_until`. A successful payment for N months extends it
+by N calendar months, counted from today or from the current end date if that is later, so
+renewing early never loses days. Payments are applied exactly once, inside a transaction that
+locks the school row, whichever path reports them first (redirect, webhook or an administrator).
+"""
+
+import calendar
+import secrets
+from datetime import datetime
+from decimal import Decimal
+
+from django.conf import settings
+from django.db import transaction
+from django.utils import timezone
+from rest_framework.exceptions import ValidationError
+
+from .models import Payment, School
+
+
+def add_months(moment: datetime, months: int) -> datetime:
+    """Same day-of-month N months later, clamped to the month's last day (31 Jan + 1 = 28/29 Feb)."""
+    month_index = moment.month - 1 + months
+    year = moment.year + month_index // 12
+    month = month_index % 12 + 1
+    day = min(moment.day, calendar.monthrange(year, month)[1])
+    return moment.replace(year=year, month=month, day=day)
+
+
+def currencies():
+    return list(settings.SUBSCRIPTION_PRICES)
+
+
+def price(months: int, currency: str) -> Decimal:
+    if months not in settings.SUBSCRIPTION_MONTH_OPTIONS:
+        raise ValidationError({"months": f"Choose one of {settings.SUBSCRIPTION_MONTH_OPTIONS} months."})
+    if currency not in settings.SUBSCRIPTION_PRICES:
+        raise ValidationError({"currency": f"Choose one of {currencies()}."})
+    return (settings.SUBSCRIPTION_PRICES[currency] * months).quantize(Decimal("0.01"))
+
+
+def new_reference():
+    return f"iga-{secrets.token_hex(12)}"
+
+
+def start_payment(school: School, user, months: int, currency: str, provider: str) -> Payment:
+    if not school.is_verified:
+        raise ValidationError("Your school must be verified by the Iga team before it can subscribe.")
+    return Payment.objects.create(
+        reference=new_reference(),
+        school=school,
+        created_by=user,
+        provider=provider,
+        months=months,
+        amount=price(months, currency),
+        currency=currency,
+    )
+
+
+def apply_payment(payment: Payment, transaction_id: str = "", data: dict | None = None, now=None) -> bool:
+    """Mark a pending payment as paid and extend the school's subscription.
+
+    Returns True if this call applied it, False if it had already been applied (or isn't pending).
+    """
+    now = now or timezone.now()
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().get(pk=payment.pk)
+        if payment.status != Payment.Status.PENDING:
+            return False
+        school = School.objects.select_for_update().get(pk=payment.school_id)
+        start = max(now, school.paid_until) if school.paid_until else now
+        end = add_months(start, payment.months)
+        school.paid_until = end
+        school.save(update_fields=["paid_until"])
+        payment.status = Payment.Status.SUCCEEDED
+        payment.paid_at = now
+        payment.period_start = start
+        payment.period_end = end
+        if transaction_id:
+            payment.provider_transaction_id = str(transaction_id)[:100]
+        if data is not None:
+            payment.provider_data = data
+        payment.save()
+    return True
+
+
+def fail_payment(payment: Payment, status: str = Payment.Status.FAILED, data: dict | None = None) -> bool:
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().get(pk=payment.pk)
+        if payment.status != Payment.Status.PENDING:
+            return False
+        payment.status = status
+        if data is not None:
+            payment.provider_data = data
+        payment.save(update_fields=["status", "provider_data"])
+    return True
+
+
+def record_manual_payment(school: School, admin, months: int, amount: Decimal, currency: str, note: str) -> Payment:
+    """A platform administrator records money received outside the app (bank transfer, cash,
+    mobile money to the company account) or a complimentary extension (amount 0)."""
+    if months < 1 or months > 24:
+        raise ValidationError({"months": "Between 1 and 24 months."})
+    if amount < 0:
+        raise ValidationError({"amount": "The amount can't be negative."})
+    if not note.strip():
+        raise ValidationError({"note": "Say how it was paid (bank reference, receipt number, or why it is free)."})
+    payment = Payment.objects.create(
+        reference=new_reference(),
+        school=school,
+        created_by=admin,
+        provider=Payment.Provider.MANUAL,
+        months=months,
+        amount=amount,
+        currency=currency,
+        note=note.strip()[:300],
+    )
+    apply_payment(payment)
+    payment.refresh_from_db()
+    return payment

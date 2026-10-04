@@ -39,7 +39,7 @@ export default {
   "auth.passwordHint": "At least 8 characters, not only numbers.",
 
   "landing.title": "Learn smarter. Every subject, S1 to S6.",
-  "landing.subtitle": "Lessons that follow the Rwandan curriculum, virtual labs you can play with, practice quizzes with instant feedback, and past papers to prepare for national exams — in English, Kinyarwanda and Kiswahili.",
+  "landing.subtitle": "Lessons that follow the Rwandan curriculum, virtual labs you can play with, practice quizzes with instant feedback, and past papers to prepare for national exams — in English and French.",
   "landing.f.lessons": "Clear lessons",
   "landing.f.lessons.d": "Short explanations, worked examples and diagrams for every unit.",
   "landing.f.labs": "Virtual labs",

@@ -75,7 +75,7 @@ def client_for():
 
 @pytest.fixture
 def subject(db):
-    return Subject.objects.create(code="mathematics", name="Mathematics", name_sw="Hisabati")
+    return Subject.objects.create(code="mathematics", name="Mathematics", name_fr="Mathématiques")
 
 
 @pytest.fixture

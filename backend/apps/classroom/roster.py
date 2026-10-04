@@ -15,6 +15,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
+from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.accounts.security import revoke_all_sessions
@@ -153,9 +154,15 @@ def create_accounts(rows, classroom, teacher):
             email=row["email"].lower() or None,
             role=User.Role.STUDENT,
             grade=classroom.grade,
-            school=teacher.school,
             must_change_password=True,
         )
+        # They join the teacher's school straight away: the teacher vouches for their own class.
+        school = teacher.school_member
+        if school is not None:
+            user.school = school
+            user.school_status = User.SchoolStatus.APPROVED
+            user.school_approved_at = timezone.now()
+            user.school_approved_by = teacher
         password = temporary_password(user)
         user.set_password(password)
         user.save()

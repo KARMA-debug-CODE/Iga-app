@@ -50,7 +50,7 @@ export function useOnline() {
 
 export function formatDate(value, lang = "en") {
   if (!value) return "";
-  const locale = { en: "en-GB", rw: "rw-RW", sw: "sw-KE" }[lang] || "en-GB";
+  const locale = { en: "en-GB", fr: "fr-FR" }[lang] || "en-GB";
   try {
     return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
   } catch {
