@@ -429,7 +429,7 @@ function Player({ initial, onFinished }) {
             {attempt.deadline && <Timer deadline={attempt.deadline} offset={offset} onExpire={onExpire} />}
           </div>
         </div>
-        <nav className="qnav" style={{ marginTop: 10 }} aria-label="Questions">
+        <nav className="qnav" style={{ marginTop: 10 }} aria-label={t("a11y.questionNav")}>
           {attempt.questions.map((q, i) => {
             const v = verdict(q);
             const cls = [

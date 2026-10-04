@@ -120,7 +120,7 @@ Dans la réalité, les frottements et la résistance de l'air dissipent de l'én
 
 Si l'on pousse un système à sa propre fréquence naturelle, l'amplitude devient très grande. C'est la **résonance**. Vous l'utilisez lorsque vous poussez une balançoire exactement aux bons moments.
 
-## Enquêtez
+## Expérimentez
 
 Utilisez le laboratoire du pendule. Modifiez la masse, puis la longueur, puis l'amplitude, et notez la période à chaque fois. Quel changement modifie la période ?
 

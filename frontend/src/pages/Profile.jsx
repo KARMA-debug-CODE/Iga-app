@@ -146,7 +146,7 @@ function TwoFactor() {
             {setup.secret}
           </code>
           <a href={setup.otpauth_uri} className="small">
-            otpauth:// link
+            {t("profile.otpauthLink")}
           </a>
         </div>
       )}

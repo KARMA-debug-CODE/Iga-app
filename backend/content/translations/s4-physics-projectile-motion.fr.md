@@ -22,7 +22,7 @@ $$u_x = u\cos\theta \qquad u_y = u\sin\theta$$
 
 ## Les équations (lancement et arrivée à la même hauteur)
 
-**Durée du vol :** la balle monte puis redescend lorsque $u_y t - \tfrac{1}{2} g t^2 = 0$ :
+**Durée du vol :** la balle monte puis redescend à sa hauteur de départ lorsque $u_y t - \tfrac{1}{2} g t^2 = 0$ :
 
 $$T = \frac{2u\sin\theta}{g}$$
 

@@ -73,7 +73,7 @@ export default function Layout() {
       <header className="topbar">
         <div className="flag-stripe" />
         <div className="topbar-inner">
-          <Link to="/" className="brand" aria-label="Iga home">
+          <Link to="/" className="brand" aria-label={t("a11y.home")}>
             <Logo />
             <span>Iga</span>
           </Link>
@@ -97,7 +97,7 @@ export default function Layout() {
       </header>
 
       <div className="layout">
-        <aside className="sidebar" aria-label="Main">
+        <aside className="sidebar" aria-label={t("a11y.mainNav")}>
           <nav>
             {primary.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.end}>
@@ -123,7 +123,7 @@ export default function Layout() {
         </main>
       </div>
 
-      <nav className="bottom-nav" aria-label="Main">
+      <nav className="bottom-nav" aria-label={t("a11y.mainNav")}>
         {primary.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end}>
             <span className="icon" aria-hidden>

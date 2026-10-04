@@ -91,7 +91,7 @@ Pour $f(x) = x^3 - 3x^2 - 9x + 5$ :
 
 ### Exemple corrigé 3 : le plus grand enclos
 
-Un éleveur de Nyagatare dispose de 120 m de clôture pour construire un enclos rectangulaire pour ses vaches le long d'un long mur droit ; seuls trois côtés doivent donc être clôturés. Quelles dimensions donnent la plus grande aire ?
+Un éleveur de Nyagatare dispose de 120 m de clôture pour construire un enclos rectangulaire pour ses vaches contre un grand mur rectiligne ; seuls trois côtés doivent donc être clôturés. Quelles dimensions donnent la plus grande aire ?
 
 1. Soit $x$ m la longueur de chacun des côtés perpendiculaires au mur. Le côté parallèle au mur mesure $120 - 2x$ m.
 2. Aire : $A = x(120 - 2x) = 120x - 2x^2$
@@ -103,7 +103,7 @@ Les problèmes d'optimisation comme celui-ci aident les agriculteurs, les constr
 
 ## Explorez
 
-Dans GeoGebra, tapez `f(x) = x^3 - 3x^2 - 9x + 5`, puis `Derivative(f)` pour tracer $f'(x)$ dans le même repère. Où la courbe de $f'$ coupe-t-elle l'axe des abscisses ? Comparez ces valeurs de $x$ avec les points de retournement de $f$.
+Dans GeoGebra, tapez `f(x) = x^3 - 3x^2 - 9x + 5`, puis `Derivative(f)` pour tracer $f'(x)$ dans le même repère. Où la courbe de $f'$ coupe-t-elle l'axe des abscisses ? Comparez ces valeurs de $x$ avec les abscisses des extremums de $f$.
 
 ```sim
 geogebra-graphing

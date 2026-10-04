@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useI18n } from "../i18n";
 import { drawAxes, makeView, palette, Slider, useCanvas } from "./canvas";
 import { GRAVITY, niceStep, positionAt, projectile, round } from "./physics";
 
 const TRAIL_COLOURS = ["#00A1DE", "#2E8B57", "#D97706", "#9333EA", "#D64545"];
 
 export default function Projectile() {
+  const { t, lang } = useI18n();
+  const decimal = lang === "fr" ? "," : ".";
   const [angle, setAngle] = useState(45);
   const [speed, setSpeed] = useState(20);
   const [planet, setPlanet] = useState("earth");
@@ -29,7 +32,7 @@ export default function Projectile() {
       const xMax = maxRange * 1.08;
       const yMax = Math.max(maxHeight * 1.25, xMax * 0.15);
       const view = makeView({ width: size.width, height: size.height, xMin: 0, xMax, yMin: 0, yMax });
-      drawAxes(ctx, view, { xStep: niceStep(xMax), yStep: niceStep(yMax, 5), xLabel: "x (m)", yLabel: "y (m)", colors });
+      drawAxes(ctx, view, { xStep: niceStep(xMax), yStep: niceStep(yMax, 5), xLabel: "x (m)", yLabel: "y (m)", colors, decimal });
 
       const path = (shot, colour, upTo = shot.time) => {
         ctx.strokeStyle = colour;
@@ -65,7 +68,7 @@ export default function Projectile() {
         ctx.fill();
       }
     },
-    [canvasRef, size, trails, angle, maxRange, maxHeight],
+    [canvasRef, size, trails, angle, maxRange, maxHeight, decimal],
   );
 
   useEffect(() => {
@@ -97,44 +100,44 @@ export default function Projectile() {
 
   return (
     <div className="lab">
-      <canvas ref={canvasRef} aria-label={`Projectile launched at ${angle} degrees and ${speed} metres per second`} />
+      <canvas ref={canvasRef} aria-label={t("sim.projectile.aria", { angle, speed })} />
       <div className="lab-controls">
-        <Slider label="Launch angle θ" value={angle} min={5} max={85} unit="°" onChange={setAngle} />
-        <Slider label="Launch speed u" value={speed} min={5} max={40} unit=" m/s" onChange={setSpeed} />
+        <Slider label={t("sim.projectile.angle")} value={angle} min={5} max={85} unit="°" onChange={setAngle} />
+        <Slider label={t("sim.projectile.speed")} value={speed} min={5} max={40} unit=" m/s" onChange={setSpeed} />
         <label>
-          Gravity g
+          {t("sim.projectile.gravity")}
           <select value={planet} onChange={(e) => setPlanet(e.target.value)}>
-            <option value="earth">Earth (9.8 m/s²)</option>
-            <option value="moon">Moon (1.6 m/s²)</option>
-            <option value="mars">Mars (3.7 m/s²)</option>
+            <option value="earth">{t("sim.projectile.earth")}</option>
+            <option value="moon">{t("sim.projectile.moon")}</option>
+            <option value="mars">{t("sim.projectile.mars")}</option>
           </select>
         </label>
       </div>
       <div className="row">
         <button className="btn btn-success" onClick={launch} disabled={!!flying}>
-          🚀 Launch
+          🚀 {t("sim.projectile.launch")}
         </button>
         <button className="btn btn-secondary" onClick={() => setTrails([])} disabled={!trails.length}>
-          Clear paths
+          {t("sim.projectile.clear")}
         </button>
       </div>
       <div className="lab-readout" aria-live="polite">
         <div>
-          Time of flight <strong>{round(prediction.time)} s</strong>
+          {t("sim.projectile.time")} <strong>{round(prediction.time)} s</strong>
           <span className="small muted">T = 2u sinθ / g</span>
         </div>
         <div>
-          Max height <strong>{round(prediction.maxHeight)} m</strong>
+          {t("sim.projectile.maxHeight")} <strong>{round(prediction.maxHeight)} m</strong>
           <span className="small muted">H = u² sin²θ / 2g</span>
         </div>
         <div>
-          Range <strong>{round(prediction.range)} m</strong>
+          {t("sim.projectile.range")} <strong>{round(prediction.range)} m</strong>
           <span className="small muted">R = u² sin2θ / g</span>
         </div>
         {last && (
           <div>
-            Last shot <strong>{last.angle}° · {last.speed} m/s</strong>
-            <span className="small muted">landed at {round(last.range)} m</span>
+            {t("sim.projectile.lastShot")} <strong>{last.angle}° · {last.speed} m/s</strong>
+            <span className="small muted">{t("sim.projectile.landedAt", { x: round(last.range) })}</span>
           </div>
         )}
       </div>

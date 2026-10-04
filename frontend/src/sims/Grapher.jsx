@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 
+import { useI18n } from "../i18n";
 import { drawAxes, makeView, palette, Slider, useCanvas } from "./canvas";
 import { quadraticFeatures, round } from "./physics";
 
+// Labels are the translation keys sim.grapher.<mode>.
 const MODES = {
-  linear: { label: "Linear", params: { m: 1, c: 0 } },
-  quadratic: { label: "Quadratic", params: { a: 1, b: 0, c: -4 } },
-  sine: { label: "Sine", params: { A: 2, B: 1, D: 0 } },
+  linear: { params: { m: 1, c: 0 } },
+  quadratic: { params: { a: 1, b: 0, c: -4 } },
+  sine: { params: { A: 2, B: 1, D: 0 } },
 };
 
 function fn(mode, p) {
@@ -24,6 +26,8 @@ function equation(mode, p) {
 }
 
 export default function Grapher() {
+  const { t, lang } = useI18n();
+  const decimal = lang === "fr" ? "," : ".";
   const [mode, setMode] = useState("linear");
   const [params, setParams] = useState(MODES.linear.params);
   const [canvasRef, size] = useCanvas(0.75, 260);
@@ -35,7 +39,7 @@ export default function Grapher() {
     const ctx = canvas.getContext("2d");
     const colors = palette();
     const view = makeView({ width: size.width, height: size.height, xMin: -10, xMax: 10, yMin: -10, yMax: 10, pad: { l: 28, r: 10, t: 10, b: 22 } });
-    drawAxes(ctx, view, { xStep: 2, yStep: 2, xLabel: "x", yLabel: "y", colors });
+    drawAxes(ctx, view, { xStep: 2, yStep: 2, xLabel: "x", yLabel: "y", colors, decimal });
 
     const f = fn(mode, params);
     ctx.save();
@@ -75,13 +79,13 @@ export default function Grapher() {
     }
     if (mode === "linear" && params.m !== 0) dot(-params.c / params.m, 0, colors.yellow);
     ctx.restore();
-  }, [canvasRef, size, mode, params]);
+  }, [canvasRef, size, mode, params, decimal]);
 
   const q = mode === "quadratic" ? quadraticFeatures(params.a, params.b, params.c) : null;
 
   return (
     <div className="lab">
-      <div className="chips" role="group" aria-label="Function type">
+      <div className="chips" role="group" aria-label={t("sim.grapher.type")}>
         {Object.entries(MODES).map(([key, m]) => (
           <button
             key={key}
@@ -92,19 +96,19 @@ export default function Grapher() {
               setParams(m.params);
             }}
           >
-            {m.label}
+            {t(`sim.grapher.${key}`)}
           </button>
         ))}
       </div>
       <div style={{ fontFamily: "var(--mono)", fontSize: "1.2rem", fontWeight: 700 }} aria-live="polite">
         {equation(mode, params)}
       </div>
-      <canvas ref={canvasRef} aria-label={`Graph of ${equation(mode, params)}`} />
+      <canvas ref={canvasRef} aria-label={t("sim.grapher.aria", { equation: equation(mode, params) })} />
       <div className="lab-controls">
         {mode === "linear" && (
           <>
-            <Slider label="Gradient m" value={params.m} min={-5} max={5} step={0.5} onChange={set("m")} />
-            <Slider label="Intercept c" value={params.c} min={-8} max={8} step={0.5} onChange={set("c")} />
+            <Slider label={t("sim.grapher.gradient")} value={params.m} min={-5} max={5} step={0.5} onChange={set("m")} />
+            <Slider label={t("sim.grapher.intercept")} value={params.c} min={-8} max={8} step={0.5} onChange={set("c")} />
           </>
         )}
         {mode === "quadratic" && (
@@ -116,39 +120,39 @@ export default function Grapher() {
         )}
         {mode === "sine" && (
           <>
-            <Slider label="Amplitude A" value={params.A} min={0} max={8} step={0.5} onChange={set("A")} />
-            <Slider label="Frequency B" value={params.B} min={0.25} max={4} step={0.25} onChange={set("B")} />
-            <Slider label="Vertical shift D" value={params.D} min={-5} max={5} step={0.5} onChange={set("D")} />
+            <Slider label={t("sim.grapher.amplitude")} value={params.A} min={0} max={8} step={0.5} onChange={set("A")} />
+            <Slider label={t("sim.grapher.frequency")} value={params.B} min={0.25} max={4} step={0.25} onChange={set("B")} />
+            <Slider label={t("sim.grapher.shift")} value={params.D} min={-5} max={5} step={0.5} onChange={set("D")} />
           </>
         )}
       </div>
       <div className="lab-readout">
         <div>
-          <span style={{ color: "#2E8B57" }}>●</span> y-intercept <strong>(0, {round(fn(mode, params)(0))})</strong>
+          <span style={{ color: "#2E8B57" }}>●</span> {t("sim.grapher.yIntercept")} <strong>(0, {round(fn(mode, params)(0))})</strong>
         </div>
         {mode === "linear" && (
           <div>
-            <span style={{ color: "#FAD201" }}>●</span> x-intercept{" "}
-            <strong>{params.m === 0 ? "none" : `(${round(-params.c / params.m)}, 0)`}</strong>
+            <span style={{ color: "#FAD201" }}>●</span> {t("sim.grapher.xIntercept")}{" "}
+            <strong>{params.m === 0 ? t("sim.grapher.none") : `(${round(-params.c / params.m)}, 0)`}</strong>
           </div>
         )}
         {q && (
           <>
             <div>
-              <span style={{ color: "#D64545" }}>●</span> vertex <strong>({round(q.vertex.x)}, {round(q.vertex.y)})</strong>
-              <span className="small muted">{q.opensUp ? "minimum" : "maximum"}</span>
+              <span style={{ color: "#D64545" }}>●</span> {t("sim.grapher.vertex")} <strong>({round(q.vertex.x)}, {round(q.vertex.y)})</strong>
+              <span className="small muted">{q.opensUp ? t("sim.grapher.minimum") : t("sim.grapher.maximum")}</span>
             </div>
             <div>
-              Discriminant <strong>{round(q.discriminant)}</strong>
+              {t("sim.grapher.discriminant")} <strong>{round(q.discriminant)}</strong>
               <span className="small muted">
-                {q.roots.length === 0 ? "no real roots" : `roots: ${q.roots.map((r) => round(r)).join(", ")}`}
+                {q.roots.length === 0 ? t("sim.grapher.noRoots") : t("sim.grapher.roots", { roots: q.roots.map((r) => round(r)).join(", ") })}
               </span>
             </div>
           </>
         )}
         {mode === "sine" && (
           <div>
-            Period <strong>{round((2 * Math.PI) / params.B)}</strong>
+            {t("sim.grapher.period")} <strong>{round((2 * Math.PI) / params.B)}</strong>
             <span className="small muted">2π / B</span>
           </div>
         )}

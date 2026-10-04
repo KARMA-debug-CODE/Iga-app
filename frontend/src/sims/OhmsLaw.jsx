@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useI18n } from "../i18n";
 import { Slider } from "./canvas";
 import { ohmsLaw, round } from "./physics";
 
 const WIRE = "M60 40 H340 V220 H60 Z";
 
 export default function OhmsLaw() {
+  const { t } = useI18n();
   const [voltage, setVoltage] = useState(6);
   const [resistance, setResistance] = useState(10);
   const [readings, setReadings] = useState([]);
@@ -31,7 +33,7 @@ export default function OhmsLaw() {
 
   return (
     <div className="lab">
-      <svg viewBox="0 0 400 260" role="img" aria-label={`Circuit: ${voltage} volts across ${resistance} ohms gives ${round(current, 3)} amps`}>
+      <svg viewBox="0 0 400 260" role="img" aria-label={t("sim.ohms.aria", { voltage, resistance, current: round(current, 3) })}>
         <path d={WIRE} fill="none" stroke="var(--text-soft)" strokeWidth="6" strokeLinejoin="round" />
         <path ref={flow} d={WIRE} fill="none" stroke="#00A1DE" strokeWidth="6" strokeDasharray="4 18" strokeLinecap="round" />
 
@@ -65,26 +67,26 @@ export default function OhmsLaw() {
       </svg>
 
       <div className="lab-controls">
-        <Slider label="Battery voltage V" value={voltage} min={0} max={12} step={0.5} unit=" V" onChange={setVoltage} />
-        <Slider label="Resistance R" value={resistance} min={1} max={100} step={1} unit=" Ω" onChange={setResistance} />
+        <Slider label={t("sim.ohms.voltage")} value={voltage} min={0} max={12} step={0.5} unit=" V" onChange={setVoltage} />
+        <Slider label={t("sim.ohms.resistance")} value={resistance} min={1} max={100} step={1} unit=" Ω" onChange={setResistance} />
       </div>
       <div className="lab-readout" aria-live="polite">
         <div>
-          Current <strong>{round(current, 3)} A</strong>
+          {t("sim.ohms.current")} <strong>{round(current, 3)} A</strong>
           <span className="small muted">I = V / R</span>
         </div>
         <div>
-          Power <strong>{round(power, 2)} W</strong>
+          {t("sim.ohms.power")} <strong>{round(power, 2)} W</strong>
           <span className="small muted">P = V × I</span>
         </div>
       </div>
       <div className="row">
         <button className="btn btn-secondary btn-sm" onClick={() => setReadings((r) => [...r, { voltage, resistance, current }].slice(-8))}>
-          📋 Record reading
+          📋 {t("sim.ohms.record")}
         </button>
         {readings.length > 0 && (
           <button className="btn btn-ghost btn-sm" onClick={() => setReadings([])}>
-            Clear table
+            {t("sim.ohms.clear")}
           </button>
         )}
       </div>

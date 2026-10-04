@@ -116,11 +116,11 @@ $$0.30 = e^{-\lambda t} \quad\Rightarrow\quad t = \frac{\ln(1/0.30)}{\lambda} = 
 
 $$t = 5730 \times \frac{1.2040}{0.6931} = 5730 \times 1.737 \approx 9950\ \text{ans}$$
 
-## Utilisations et radioactivité naturelle
+## Utilisations et rayonnement ambiant
 
 Les radio-isotopes servent à traiter le cancer, à stériliser les seringues, et comme **traceurs** : des chercheurs en agronomie peuvent ajouter un peu de phosphore 32 à un engrais et mesurer à quelle vitesse des plants de haricots de Musanze l'absorbent.
 
-Nous sommes tous exposés à un faible **rayonnement ambiant** (la radioactivité naturelle) provenant des roches et du sol, du radon, des aliments, des radiographies médicales et des rayons cosmiques. Le rayonnement cosmique est plus intense en altitude : un alpiniste sur le mont Karisimbi (4507 m) reçoit donc plus de rayonnement cosmique qu'un pêcheur sur le lac Kivu (environ 1460 m).
+Nous sommes tous exposés à un faible **rayonnement ambiant** (ou bruit de fond radioactif) provenant des roches et du sol, du radon, des aliments, des radiographies médicales et des rayons cosmiques. Le rayonnement cosmique est plus intense en altitude : un alpiniste sur le mont Karisimbi (4507 m) reçoit donc plus de rayonnement cosmique qu'un pêcheur sur le lac Kivu (environ 1460 m).
 
 ## Sécurité
 

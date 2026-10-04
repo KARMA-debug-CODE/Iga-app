@@ -82,7 +82,7 @@ export default function Lesson() {
             {lesson.video_url && (
               <div className="sim-frame">
                 <a className="sim-placeholder" href={lesson.video_url} target="_blank" rel="noopener noreferrer">
-                  🎬 Watch the video
+                  🎬 {t("learn.watchVideo")}
                 </a>
               </div>
             )}
@@ -159,7 +159,7 @@ export default function Lesson() {
               </section>
             )}
 
-            <nav className="spread section" aria-label="Lesson navigation">
+            <nav className="spread section" aria-label={t("a11y.lessonNav")}>
               {lesson.previous ? (
                 <Link className="btn btn-secondary" to={`/lessons/${lesson.previous.slug}`}>
                   ← {t("learn.previous")}

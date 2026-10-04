@@ -58,10 +58,10 @@ export default function CodePlayground({ initialCode = "", height = 320 }) {
           spellCheck={false}
           autoCapitalize="off"
           autoCorrect="off"
-          aria-label="Code editor"
+          aria-label={t("a11y.codeEditor")}
           style={{ minHeight: height }}
         />
-        <iframe title="Preview" sandbox="allow-scripts allow-modals" srcDoc={rendered} style={{ minHeight: height }} />
+        <iframe title={t("a11y.preview")} sandbox="allow-scripts allow-modals" srcDoc={rendered} style={{ minHeight: height }} />
       </div>
     </div>
   );

@@ -100,7 +100,7 @@ function Chat({ group }) {
           return (
             <div key={m.id} className={`bubble ${mine ? "mine" : ""} ${m.is_hidden ? "hidden" : ""}`}>
               <div className="meta">
-                <strong>{mine ? "You" : m.author?.name || "—"}</strong>
+                <strong>{mine ? t("board.you") : m.author?.name || "—"}</strong>
                 {m.author?.role === "teacher" && <span className="pill pill-blue">🧑🏽‍🏫</span>}
                 <span>{formatDate(m.created_at, lang)}</span>
                 {!mine && !m.is_hidden && <button onClick={() => report(m)}>{t("groups.report")}</button>}

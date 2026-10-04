@@ -42,7 +42,7 @@ export default function Labs() {
         <SubjectSelect value={subject} onChange={setSubject} />
         <label>
           {t("labs.search")}
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="circuit, atom, graph…" />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("labs.searchPlaceholder")} />
         </label>
       </div>
       <GradeChips value={grade} onChange={setGrade} allowAll />

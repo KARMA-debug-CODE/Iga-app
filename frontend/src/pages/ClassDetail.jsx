@@ -44,7 +44,7 @@ function NewAssignment({ classroom, onCreated }) {
         method: "POST",
         body: {
           classroom: classroom.id,
-          title: form.title || options.find((o) => String(o.id) === String(form.target))?.label || "Assignment",
+          title: form.title || options.find((o) => String(o.id) === String(form.target))?.label || t("classes.defaultTitle"),
           instructions: form.instructions,
           [kind]: Number(form.target),
           due_at: form.due_at ? new Date(form.due_at).toISOString() : null,
@@ -71,7 +71,7 @@ function NewAssignment({ classroom, onCreated }) {
               setForm((f) => ({ ...f, target: "" }));
             }}
           >
-            {{ quiz: "📝 Quiz", lesson: "📖 Lesson", simulation: "🔬 Lab" }[k]}
+            {{ quiz: "📝", lesson: "📖", simulation: "🔬" }[k]} {t(`classes.kind.${k}`)}
           </button>
         ))}
       </div>
@@ -265,7 +265,7 @@ function RosterImport({ classroom, onCreated }) {
           <button
             className="btn btn-secondary btn-sm"
             onClick={() =>
-              downloadCsv(`${classroom.name}-accounts.csv`, [
+              downloadCsv(t("roster.filename", { name: classroom.name }), [
                 ["first_name", "last_name", "username", "temporary_password"],
                 ...created.map((r) => [r.first_name, r.last_name, r.username, r.temporary_password]),
               ])

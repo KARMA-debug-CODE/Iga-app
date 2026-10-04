@@ -7,17 +7,18 @@ import { Empty, ErrorMessage, GRADES, Loader, Tabs, useToast } from "../componen
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
-const TYPES = [
-  ["mcq", "Multiple choice (one answer)"],
-  ["multi", "Multiple choice (several answers)"],
-  ["true_false", "True / False"],
-  ["numeric", "Numeric"],
-  ["short", "Short answer"],
-  ["essay", "Written (teacher-marked)"],
-];
+// Question types; labels are the translation keys teach.qtype.<type>.
+const TYPES = ["mcq", "multi", "true_false", "numeric", "short", "essay"];
+
+/** Translate a key built from an API value, showing `fallback` for values the dictionaries don't know yet. */
+function tOr(t, key, fallback) {
+  const text = t(key);
+  return text === key ? fallback : text;
+}
 
 /** Subject + grade + unit pickers shared by the authoring forms. */
 function useScope() {
+  const { t } = useI18n();
   const subjects = useApi("/subjects/");
   const [scope, setScope] = useState({ subject: "", grade: "S1", unit: "" });
   const subjectList = useMemo(() => subjects.data || [], [subjects.data]);
@@ -31,7 +32,7 @@ function useScope() {
   const picker = (
     <div className="form-row">
       <label>
-        Subject
+        {t("practice.subject")}
         <select value={scope.subject} onChange={(e) => setScope({ ...scope, subject: e.target.value, unit: "" })}>
           {subjectList.map((s) => (
             <option key={s.id} value={s.id}>
@@ -41,7 +42,7 @@ function useScope() {
         </select>
       </label>
       <label>
-        Grade
+        {t("auth.grade")}
         <select value={scope.grade} onChange={(e) => setScope({ ...scope, grade: e.target.value, unit: "" })}>
           {GRADES.map((g) => (
             <option key={g}>{g}</option>
@@ -49,7 +50,7 @@ function useScope() {
         </select>
       </label>
       <label>
-        Unit
+        {t("teach.unit")}
         <select value={scope.unit} onChange={(e) => setScope({ ...scope, unit: e.target.value })}>
           <option value="">—</option>
           {(units.data || []).map((u) => (
@@ -121,9 +122,9 @@ function QuestionForm({ onSaved }) {
         <label>
           {t("teach.type")}
           <select value={form.type} onChange={set("type")}>
-            {TYPES.map(([v, l]) => (
+            {TYPES.map((v) => (
               <option key={v} value={v}>
-                {l}
+                {t(`teach.qtype.${v}`)}
               </option>
             ))}
           </select>
@@ -153,11 +154,11 @@ function QuestionForm({ onSaved }) {
                 name="correct"
                 checked={c.is_correct}
                 onChange={() => setCorrect(i)}
-                aria-label={`Option ${i + 1} is correct`}
+                aria-label={t("teach.optionCorrect", { n: i + 1 })}
               />
-              <input value={c.text} onChange={(e) => setChoices((list) => list.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} placeholder={`Option ${i + 1}`} />
+              <input value={c.text} onChange={(e) => setChoices((list) => list.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} placeholder={t("teach.optionN", { n: i + 1 })} />
               {choices.length > 2 && (
-                <button type="button" className="btn btn-sm btn-ghost" onClick={() => setChoices((list) => list.filter((_, j) => j !== i))} aria-label="Remove option">
+                <button type="button" className="btn btn-sm btn-ghost" onClick={() => setChoices((list) => list.filter((_, j) => j !== i))} aria-label={t("teach.removeOption")}>
                   ✕
                 </button>
               )}
@@ -172,8 +173,8 @@ function QuestionForm({ onSaved }) {
         <label>
           {t("teach.answer")}
           <select value={form.tf || "true"} onChange={set("tf")}>
-            <option value="true">True</option>
-            <option value="false">False</option>
+            <option value="true">{t("teach.true")}</option>
+            <option value="false">{t("teach.false")}</option>
           </select>
         </label>
       )}
@@ -212,6 +213,7 @@ function QuestionForm({ onSaved }) {
 }
 
 function QuestionBank() {
+  const { t } = useI18n();
   const [refresh, setRefresh] = useState(0);
   const state = useApi("/questions/", { params: { mine: 1 } }, [refresh]);
   return (
@@ -226,9 +228,9 @@ function QuestionBank() {
               {list.map((q) => (
                 <div className="card" key={q.id}>
                   <div className="row small muted">
-                    <span className="pill">{q.type}</span>
+                    <span className="pill">{tOr(t, `teach.qtype.${q.type}`, q.type)}</span>
                     <span>
-                      {q.subject_code} · {q.grade} · {Number(q.marks)} mark(s)
+                      {q.subject_code} · {q.grade} · {t("teach.marksN", { n: Number(q.marks) })}
                     </span>
                   </div>
                   <Markdown interactive={false}>{q.prompt}</Markdown>
@@ -308,20 +310,20 @@ function QuizBuilder() {
           <label>
             {t("classes.type")}
             <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
-              <option value="practice">Practice</option>
-              <option value="test">Class test</option>
-              <option value="mock">Mock exam</option>
+              <option value="practice">{t("teach.quizKind.practice")}</option>
+              <option value="test">{t("teach.quizKind.test")}</option>
+              <option value="mock">{t("teach.quizKind.mock")}</option>
             </select>
           </label>
           <label>
-            Mode
+            {t("teach.mode")}
             <select value={form.feedback_mode} onChange={(e) => setForm({ ...form, feedback_mode: e.target.value })}>
               <option value="immediate">{t("practice.practiceMode")}</option>
               <option value="after_submit">{t("practice.examMode")}</option>
             </select>
           </label>
           <label>
-            ⏱ min
+            {t("teach.timeLimit")}
             <input type="number" min="1" value={form.time_limit_minutes} onChange={(e) => setForm({ ...form, time_limit_minutes: e.target.value })} placeholder="—" />
           </label>
           <label>
@@ -342,7 +344,7 @@ function QuizBuilder() {
                   onChange={() => setSelected((s) => (s.includes(q.id) ? s.filter((x) => x !== q.id) : [...s, q.id]))}
                 />
                 <span style={{ minWidth: 0 }}>
-                  <span className="pill">{q.type}</span> <Markdown interactive={false}>{q.prompt}</Markdown>
+                  <span className="pill">{tOr(t, `teach.qtype.${q.type}`, q.type)}</span> <Markdown interactive={false}>{q.prompt}</Markdown>
                 </span>
               </label>
             ))}
@@ -369,7 +371,7 @@ function QuizBuilder() {
                   <Link className="btn btn-sm btn-ghost" to={`/teach/quizzes/${q.id}/analytics`} aria-label={`${t("analytics.title")}: ${q.title}`}>
                     📊
                   </Link>
-                  <span className={`pill ${q.status === "published" ? "pill-success" : "pill-warn"}`}>{q.status}</span>
+                  <span className={`pill ${q.status === "published" ? "pill-success" : "pill-warn"}`}>{tOr(t, `teach.status.${q.status}`, q.status)}</span>
                 </div>
               </div>
             ))}
@@ -380,10 +382,13 @@ function QuizBuilder() {
   );
 }
 
+// Code shown inside the translated embedding tip, in place of its {placeholders}.
+const EMBED_TIP_CODE = { "{sim}": "sim", "{example}": "projectile-lab", "{playground}": "playground" };
+
 function LessonEditor() {
   const { t } = useI18n();
   const { scope, picker } = useScope();
-  const [form, setForm] = useState({ title: "", slug: "", summary: "", body: "## Introduction\n\nWrite your lesson here. Use $E = mc^2$ for maths.\n", estimated_minutes: 20 });
+  const [form, setForm] = useState(() => ({ title: "", slug: "", summary: "", body: t("teach.bodyTemplate"), estimated_minutes: 20 }));
   const [slugTouched, setSlugTouched] = useState(false);
   const [preview, setPreview] = useState(false);
   const [error, setError] = useState(null);
@@ -394,7 +399,7 @@ function LessonEditor() {
     e.preventDefault();
     setError(null);
     if (!scope.unit) {
-      setError(new Error("Choose a unit for this lesson."));
+      setError(new Error(t("teach.chooseUnit")));
       return;
     }
     try {
@@ -456,8 +461,9 @@ function LessonEditor() {
           <textarea rows={16} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} style={{ fontFamily: "var(--mono)", fontSize: "0.9rem" }} />
         )}
         <p className="small muted" style={{ margin: 0 }}>
-          Tip: embed a lab with a code block whose language is <code>sim</code> containing the lab name (e.g. <code>projectile-lab</code>), or a live editor with
-          <code> playground</code>.
+          {t("teach.embedTip")
+            .split(/(\{\w+\})/)
+            .map((part, i) => (EMBED_TIP_CODE[part] ? <code key={i}>{EMBED_TIP_CODE[part]}</code> : part))}
         </p>
         <ErrorMessage error={error} />
         <button className="btn">{t("common.save")}</button>
@@ -468,7 +474,7 @@ function LessonEditor() {
             {results(data).map((l) => (
               <div key={l.id} className="card spread">
                 <Link to={`/lessons/${l.slug}`}>{l.title}</Link>
-                <span className={`pill ${l.status === "published" ? "pill-success" : "pill-warn"}`}>{l.status}</span>
+                <span className={`pill ${l.status === "published" ? "pill-success" : "pill-warn"}`}>{tOr(t, `teach.status.${l.status}`, l.status)}</span>
               </div>
             ))}
           </div>
@@ -512,10 +518,10 @@ function ResourceForm() {
         <label>
           {t("teach.kind")}
           <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
-            <option value="notes">Revision notes</option>
-            <option value="formula_sheet">Formula sheet</option>
-            <option value="video">Video</option>
-            <option value="link">Web link</option>
+            <option value="notes">{t("teach.resourceKind.notes")}</option>
+            <option value="formula_sheet">{t("teach.resourceKind.formula_sheet")}</option>
+            <option value="video">{t("teach.resourceKind.video")}</option>
+            <option value="link">{t("teach.resourceKind.link")}</option>
           </select>
         </label>
       </div>

@@ -97,7 +97,7 @@ function Stats() {
 }
 
 function Users() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [pending, setPending] = useState(true);
   const [q, setQ] = useState("");
   const state = useApi("/admin/users/", { params: { pending_teachers: pending ? 1 : undefined, q } });
@@ -147,7 +147,7 @@ function Users() {
                         {!u.is_active && <span className="pill pill-danger">{t("admin.disabled")}</span>}
                       </td>
                       <td>{u.school}</td>
-                      <td className="small">{formatDate(u.date_joined)}</td>
+                      <td className="small">{formatDate(u.date_joined, lang)}</td>
                       <td>
                         <div className="row">
                           {u.role === "teacher" && !u.teacher_approved && (
@@ -173,7 +173,7 @@ function Users() {
 }
 
 function Review() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const state = useApi("/admin/review/");
   async function decide(item, approve) {
     await api("/admin/review/decide/", { method: "POST", body: { type: item.type, id: item.id, approve } });
@@ -191,7 +191,7 @@ function Review() {
                 <div>
                   <span className="pill">{tOr(t, `admin.type.${item.type}`, item.type)}</span> <strong>{item.title}</strong>
                   <div className="small muted">
-                    {item.subject} · {item.grade} · {item.author} · {formatDate(item.updated_at)}
+                    {item.subject} · {item.grade} · {item.author} · {formatDate(item.updated_at, lang)}
                   </div>
                   {item.type === "lesson" && <Link to={`/lessons/${item.slug}`}>{t("teach.preview")} →</Link>}
                   {item.url && (
@@ -218,7 +218,7 @@ function Review() {
 }
 
 function Moderation() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const state = useApi("/admin/moderation/");
   async function resolve(report, hide) {
     await api(`/admin/moderation/${report.id}/resolve/`, { method: "POST", body: { hide } });
@@ -234,7 +234,7 @@ function Moderation() {
             {reports.map((r) => (
               <div className="card" key={r.id}>
                 <div className="small muted">
-                  {r.message.group} · {t("admin.reportedBy", { name: r.reporter })} · {formatDate(r.created_at)}
+                  {r.message.group} · {t("admin.reportedBy", { name: r.reporter })} · {formatDate(r.created_at, lang)}
                 </div>
                 <blockquote className="alert" style={{ margin: "8px 0" }}>
                   <strong>{r.message.author}:</strong> {r.message.body}
@@ -258,7 +258,7 @@ function Moderation() {
 }
 
 function Audit() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const state = useApi("/admin/audit/");
   return (
     <Loader state={state}>
@@ -277,7 +277,7 @@ function Audit() {
             <tbody>
               {entries.map((e) => (
                 <tr key={e.id}>
-                  <td className="small">{formatDate(e.created_at)}</td>
+                  <td className="small">{formatDate(e.created_at, lang)}</td>
                   <td>{e.actor || "—"}</td>
                   <td>
                     <code>{e.action}</code>

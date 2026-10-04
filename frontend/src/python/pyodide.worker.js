@@ -33,7 +33,8 @@ self.onmessage = async ({ data }) => {
     pyodide = await load();
   } catch (err) {
     runtime = null;
-    self.postMessage({ type: "error", text: `Could not start Python: ${err?.message || err}` });
+    const detail = String(err?.message || err);
+    self.postMessage({ type: "error", code: "start-failed", detail, text: `Could not start Python: ${detail}` });
     return;
   }
   self.postMessage({ type: "started" });

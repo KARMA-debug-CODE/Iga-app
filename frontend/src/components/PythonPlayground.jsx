@@ -16,8 +16,12 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
   const [status, setStatus] = useState("idle"); // idle | loading | running
   const worker = useRef(null);
   const loadedOnce = useRef(false);
+  const tr = useRef(t); // the worker's handlers outlive renders, so they read the current language from here
 
   useEffect(() => () => worker.current?.terminate(), []);
+  useEffect(() => {
+    tr.current = t;
+  }, [t]);
 
   function append(stream, text) {
     setOutput((o) => [...o, { stream, text }]);
@@ -36,12 +40,12 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
           if (data.result !== null) append("result", data.result);
           setStatus("idle");
         } else if (data.type === "error") {
-          append("stderr", data.text);
+          append("stderr", data.code === "start-failed" ? tr.current("python.startFailed", { error: data.detail }) : data.text);
           setStatus("idle");
         }
       };
       worker.current.onerror = (event) => {
-        append("stderr", event.message || "Python stopped unexpectedly.");
+        append("stderr", event.message || tr.current("python.crashed"));
         worker.current?.terminate();
         worker.current = null;
         setStatus("idle");
@@ -108,7 +112,7 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
           spellCheck={false}
           autoCapitalize="off"
           autoCorrect="off"
-          aria-label="Python code editor"
+          aria-label={t("python.editor")}
           style={{ minHeight: height }}
         />
         <div className="python-output-wrap">

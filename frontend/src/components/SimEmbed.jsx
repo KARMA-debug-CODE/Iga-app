@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 
 import { api } from "../api";
-import { useI18n } from "../i18n";
+import { translateNow, useI18n } from "../i18n";
 import { BUILTIN_SIMS } from "../sims/registry";
 import ErrorBoundary from "./ErrorBoundary";
 import { Spinner } from "./ui";
@@ -26,7 +26,7 @@ function loadGeoGebra() {
       script.onload = resolve;
       script.onerror = () => {
         ggbScript = null;
-        reject(new Error("Could not load GeoGebra. Check your internet connection."));
+        reject(new Error(translateNow("sim.geogebraLoadError")));
       };
       document.head.appendChild(script);
     });
@@ -94,12 +94,12 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
     api(`/simulations/${sim.slug}/view/`, { method: "POST" }).catch(() => {});
   }, [sim, launched, isBuiltin]);
 
-  if (error) return <div className="alert alert-error">Simulation “{slug}” not found.</div>;
+  if (error) return <div className="alert alert-error">{t("sim.notFound", { slug })}</div>;
   if (!sim) return <Spinner />;
 
   if (isBuiltin) {
     const Component = BUILTIN_SIMS[sim.provider_id];
-    if (!Component) return <div className="alert">Unknown built-in lab: {sim.provider_id}</div>;
+    if (!Component) return <div className="alert">{t("sim.unknownBuiltin", { id: sim.provider_id })}</div>;
     return (
       <div className="sim-frame">
         <ErrorBoundary compact>

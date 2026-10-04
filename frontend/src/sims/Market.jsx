@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { useI18n } from "../i18n";
 import { drawAxes, makeView, palette, Slider, useCanvas } from "./canvas";
 import { marketAtPrice, marketEquilibrium, round } from "./physics";
 
@@ -7,6 +8,8 @@ const B = 2;
 const D = 2;
 
 export default function Market() {
+  const { t, lang } = useI18n();
+  const decimal = lang === "fr" ? "," : ".";
   const [demandShift, setDemandShift] = useState(100);
   const [supplyShift, setSupplyShift] = useState(20);
   const [price, setPrice] = useState(25);
@@ -22,7 +25,7 @@ export default function Market() {
     const ctx = canvas.getContext("2d");
     const colors = palette();
     const view = makeView({ width: size.width, height: size.height, xMin: 0, xMax: 160, yMin: 0, yMax: 70 });
-    drawAxes(ctx, view, { xStep: 20, yStep: 10, xLabel: "Quantity", yLabel: "Price (FRW ×10)", colors });
+    drawAxes(ctx, view, { xStep: 20, yStep: 10, xLabel: t("sim.market.quantity"), yLabel: t("sim.market.priceAxis"), colors, decimal });
 
     const line = (qOf, colour, label) => {
       ctx.strokeStyle = colour;
@@ -85,37 +88,37 @@ export default function Market() {
       ctx.fill();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasRef, size, demandShift, supplyShift, price]);
+  }, [canvasRef, size, demandShift, supplyShift, price, t, decimal]);
 
   const statusText = {
-    equilibrium: "Equilibrium — the market clears.",
-    shortage: `Shortage of ${round(atPrice.gap, 0)} units — buyers compete, so the price rises.`,
-    surplus: `Surplus of ${round(atPrice.gap, 0)} units — sellers cut prices to sell stock.`,
+    equilibrium: t("sim.market.equilibrium"),
+    shortage: t("sim.market.shortage", { n: round(atPrice.gap, 0) }),
+    surplus: t("sim.market.surplus", { n: round(atPrice.gap, 0) }),
   }[atPrice.status];
 
   return (
     <div className="lab">
-      <canvas ref={canvasRef} aria-label="Demand and supply diagram" />
+      <canvas ref={canvasRef} aria-label={t("sim.market.aria")} />
       <div className="lab-controls">
-        <Slider label="Demand (shift D)" value={demandShift} min={60} max={150} step={5} onChange={setDemandShift} />
-        <Slider label="Supply (shift S)" value={supplyShift} min={-20} max={70} step={5} onChange={setSupplyShift} />
-        <Slider label="Market price" value={price} min={0} max={60} step={1} onChange={setPrice} />
+        <Slider label={t("sim.market.demand")} value={demandShift} min={60} max={150} step={5} onChange={setDemandShift} />
+        <Slider label={t("sim.market.supply")} value={supplyShift} min={-20} max={70} step={5} onChange={setSupplyShift} />
+        <Slider label={t("sim.market.price")} value={price} min={0} max={60} step={1} onChange={setPrice} />
       </div>
       <div className="lab-readout" aria-live="polite">
         <div>
-          Equilibrium price <strong>{round(eq.price, 1)}</strong>
+          {t("sim.market.eqPrice")} <strong>{round(eq.price, 1)}</strong>
         </div>
         <div>
-          Equilibrium quantity <strong>{round(eq.quantity, 1)}</strong>
+          {t("sim.market.eqQuantity")} <strong>{round(eq.quantity, 1)}</strong>
         </div>
         <div>
-          At price {price}: demanded <strong>{round(atPrice.demanded, 0)}</strong>
-          <span className="small muted">supplied {round(atPrice.supplied, 0)}</span>
+          {t("sim.market.atPrice", { price })} <strong>{round(atPrice.demanded, 0)}</strong>
+          <span className="small muted">{t("sim.market.supplied", { n: round(atPrice.supplied, 0) })}</span>
         </div>
       </div>
       <div className={`alert ${atPrice.status === "equilibrium" ? "alert-success" : "alert-warn"}`}>{statusText}</div>
       <p className="small muted" style={{ margin: 0 }}>
-        Model: Qd = {demandShift} − 2P, Qs = {supplyShift} + 2P
+        {t("sim.market.model", { a: demandShift, c: supplyShift })}
       </p>
     </div>
   );

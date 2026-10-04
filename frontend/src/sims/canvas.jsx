@@ -61,8 +61,10 @@ export function makeView({ width, height, xMin, xMax, yMin, yMax, pad = { l: 40,
   };
 }
 
-export function drawAxes(ctx, view, { xStep, yStep, xLabel = "", yLabel = "", colors }) {
+export function drawAxes(ctx, view, { xStep, yStep, xLabel = "", yLabel = "", colors, decimal = "." }) {
   const { x, y, xMin, xMax, yMin, yMax, width, height } = view;
+  // Tick labels without floating-point noise, with the reader's decimal mark ("," in French).
+  const tick = (n) => String(+n.toFixed(6)).replace(".", decimal);
   ctx.save();
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = colors.bg;
@@ -79,7 +81,7 @@ export function drawAxes(ctx, view, { xStep, yStep, xLabel = "", yLabel = "", co
     ctx.lineTo(x(gx), y(yMax));
     ctx.stroke();
     ctx.textAlign = "center";
-    ctx.fillText(+gx.toFixed(6), x(gx), height - view.pad.b + 14);
+    ctx.fillText(tick(gx), x(gx), height - view.pad.b + 14);
   }
   for (let gy = start(yMin, yStep); gy <= yMax + 1e-9; gy += yStep) {
     ctx.beginPath();
@@ -87,7 +89,7 @@ export function drawAxes(ctx, view, { xStep, yStep, xLabel = "", yLabel = "", co
     ctx.lineTo(x(xMax), y(gy));
     ctx.stroke();
     ctx.textAlign = "right";
-    ctx.fillText(+gy.toFixed(6), view.pad.l - 6, y(gy) + 4);
+    ctx.fillText(tick(gy), view.pad.l - 6, y(gy) + 4);
   }
   // Axes through zero when visible.
   ctx.strokeStyle = colors.strong;
