@@ -76,9 +76,12 @@ def test_cannot_pick_an_unverified_school(client_for):
 
 
 def test_school_admin_registers_a_new_school(client_for):
+    no_email = register(client_for(), role="school_admin", new_school={"name": "GS Remera", "district": "Gasabo", "phone": "1"})
+    assert no_email.status_code == 400 and "email" in no_email.data
     response = register(
         client_for(),
         role="school_admin",
+        email="head@gsremera.rw",
         new_school={"name": "  GS   Remera ", "district": "Gasabo", "phone": "+250788000000"},
     )
     assert response.status_code == 201, response.data
@@ -93,7 +96,7 @@ def test_school_admin_registers_a_new_school(client_for):
 
 
 def test_school_admins_cannot_join_by_code(client_for, lycee):
-    response = register(client_for(), role="school_admin", school=lycee.id, school_code=lycee.join_code)
+    response = register(client_for(), role="school_admin", email="a@b.rw", school=lycee.id, school_code=lycee.join_code)
     assert response.status_code == 400
 
 
@@ -370,7 +373,10 @@ def test_flutterwave_outage_cancels_the_checkout(client_for, lycee_admin, fw):
 
 def test_platform_admin_verifies_school_and_its_first_admin(client_for, admin_user):
     response = register(
-        client_for(), role="school_admin", new_school={"name": "GS Kimironko", "district": "Gasabo", "phone": "1"}
+        client_for(),
+        role="school_admin",
+        email="head@kimironko.rw",
+        new_school={"name": "GS Kimironko", "district": "Gasabo", "phone": "1"},
     )
     school = School.objects.get(name="GS Kimironko")
     listed = client_for(admin_user).get("/api/admin/schools/", {"status": "pending"}).data

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
+import { LockBadge, LockedNotice } from "../components/Locked";
 import { Empty, ErrorMessage, GradeChips, Loader, scoreClass, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -61,9 +62,15 @@ function QuizGrid({ subject, grade }) {
                       <span>·</span>
                       <span>{q.feedback_mode === "immediate" ? t("practice.practiceMode") : t("practice.examMode")}</span>
                     </div>
-                    <button className="btn btn-sm" style={{ marginTop: 12 }} disabled={busy} onClick={() => start(q.id)}>
-                      {q.my_attempts ? t("quiz.tryAgain") : t("practice.start")} →
-                    </button>
+                    {q.locked ? (
+                      <div style={{ marginTop: 12 }}>
+                        <LockBadge />
+                      </div>
+                    ) : (
+                      <button className="btn btn-sm" style={{ marginTop: 12 }} disabled={busy} onClick={() => start(q.id)}>
+                        {q.my_attempts ? t("quiz.tryAgain") : t("practice.start")} →
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -131,8 +138,13 @@ function PastPapers({ subject }) {
                     </span>
                   </div>
                   {p.source_note && <p className="small muted" style={{ margin: "10px 0 0" }}>{p.source_note}</p>}
+                  {p.locked && (
+                    <div style={{ marginTop: 12 }}>
+                      <LockedNotice compact />
+                    </div>
+                  )}
                   <div className="row" style={{ marginTop: 12 }}>
-                    {p.quiz && (
+                    {p.quiz && !p.locked && (
                       <button className="btn btn-sm" disabled={busy} onClick={() => start(p.quiz)}>
                         ✍️ {t("practice.takeInteractive")}
                       </button>

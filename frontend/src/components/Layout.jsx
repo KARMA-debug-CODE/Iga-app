@@ -16,30 +16,50 @@ export default function Layout() {
   const [query, setQuery] = useState("");
 
   const isParent = user?.role === "parent";
-  const primary = [
-    { to: "/", icon: "🏠", label: t("nav.home"), end: true },
-    { to: "/learn", icon: "📚", label: t("nav.learn") },
-    { to: "/labs", icon: "🔬", label: t("nav.labs") },
-    { to: "/practice", icon: "📝", label: t("nav.practice") },
-    isParent ? { to: "/profile", icon: "⚙️", label: t("nav.profile") } : { to: "/groups", icon: "👥", label: t("nav.groups") },
-  ];
-  const secondary = [
-    ...(isParent
-      ? []
-      : [
-          { to: "/classes", icon: "🏫", label: t("nav.classes") },
-          { to: "/leaderboard", icon: "🏆", label: t("nav.leaderboard") },
-        ]),
-    { to: "/playground", icon: "💻", label: t("nav.playground") },
-    ...(isTeacher
-      ? [
-          { to: "/teach", icon: "🧑🏽‍🏫", label: t("nav.teach") },
-          { to: "/marking", icon: "✅", label: t("nav.marking") },
-        ]
-      : []),
-    ...(isAdmin ? [{ to: "/admin", icon: "🛡️", label: t("nav.admin") }] : []),
-    ...(isParent ? [] : [{ to: "/profile", icon: "⚙️", label: t("nav.profile") }]),
-  ];
+  const isSchoolAdmin = user?.role === "school_admin";
+  const schoolNav = isSchoolAdmin && user.school_status === "approved";
+  const primary = isSchoolAdmin
+    ? [
+        { to: "/", icon: "🏠", label: t("nav.home"), end: true },
+        ...(schoolNav
+          ? [
+              { to: "/school/members", icon: "👩🏽‍🎓", label: t("nav.members") },
+              { to: "/school/billing", icon: "💳", label: t("nav.billing") },
+            ]
+          : []),
+        { to: "/learn", icon: "📚", label: t("nav.learn") },
+        { to: "/profile", icon: "⚙️", label: t("nav.profile") },
+      ]
+    : [
+        { to: "/", icon: "🏠", label: t("nav.home"), end: true },
+        { to: "/learn", icon: "📚", label: t("nav.learn") },
+        { to: "/labs", icon: "🔬", label: t("nav.labs") },
+        { to: "/practice", icon: "📝", label: t("nav.practice") },
+        isParent ? { to: "/profile", icon: "⚙️", label: t("nav.profile") } : { to: "/groups", icon: "👥", label: t("nav.groups") },
+      ];
+  const secondary = isSchoolAdmin
+    ? [
+        { to: "/labs", icon: "🔬", label: t("nav.labs") },
+        { to: "/practice", icon: "📝", label: t("nav.practice") },
+        { to: "/playground", icon: "💻", label: t("nav.playground") },
+      ]
+    : [
+        ...(isParent
+          ? []
+          : [
+              { to: "/classes", icon: "🏫", label: t("nav.classes") },
+              { to: "/leaderboard", icon: "🏆", label: t("nav.leaderboard") },
+            ]),
+        { to: "/playground", icon: "💻", label: t("nav.playground") },
+        ...(isTeacher
+          ? [
+              { to: "/teach", icon: "🧑🏽‍🏫", label: t("nav.teach") },
+              { to: "/marking", icon: "✅", label: t("nav.marking") },
+            ]
+          : []),
+        ...(isAdmin ? [{ to: "/admin", icon: "🛡️", label: t("nav.admin") }] : []),
+        ...(isParent ? [] : [{ to: "/profile", icon: "⚙️", label: t("nav.profile") }]),
+      ];
 
   const initials = (user?.first_name?.[0] || user?.username?.[0] || "?").toUpperCase();
 

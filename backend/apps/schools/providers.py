@@ -33,7 +33,8 @@ class DevProvider:
         return bool(settings.BILLING_DEV_MODE)
 
     def create_checkout(self, payment, user, request=None):
-        return f"{settings.FRONTEND_URL}/school/billing/dev-checkout?ref={payment.reference}"
+        # A page of our own app, so a relative link works whatever host the app is served from.
+        return f"/school/billing/dev-checkout?ref={payment.reference}"
 
     def verify(self, payment):
         outcome = (payment.provider_data or {}).get("dev_outcome")

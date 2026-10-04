@@ -33,32 +33,27 @@ const Playground = lazy(() => import("./pages/Playground"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ChildReport = lazy(() => import("./pages/Children"));
 const QuizAnalytics = lazy(() => import("./pages/QuizAnalytics"));
+const schoolPage = (name) => lazy(() => import("./pages/School").then((m) => ({ default: m[name] })));
+const SchoolMembers = schoolPage("SchoolMembers");
+const SchoolBilling = schoolPage("SchoolBilling");
+const BillingReturn = schoolPage("BillingReturn");
+const DevCheckout = schoolPage("DevCheckout");
+const Receipt = schoolPage("Receipt");
+const SchoolHome = schoolPage("SchoolHome");
 
-function RequireAuth({ children, teacher = false, admin = false }) {
+function RequireAuth({ children, teacher = false, admin = false, schoolAdmin = false }) {
   const { user, isTeacher, isAdmin } = useAuth();
   const location = useLocation();
-  if (!user)
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ from: location.pathname + location.search }}
-      />
-    );
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   if (admin && !isAdmin) return <Navigate to="/" replace />;
   if (teacher && !isTeacher) return <Navigate to="/" replace />;
+  if (schoolAdmin && user.role !== "school_admin") return <Navigate to="/" replace />;
   return children;
 }
 
 function RedirectToLogin() {
   const location = useLocation();
-  return (
-    <Navigate
-      to="/login"
-      replace
-      state={{ from: location.pathname + location.search }}
-    />
-  );
+  return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
 }
 
 function ScrollToTop() {
@@ -74,8 +69,7 @@ export default function App() {
 
   // Follow the language saved on the account when someone logs in.
   useEffect(() => {
-    if (user?.preferred_language && user.preferred_language !== lang)
-      setLang(user.preferred_language);
+    if (user?.preferred_language && user.preferred_language !== lang) setLang(user.preferred_language);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -84,9 +78,7 @@ export default function App() {
   // A temporary password from a teacher must be replaced before anything else.
   if (user?.must_change_password && !user.offline) return <FirstLogin />;
 
-  const page = (element, opts) => (
-    <RequireAuth {...opts}>{element}</RequireAuth>
-  );
+  const page = (element, opts) => <RequireAuth {...opts}>{element}</RequireAuth>;
 
   return (
     <>
@@ -94,14 +86,8 @@ export default function App() {
       <ErrorBoundary resetKey={location.pathname} reloadOnRetry>
         <Suspense fallback={<Spinner />}>
           <Routes>
-            <Route
-              path="/login"
-              element={user ? <Navigate to="/" replace /> : <Login />}
-            />
-            <Route
-              path="/register"
-              element={user ? <Navigate to="/" replace /> : <Register />}
-            />
+            <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+            <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
             {!user && <Route path="/" element={<Landing />} />}
             <Route element={user ? <Layout /> : <RedirectToLogin />}>
               <Route path="/" element={page(<Dashboard />)} />
@@ -121,23 +107,17 @@ export default function App() {
               <Route path="/search" element={page(<Search />)} />
               <Route path="/playground" element={page(<Playground />)} />
               <Route path="/children/:id" element={page(<ChildReport />)} />
-              <Route
-                path="/teach"
-                element={page(<Teach />, { teacher: true })}
-              />
-              <Route
-                path="/classes/:id/quizzes/:quizId/analytics"
-                element={page(<QuizAnalytics />, { teacher: true })}
-              />
-              <Route
-                path="/teach/quizzes/:quizId/analytics"
-                element={page(<QuizAnalytics />, { teacher: true })}
-              />
-              <Route
-                path="/marking"
-                element={page(<Marking />, { teacher: true })}
-              />
+              <Route path="/teach" element={page(<Teach />, { teacher: true })} />
+              <Route path="/classes/:id/quizzes/:quizId/analytics" element={page(<QuizAnalytics />, { teacher: true })} />
+              <Route path="/teach/quizzes/:quizId/analytics" element={page(<QuizAnalytics />, { teacher: true })} />
+              <Route path="/marking" element={page(<Marking />, { teacher: true })} />
               <Route path="/admin" element={page(<Admin />, { admin: true })} />
+              <Route path="/school" element={page(<SchoolHome />, { schoolAdmin: true })} />
+              <Route path="/school/members" element={page(<SchoolMembers />, { schoolAdmin: true })} />
+              <Route path="/school/billing" element={page(<SchoolBilling />, { schoolAdmin: true })} />
+              <Route path="/school/billing/return" element={page(<BillingReturn />, { schoolAdmin: true })} />
+              <Route path="/school/billing/dev-checkout" element={page(<DevCheckout />, { schoolAdmin: true })} />
+              <Route path="/school/billing/receipt/:reference" element={page(<Receipt />, { schoolAdmin: true })} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

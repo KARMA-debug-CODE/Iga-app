@@ -557,6 +557,8 @@ input[type="range"] {
 
 .form {
   display: grid;
+  /* One column that never grows past the container (long selects and fieldsets would). */
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -1603,5 +1605,128 @@ tr:last-child td {
   .card {
     box-shadow: none;
     border: 1px solid #999;
+  }
+}
+
+/* Locked (premium) content and access messages */
+.locked-notice {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.locked-notice.compact {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.locked-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.access-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pill-lock {
+  background: var(--surface-2);
+  color: var(--text-soft);
+}
+
+/* School picker */
+.fieldset {
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin: 0;
+  min-width: 0;
+}
+
+.fieldset legend {
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0 4px;
+}
+
+.school-results {
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.school-results .list-link {
+  width: 100%;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.school-chosen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+/* School administration and billing */
+.subscription-card.good {
+  border-left: 6px solid var(--success);
+}
+
+.subscription-card.warn {
+  border-left: 6px solid var(--yellow);
+}
+
+.subscription-card.bad {
+  border-left: 6px solid var(--danger);
+}
+
+.stat.attention strong {
+  color: var(--warn);
+}
+
+.billing-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  font-size: 1.1rem;
+}
+
+.receipt-lines {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 16px 0;
+}
+
+.receipt-lines dt {
+  color: var(--text-soft);
+}
+
+.receipt-lines dd {
+  margin: 0;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
   }
 }

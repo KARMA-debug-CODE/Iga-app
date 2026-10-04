@@ -2,10 +2,111 @@ import { useEffect, useState } from "react";
 
 import { api } from "../api";
 import { useAuth } from "../auth";
+import SchoolPicker from "../components/SchoolPicker";
 import { ErrorMessage, GRADES, Loader, useToast } from "../components/ui";
 import { useApi } from "../hooks";
 import { LANGUAGES, useI18n } from "../i18n";
 import { getTheme, setTheme } from "../theme";
+
+function MySchool() {
+  const { user, reloadUser } = useAuth();
+  const { t } = useI18n();
+  const [choosing, setChoosing] = useState(false);
+  const [school, setSchool] = useState(null);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const locked = user.role === "school_admin" && user.school_status === "approved";
+
+  async function send(method, body) {
+    setBusy(true);
+    setError(null);
+    try {
+      await api("/my-school/", { method, body });
+      await reloadUser();
+      setChoosing(false);
+      setSchool(null);
+      setCode("");
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const status = user.school_status;
+  return (
+    <div className="card" id="school">
+      <h2>🏫 {t("school.mySchool")}</h2>
+      {user.school ? (
+        <div className="stack" style={{ gap: 8 }}>
+          <div>
+            <strong>{user.school.name}</strong> <span className="small muted">· {user.school.district}</span>
+          </div>
+          <span className={`pill ${status === "approved" ? "pill-success" : status === "pending" ? "pill-warn" : "pill-danger"}`}>
+            {t(`school.status.${status || "none"}`)}
+          </span>
+          {status === "approved" && user.school.subscription && (
+            <span className="small muted">
+              {user.access?.premium ? t("school.fullAccess") : t(`access.reason.${user.access?.reason}`, { school: user.school.name })}
+            </span>
+          )}
+          {status === "pending" && <span className="small muted">{t("school.pendingHelp")}</span>}
+        </div>
+      ) : (
+        <p className="small muted">{t("school.noneHelp")}</p>
+      )}
+      {!locked && !choosing && (
+        <div className="row" style={{ marginTop: 12 }}>
+          <button className="btn btn-sm btn-secondary" onClick={() => setChoosing(true)}>
+            {user.school ? t("school.changeSchool") : t("access.chooseSchool")}
+          </button>
+          {user.school && (
+            <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => window.confirm(t("school.leaveConfirm")) && send("DELETE")}>
+              {t("school.leave")}
+            </button>
+          )}
+        </div>
+      )}
+      {choosing && (
+        <form
+          className="form"
+          style={{ marginTop: 12 }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (school) send("POST", { school: school.id, school_code: code.trim() });
+          }}
+        >
+          <SchoolPicker value={school} onChange={setSchool} />
+          {school && user.role !== "school_admin" && (
+            <label>
+              {t("school.code")}
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                maxLength={12}
+                style={{ fontFamily: "var(--mono)", letterSpacing: "0.12em" }}
+              />
+              <span className="small muted" style={{ fontWeight: 400 }}>
+                {t("school.codeHint")}
+              </span>
+            </label>
+          )}
+          <ErrorMessage error={error} />
+          <div className="row">
+            <button className="btn btn-sm" disabled={!school || busy}>
+              {t("common.save")}
+            </button>
+            <button type="button" className="btn btn-sm btn-ghost" onClick={() => setChoosing(false)}>
+              {t("common.cancel")}
+            </button>
+          </div>
+        </form>
+      )}
+      {!choosing && <ErrorMessage error={error} />}
+    </div>
+  );
+}
 
 function TwoFactor() {
   const { user, setUser } = useAuth();
@@ -223,10 +324,6 @@ export default function Profile() {
                 </select>
               </label>
             )}
-            <label>
-              {t("auth.school")}
-              <input value={user.school?.name || ""} readOnly />
-            </label>
           </div>
           <label>
             {t("profile.language")}
@@ -243,6 +340,7 @@ export default function Profile() {
         </form>
 
         <div className="stack">
+          {user.role !== "parent" && user.role !== "admin" && <MySchool />}
           <div className="card">
             <h2>{t("profile.theme")}</h2>
             <div className="chips">

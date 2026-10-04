@@ -5,7 +5,7 @@
  * - GET /api/* for learning content: network-first, falling back to the last copy.
  * - Never caches auth, attempts, chat or anything that isn't a plain GET.
  */
-const VERSION = "iga-v4";
+const VERSION = "iga-v5";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon.svg"];
 const OFFLINE_API = [/^\/api\/(subjects|lessons|units|simulations|resources|meta|exam-papers)\b/];
 const NEVER_CACHE = [/^\/api\/auth\//, /^\/api\/attempts\//, /^\/api\/groups\/\d+\/messages/, /^\/django-admin/];
@@ -31,6 +31,9 @@ async function networkFirst(request) {
   try {
     const response = await fetch(request);
     if (response.ok) cache.put(key, response.clone());
+    // Access was refused (logged out, or the school's subscription ended): drop the saved copy
+    // so it can't be read later by going offline.
+    if (response.status === 401 || response.status === 403) await cache.delete(key, { ignoreVary: true });
     if (response.status >= 500) {
       // Server unreachable behind the proxy (502/503/504): prefer the saved copy.
       const cached = await cache.match(key, { ignoreVary: true });

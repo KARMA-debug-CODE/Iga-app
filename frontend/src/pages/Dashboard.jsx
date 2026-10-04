@@ -2,12 +2,14 @@ import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import { AccessBanner } from "../components/Locked";
 import { Empty, Loader, Progress, scoreClass } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
 // Parents get their own (lazily loaded) dashboard, in the same chunk as the /children pages.
 const ParentDashboard = lazy(() => import("./Children").then((m) => ({ default: m.ParentDashboard })));
+const SchoolHome = lazy(() => import("./School").then((m) => ({ default: m.SchoolHome })));
 
 export function SubjectCard({ subject, grade }) {
   const { t } = useI18n();
@@ -258,7 +260,14 @@ function TeacherDashboard({ data }) {
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useI18n();
-  const state = useApi("/dashboard/", { skip: user.role === "parent" });
+  const state = useApi("/dashboard/", { skip: user.role === "parent" || user.role === "school_admin" });
+  if (user.role === "school_admin") {
+    return (
+      <Suspense fallback={<div className="muted">{t("common.loading")}</div>}>
+        <SchoolHome />
+      </Suspense>
+    );
+  }
   return (
     <>
       <div className="page-header">
@@ -266,6 +275,7 @@ export default function Dashboard() {
         <p>{t("app.tagline")}</p>
       </div>
       {user.role === "teacher" && !user.teacher_approved && <div className="alert alert-warn" style={{ marginBottom: 16 }}>{t("auth.teacherPending")}</div>}
+      <AccessBanner />
       {user.role === "parent" ? (
         <Suspense fallback={<div className="muted">{t("common.loading")}</div>}>
           <ParentDashboard />

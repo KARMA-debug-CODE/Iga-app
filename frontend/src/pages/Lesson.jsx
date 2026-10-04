@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "../api";
 import Markdown from "../components/Markdown";
+import { LockBadge, LockedNotice } from "../components/Locked";
 import SimEmbed from "../components/SimEmbed";
 import TutorPanel from "../components/TutorPanel";
 import { Loader, useToast } from "../components/ui";
@@ -30,8 +31,12 @@ export default function Lesson() {
   }
 
   async function startQuiz(quizId) {
-    const attempt = await api(`/quizzes/${quizId}/start/`, { method: "POST" });
-    navigate(`/attempts/${attempt.id}`);
+    try {
+      const attempt = await api(`/quizzes/${quizId}/start/`, { method: "POST" });
+      navigate(`/attempts/${attempt.id}`);
+    } catch (err) {
+      showToast(err.message);
+    }
   }
 
   return (
@@ -82,13 +87,19 @@ export default function Lesson() {
               </div>
             )}
 
-            <div className="card">
-              <Markdown sims={sims}>{lesson.body}</Markdown>
-            </div>
+            {lesson.locked ? (
+              <LockedNotice reason={lesson.access_reason} />
+            ) : (
+              <>
+                <div className="card">
+                  <Markdown sims={sims}>{lesson.body}</Markdown>
+                </div>
 
-            <div className="section">
-              <TutorPanel lesson={lesson.slug} starters={[t("tutor.s.simpler"), t("tutor.s.example"), t("tutor.s.quizme")]} />
-            </div>
+                <div className="section">
+                  <TutorPanel lesson={lesson.slug} starters={[t("tutor.s.simpler"), t("tutor.s.example"), t("tutor.s.quizme")]} />
+                </div>
+              </>
+            )}
 
             {extraSims.length > 0 && (
               <section className="section">
@@ -99,24 +110,33 @@ export default function Lesson() {
               </section>
             )}
 
-            <div className="card section" style={{ textAlign: "center" }}>
-              {lesson.completed ? (
-                <strong style={{ color: "var(--success)" }}>✓ {t("learn.completed")}</strong>
-              ) : (
-                <button className="btn btn-success" onClick={complete} disabled={busy}>
-                  ✓ {t("learn.markComplete")}
-                </button>
-              )}
-            </div>
+            {!lesson.locked && (
+              <div className="card section" style={{ textAlign: "center" }}>
+                {lesson.completed ? (
+                  <strong style={{ color: "var(--success)" }}>✓ {t("learn.completed")}</strong>
+                ) : (
+                  <button className="btn btn-success" onClick={complete} disabled={busy}>
+                    ✓ {t("learn.markComplete")}
+                  </button>
+                )}
+              </div>
+            )}
 
             {lesson.quizzes.length > 0 && (
               <section className="section">
                 <h2>📝 {t("learn.quizzes")}</h2>
                 <div className="grid">
                   {lesson.quizzes.map((q) => (
-                    <button key={q.id} className="card card-link" style={{ textAlign: "left", font: "inherit", cursor: "pointer" }} onClick={() => startQuiz(q.id)}>
+                    <button
+                      key={q.id}
+                      className="card card-link"
+                      style={{ textAlign: "left", font: "inherit", cursor: q.locked ? "not-allowed" : "pointer" }}
+                      onClick={() => !q.locked && startQuiz(q.id)}
+                      aria-disabled={q.locked}
+                    >
                       <strong>{q.title}</strong>
                       <div className="small muted">{t("practice.questions", { n: q.question_count })}</div>
+                      {q.locked && <LockBadge />}
                     </button>
                   ))}
                 </div>

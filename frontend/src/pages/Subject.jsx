@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import { LockBadge } from "../components/Locked";
 import { GradeChips, Loader, Progress } from "../components/ui";
 import { results } from "../api";
 import { useApi } from "../hooks";
@@ -12,7 +13,7 @@ function SaveOffline({ unit }) {
   const { t, lang } = useI18n();
   const [state, setState] = useState(() => (savedUnits()[unit.id] ? "saved" : "idle"));
   const [progress, setProgress] = useState("");
-  if (!offlineSupported() || !unit.lessons.length) return null;
+  if (!offlineSupported() || !unit.lessons.some((l) => !l.locked)) return null;
   async function save() {
     setState("saving");
     try {
@@ -70,9 +71,10 @@ function QuizList({ code, grade }) {
       <h2>{t("practice.quizzes")}</h2>
       <div className="grid">
         {list.map((q) => (
-          <Link key={q.id} to={`/practice?start=${q.id}`} className="card card-link">
+          <Link key={q.id} to={q.locked ? `/practice?subject=${code}` : `/practice?start=${q.id}`} className="card card-link">
             <strong>{q.title}</strong>
             <div className="small muted">{t("practice.questions", { n: q.question_count })}</div>
+            {q.locked && <LockBadge />}
           </Link>
         ))}
       </div>
@@ -143,6 +145,7 @@ export default function Subject() {
                               <div>{lesson.title}</div>
                               <div className="small muted">{t("learn.minutes", { n: lesson.estimated_minutes })}</div>
                             </div>
+                            {lesson.locked ? <LockBadge /> : lesson.is_free && !user?.access?.premium && <span className="pill pill-success">{t("access.free")}</span>}
                             <span aria-hidden>›</span>
                           </Link>
                         </li>

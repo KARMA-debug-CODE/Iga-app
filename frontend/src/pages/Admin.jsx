@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
-import { Empty, Loader, Tabs } from "../components/ui";
+import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
@@ -12,6 +12,7 @@ function Stats() {
     <Loader state={state}>
       {(s) => (
         <div className="stack">
+          {s.subscriptions && <SubscriptionStats subs={s.subscriptions} />}
           <div className="stats">
             {Object.entries(s.users_by_role).map(([role, n]) => (
               <div className="card stat" key={role}>
@@ -285,6 +286,272 @@ function Audit() {
   );
 }
 
+function SchoolDetail({ id, onChanged }) {
+  const { t, lang } = useI18n();
+  const state = useApi(`/admin/schools/${id}/`, {}, [id]);
+  const members = useApi(`/admin/schools/${id}/members/`, {}, [id]);
+  const [form, setForm] = useState({ months: 1, amount: "200", currency: "USD", note: "" });
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  async function run(fn) {
+    setBusy(true);
+    setError(null);
+    try {
+      await fn();
+      state.reload();
+      members.reload();
+      onChanged();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const act = (action) => run(() => api(`/admin/schools/${id}/${action}/`, { method: "POST" }));
+  const recordPayment = (e) => {
+    e.preventDefault();
+    run(async () => {
+      await api(`/admin/schools/${id}/payments/`, { method: "POST", body: form });
+      setForm((f) => ({ ...f, note: "" }));
+    });
+  };
+  const pendingAdmins = (members.data || []).filter((m) => m.role === "school_admin" && m.school_status === "pending");
+
+  return (
+    <Loader state={state}>
+      {(school) => (
+        <div className="card stack" style={{ gap: 12 }}>
+          <div className="spread">
+            <div>
+              <h3 style={{ margin: 0 }}>{school.name}</h3>
+              <span className="small muted">
+                {school.district} · {school.phone} {school.email && `· ${school.email}`}
+              </span>
+            </div>
+            <span className="pill">{t(`admin.schoolStatus.${school.status}`)}</span>
+          </div>
+          <div className="small">
+            {t(`billing.state.${school.subscription.state}`)}
+            {school.subscription.paid_until &&
+              ` · ${t("billing.until", { date: formatDate(school.subscription.paid_until, lang) })}`} ·{" "}
+            {t("admin.codeIs", { code: school.join_code })}
+          </div>
+          <div className="small">
+            <strong>{t("admin.schoolAdmins")}:</strong>{" "}
+            {school.admins.length
+              ? school.admins.map((a) => `${a.name} (${a.email || a.username}, ${t(`school.status.${a.status || "none"}`)})`).join(", ")
+              : "—"}
+          </div>
+          <ErrorMessage error={error} />
+          <div className="row">
+            {school.status !== "verified" && (
+              <button
+                className="btn btn-sm btn-success"
+                disabled={busy}
+                onClick={() => act(school.status === "pending" ? "verify" : "reinstate")}
+              >
+                ✓ {t(school.status === "pending" ? "admin.verify" : "admin.reinstate")}
+              </button>
+            )}
+            {school.status === "verified" && (
+              <button
+                className="btn btn-sm btn-danger"
+                disabled={busy}
+                onClick={() => window.confirm(t("admin.suspendConfirm")) && act("suspend")}
+              >
+                {t("admin.suspend")}
+              </button>
+            )}
+            {pendingAdmins.length > 0 && (
+              <button
+                className="btn btn-sm"
+                disabled={busy}
+                onClick={() =>
+                  run(() =>
+                    api(`/admin/schools/${id}/members/`, { method: "POST", body: { ids: pendingAdmins.map((m) => m.id), approve: true } }),
+                  )
+                }
+              >
+                ✓ {t("admin.approveAdmins", { n: pendingAdmins.length })}
+              </button>
+            )}
+          </div>
+          {school.status === "verified" && (
+            <form className="form" onSubmit={recordPayment}>
+              <strong>{t("admin.recordPayment")}</strong>
+              <div className="form-row">
+                <label>
+                  {t("billing.months")}
+                  <input
+                    type="number"
+                    min="1"
+                    max="24"
+                    value={form.months}
+                    onChange={(e) => setForm({ ...form, months: Number(e.target.value) })}
+                  />
+                </label>
+                <label>
+                  {t("billing.amount")}
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.amount}
+                    onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                  />
+                </label>
+                <label>
+                  {t("billing.currency")}
+                  <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+                    <option>USD</option>
+                    <option>RWF</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                {t("admin.paymentNote")}
+                <input
+                  value={form.note}
+                  onChange={(e) => setForm({ ...form, note: e.target.value })}
+                  required
+                  placeholder={t("admin.paymentNoteHint")}
+                />
+              </label>
+              <button className="btn btn-sm" disabled={busy}>
+                {t("admin.record")}
+              </button>
+            </form>
+          )}
+          {school.payments.length > 0 && (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t("billing.date")}</th>
+                    <th>{t("billing.amount")}</th>
+                    <th>{t("billing.months")}</th>
+                    <th>{t("billing.method")}</th>
+                    <th>{t("billing.status")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {school.payments.map((p) => (
+                    <tr key={p.reference}>
+                      <td>{formatDate(p.paid_at || p.created_at, lang)}</td>
+                      <td>
+                        {p.amount} {p.currency}
+                      </td>
+                      <td>{p.months}</td>
+                      <td>
+                        {t(`billing.provider.${p.provider}`)}
+                        {p.note && ` · ${p.note}`}
+                      </td>
+                      <td>{t(`billing.paymentStatus.${p.status}`)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </Loader>
+  );
+}
+
+function Schools() {
+  const { t, lang } = useI18n();
+  const [status, setStatus] = useState("pending");
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(null);
+  const state = useApi("/admin/schools/", { params: { status, q: query } }, [status, query]);
+  return (
+    <div className="stack">
+      <div className="row">
+        <div className="chips">
+          {["pending", "verified", "suspended", ""].map((s) => (
+            <button
+              key={s || "all"}
+              className={`chip ${status === s ? "active" : ""}`}
+              aria-pressed={status === s}
+              onClick={() => setStatus(s)}
+            >
+              {s ? t(`admin.schoolStatus.${s}`) : t("practice.all")}
+            </button>
+          ))}
+        </div>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("school.search")}
+          aria-label={t("school.search")}
+          style={{ maxWidth: 260 }}
+        />
+      </div>
+      <Loader state={state}>
+        {(list) =>
+          list.length === 0 ? (
+            <Empty icon="🏫">{t("admin.noSchools")}</Empty>
+          ) : (
+            <div className="stack">
+              {list.map((s) => (
+                <div key={s.id}>
+                  <button
+                    className="card card-link spread"
+                    style={{ width: "100%", textAlign: "left", font: "inherit" }}
+                    onClick={() => setOpen(open === s.id ? null : s.id)}
+                  >
+                    <span>
+                      <strong>{s.name}</strong>{" "}
+                      <span className="small muted">
+                        · {s.district} · {t("admin.membersN", { n: s.members })}
+                      </span>
+                    </span>
+                    <span className="small">
+                      {t(`billing.state.${s.subscription.state}`)}
+                      {s.subscription.paid_until && ` · ${formatDate(s.subscription.paid_until, lang)}`}
+                    </span>
+                  </button>
+                  {open === s.id && <SchoolDetail id={s.id} onChanged={state.reload} />}
+                </div>
+              ))}
+            </div>
+          )
+        }
+      </Loader>
+    </div>
+  );
+}
+
+function SubscriptionStats({ subs }) {
+  const { t } = useI18n();
+  const fmt = (byCurrency) =>
+    Object.entries(byCurrency)
+      .map(([c, v]) => `${v} ${c}`)
+      .join(" + ") || "0";
+  return (
+    <div className="stats">
+      <div className="card stat">
+        <strong>{subs.active_schools}</strong>
+        <span className="muted small">{t("admin.activeSchools")}</span>
+      </div>
+      <div className="card stat">
+        <strong>{subs.pending_schools}</strong>
+        <span className="muted small">{t("admin.pendingSchools")}</span>
+      </div>
+      <div className="card stat">
+        <strong>{fmt(subs.this_month)}</strong>
+        <span className="muted small">{t("admin.revenueMonth")}</span>
+      </div>
+      <div className="card stat">
+        <strong>{fmt(subs.all_time)}</strong>
+        <span className="muted small">{t("admin.revenueTotal")}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Admin() {
   const { t } = useI18n();
   const [tab, setTab] = useState("stats");
@@ -301,6 +568,7 @@ export default function Admin() {
         onChange={setTab}
         tabs={[
           { value: "stats", label: t("admin.stats") },
+          { value: "schools", label: t("admin.schools") },
           { value: "users", label: t("admin.users") },
           { value: "review", label: t("admin.review") },
           { value: "moderation", label: t("admin.moderation") },
@@ -308,6 +576,7 @@ export default function Admin() {
         ]}
       />
       {tab === "stats" && <Stats />}
+      {tab === "schools" && <Schools />}
       {tab === "users" && <Users />}
       {tab === "review" && <Review />}
       {tab === "moderation" && <Moderation />}

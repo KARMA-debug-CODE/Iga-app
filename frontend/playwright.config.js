@@ -18,6 +18,8 @@ export default defineConfig({
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: "http://127.0.0.1:5173",
+    // French browsers would switch the app to French; the assertions are in English.
+    locale: "en-GB",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

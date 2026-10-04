@@ -61,7 +61,8 @@ export async function saveUnitOffline(unit, lang, onProgress = () => {}) {
   const { preloadBuiltinSims } = await import("./sims/registry");
   await Promise.all([import("./pages/Lesson"), import("./components/Markdown"), preloadBuiltinSims()]);
   await cacheMathFonts();
-  const slugs = unit.lessons.map((l) => l.slug);
+  // Only lessons the student can open: locked ones have no text to keep.
+  const slugs = unit.lessons.filter((l) => !l.locked).map((l) => l.slug);
   let done = 0;
   for (const slug of slugs) {
     await api(`/lessons/${slug}/`, { params: { lang } });

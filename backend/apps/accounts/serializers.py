@@ -153,6 +153,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         if role == User.Role.PARENT and (attrs.get("school") or attrs.get("new_school")):
             raise serializers.ValidationError({"school": "Parents don't join a school; link to your child instead."})
         if role == User.Role.SCHOOL_ADMIN:
+            if not attrs.get("email"):
+                raise serializers.ValidationError(
+                    {"email": "School administrators need an email address for receipts and reminders."}
+                )
             if bool(attrs.get("school")) == bool(attrs.get("new_school")):
                 raise serializers.ValidationError({"school": "Choose your school, or register a new one (not both)."})
             if attrs.get("school_code"):
