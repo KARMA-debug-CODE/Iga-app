@@ -160,6 +160,8 @@ export function SchoolMembers() {
   const [toast, showToast] = useToast();
   const state = useApi("/school/members/", { params: { status: statusFilter, role, q: query } }, [statusFilter, role, query]);
   const members = useMemo(() => state.data || [], [state.data]);
+  // Only people on screen can be acted on, even if the selection was made from an older list.
+  const chosen = members.filter((m) => selected.has(m.id)).map((m) => m.id);
 
   function setFilter(next) {
     setSelected(new Set());
@@ -169,7 +171,7 @@ export function SchoolMembers() {
   async function decide(approve) {
     setError(null);
     try {
-      const res = await api("/school/members/decide/", { method: "POST", body: { ids: [...selected], approve } });
+      const res = await api("/school/members/decide/", { method: "POST", body: { ids: chosen, approve } });
       showToast(t(approve ? "school.approvedN" : "school.rejectedN", { n: res.changed.length }));
       setSelected(new Set());
       state.reload();
@@ -251,10 +253,10 @@ export function SchoolMembers() {
           <button className="btn btn-sm btn-secondary" onClick={() => setSelected(new Set(members.map((m) => m.id)))}>
             {t("school.selectAll")}
           </button>
-          <button className="btn btn-sm btn-success" disabled={!selected.size} onClick={() => decide(true)}>
-            ✓ {t("school.approve")} ({selected.size})
+          <button className="btn btn-sm btn-success" disabled={!chosen.length} onClick={() => decide(true)}>
+            ✓ {t("school.approve")} ({chosen.length})
           </button>
-          <button className="btn btn-sm btn-danger" disabled={!selected.size} onClick={() => decide(false)}>
+          <button className="btn btn-sm btn-danger" disabled={!chosen.length} onClick={() => decide(false)}>
             {t("school.reject")}
           </button>
         </div>

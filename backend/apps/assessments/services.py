@@ -129,10 +129,10 @@ def _create_attempt(user, quiz, assignment):
 def _ensure_open(attempt):
     """Must run outside a transaction so an automatic submit isn't rolled back by the error."""
     if attempt.status != Attempt.Status.IN_PROGRESS:
-        raise ValidationError(_("This attempt has already been submitted."))
+        raise ValidationError({"detail": _("This attempt has already been submitted."), "code": "attempt_closed"})
     if not attempt.accepts_submission():
         submit_attempt(attempt)
-        raise ValidationError(_("Time is up — your attempt was submitted automatically."))
+        raise ValidationError({"detail": _("Time is up — your attempt was submitted automatically."), "code": "time_up"})
 
 
 def _question_in_attempt(attempt, question_id):
@@ -149,7 +149,7 @@ def _lock_open(attempt):
     """Lock the attempt row so a save can't land after (or during) the submit that scored it."""
     locked = Attempt.objects.select_for_update().get(pk=attempt.pk)
     if locked.status != Attempt.Status.IN_PROGRESS:
-        raise ValidationError(_("This attempt has already been submitted."))
+        raise ValidationError({"detail": _("This attempt has already been submitted."), "code": "attempt_closed"})
     return locked
 
 

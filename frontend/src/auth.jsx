@@ -56,15 +56,15 @@ export function AuthProvider({ children }) {
         lastLoaded.current = Date.now();
       })
       .catch((err) => {
-        if (err instanceof ApiError && err.status < 500) {
+        if (err instanceof ApiError && [401, 403].includes(err.status)) {
           // The server says this session is over (expired or revoked) without anyone pressing
           // Log out: don't leave that person's saved pages for whoever signs in next.
           if (rememberedUser()) clearOfflineData().catch(() => {});
           setUser(null);
           return;
         }
-        // No network, or the server is down (rather than "not logged in"): open in offline mode
-        // with saved lessons.
+        // No network, the server is down or busy (5xx, 429), rather than "not logged in": open in
+        // offline mode with the saved lessons.
         const saved = rememberedUser();
         setUser(saved ? { ...saved, offline: true } : null);
       })

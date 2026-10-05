@@ -13,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
 from django.http import FileResponse, Http404, HttpResponse
+from django.utils.translation import gettext as _
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
@@ -39,7 +40,7 @@ class PaperDownloadView(APIView):
         try:
             data = signing.loads(token, salt=SALT, max_age=LINK_SECONDS)
         except signing.BadSignature:
-            raise Http404("This download link has expired. Go back and open the paper again.")
+            raise Http404(_("This download link has expired. Go back and open the paper again."))
         if data.get("k") not in KINDS:
             raise Http404
         paper = ExamPaper.objects.select_related("quiz").filter(pk=data.get("p")).first()

@@ -145,7 +145,17 @@ class LessonViewSet(
         data = self.get_serializer(lesson).data
         lang = request_language(request)
 
-        siblings = list(visible_lessons(request.user).filter(unit=lesson.unit).order_by("order").values("slug", "title"))
+        siblings = list(visible_lessons(request.user).filter(unit=lesson.unit).order_by("order").values("id", "slug", "title"))
+        if lang != "en":
+            titles = dict(
+                LessonTranslation.objects.filter(lesson_id__in=[s["id"] for s in siblings], language=lang).values_list(
+                    "lesson_id", "title"
+                )
+            )
+            for sibling in siblings:
+                sibling["title"] = titles.get(sibling["id"], sibling["title"])
+        for sibling in siblings:
+            del sibling["id"]
         index = next((i for i, s in enumerate(siblings) if s["slug"] == lesson.slug), None)
         data["previous"] = siblings[index - 1] if index else None
         data["next"] = siblings[index + 1] if index is not None and index + 1 < len(siblings) else None
@@ -153,7 +163,7 @@ class LessonViewSet(
         data["simulations"] = [
             {
                 "slug": sim.slug,
-                "title": sim.title,
+                "title": (sim.title_fr if lang == "fr" else "") or sim.title,
                 "provider": sim.provider,
                 "provider_id": sim.provider_id,
                 "embed_url": sim.embed_url(lang),

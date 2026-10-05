@@ -157,9 +157,10 @@ class FlutterwaveProvider:
             data = body.get("data") or {}
             if body.get("status") != "success" or not data:
                 return Verification("pending")
-            if str(data.get("status", "")).lower() in ("failed", "cancelled"):
+            if str(data.get("status", "")).lower() != "successful":
                 # The lookup by reference returns one attempt, but a checkout can hold several
-                # (a declined card, then a good one). Look for a successful one before judging.
+                # (a declined card or an unanswered prompt, then a good one). Look for a successful
+                # one before judging.
                 data = self._successful_attempt(payment) or data
         return self._judge(payment, data)
 

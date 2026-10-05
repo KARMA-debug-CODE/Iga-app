@@ -283,8 +283,10 @@ function Player({ initial, onFinished }) {
 
   const closedByServer = useCallback(
     (e) => {
-      if (e?.status === 400 && /time is up|already been submitted/i.test(e.message)) {
-        onFinished(/time is up/i.test(e.message) ? t("quiz.timeUp") : null);
+      // The server says the attempt is over (its codes don't depend on the reader's language).
+      const code = e?.status === 400 ? e.data?.code : null;
+      if (code === "time_up" || code === "attempt_closed") {
+        onFinished(code === "time_up" ? t("quiz.timeUp") : null);
         return true;
       }
       return false;

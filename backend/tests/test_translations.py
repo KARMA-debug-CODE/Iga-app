@@ -121,3 +121,53 @@ def test_the_app_language_wins_over_the_saved_preference(client_for, unit):
     assert client.get("/api/subjects/").data[0]["display_name"] == "Mathématiques"  # no header: the saved preference
     assert client.get("/api/subjects/", HTTP_ACCEPT_LANGUAGE="en").data[0]["display_name"] == "Mathematics"
     assert client.get("/api/subjects/", {"lang": "fr"}, HTTP_ACCEPT_LANGUAGE="en").data[0]["display_name"] == "Mathématiques"
+
+
+def test_an_unsupported_accept_language_keeps_the_saved_preference(client_for, unit):
+    client = client_for(make_user("pref2", preferred_language="fr"))
+    for header in ("rw-RW,rw;q=0.9", "*"):
+        assert client.get("/api/subjects/", HTTP_ACCEPT_LANGUAGE=header).data[0]["display_name"] == "Mathématiques"
+
+
+def test_lessons_and_lab_search_are_french_for_french_readers(client_for, student, unit):
+    from apps.curriculum.models import Lesson, LessonTranslation
+    from apps.simulations.models import Simulation
+
+    sim = Simulation.objects.create(
+        slug="ohms",
+        title="Ohm's Law Lab",
+        title_fr="Labo de la loi d'Ohm",
+        provider="builtin",
+        provider_id="ohms",
+        description="Change the voltage.",
+        description_fr="Changez la tension de la pile.",
+    )
+    first = Lesson.objects.create(unit=unit, slug="first", title="First", body="x", status="published", is_free=True, order=1)
+    second = Lesson.objects.create(unit=unit, slug="second", title="Second", body="x", status="published", is_free=True, order=2)
+    LessonTranslation.objects.create(lesson=second, language="fr", title="Deuxième", body="y")
+    first.simulations.add(sim)
+    client = client_for(student)
+    page = client.get("/api/lessons/first/", HTTP_ACCEPT_LANGUAGE="fr").data
+    assert page["simulations"][0]["title"] == "Labo de la loi d'Ohm"
+    assert page["next"]["title"] == "Deuxième"
+    assert [s["slug"] for s in client.get("/api/simulations/", {"q": "loi"}, HTTP_ACCEPT_LANGUAGE="fr").data] == ["ohms"]
+    assert client.get("/api/simulations/", {"q": "loi"}, HTTP_ACCEPT_LANGUAGE="en").data == []
+
+
+def test_dashboard_names_subjects_in_french(client_for, student, quiz_factory):
+    quiz = quiz_factory(is_free=True)
+    client = client_for(student)
+    attempt = client.post(f"/api/quizzes/{quiz.id}/start/").data
+    client.post(f"/api/attempts/{attempt['id']}/submit/")
+    assert client.get("/api/dashboard/", HTTP_ACCEPT_LANGUAGE="fr").data["recent_attempts"][0]["subject"] == "Mathématiques"
+
+
+def test_closed_attempts_carry_a_code_in_every_language(client_for, student, quiz_factory):
+    quiz = quiz_factory(is_free=True)
+    client = client_for(student)
+    attempt = client.post(f"/api/quizzes/{quiz.id}/start/").data
+    client.post(f"/api/attempts/{attempt['id']}/submit/")
+    question = attempt["questions"][0]["id"]
+    late = client.post(f"/api/attempts/{attempt['id']}/answer/", {"question": question}, format="json", HTTP_ACCEPT_LANGUAGE="fr")
+    assert late.status_code == 400
+    assert late.data["code"] == "attempt_closed" and "déjà été remise" in late.data["detail"]

@@ -124,6 +124,7 @@ def dashboard(request):
                 .select_related("quiz", "quiz__subject", "user")
                 .order_by("-submitted_at")[:8],
                 many=True,
+                context={"request": request},
             ).data,
             "awaiting_review": {
                 "lessons": Lesson.objects.filter(author=user, status=ContentStatus.REVIEW).count(),
@@ -153,6 +154,7 @@ def dashboard(request):
         .select_related("quiz", "quiz__subject")
         .order_by("-submitted_at")[:5],
         many=True,
+        context={"request": request},
     ).data
     data["continue_learning"] = _continue_learning(user, request_language(request))
     data["lessons_completed"] = LessonProgress.objects.filter(user=user).count()

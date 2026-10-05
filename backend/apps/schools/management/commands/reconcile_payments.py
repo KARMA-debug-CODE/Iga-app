@@ -5,8 +5,10 @@ or cron: `python manage.py reconcile_payments`.
 - A payment the provider now reports as successful is applied (once, as always).
 - A payment whose checkout has closed without a successful transaction is marked cancelled.
 - Open payments older than BILLING_RECONCILE_DAYS are closed without asking the provider.
-- Payments closed in the last CLOSED_RECHECK are asked about again, in case a mobile money approval
-  completed after the checkout closed and its webhook never arrived.
+- Payments closed in the last CLOSED_RECHECK are asked about again (at most once per
+  CLOSED_RECHECK_EVERY), in case a mobile money approval completed after the checkout closed and its
+  webhook never arrived. Payments refused for a wrong amount or currency, and payments whose
+  checkout was never created, are not.
 
 Closing a payment never loses money: if the provider later reports a successful transaction for
 it (webhook or the return page), billing.apply_payment still applies it.
@@ -18,6 +20,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 
@@ -26,6 +29,17 @@ from apps.schools.models import Payment
 
 log = logging.getLogger(__name__)
 CLOSED_RECHECK = timedelta(days=1)
+CLOSED_RECHECK_EVERY = timedelta(hours=1)
+
+
+def _settled_for_good(payment):
+    """Closed payments not worth asking about again (checked in Python: a JSON key lookup in an
+    exclude() would also drop payments that lack the key)."""
+    data = payment.provider_data or {}
+    if data.get("checkout_failed"):
+        return True  # the checkout was never created, so nothing can have been paid
+    # Paid, but the wrong amount or currency: refused for good (and logged once, not every run).
+    return payment.status == Payment.Status.FAILED and str(data.get("status", "")).lower() == "successful"
 
 
 def reconcile(now=None):
@@ -36,10 +50,14 @@ def reconcile(now=None):
     counts["expired"] = open_payments.filter(created_at__lt=since).update(status=Payment.Status.CANCELLED)
 
     online = Payment.objects.exclude(provider=Payment.Provider.MANUAL)
-    to_check = online.filter(status=Payment.Status.PENDING, created_at__gte=since) | online.filter(
+    closed = online.filter(
         status__in=[Payment.Status.FAILED, Payment.Status.CANCELLED], created_at__gte=now - CLOSED_RECHECK
-    )
+    ).filter(Q(checked_at__isnull=True) | Q(checked_at__lt=now - CLOSED_RECHECK_EVERY))
+    to_check = online.filter(status=Payment.Status.PENDING, created_at__gte=since) | closed
     for payment in to_check.select_related("school").order_by("created_at"):
+        if payment.status != Payment.Status.PENDING and _settled_for_good(payment):
+            continue
+        Payment.objects.filter(pk=payment.pk).update(checked_at=now)
         try:
             provider = providers.get(payment.provider)
         except APIException:

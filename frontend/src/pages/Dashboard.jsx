@@ -259,8 +259,9 @@ function TeacherDashboard({ data }) {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { t } = useI18n();
-  const state = useApi("/dashboard/", { skip: user.role === "parent" || user.role === "school_admin" });
+  const { t, lang } = useI18n();
+  // ?lang= makes the answer follow a language change straight away (it's part of the request key).
+  const state = useApi("/dashboard/", { skip: user.role === "parent" || user.role === "school_admin", params: { lang } });
   if (user.role === "school_admin") {
     return (
       <Suspense fallback={<div className="muted">{t("common.loading")}</div>}>

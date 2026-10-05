@@ -218,7 +218,7 @@ class CheckoutView(APIView):
         try:
             url = provider.create_checkout(payment, request.user, request)
         except Exception:
-            billing.fail_payment(payment, status=Payment.Status.CANCELLED)
+            billing.fail_payment(payment, status=Payment.Status.CANCELLED, data={"checkout_failed": True})
             raise
         audit.record(request, "start_payment", school, reference=payment.reference, months=payment.months)
         return Response({"reference": payment.reference, "checkout_url": url}, status=status.HTTP_201_CREATED)

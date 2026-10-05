@@ -28,7 +28,10 @@ class SimulationViewSet(viewsets.ReadOnlyModelViewSet):
             qs = qs.filter(provider=params["provider"])
         if params.get("q"):
             term = params["q"]
-            qs = qs.filter(Q(title__icontains=term) | Q(topics__icontains=term) | Q(description__icontains=term))
+            match = Q(title__icontains=term) | Q(topics__icontains=term) | Q(description__icontains=term)
+            if request_language(self.request) == "fr":
+                match |= Q(title_fr__icontains=term) | Q(description_fr__icontains=term)
+            qs = qs.filter(match)
         qs = qs.distinct()
         grade = params.get("grade")
         if grade:

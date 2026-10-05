@@ -35,7 +35,7 @@ export default function OhmsLaw() {
 
   return (
     <div className="lab">
-      <svg viewBox="0 0 400 260" role="img" aria-label={t("sim.ohms.aria", { voltage, resistance, current: num(current, 3) })}>
+      <svg viewBox="0 0 400 260" role="img" aria-label={t("sim.ohms.aria", { voltage: num(voltage, 1), resistance, current: num(current, 3) })}>
         <path d={WIRE} fill="none" stroke="var(--text-soft)" strokeWidth="6" strokeLinejoin="round" />
         <path ref={flow} d={WIRE} fill="none" stroke="#00A1DE" strokeWidth="6" strokeDasharray="4 18" strokeLinecap="round" />
 
@@ -44,7 +44,7 @@ export default function OhmsLaw() {
         <line x1="44" y1="118" x2="76" y2="118" stroke="var(--text)" strokeWidth="4" />
         <line x1="52" y1="132" x2="68" y2="132" stroke="var(--text)" strokeWidth="4" />
         <line x1="44" y1="146" x2="76" y2="146" stroke="var(--text)" strokeWidth="4" />
-        <text x="92" y="136" fontSize="15" fontWeight="700" fill="var(--text)">{voltage} V</text>
+        <text x="92" y="136" fontSize="15" fontWeight="700" fill="var(--text)">{num(voltage, 1)} V</text>
 
         {/* Resistor */}
         <rect x="150" y="26" width="100" height="28" fill="var(--surface)" />
@@ -106,7 +106,7 @@ export default function OhmsLaw() {
             <tbody>
               {readings.map((r, i) => (
                 <tr key={i}>
-                  <td>{r.voltage}</td>
+                  <td>{num(r.voltage, 1)}</td>
                   <td>{r.resistance}</td>
                   <td>{num(r.current, 3)}</td>
                   <td>{r.current ? num(r.voltage / r.current, 1) : "—"}</td>

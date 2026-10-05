@@ -21,7 +21,7 @@
 | Mobile-first, dark mode, Rwanda colours | 🟢 | Installable PWA |
 | Security (2FA, HTTPS, scoped access, anti-cheat) | 🟢 | Session revocation, refresh-token reuse detection, admin 2FA, upload checks. See the Architecture doc |
 | Scalable cloud deployment | 🟡 | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
-| Testing & QA | 🟢 | 285 API tests (SQLite + PostgreSQL), unit tests, 36 E2E runs (18 journeys on mobile and desktop; two school journeys run on desktop only), CI |
+| Testing & QA | 🟢 | 294 API tests (SQLite + PostgreSQL), unit tests, 36 E2E runs (18 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | 🟢 | Linked by a one-time code from the student; read-only progress report |
 | AI tutor | 🟢 | Claude-powered, off during exams, never reveals answers early; needs an API key and a usage budget |
 | Offline use | 🟡 | Whole units can be saved for offline reading and labs; quizzes still need a connection |

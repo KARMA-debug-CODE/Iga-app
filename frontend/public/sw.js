@@ -70,8 +70,15 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   if (request.mode === "navigate") {
-    // Single-page app: every route is served by index.html.
-    event.respondWith(fetch(request).catch(() => caches.match("/index.html", { ignoreVary: true })));
+    // Single-page app: every route is served by index.html. Keep the latest copy for offline use.
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) caches.open(VERSION).then((cache) => cache.put("/index.html", response.clone()));
+          return response;
+        })
+        .catch(() => caches.match("/index.html", { ignoreVary: true })),
+    );
     return;
   }
   // Built assets and the Python runtime never change under the same name.

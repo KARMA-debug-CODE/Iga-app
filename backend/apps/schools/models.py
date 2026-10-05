@@ -101,6 +101,8 @@ class Payment(models.Model):
     note = models.CharField(max_length=300, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     paid_at = models.DateTimeField(null=True, blank=True)
+    # Last time reconcile_payments asked the provider about this payment.
+    checked_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

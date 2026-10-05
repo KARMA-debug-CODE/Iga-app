@@ -416,3 +416,41 @@ def test_upgrade_opens_the_starter_lessons_and_quizzes(subject, unit):
     assert Lesson.objects.get(pk=starter.pk).is_free is True
     assert Lesson.objects.get(pk=other.pk).is_free is False
     assert Quiz.objects.get(pk=quiz.pk).is_free is True
+
+
+def test_teachers_keep_their_own_marking_guides_without_the_subscription(client_for, student, subject, unit):
+    from apps.classroom.models import Classroom, Enrollment
+
+    school = make_school("Lapsing2", "Huye", paid_until=timezone.now() + timedelta(days=30))
+    teacher = make_user("guideteacher", role="teacher", teacher_approved=True, school=school)
+    library = add_mcq(subject, unit, "LIBRARY MCQ")
+    library_essay = Question.objects.create(
+        subject=subject, grade="S2", unit=unit, type=Question.Type.ESSAY, prompt="LIB ESSAY", marks=4, marking_guide="LIB GUIDE"
+    )
+    own_essay = Question.objects.create(
+        subject=subject,
+        grade="S2",
+        unit=unit,
+        type=Question.Type.ESSAY,
+        prompt="OWN ESSAY",
+        marks=4,
+        marking_guide="MY OWN GUIDE",
+        author=teacher,
+    )
+    quiz = make_quiz(subject, unit, [library, library_essay, own_essay], feedback_mode="after_submit", author=teacher)
+    classroom = Classroom.objects.create(name="Maths", grade="S2", teacher=teacher, subject=subject)
+    Enrollment.objects.create(classroom=classroom, student=student)
+    client = client_for(student)
+    attempt = client.post(f"/api/quizzes/{quiz.id}/start/").data
+    for q in attempt["questions"]:
+        if q["type"] == "essay":
+            client.post(f"/api/attempts/{attempt['id']}/answer/", {"question": q["id"], "text": "..."}, format="json")
+    client.post(f"/api/attempts/{attempt['id']}/submit/")
+    school.paid_until = timezone.now() - timedelta(days=30)
+    school.save()
+    from apps.accounts.models import User
+
+    guides = {
+        item["question"]: item["marking_guide"] for item in client_for(User.objects.get(pk=teacher.pk)).get("/api/marking/").data
+    }
+    assert guides == {"LIB ESSAY": "", "OWN ESSAY": "MY OWN GUIDE"}

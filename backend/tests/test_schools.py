@@ -495,7 +495,8 @@ def test_reconcile_applies_lost_webhooks_and_closes_abandoned_checkouts(lycee, l
         raise flutterwave.ProviderUnavailable()
 
     fw["responses"]["/transactions/verify_by_reference"] = down
-    assert reconcile(now)["unreachable"] == 2  # the open payment and the one closed today
+    assert reconcile(now)["unreachable"] == 1  # the open payment; the closed one was asked about a moment ago
+    assert reconcile(now + timedelta(minutes=61))["unreachable"] == 2  # an hour later, the closed one too
     assert Payment.objects.get(pk=still_open.pk).status == "pending"
 
 
@@ -621,6 +622,56 @@ def test_reconcile_rechecks_payments_closed_in_the_last_day(lycee, lycee_admin, 
     calls = len(fw["calls"])
     reconcile()
     assert len(fw["calls"]) == calls  # older closed payments are left alone
+
+
+def test_reconcile_leaves_final_payments_alone(lycee, lycee_admin, fw):
+    from apps.schools.management.commands.reconcile_payments import reconcile
+
+    wrong_amount = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    never_started = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    closed = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    earlier = timezone.now() - timedelta(hours=2)
+    Payment.objects.filter(pk=wrong_amount.pk).update(
+        created_at=earlier, status="failed", provider_data={"status": "successful", "amount": 2}
+    )
+    Payment.objects.filter(pk=never_started.pk).update(
+        created_at=earlier, status="cancelled", provider_data={"checkout_failed": True}
+    )
+    Payment.objects.filter(pk=closed.pk).update(created_at=earlier, status="cancelled")
+    fw["responses"]["/transactions/verify_by_reference"] = {
+        "status": "error",
+        "message": "No transaction was found",
+        "data": None,
+    }
+    reconcile()
+    asked = [path for _, path, _ in fw["calls"]]
+    assert any(closed.reference in path for path in asked)
+    assert not any(wrong_amount.reference in path or never_started.reference in path for path in asked)
+
+
+def test_a_pending_attempt_does_not_hide_a_successful_one(lycee, lycee_admin, fw):
+    payment = billing.start_payment(lycee, lycee_admin, 1, "USD", "flutterwave")
+    fw["responses"]["/transactions/verify_by_reference"] = _verify_response(payment, "pending", 10)
+    fw["responses"]["/transactions?"] = {
+        "status": "success",
+        "data": [
+            {"id": 10, "tx_ref": payment.reference, "status": "pending"},
+            {"id": 11, "tx_ref": payment.reference, "status": "successful"},
+        ],
+    }
+    fw["responses"]["/transactions/11/verify"] = _verify_response(payment, "successful", 11)
+    from apps.schools import providers
+
+    assert providers.get("flutterwave").verify(payment).status == "succeeded"
+
+
+def test_checkout_that_never_started_is_marked(client_for, lycee_admin, fw):
+    def down(path, payload):
+        raise flutterwave.ProviderUnavailable()
+
+    fw["responses"]["/payments"] = down
+    client_for(lycee_admin).post("/api/billing/checkout/", {"months": 1, "currency": "USD"}, format="json")
+    assert Payment.objects.get().provider_data == {"checkout_failed": True}
 
 
 def _http_error(code, body):
@@ -851,3 +902,20 @@ def test_seed_demo_can_run_again_after_the_pending_admin_left(client_for):
     gsadmin.refresh_from_db()
     assert gsadmin.school.name == "GS Remera Catholique" and gsadmin.school_status == "pending"
     assert School.objects.filter(name="GS Remera Catholique").count() == 1
+
+
+def test_upgrade_marks_teacher_confirmations_made_by_schools(lycee, lycee_admin, admin_user):
+    import importlib
+
+    from django.apps import apps as registry
+
+    migration = importlib.import_module("apps.accounts.migrations.0008_mark_school_teacher_confirmations")
+    by_school = make_user("byschool", role="teacher", teacher_approved=True, school=lycee)
+    User.objects.filter(pk=by_school.pk).update(school_approved_by=lycee_admin)
+    by_iga = make_user("byiga", role="teacher", teacher_approved=True, school=lycee)
+    User.objects.filter(pk=by_iga.pk).update(school_approved_by=admin_user)
+    by_code = make_user("bycode", role="teacher", teacher_approved=True, school=lycee)
+    migration.mark_school_confirmations(registry, None)
+    assert User.objects.get(pk=by_school.pk).teacher_approved_by_school_id == lycee.id
+    assert User.objects.get(pk=by_iga.pk).teacher_approved_by_school_id is None
+    assert User.objects.get(pk=by_code.pk).teacher_approved_by_school_id is None

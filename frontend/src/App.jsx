@@ -64,7 +64,12 @@ function ScrollToTop() {
       return undefined;
     }
     // Links like /profile#school go to that section once the page has rendered it.
-    const id = decodeURIComponent(hash.slice(1));
+    let id = hash.slice(1);
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      /* not valid percent-encoding: use it as it is */
+    }
     let tries = 0;
     const timer = setInterval(() => {
       const element = document.getElementById(id);

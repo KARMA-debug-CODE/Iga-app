@@ -1,4 +1,5 @@
 from django.utils import translation
+from django.utils.translation.trans_real import parse_accept_lang_header
 
 from apps.core.constants import GRADE_CODES, LANGUAGE_CODES
 
@@ -9,7 +10,8 @@ def request_language(request):
     lang = request.query_params.get("lang") if hasattr(request, "query_params") else None
     if lang in LANGUAGE_CODES:
         return lang
-    if request.META.get("HTTP_ACCEPT_LANGUAGE"):
+    header = request.META.get("HTTP_ACCEPT_LANGUAGE", "")
+    if any(code.split("-")[0] in LANGUAGE_CODES for code, _q in parse_accept_lang_header(header)):
         active = (translation.get_language() or "")[:2]
         if active in LANGUAGE_CODES:
             return active

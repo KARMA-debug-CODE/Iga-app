@@ -1,5 +1,5 @@
 // "Save for offline": fetch every lesson in a unit so the service worker keeps a copy.
-// On logout everything cached is wiped, because school computers are often shared.
+// On logout every saved lesson is wiped, because school computers are often shared.
 import { api } from "./api";
 
 const KEY = "iga.offline.units";
@@ -125,6 +125,10 @@ export async function clearOfflineData() {
     /* ignore */
   }
   if (typeof caches === "undefined") return;
-  const names = await caches.keys();
-  await Promise.all(names.filter((n) => n.startsWith("iga-")).map((n) => caches.delete(n)));
+  // Only the saved API answers are personal; the app's own files stay, so it still opens offline.
+  for (const name of (await caches.keys()).filter((n) => n.startsWith("iga-"))) {
+    const cache = await caches.open(name);
+    const personal = (await cache.keys()).filter((request) => new URL(request.url).pathname.startsWith("/api/"));
+    await Promise.all(personal.map((request) => cache.delete(request)));
+  }
 }

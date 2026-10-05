@@ -76,7 +76,7 @@ To load only the curriculum (no demo users), for example on a pilot server, run 
 ## Running the tests
 
 ```bash
-cd backend && pytest                 # 285 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
+cd backend && pytest                 # 294 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
 cd backend && ruff check .           # lint
 cd frontend && npm test              # unit tests for the lab maths
 cd frontend && npm run lint

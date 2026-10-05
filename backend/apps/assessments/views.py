@@ -305,8 +305,14 @@ class MarkingViewSet(viewsets.ViewSet):
         )
 
     def list(self, request):
-        pending = self._answers(request).filter(marks_awarded__isnull=True).order_by("attempt__submitted_at")[:200]
+        pending = list(self._answers(request).filter(marks_awarded__isnull=True).order_by("attempt__submitted_at")[:200])
         lang = request_language(request)
+        # Library questions' marking guides are premium; a teacher's own (or a colleague's) are not.
+        library = set(
+            Question.objects.filter(services.library_questions_q(), id__in={a.question_id for a in pending}).values_list(
+                "id", flat=True
+            )
+        )
         return Response(
             [
                 {
@@ -317,8 +323,9 @@ class MarkingViewSet(viewsets.ViewSet):
                     "submitted_at": a.attempt.submitted_at,
                     "question": a.question.prompt,
                     "max_marks": a.question.marks,
-                    # Marking guides are premium, like the explanations students see.
-                    "marking_guide": a.question.marking_guide if access.can_open(request.user, a.attempt.quiz) else "",
+                    "marking_guide": a.question.marking_guide
+                    if a.question_id not in library or access.can_open(request.user, a.attempt.quiz)
+                    else "",
                     "answer_text": a.text_answer,
                 }
                 for a in pending
