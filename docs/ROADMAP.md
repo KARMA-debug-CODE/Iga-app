@@ -8,7 +8,7 @@
 | Official textbooks & guides | 🟡 | Resource library with an "official" flag and a link to the REB e-learning portal. Uploading PDFs is waiting on redistribution rights |
 | Simplified lessons, visuals, rich media | 🟢 | Markdown lessons with maths, tables, embedded labs and video links |
 | ICT / coding modules (W3Schools-style) | 🟢 | Live HTML/CSS/JS editor and real Python (Pyodide, self-hosted) in lessons and a standalone playground |
-| English / French | 🟢 | Interface, subject names, unit titles and all 39 lessons in both languages; the tutor answers in the student's reading language. French needs review by a fluent teacher; quizzes are English-only |
+| English / French | 🟢 | Interface, server messages and emails, subject names, unit titles, lab descriptions and all 39 lessons in both languages; search works in French; the tutor answers in the student's reading language. French needs review by a fluent teacher; quizzes are English-only |
 | School subscriptions | 🟢 | Schools pay USD 200/month for all their members; free starter lessons for everyone else. Flutterwave (cards, mobile money), bank transfers recorded by the team, receipts and reminders |
 | Interactive simulations (PhET, GeoGebra) | 🟢 | 32 PhET, 3 GeoGebra, 4 built-in offline labs, mapped to subjects and grades |
 | Past national exam papers with marking guides | 🟡 Engine done | Library, timed exam mode, importer and marking guides. Needs NESA papers and permission; ships with 2 unofficial samples |
@@ -21,7 +21,7 @@
 | Mobile-first, dark mode, Rwanda colours | 🟢 | Installable PWA |
 | Security (2FA, HTTPS, scoped access, anti-cheat) | 🟢 | Session revocation, refresh-token reuse detection, admin 2FA, upload checks. See the Architecture doc |
 | Scalable cloud deployment | 🟡 | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
-| Testing & QA | 🟢 | 173 API tests (SQLite + PostgreSQL), unit tests, 28 E2E runs (14 journeys on mobile and desktop), CI |
+| Testing & QA | 🟢 | 285 API tests (SQLite + PostgreSQL), unit tests, 36 E2E runs (18 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | 🟢 | Linked by a one-time code from the student; read-only progress report |
 | AI tutor | 🟢 | Claude-powered, off during exams, never reveals answers early; needs an API key and a usage budget |
 | Offline use | 🟡 | Whole units can be saved for offline reading and labs; quizzes still need a connection |
@@ -31,7 +31,7 @@
 1. **Curriculum alignment.** Teachers check each unit against the REB syllabus PDFs, tick *alignment verified*, and add the key unit competence.
 2. **Content sprint.** Prioritise S3 and S6 (exam years) in Maths, Physics, Chemistry, Biology and English. Target at least 3 lessons and 1 quiz per unit.
 3. **Permissions.** Write to NESA for permission to publish past papers and marking guides, and to REB about hosting textbook PDFs. Record the reference in each paper's `source_note`.
-4. **Language review.** A fluent teacher reviews the French interface strings (`frontend/src/i18n/fr.js`), unit titles and lesson translations, and marks reviewed lessons with `reviewed: true`.
+4. **Language review.** A fluent teacher reviews the French interface strings (`frontend/src/i18n/fr.js`), server messages and emails (`backend/locale/fr/LC_MESSAGES/django.po`), unit titles, lab texts and lesson translations, and marks reviewed lessons with `reviewed: true`.
 5. **Payments.** Open a Flutterwave business account, test with test keys, decide the RWF price, and confirm whether receipts must be EBM invoices (VAT).
 6. **Privacy.** Review against Rwanda's data-protection law (Law N° 058/2021). Decide on consent for students under 16, data retention periods, and whether school email or another identifier is used at sign-up. Register with NCSA if required.
 7. **Safeguarding.** Agree moderation rules with the pilot school and appoint teacher moderators per group.

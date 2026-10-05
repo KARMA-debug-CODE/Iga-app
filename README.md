@@ -76,11 +76,11 @@ To load only the curriculum (no demo users), for example on a pilot server, run 
 ## Running the tests
 
 ```bash
-cd backend && pytest                 # 173 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
+cd backend && pytest                 # 285 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
 cd backend && ruff check .           # lint
 cd frontend && npm test              # unit tests for the lab maths
 cd frontend && npm run lint
-cd frontend && npx playwright test   # 14 end-to-end journeys × (mobile + desktop) against the real API
+cd frontend && npx playwright test   # 18 end-to-end journeys × (mobile + desktop) against the real API
 ```
 
 The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.
