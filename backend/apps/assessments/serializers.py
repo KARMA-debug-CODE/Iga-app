@@ -1,10 +1,11 @@
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
-from apps.core.utils import request_language
+from apps.core.utils import request_language, serializer_language
 from apps.schools import access
 from apps.schools.downloads import signed_download_url
 
@@ -53,10 +54,10 @@ class QuestionSerializer(serializers.ModelSerializer):
         if value in (None, ""):
             return []
         if not isinstance(value, list) or not all(isinstance(a, str) for a in value):
-            raise serializers.ValidationError("Give a list of accepted answers (text).")
+            raise serializers.ValidationError(_("Give a list of accepted answers (text)."))
         cleaned = [a.strip() for a in value if a.strip()]
         if len(cleaned) > 50 or any(len(a) > 200 for a in cleaned):
-            raise serializers.ValidationError("Use at most 50 accepted answers of up to 200 characters each.")
+            raise serializers.ValidationError(_("Use at most 50 accepted answers of up to 200 characters each."))
         return cleaned
 
     def validate(self, attrs):
@@ -64,20 +65,20 @@ class QuestionSerializer(serializers.ModelSerializer):
         choices = attrs.get("choices")
         if qtype in Question.CHOICE_TYPES and choices is not None:
             if len(choices) < 2:
-                raise serializers.ValidationError({"choices": "Add at least two options."})
+                raise serializers.ValidationError({"choices": _("Add at least two options.")})
             correct = sum(1 for c in choices if c.get("is_correct"))
             if correct == 0:
-                raise serializers.ValidationError({"choices": "Mark at least one option as correct."})
+                raise serializers.ValidationError({"choices": _("Mark at least one option as correct.")})
             if qtype != Question.Type.MULTI and correct > 1:
-                raise serializers.ValidationError({"choices": "Only one option can be correct."})
+                raise serializers.ValidationError({"choices": _("Only one option can be correct.")})
         elif qtype in Question.CHOICE_TYPES and self.instance is None:
-            raise serializers.ValidationError({"choices": "Multiple-choice questions need options."})
+            raise serializers.ValidationError({"choices": _("Multiple-choice questions need options.")})
         if qtype == Question.Type.NUMERIC:
             answer = attrs.get("numeric_answer", getattr(self.instance, "numeric_answer", None))
             if answer is None:
-                raise serializers.ValidationError({"numeric_answer": "Numeric questions need an answer."})
+                raise serializers.ValidationError({"numeric_answer": _("Numeric questions need an answer.")})
         if attrs.get("source") == Question.Source.PAST_PAPER and not self.context["request"].user.is_platform_admin:
-            raise serializers.ValidationError({"source": "Only administrators can add official past-paper questions."})
+            raise serializers.ValidationError({"source": _("Only administrators can add official past-paper questions.")})
         return attrs
 
     @transaction.atomic
@@ -102,9 +103,9 @@ class QuestionSerializer(serializers.ModelSerializer):
         if changed:
             raise serializers.ValidationError(
                 {
-                    changed[
-                        0
-                    ]: "Students have already answered this question, so its answer can't change. Make a new question instead."
+                    changed[0]: _(
+                        "Students have already answered this question, so its answer can't change. Make a new question instead."
+                    )
                 }
             )
         if choices is None:
@@ -116,7 +117,9 @@ class QuestionSerializer(serializers.ModelSerializer):
         if not same_key:
             raise serializers.ValidationError(
                 {
-                    "choices": "Students have already answered this question, so its options can't change. Make a new question instead."
+                    "choices": _(
+                        "Students have already answered this question, so its options can't change. Make a new question instead."
+                    )
                 }
             )
         for old, new in zip(current, choices, strict=True):
@@ -165,7 +168,7 @@ def paper_link(viewer, paper, kind, request=None):
 
 class ExamPaperSerializer(serializers.ModelSerializer):
     subject_code = serializers.CharField(source="subject.code", read_only=True)
-    subject_name = serializers.CharField(source="subject.name", read_only=True)
+    subject_name = serializers.SerializerMethodField()
     subject_icon = serializers.CharField(source="subject.icon", read_only=True)
     paper_link = serializers.SerializerMethodField()
     marking_guide_link = serializers.SerializerMethodField()
@@ -193,6 +196,9 @@ class ExamPaperSerializer(serializers.ModelSerializer):
 
     def get_locked(self, paper):
         return not (paper_is_free(paper) or access.has_premium(_viewer(self)))
+
+    def get_subject_name(self, paper):
+        return paper.subject.localized_name(serializer_language(self))
 
     def get_paper_link(self, paper):
         return paper_link(_viewer(self), paper, "paper", self.context.get("request"))
@@ -292,7 +298,7 @@ class QuizWriteSerializer(serializers.ModelSerializer):
 
     def validate_kind(self, value):
         if value == Quiz.Kind.PAST_PAPER and not self.context["request"].user.is_platform_admin:
-            raise serializers.ValidationError("Only administrators can publish past papers.")
+            raise serializers.ValidationError(_("Only administrators can publish past papers."))
         return value
 
     def validate_status(self, value):
@@ -310,9 +316,9 @@ class QuizWriteSerializer(serializers.ModelSerializer):
         found = set(allowed.values_list("id", flat=True))
         missing = [i for i in ids if i not in found]
         if missing:
-            raise serializers.ValidationError(f"Unknown or private questions: {missing}")
+            raise serializers.ValidationError(_("Unknown or private questions: %(ids)s") % {"ids": missing})
         if len(set(ids)) != len(ids):
-            raise serializers.ValidationError("A question appears twice.")
+            raise serializers.ValidationError(_("A question appears twice."))
         return ids
 
     def _set_questions(self, quiz, ids):
@@ -381,7 +387,11 @@ class AttemptSerializer(serializers.ModelSerializer):
             "kind": q.kind,
             "feedback_mode": q.feedback_mode,
             "time_limit_minutes": q.time_limit_minutes,
-            "subject": {"code": q.subject.code, "name": q.subject.name, "icon": q.subject.icon},
+            "subject": {
+                "code": q.subject.code,
+                "name": q.subject.localized_name(serializer_language(self)),
+                "icon": q.subject.icon,
+            },
             "grade": q.grade,
             "marking_guide_link": self._marking_guide(attempt, paper) if attempt.status != Attempt.Status.IN_PROGRESS else None,
             "locked": not self._full_solutions(attempt),
@@ -443,7 +453,7 @@ class AttemptSerializer(serializers.ModelSerializer):
 class AttemptListSerializer(serializers.ModelSerializer):
     quiz_title = serializers.CharField(source="quiz.title", read_only=True)
     quiz_kind = serializers.CharField(source="quiz.kind", read_only=True)
-    subject = serializers.CharField(source="quiz.subject.name", read_only=True)
+    subject = serializers.SerializerMethodField()
     subject_icon = serializers.CharField(source="quiz.subject.icon", read_only=True)
     percentage = serializers.FloatField(read_only=True)
 
@@ -463,6 +473,9 @@ class AttemptListSerializer(serializers.ModelSerializer):
             "max_score",
             "percentage",
         ]
+
+    def get_subject(self, attempt):
+        return attempt.quiz.subject.localized_name(serializer_language(self))
 
 
 class AnswerInputSerializer(serializers.Serializer):

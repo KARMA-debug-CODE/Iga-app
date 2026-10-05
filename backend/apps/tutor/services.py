@@ -12,6 +12,7 @@ import logging
 
 import anthropic
 from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from apps.assessments import services as assessment_services
@@ -73,7 +74,7 @@ def clean_history(history):
     if not history:
         return []
     if not isinstance(history, list):
-        raise ValidationError({"history": "Must be a list of messages."})
+        raise ValidationError({"history": _("Must be a list of messages.")})
     history = history[-MAX_HISTORY_MESSAGES:]
     if history and history[0].get("role") != "user":
         history = history[1:]
@@ -83,10 +84,10 @@ def clean_history(history):
         content = item.get("content") if isinstance(item, dict) else None
         expected = "user" if i % 2 == 0 else "assistant"
         if role != expected or not isinstance(content, str) or not content.strip():
-            raise ValidationError({"history": "Messages must alternate between the student and the tutor."})
+            raise ValidationError({"history": _("Messages must alternate between the student and the tutor.")})
         cleaned.append({"role": role, "content": content[:4000]})
     if cleaned and cleaned[-1]["role"] != "assistant":
-        raise ValidationError({"history": "The history must end with a tutor reply."})
+        raise ValidationError({"history": _("The history must end with a tutor reply.")})
     return cleaned
 
 
@@ -145,7 +146,7 @@ def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lan
     if lesson_slug:
         lesson = visible_lessons(user).select_related("unit__subject").filter(slug=lesson_slug).first()
         if lesson is None:
-            raise NotFound("Lesson not found.")
+            raise NotFound(_("Lesson not found."))
         unit = lesson.unit
         # Quote the lesson in the language the student is reading, when it has been translated.
         translation = lesson.translations.filter(language=code).first() if code != "en" else None
@@ -158,18 +159,18 @@ def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lan
     if attempt_id:
         attempt = Attempt.objects.select_related("quiz", "quiz__subject").filter(pk=attempt_id, user=user).first()
         if attempt is None:
-            raise NotFound("Attempt not found.")
+            raise NotFound(_("Attempt not found."))
         assessment_services.finalize_if_expired(attempt)
         in_progress = attempt.status == Attempt.Status.IN_PROGRESS
         if in_progress and (attempt.deadline or attempt.quiz.feedback_mode == Quiz.FeedbackMode.AFTER_SUBMIT):
-            raise PermissionDenied("The tutor is switched off during exams and timed tests. Good luck!")
+            raise PermissionDenied(_("The tutor is switched off during exams and timed tests. Good luck!"))
         if question_id:
             try:
                 question_id = int(question_id)
             except (TypeError, ValueError):
-                raise ValidationError({"question": "Unknown question."})
+                raise ValidationError({"question": _("Unknown question.")})
             if question_id not in attempt.question_order:
-                raise NotFound("That question is not part of this attempt.")
+                raise NotFound(_("That question is not part of this attempt."))
             question = Question.objects.prefetch_related("choices").get(pk=question_id)
             answer = attempt.answers.filter(question=question).prefetch_related("selected_choices").first()
             block = [
@@ -195,9 +196,9 @@ def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lan
 def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question_id=None, lang=None):
     message = (message or "").strip()
     if not message:
-        raise ValidationError({"message": "Write a question for the tutor."})
+        raise ValidationError({"message": _("Write a question for the tutor.")})
     if len(message) > MAX_MESSAGE_CHARS:
-        raise ValidationError({"message": f"Please keep questions under {MAX_MESSAGE_CHARS} characters."})
+        raise ValidationError({"message": _("Please keep questions under %(n)s characters.") % {"n": MAX_MESSAGE_CHARS}})
     history = clean_history(history)
     context, lesson, attempt, question = build_context(user, lesson_slug, attempt_id, question_id, lang)
     code = reply_language(user, lang)

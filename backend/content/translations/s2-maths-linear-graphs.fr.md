@@ -30,7 +30,7 @@ $$m = \frac{9 - 3}{4 - 1} = \frac{6}{3} = 2$$
 
 ## Essayez : déplacez les curseurs
 
-Choisissez **Linear** (linéaire) dans le traceur ci-dessous. Modifiez $m$ et $c$ et observez ce qui se passe. Pouvez-vous obtenir une droite qui descend et coupe l'axe des $y$ en $-2$ ?
+Choisissez **Affine** dans le traceur ci-dessous. Modifiez $m$ et $c$ et observez ce qui se passe. Pouvez-vous obtenir une droite qui descend et coupe l'axe des $y$ en $-2$ ?
 
 ```sim
 function-grapher

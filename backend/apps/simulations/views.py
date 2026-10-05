@@ -1,9 +1,11 @@
 from django.db.models import Q
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.core.utils import request_language
+from apps.curriculum.models import localized_lesson_titles
 from apps.gamification import services as gamification
 
 from .models import Simulation, SimulationView
@@ -44,9 +46,11 @@ class SimulationViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             sim = self.get_object()
         except Simulation.DoesNotExist:
-            return Response({"detail": "Not found."}, status=404)
+            return Response({"detail": _("Not found.")}, status=404)
         data = self.get_serializer(sim).data
-        data["lessons"] = [{"slug": lesson.slug, "title": lesson.title} for lesson in sim.lessons.filter(status="published")[:10]]
+        lessons = list(sim.lessons.filter(status="published")[:10])
+        titles = localized_lesson_titles(lessons, request_language(request))
+        data["lessons"] = [{"slug": lesson.slug, "title": titles[lesson.id]} for lesson in lessons]
         return Response(data)
 
     @action(detail=True, methods=["post"])
@@ -54,7 +58,7 @@ class SimulationViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             sim = self.get_object()
         except Simulation.DoesNotExist:
-            return Response({"detail": "Not found."}, status=404)
+            return Response({"detail": _("Not found.")}, status=404)
         SimulationView.objects.create(user=request.user, simulation=sim)
         xp = gamification.on_simulation_viewed(request.user, sim)
         return Response({"xp_gained": xp, "xp": request.user.xp})

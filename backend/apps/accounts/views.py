@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -89,18 +90,18 @@ class LoginView(APIView):
         # Always run authenticate() so unknown usernames cost the same hashing time.
         user = authenticate(request, username=match.username if match else identifier, password=password)
         if user is None:
-            return Response({"detail": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"detail": _("Invalid username/email or password.")}, status=status.HTTP_401_UNAUTHORIZED)
 
         if user.totp_enabled:
             otp = serializer.validated_data.get("otp", "")
             if not otp:
                 return Response(
-                    {"detail": "Enter the code from your authenticator app.", "otp_required": True},
+                    {"detail": _("Enter the code from your authenticator app."), "otp_required": True},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
             if not verify_totp(user, otp):
                 return Response(
-                    {"detail": "That code is not valid.", "otp_required": True},
+                    {"detail": _("That code is not valid."), "otp_required": True},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
@@ -117,13 +118,13 @@ class RefreshView(APIView):
     def post(self, request):
         raw = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
         if not raw:
-            return Response({"detail": "Not logged in."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"detail": _("Not logged in.")}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             old = RefreshToken(raw)
             user = User.objects.get(pk=old["user_id"], is_active=True)
         except (TokenError, User.DoesNotExist, KeyError):
             just_rotated = self._handle_reuse(raw)
-            response = Response({"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED)
+            response = Response({"detail": _("Session expired.")}, status=status.HTTP_401_UNAUTHORIZED)
             if not just_rotated:
                 # (A token rotated moments ago means another tab already holds the new cookie; keep it.)
                 response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.REFRESH_COOKIE_PATH)
@@ -195,7 +196,9 @@ class ChangePasswordView(APIView):
         request.user.must_change_password = False
         request.user.save(update_fields=["password", "must_change_password"])
         audit.record(request, "change_password", request.user)
-        return _with_fresh_session(Response({"detail": "Password updated. You were logged out on other devices."}), request.user)
+        return _with_fresh_session(
+            Response({"detail": _("Password updated. You were logged out on other devices.")}), request.user
+        )
 
 
 class TwoFactorSetupView(APIView):
@@ -206,7 +209,7 @@ class TwoFactorSetupView(APIView):
     def post(self, request):
         user = request.user
         if user.totp_enabled:
-            return Response({"detail": "Two-factor authentication is already on."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": _("Two-factor authentication is already on.")}, status=status.HTTP_400_BAD_REQUEST)
         user.totp_secret = pyotp.random_base32()
         user.totp_last_step = None
         user.save(update_fields=["totp_secret", "totp_last_step"])
@@ -223,7 +226,7 @@ class TwoFactorEnableView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
         if not verify_totp(user, serializer.validated_data["otp"]):
-            return Response({"detail": "That code is not valid."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": _("That code is not valid.")}, status=status.HTTP_400_BAD_REQUEST)
         user.totp_enabled = True
         user.save(update_fields=["totp_enabled"])
         audit.record(request, "enable_2fa", user)
@@ -239,7 +242,7 @@ class TwoFactorDisableView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
         if not user.totp_enabled or not verify_totp(user, serializer.validated_data["otp"]):
-            return Response({"detail": "That code is not valid."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": _("That code is not valid.")}, status=status.HTTP_400_BAD_REQUEST)
         user.totp_enabled = False
         user.totp_secret = ""
         user.totp_last_step = None

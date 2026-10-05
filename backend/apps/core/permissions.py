@@ -1,8 +1,9 @@
+from django.utils.translation import gettext_lazy
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsTeacher(BasePermission):
-    message = "Only approved teachers can do this."
+    message = gettext_lazy("Only approved teachers can do this.")
 
     def has_permission(self, request, view):
         user = request.user
@@ -10,7 +11,7 @@ class IsTeacher(BasePermission):
 
 
 class IsPlatformAdmin(BasePermission):
-    message = "Only administrators can do this."
+    message = gettext_lazy("Only administrators can do this.")
 
     def has_permission(self, request, view):
         user = request.user

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -15,6 +16,7 @@ from apps.assessments.services import finalize_if_expired, visible_quizzes
 from apps.core import audit
 from apps.core.permissions import IsTeacher
 from apps.core.throttles import JoinRateThrottle
+from apps.core.utils import serializer_language
 from apps.curriculum.models import LessonProgress
 from apps.curriculum.views import visible_lessons
 from apps.schools import access
@@ -26,7 +28,7 @@ from .models import Assignment, Classroom, Enrollment
 
 class ClassroomSerializer(serializers.ModelSerializer):
     teacher_name = serializers.CharField(source="teacher.display_name", read_only=True)
-    subject_name = serializers.CharField(source="subject.name", read_only=True, default=None)
+    subject_name = serializers.SerializerMethodField()
     subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="🏫")
     student_count = serializers.SerializerMethodField()
     join_code = serializers.SerializerMethodField()
@@ -50,6 +52,9 @@ class ClassroomSerializer(serializers.ModelSerializer):
 
     def get_student_count(self, classroom):
         return classroom.enrollments.count()
+
+    def get_subject_name(self, obj):
+        return obj.subject.localized_name(serializer_language(self)) if obj.subject_id else None
 
     def get_join_code(self, classroom):
         user = self.context["request"].user
@@ -90,15 +95,15 @@ class AssignmentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         targets = [attrs.get(k) for k in ("quiz", "lesson", "simulation")]
         if sum(1 for t in targets if t) != 1:
-            raise serializers.ValidationError("Attach exactly one quiz, lesson or simulation.")
+            raise serializers.ValidationError(_("Attach exactly one quiz, lesson or simulation."))
         user = self.context["request"].user
         classroom = attrs.get("classroom")
         if classroom and classroom.teacher_id != user.id and not user.is_platform_admin:
-            raise serializers.ValidationError({"classroom": "That is not your class."})
+            raise serializers.ValidationError({"classroom": _("That is not your class.")})
         if attrs.get("quiz") and not visible_quizzes(user).filter(pk=attrs["quiz"].pk).exists():
-            raise serializers.ValidationError({"quiz": "Quiz not found."})
+            raise serializers.ValidationError({"quiz": _("Quiz not found.")})
         if attrs.get("lesson") and not visible_lessons(user).filter(pk=attrs["lesson"].pk).exists():
-            raise serializers.ValidationError({"lesson": "Lesson not found."})
+            raise serializers.ValidationError({"lesson": _("Lesson not found.")})
         return attrs
 
     def get_my_status(self, assignment):
@@ -234,11 +239,11 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], throttle_classes=[JoinRateThrottle])
     def join(self, request):
         if not request.user.is_student:
-            raise PermissionDenied("Only students join classes with a code.")
+            raise PermissionDenied(_("Only students join classes with a code."))
         code = (request.data.get("code") or "").strip().upper()
         classroom = Classroom.objects.filter(join_code=code, archived=False).first()
         if not classroom:
-            raise ValidationError({"code": "No class has that code. Check with your teacher."})
+            raise ValidationError({"code": _("No class has that code. Check with your teacher.")})
         Enrollment.objects.get_or_create(classroom=classroom, student=request.user)
         return Response(self.get_serializer(classroom).data, status=status.HTTP_200_OK)
 
@@ -251,9 +256,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def remove_student(self, request, pk=None):
         classroom = self.get_object()
-        deleted, _ = Enrollment.objects.filter(classroom=classroom, student_id=request.data.get("student")).delete()
+        deleted, _created = Enrollment.objects.filter(classroom=classroom, student_id=request.data.get("student")).delete()
         if not deleted:
-            raise ValidationError({"student": "That student is not in this class."})
+            raise ValidationError({"student": _("That student is not in this class.")})
         audit.record(request, "remove_student", classroom, student=request.data.get("student"))
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -262,7 +267,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         """Create student accounts from CSV text. {"csv": "...", "confirm": false} previews only."""
         classroom = self.get_object()
         if classroom.archived:
-            raise ValidationError("This class is archived.")
+            raise ValidationError(_("This class is archived."))
         try:
             rows = roster.parse(request.data.get("csv", ""))
         except roster.RosterError as exc:
@@ -284,7 +289,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             .first()
         )
         if enrollment is None or not enrollment.student.is_student:
-            raise ValidationError({"student": "That student is not in this class."})
+            raise ValidationError({"student": _("That student is not in this class.")})
         password = roster.reset_password(enrollment.student)
         audit.record(request, "reset_student_password", enrollment.student, classroom=classroom.id)
         return Response({"username": enrollment.student.username, "temporary_password": password})

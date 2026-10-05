@@ -4,6 +4,7 @@ from decimal import Decimal
 from statistics import median
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import PermissionDenied
 
 from apps.classroom.models import Classroom, Enrollment
@@ -16,7 +17,7 @@ def _students_for(user, classroom_id):
     if classroom_id:
         classroom = get_object_or_404(Classroom, pk=classroom_id)
         if classroom.teacher_id != user.id and not user.is_platform_admin:
-            raise PermissionDenied("That is not your class.")
+            raise PermissionDenied(_("That is not your class."))
         return set(classroom.enrollments.values_list("student_id", flat=True)), classroom
     if user.is_platform_admin:
         return None, None  # everyone
@@ -24,7 +25,7 @@ def _students_for(user, classroom_id):
     return set(current.values_list("student_id", flat=True)), None
 
 
-def quiz_analytics(quiz, user, classroom_id=None):
+def quiz_analytics(quiz, user, classroom_id=None, lang="en"):
     student_ids, classroom = _students_for(user, classroom_id)
     finished = Attempt.objects.filter(quiz=quiz).exclude(status=Attempt.Status.IN_PROGRESS).order_by("submitted_at", "id")
     if student_ids is not None:
@@ -104,7 +105,7 @@ def quiz_analytics(quiz, user, classroom_id=None):
         )
 
     return {
-        "quiz": {"id": quiz.id, "title": quiz.title, "subject": quiz.subject.name, "grade": quiz.grade},
+        "quiz": {"id": quiz.id, "title": quiz.title, "subject": quiz.subject.localized_name(lang), "grade": quiz.grade},
         "classroom": {"id": classroom.id, "name": classroom.name, "students": len(student_ids)} if classroom else None,
         "students_attempted": len(attempts),
         "average_pct": round(sum(percentages) / len(percentages), 1) if percentages else None,

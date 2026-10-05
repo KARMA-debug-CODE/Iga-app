@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -6,7 +7,7 @@ ALLOWED_WITH_TEMPORARY_PASSWORD = {"/api/auth/me/", "/api/auth/password/", "/api
 
 
 class PasswordChangeRequired(PermissionDenied):
-    default_detail = "Choose a new password before continuing."
+    default_detail = gettext_lazy("Choose a new password before continuing.")
     default_code = "password_change_required"
 
 

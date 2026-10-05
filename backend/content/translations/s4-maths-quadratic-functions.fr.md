@@ -44,7 +44,7 @@ Pour $x^2 - 4x + 3$ : $\Delta = 16 - 12 = 4 > 0$, et $x = \frac{4 \pm 2}{2}$, do
 
 ## Explorez
 
-Sélectionnez **Quadratic** (second degré) ci-dessous. Gardez $b = 0$ et $c = 0$, puis faites varier $a$ ; ensuite, faites varier $c$ seul ; enfin, $b$ seul. Décrivez dans votre cahier l'effet de chaque coefficient.
+Sélectionnez **Second degré** ci-dessous. Gardez $b = 0$ et $c = 0$, puis faites varier $a$ ; ensuite, faites varier $c$ seul ; enfin, $b$ seul. Décrivez dans votre cahier l'effet de chaque coefficient.
 
 ```sim
 function-grapher

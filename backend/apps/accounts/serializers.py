@@ -1,5 +1,6 @@
 from django.contrib.auth import password_validation
 from django.db import IntegrityError, transaction
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import GRADE_CODES
@@ -86,20 +87,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_grade(self, value):
         if value and value not in GRADE_CODES:
-            raise serializers.ValidationError("Unknown grade.")
+            raise serializers.ValidationError(_("Unknown grade."))
         return value
 
     def validate_email(self, value):
         if not value:
             if self.instance is not None and self.instance.is_school_admin:
-                raise serializers.ValidationError("School administrators need an email address for receipts and reminders.")
+                raise serializers.ValidationError(_("School administrators need an email address for receipts and reminders."))
             return None
         value = value.lower()
         others = User.objects.filter(email__iexact=value)
         if self.instance is not None:
             others = others.exclude(pk=self.instance.pk)
         if others.exists():
-            raise serializers.ValidationError("An account with this email already exists.")
+            raise serializers.ValidationError(_("An account with this email already exists."))
         return value
 
 
@@ -155,24 +156,24 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         role = attrs.get("role", User.Role.STUDENT)
         if role == User.Role.STUDENT and not attrs.get("grade"):
-            raise serializers.ValidationError({"grade": "Students must choose their grade (S1–S6)."})
+            raise serializers.ValidationError({"grade": _("Students must choose their grade (S1–S6).")})
         if role != User.Role.STUDENT:
             attrs["grade"] = ""
         if role == User.Role.PARENT and (attrs.get("school") or attrs.get("new_school")):
-            raise serializers.ValidationError({"school": "Parents don't join a school; link to your child instead."})
+            raise serializers.ValidationError({"school": _("Parents don't join a school; link to your child instead.")})
         if role == User.Role.SCHOOL_ADMIN:
             if not attrs.get("email"):
                 raise serializers.ValidationError(
-                    {"email": "School administrators need an email address for receipts and reminders."}
+                    {"email": _("School administrators need an email address for receipts and reminders.")}
                 )
             if bool(attrs.get("school")) == bool(attrs.get("new_school")):
-                raise serializers.ValidationError({"school": "Choose your school, or register a new one (not both)."})
+                raise serializers.ValidationError({"school": _("Choose your school, or register a new one (not both).")})
             if attrs.get("school_code"):
                 raise serializers.ValidationError(
-                    {"school_code": "School administrators are approved by the Iga team or an existing administrator."}
+                    {"school_code": _("School administrators are approved by the Iga team or an existing administrator.")}
                 )
         elif attrs.get("new_school"):
-            raise serializers.ValidationError({"new_school": "Only school administrators register schools."})
+            raise serializers.ValidationError({"new_school": _("Only school administrators register schools.")})
         new_school = attrs.get("new_school")
         existing = (
             School.objects.filter(name__iexact=new_school["name"], district=new_school["district"]).first()
@@ -182,12 +183,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         if existing is not None:
             if existing.is_verified:
                 raise serializers.ValidationError(
-                    {"new_school": "That school is already on Iga. Choose it from the list instead."}
+                    {"new_school": _("That school is already on Iga. Choose it from the list instead.")}
                 )
             raise serializers.ValidationError(
                 {
-                    "new_school": "That school has already been registered and is waiting for the Iga team. "
-                    "If you run it, contact the Iga team."
+                    "new_school": _(
+                        "That school has already been registered and is waiting for the Iga team. "
+                        "If you run it, contact the Iga team."
+                    )
                 }
             )
         candidate = User(**{k: v for k, v in attrs.items() if k not in ("password", "school", "school_code", "new_school")})
@@ -196,14 +199,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if "@" in value:
-            raise serializers.ValidationError("Usernames can't contain @. Use letters, numbers, dots or dashes.")
+            raise serializers.ValidationError(_("Usernames can't contain @. Use letters, numbers, dots or dashes."))
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError("That username is taken.")
+            raise serializers.ValidationError(_("That username is taken."))
         return value
 
     def validate_email(self, value):
         if value and User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError("An account with this email already exists.")
+            raise serializers.ValidationError(_("An account with this email already exists."))
         return value.lower() if value else value
 
     @transaction.atomic
@@ -222,7 +225,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                     created = School.objects.create(created_by=user, **new_school)
             except IntegrityError:  # registered by someone else a moment ago
                 raise serializers.ValidationError(
-                    {"new_school": "That school has just been registered. Choose it from the list."}
+                    {"new_school": _("That school has just been registered. Choose it from the list.")}
                 )
             user.school = created
             user.school_status = User.SchoolStatus.PENDING
@@ -245,9 +248,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         user = self.context["request"].user
         if not user.check_password(attrs["current_password"]):
-            raise serializers.ValidationError({"current_password": "Incorrect password."})
+            raise serializers.ValidationError({"current_password": _("Incorrect password.")})
         if attrs["new_password"] == attrs["current_password"]:
-            raise serializers.ValidationError({"new_password": "Choose a password different from the current one."})
+            raise serializers.ValidationError({"new_password": _("Choose a password different from the current one.")})
         password_validation.validate_password(attrs["new_password"], user)
         return attrs
 

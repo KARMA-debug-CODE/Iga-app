@@ -16,6 +16,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from apps.accounts.models import User
 from apps.accounts.security import revoke_all_sessions
@@ -72,7 +73,7 @@ def parse(text):
     """Rows as dicts with first_name, last_name, username, email (and the CSV line number)."""
     text = (text or "").lstrip("﻿").strip()
     if not text:
-        raise RosterError("The list is empty.")
+        raise RosterError(_("The list is empty."))
     try:
         dialect = csv.Sniffer().sniff(text.splitlines()[0], delimiters=",;\t")
     except csv.Error:
@@ -80,7 +81,7 @@ def parse(text):
     reader = csv.reader(io.StringIO(text), dialect)
     header = [_canonical(h) for h in next(reader)]
     if "first_name" not in header and "name" not in header:
-        raise RosterError("The first row must name the columns, e.g. first_name,last_name (username and email are optional).")
+        raise RosterError(_("The first row must name the columns, e.g. first_name,last_name (username and email are optional)."))
     rows = []
     for line, values in enumerate(reader, start=2):
         if not any(v.strip() for v in values):
@@ -91,13 +92,13 @@ def parse(text):
                 row[column] = value.strip()
         full_name = row.pop("name", "")
         if full_name and not row["first_name"]:
-            first, _, last = full_name.partition(" ")
+            first, _space, last = full_name.partition(" ")
             row["first_name"], row["last_name"] = first, row["last_name"] or last.strip()
         rows.append(row)
     if len(rows) > MAX_ROWS:
-        raise RosterError(f"Import at most {MAX_ROWS} students at a time.")
+        raise RosterError(_("Import at most %(n)s students at a time.") % {"n": MAX_ROWS})
     if not rows:
-        raise RosterError("No students found under the header row.")
+        raise RosterError(_("No students found under the header row."))
     return rows
 
 
@@ -109,20 +110,20 @@ def check(rows):
     for row in rows:
         errors = []
         if not row["first_name"]:
-            errors.append("First name is missing.")
+            errors.append(_("First name is missing."))
         if len(row["first_name"]) > 150 or len(row["last_name"]) > 150:
-            errors.append("Name is too long.")
+            errors.append(_("Name is too long."))
         if row["username"]:
             try:
                 validator(row["username"])
             except ValidationError:
-                errors.append("Usernames may use letters, numbers and . _ - only.")
+                errors.append(_("Usernames may use letters, numbers and . _ - only."))
             if "@" in row["username"]:
-                errors.append("Usernames can't contain @.")
+                errors.append(_("Usernames can't contain @."))
             if User.objects.filter(username__iexact=row["username"]).exists():
-                errors.append("That username is already taken.")
+                errors.append(_("That username is already taken."))
             if row["username"].lower() in chosen:
-                errors.append("That username appears twice in the list.")
+                errors.append(_("That username appears twice in the list."))
         elif row["first_name"]:
             base, n = _base_username(row["first_name"], row["last_name"]), 1
             candidate = base
@@ -134,9 +135,9 @@ def check(rows):
             try:
                 validate_email(row["email"])
                 if User.objects.filter(email__iexact=row["email"]).exists():
-                    errors.append("That email is already used by another account.")
+                    errors.append(_("That email is already used by another account."))
             except ValidationError:
-                errors.append("That email address isn't valid.")
+                errors.append(_("That email address isn't valid."))
         chosen.add(row["username"].lower())
         row["errors"] = errors
         ok = ok and not errors

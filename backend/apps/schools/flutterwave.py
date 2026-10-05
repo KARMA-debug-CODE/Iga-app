@@ -35,6 +35,8 @@ import urllib.request
 from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from rest_framework.exceptions import APIException
 
 from .billing import ZERO_DECIMAL_CURRENCIES
@@ -47,7 +49,7 @@ PAYMENT_OPTIONS = {"USD": "card", "RWF": "card,mobilemoneyrwanda"}
 
 class ProviderUnavailable(APIException):
     status_code = 503
-    default_detail = "The payment service isn't answering right now. Please try again in a few minutes."
+    default_detail = gettext_lazy("The payment service isn't answering right now. Please try again in a few minutes.")
     default_code = "provider_unavailable"
 
 
@@ -117,9 +119,10 @@ class FlutterwaveProvider:
             "redirect_url": return_url(payment),
             "payment_options": PAYMENT_OPTIONS.get(payment.currency, "card"),
             "customer": customer,
+            # Shown on Flutterwave's page, in the language the administrator uses Iga in.
             "customizations": {
-                "title": f"{settings.APP_NAME} school subscription",
-                "description": f"{school.name}: {payment.months} month(s)",
+                "title": _("%(app)s school subscription") % {"app": settings.APP_NAME},
+                "description": _("%(school)s: %(months)s month(s)") % {"school": school.name, "months": payment.months},
             },
             "meta": {"school_id": school.id, "months": payment.months},
             # A known end to the session, so a failed attempt can be judged final once it is over.

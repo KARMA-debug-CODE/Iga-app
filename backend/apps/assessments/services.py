@@ -15,6 +15,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db import transaction
 from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.core.constants import ContentStatus
@@ -91,11 +92,11 @@ def _create_attempt(user, quiz, assignment):
     if quiz.max_attempts:
         used = Attempt.objects.filter(user=user, quiz=quiz).count()
         if used >= quiz.max_attempts:
-            raise PermissionDenied("You have used all your attempts for this quiz.")
+            raise PermissionDenied(_("You have used all your attempts for this quiz."))
 
     links = list(quiz.quiz_questions.select_related("question").prefetch_related("question__choices"))
     if not links:
-        raise ValidationError("This quiz has no questions yet.")
+        raise ValidationError(_("This quiz has no questions yet."))
 
     questions = [link.question for link in links]
     if quiz.shuffle_questions:
@@ -128,19 +129,19 @@ def _create_attempt(user, quiz, assignment):
 def _ensure_open(attempt):
     """Must run outside a transaction so an automatic submit isn't rolled back by the error."""
     if attempt.status != Attempt.Status.IN_PROGRESS:
-        raise ValidationError("This attempt has already been submitted.")
+        raise ValidationError(_("This attempt has already been submitted."))
     if not attempt.accepts_submission():
         submit_attempt(attempt)
-        raise ValidationError("Time is up — your attempt was submitted automatically.")
+        raise ValidationError(_("Time is up — your attempt was submitted automatically."))
 
 
 def _question_in_attempt(attempt, question_id):
     try:
         question_id = int(question_id)
     except (TypeError, ValueError):
-        raise ValidationError("Unknown question.")
+        raise ValidationError(_("Unknown question."))
     if question_id not in attempt.question_order:
-        raise ValidationError("That question is not part of this attempt.")
+        raise ValidationError(_("That question is not part of this attempt."))
     return Question.objects.prefetch_related("choices").get(pk=question_id)
 
 
@@ -148,7 +149,7 @@ def _lock_open(attempt):
     """Lock the attempt row so a save can't land after (or during) the submit that scored it."""
     locked = Attempt.objects.select_for_update().get(pk=attempt.pk)
     if locked.status != Attempt.Status.IN_PROGRESS:
-        raise ValidationError("This attempt has already been submitted.")
+        raise ValidationError(_("This attempt has already been submitted."))
     return locked
 
 
@@ -160,20 +161,20 @@ def save_answer(attempt, question_id, choice_ids=None, text="", numeric=None):
 
 def _save_answer(attempt, question_id, choice_ids, text, numeric):
     question = _question_in_attempt(attempt, question_id)
-    answer, _ = Answer.objects.get_or_create(attempt=attempt, question=question)
+    answer, _created = Answer.objects.get_or_create(attempt=attempt, question=question)
     if answer.checked:
-        raise ValidationError("You already checked this answer, so it can't be changed.")
+        raise ValidationError(_("You already checked this answer, so it can't be changed."))
 
     if question.type in Question.CHOICE_TYPES:
         try:
             choice_ids = [int(c) for c in (choice_ids or [])]
         except (TypeError, ValueError):
-            raise ValidationError("Invalid option selected.")
+            raise ValidationError(_("Invalid option selected."))
         valid = set(question.choices.values_list("id", flat=True))
         if not set(choice_ids) <= valid:
-            raise ValidationError("Invalid option selected.")
+            raise ValidationError(_("Invalid option selected."))
         if question.type != Question.Type.MULTI and len(choice_ids) > 1:
-            raise ValidationError("Choose only one option.")
+            raise ValidationError(_("Choose only one option."))
         answer.save()
         answer.selected_choices.set(choice_ids)
     elif question.type == Question.Type.NUMERIC:
@@ -183,7 +184,7 @@ def _save_answer(attempt, question_id, choice_ids, text, numeric):
             try:
                 answer.numeric_answer = float(numeric)
             except (TypeError, ValueError):
-                raise ValidationError("Enter a number.")
+                raise ValidationError(_("Enter a number."))
         answer.save()
     else:
         answer.text_answer = (text or "")[:10000]
@@ -228,14 +229,14 @@ def score_answer(answer):
 def check_answer(attempt, question_id):
     """Practice mode: mark one answer now and lock it."""
     if attempt.quiz.feedback_mode != Quiz.FeedbackMode.IMMEDIATE:
-        raise PermissionDenied("Answers are revealed after you submit in exam mode.")
+        raise PermissionDenied(_("Answers are revealed after you submit in exam mode."))
     _ensure_open(attempt)
     with transaction.atomic():
         attempt = _lock_open(attempt)
         question = _question_in_attempt(attempt, question_id)
         if question.needs_manual_marking:
-            raise ValidationError("Your teacher will mark this answer.")
-        answer, _ = Answer.objects.select_for_update().get_or_create(attempt=attempt, question=question)
+            raise ValidationError(_("Your teacher will mark this answer."))
+        answer, _created = Answer.objects.select_for_update().get_or_create(attempt=attempt, question=question)
         if not answer.checked:
             answer.is_correct, answer.marks_awarded = score_answer(answer)
             answer.checked = True
@@ -265,7 +266,7 @@ def submit_attempt(attempt):
     for question_id in attempt.question_order:
         if question_id not in questions:  # deleted after the attempt started
             continue
-        answer, _ = Answer.objects.get_or_create(attempt=attempt, question=questions[question_id])
+        answer, _created = Answer.objects.get_or_create(attempt=attempt, question=questions[question_id])
         if not answer.checked:
             answer.is_correct, answer.marks_awarded = score_answer(answer)
             if answer.marks_awarded is None and not answer.text_answer.strip():
@@ -293,11 +294,11 @@ def mark_answer(answer, marks, feedback, teacher):
     question = answer.question
     marks = _q(marks)
     if marks < 0 or marks > Decimal(question.marks):
-        raise ValidationError(f"Marks must be between 0 and {question.marks}.")
+        raise ValidationError(_("Marks must be between 0 and %(max)s.") % {"max": question.marks})
     # Lock the attempt so two teachers marking different answers both count in the total.
     answer.attempt = Attempt.objects.select_for_update().get(pk=answer.attempt_id)
     if answer.attempt.status == Attempt.Status.IN_PROGRESS:
-        raise ValidationError("The student hasn't submitted yet.")
+        raise ValidationError(_("The student hasn't submitted yet."))
     answer.marks_awarded = marks
     answer.is_correct = marks == Decimal(question.marks)
     answer.teacher_feedback = feedback or ""

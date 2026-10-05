@@ -118,7 +118,7 @@ Demandez-vous toujours si chaque racine a un sens dans la situation réelle, et 
 
 ## Voir les racines sur un graphique
 
-Les racines de $ax^2 + bx + c = 0$ sont les valeurs de $x$ pour lesquelles la courbe de $y = ax^2 + bx + c$ coupe l'axe des $x$. Choisissez **Quadratic** (fonction du second degré) dans le traceur de courbes et réglez $a = 1$, $b = -1$, $c = -6$. Vérifiez que les racines sont $-2$ et $3$, car $x^2 - x - 6 = (x + 2)(x - 3)$. Augmentez ensuite lentement $c$. À partir de quand la courbe ne rencontre-t-elle plus l'axe des $x$, et quel est alors le signe du discriminant ?
+Les racines de $ax^2 + bx + c = 0$ sont les valeurs de $x$ pour lesquelles la courbe de $y = ax^2 + bx + c$ coupe l'axe des $x$. Choisissez **Second degré** dans le traceur de courbes et réglez $a = 1$, $b = -1$, $c = -6$. Vérifiez que les racines sont $-2$ et $3$, car $x^2 - x - 6 = (x + 2)(x - 3)$. Augmentez ensuite lentement $c$. À partir de quand la courbe ne rencontre-t-elle plus l'axe des $x$, et quel est alors le signe du discriminant ?
 
 ```sim
 function-grapher

@@ -15,7 +15,9 @@ class Simulation(models.Model):
 
     slug = models.SlugField(max_length=80, unique=True)
     title = models.CharField(max_length=200)
+    title_fr = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True)
+    description_fr = models.TextField(blank=True)
     provider = models.CharField(max_length=12, choices=Provider.choices)
     provider_id = models.CharField(
         max_length=200,
@@ -29,6 +31,7 @@ class Simulation(models.Model):
     grades = models.JSONField(default=list, blank=True, help_text='e.g. ["S1", "S2"]')
     topics = models.CharField(max_length=300, blank=True, help_text="Comma-separated keywords")
     learning_goals = models.TextField(blank=True)
+    learning_goals_fr = models.TextField(blank=True)
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:

@@ -1,6 +1,7 @@
 import logging
 
 import anthropic
+from django.utils.translation import gettext as _
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -39,7 +40,7 @@ class TutorAskView(APIView):
     def post(self, request):
         if not services.tutor_enabled():
             return Response(
-                {"detail": "The AI tutor is not switched on for this school yet."}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+                {"detail": _("The AI tutor is not switched on for this school yet.")}, status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         access.require(request.user)  # the tutor is part of the school subscription
         data = AskSerializer(data=request.data)
@@ -57,22 +58,23 @@ class TutorAskView(APIView):
             )
         except anthropic.RateLimitError:
             return Response(
-                {"detail": "The tutor is very busy right now. Try again in a minute."}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+                {"detail": _("The tutor is very busy right now. Try again in a minute.")},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except (anthropic.AuthenticationError, anthropic.PermissionDeniedError):
             log.exception("Tutor credentials rejected by the Claude API")
             return Response(
-                {"detail": "The AI tutor is not set up correctly. Please tell an administrator."},
+                {"detail": _("The AI tutor is not set up correctly. Please tell an administrator.")},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except anthropic.APIConnectionError:
             return Response(
-                {"detail": "Couldn't reach the tutor. Check your connection and try again."},
+                {"detail": _("Couldn't reach the tutor. Check your connection and try again.")},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except anthropic.APIStatusError as exc:
             log.warning("Tutor request failed: %s (request id %s)", exc.status_code, getattr(exc, "request_id", None))
             return Response(
-                {"detail": "The tutor couldn't answer just now. Please try again."}, status=status.HTTP_502_BAD_GATEWAY
+                {"detail": _("The tutor couldn't answer just now. Please try again.")}, status=status.HTTP_502_BAD_GATEWAY
             )
         return Response({"reply": reply})

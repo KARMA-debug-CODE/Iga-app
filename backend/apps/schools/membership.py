@@ -7,6 +7,7 @@ request. Platform administrators can do anything a school administrator can.
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.core import audit
@@ -28,16 +29,18 @@ def choose_school(user, school, code="", request=None, approved_by=None):
     through a platform administrator or an existing administrator of that school, never by code.
     """
     if user.role not in JOINING_ROLES:
-        raise ValidationError({"school": "Only students, teachers and school staff belong to a school."})
+        raise ValidationError({"school": _("Only students, teachers and school staff belong to a school.")})
     if school is None:
         return leave_school(user, request=request)
     if not school.is_verified:
-        raise ValidationError({"school": "That school isn't verified yet."})
+        raise ValidationError({"school": _("That school isn't verified yet.")})
     code_ok = bool(code) and normalise_code(code) == school.join_code and user.role != "school_admin"
     if code and not code_ok and user.role != "school_admin":
         raise ValidationError(
             {
-                "school_code": "That code doesn't match this school. Check it with your school, or leave it empty to ask for approval."
+                "school_code": _(
+                    "That code doesn't match this school. Check it with your school, or leave it empty to ask for approval."
+                )
             }
         )
     if user.school_id == school.pk and user.school_status == user.SchoolStatus.APPROVED:
@@ -97,7 +100,7 @@ def can_manage(actor, school):
 
 def require_manager(actor, school):
     if not can_manage(actor, school):
-        raise PermissionDenied("Only this school's administrators can do that.")
+        raise PermissionDenied(_("Only this school's administrators can do that."))
 
 
 def needs_teacher_confirmation(user):
@@ -146,9 +149,9 @@ def decide(actor, school, members, approve, request=None):
 def remove(actor, school, user, request=None):
     require_manager(actor, school)
     if user.school_id != school.pk:
-        raise ValidationError({"user": "That person isn't a member of this school."})
+        raise ValidationError({"user": _("That person isn't a member of this school.")})
     if user.pk == actor.pk:
-        raise ValidationError({"user": "You can't remove yourself."})
+        raise ValidationError({"user": _("You can't remove yourself.")})
     leave_school(user)
     if request is not None:
         audit.record(request, "remove_member", school, user=user.id)

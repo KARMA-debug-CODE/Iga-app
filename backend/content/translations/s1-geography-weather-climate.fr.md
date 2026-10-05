@@ -81,7 +81,7 @@ On appelle le Rwanda le « pays des mille collines ». La plus grande partie du 
 La température **baisse quand l'altitude augmente**, d'environ **6,5 °C tous les 1 000 m** (soit environ 0,65 °C tous les 100 m). Cela s'explique ainsi :
 
 - Le soleil chauffe le sol, puis le sol chauffe l'air juste au-dessus de lui. L'air situé très haut au-dessus des basses terres est plus éloigné de cette source de chaleur.
-- En altitude, l'air est plus **raréfié** (moins dense) : il retient donc moins la chaleur.
+- L'air qui s'élève **se dilate**, car la pression autour de lui diminue, et un air qui se dilate **se refroidit**. En altitude, la pression est plus faible : l'air y est donc plus frais.
 
 C'est pourquoi les terres plus basses du Bugesera et de Kirehe, à l'est (entre 1 300 et 1 500 m environ), sont chaudes, alors que Musanze et les hautes terres de la forêt de Nyungwe (entre 1 800 et 2 900 m environ) sont fraîches, et qu'il peut faire presque 0 °C au sommet du Karisimbi.
 

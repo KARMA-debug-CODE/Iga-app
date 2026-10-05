@@ -1,5 +1,6 @@
 from django.db.models import Count, Max, Q, Sum
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -10,6 +11,7 @@ from apps.classroom.models import Assignment, Enrollment
 from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
+from apps.core.utils import request_language
 from apps.schools import access
 
 from . import services
@@ -60,7 +62,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def _check_owner(self, question):
         user = self.request.user
         if not user.is_platform_admin and question.author_id != user.id:
-            raise PermissionDenied("You can only change questions you wrote.")
+            raise PermissionDenied(_("You can only change questions you wrote."))
 
     def perform_create(self, serializer):
         question = serializer.save(author=self.request.user)
@@ -74,7 +76,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         self._check_owner(instance)
         if instance.answers.exists():
-            raise ValidationError("Students have already answered this question; archive the quiz instead.")
+            raise ValidationError(_("Students have already answered this question; archive the quiz instead."))
         audit.record(self.request, "delete_question", instance)
         instance.delete()
 
@@ -135,13 +137,15 @@ class QuizViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         if not user.is_platform_admin and serializer.instance.author_id != user.id:
-            raise PermissionDenied("You can only edit quizzes you created.")
+            raise PermissionDenied(_("You can only edit quizzes you created."))
         quiz = serializer.instance
         if quiz.attempts.exists():
             if "question_ids" in serializer.validated_data and serializer.validated_data["question_ids"] != list(
                 quiz.quiz_questions.order_by("order").values_list("question_id", flat=True)
             ):
-                raise ValidationError({"question_ids": "Students have started this quiz; duplicate it to change the questions."})
+                raise ValidationError(
+                    {"question_ids": _("Students have started this quiz; duplicate it to change the questions.")}
+                )
             serializer.validated_data.pop("question_ids", None)
         extra = {}
         if not user.is_platform_admin and serializer.validated_data.get("status", quiz.status) not in (
@@ -158,7 +162,7 @@ class QuizViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         user = self.request.user
         if not user.is_platform_admin and instance.author_id != user.id:
-            raise PermissionDenied("You can only delete quizzes you created.")
+            raise PermissionDenied(_("You can only delete quizzes you created."))
         if instance.attempts.exists():
             instance.status = ContentStatus.ARCHIVED
             instance.save(update_fields=["status"])
@@ -174,13 +178,13 @@ class QuizViewSet(viewsets.ModelViewSet):
         # library questions needs the subscription, even for the teacher who built it.
         if not (quiz.author_id == request.user.id and quiz.is_free):
             access.require(request.user, quiz)
-        return Response(quiz_analytics(quiz, request.user, request.query_params.get("classroom")))
+        return Response(quiz_analytics(quiz, request.user, request.query_params.get("classroom"), request_language(request)))
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def start(self, request, pk=None):
         quiz = self.get_object()
         if quiz.status == ContentStatus.ARCHIVED:
-            raise ValidationError("This quiz is no longer available.")
+            raise ValidationError(_("This quiz is no longer available."))
         access.require(request.user, quiz)  # an assignment never grants access by itself
         assignment = None
         assignment_id = request.data.get("assignment")
@@ -188,7 +192,7 @@ class QuizViewSet(viewsets.ModelViewSet):
             try:
                 assignment_id = int(assignment_id)
             except (TypeError, ValueError):
-                raise ValidationError({"assignment": "Unknown assignment."})
+                raise ValidationError({"assignment": _("Unknown assignment.")})
             assignment = get_object_or_404(
                 Assignment.objects.distinct(),
                 pk=assignment_id,
@@ -259,7 +263,7 @@ class AttemptViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
     def _own_attempt(self, needs_access=True):
         attempt = self.get_object()
         if attempt.user_id != self.request.user.id:
-            raise PermissionDenied("This is not your attempt.")
+            raise PermissionDenied(_("This is not your attempt."))
         if needs_access and attempt.status == Attempt.Status.IN_PROGRESS:
             access.require(self.request.user, attempt.quiz)
         return attempt
@@ -302,13 +306,14 @@ class MarkingViewSet(viewsets.ViewSet):
 
     def list(self, request):
         pending = self._answers(request).filter(marks_awarded__isnull=True).order_by("attempt__submitted_at")[:200]
+        lang = request_language(request)
         return Response(
             [
                 {
                     "id": a.id,
                     "student": a.attempt.user.display_name,
                     "quiz": a.attempt.quiz.title,
-                    "subject": a.attempt.quiz.subject.name,
+                    "subject": a.attempt.quiz.subject.localized_name(lang),
                     "submitted_at": a.attempt.submitted_at,
                     "question": a.question.prompt,
                     "max_marks": a.question.marks,

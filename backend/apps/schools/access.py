@@ -7,6 +7,7 @@ to every signed-in user. Keep every check going through `content_access` so ther
 
 from dataclasses import dataclass
 
+from django.utils.translation import gettext_lazy
 from rest_framework.exceptions import PermissionDenied
 
 ELIGIBLE_ROLES = {"student", "teacher", "school_admin"}
@@ -22,7 +23,7 @@ class Access:
 
 
 class SubscriptionRequired(PermissionDenied):
-    default_detail = "This is part of the full Iga library. Ask your school to subscribe to unlock it."
+    default_detail = gettext_lazy("This is part of the full Iga library. Ask your school to subscribe to unlock it.")
     default_code = "subscription_required"
 
 

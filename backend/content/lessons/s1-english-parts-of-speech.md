@@ -55,7 +55,7 @@ So always ask: *what is this word doing in this sentence?*
 
 ## Check yourself
 
-Name the part of speech of each underlined word:
+Name the part of speech of each word in italics:
 
 1. The children played *happily* in the field.
 2. Uwase is clever *but* lazy.

@@ -104,7 +104,7 @@ Ces deux forces forment un **couple action–réaction** (on parle aussi de prin
 
 Exemples :
 
-- Un pêcheur sur le lac Kivu pousse l'eau **vers l'arrière** avec sa pagaie ; l'eau pousse la pirogue **vers l'avant**.
+- Un pêcheur sur le lac Kivu pousse l'eau **vers l'arrière** avec sa pagaie ; l'eau pousse la pagaie **vers l'avant**, ce qui fait avancer la pirogue.
 - Quand vous marchez, votre pied pousse le sol vers l'arrière ; le sol vous pousse vers l'avant.
 - Une fusée pousse des gaz chauds vers le bas ; les gaz poussent la fusée vers le haut.
 

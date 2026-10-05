@@ -7,6 +7,8 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import BasePermission
@@ -19,6 +21,7 @@ from apps.classroom.views import assignment_status
 from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.throttles import JoinRateThrottle
+from apps.core.utils import request_language
 from apps.curriculum.models import Lesson, LessonProgress, Subject
 
 from .models import ParentInvite, ParentLink
@@ -36,14 +39,14 @@ def new_code():
 
 
 class IsStudent(BasePermission):
-    message = "Only students can do this."
+    message = gettext_lazy("Only students can do this.")
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_student
 
 
 class IsParent(BasePermission):
-    message = "Only parent or guardian accounts can do this."
+    message = gettext_lazy("Only parent or guardian accounts can do this.")
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_parent
@@ -81,7 +84,7 @@ def child_summary(student):
     }
 
 
-def child_report(student):
+def child_report(student, lang="en"):
     summary = child_summary(student)
     grade = student.grade
     subjects = []
@@ -103,7 +106,7 @@ def child_report(student):
             subjects.append(
                 {
                     "code": subject.code,
-                    "name": subject.name,
+                    "name": subject.localized_name(lang),
                     "icon": subject.icon,
                     "lessons": subject.n,
                     "completed": sum(1 for i in ids if i in done_ids),
@@ -127,7 +130,7 @@ def child_report(student):
         "recent_results": [
             {
                 "quiz": a.quiz.title,
-                "subject": a.quiz.subject.name,
+                "subject": a.quiz.subject.localized_name(lang),
                 "icon": a.quiz.subject.icon,
                 "percentage": a.percentage,
                 "status": a.status,
@@ -173,7 +176,7 @@ class MyParentsView(APIView):
         )
 
     def delete(self, request, parent_id):
-        deleted, _ = ParentLink.objects.filter(student=request.user, parent_id=parent_id).delete()
+        deleted, _created = ParentLink.objects.filter(student=request.user, parent_id=parent_id).delete()
         if not deleted:
             return Response(status=status.HTTP_404_NOT_FOUND)
         audit.record(request, "remove_parent_link", request.user, parent=parent_id)
@@ -197,9 +200,9 @@ class ChildrenView(APIView):
         code = str(request.data.get("code", "")).strip().upper().replace(" ", "")
         invite = ParentInvite.objects.select_for_update().filter(code=code).select_related("student").first()
         if invite is None or invite.used_by_id or invite.expires_at < timezone.now():
-            raise ValidationError({"code": "That code is not valid or has expired. Ask your child to make a new one."})
+            raise ValidationError({"code": _("That code is not valid or has expired. Ask your child to make a new one.")})
         if not invite.student.is_active:
-            raise ValidationError({"code": "That account is not active."})
+            raise ValidationError({"code": _("That account is not active.")})
         ParentLink.objects.get_or_create(parent=request.user, student=invite.student)
         invite.used_by = request.user
         invite.save(update_fields=["used_by"])
@@ -215,7 +218,7 @@ class ChildDetailView(APIView):
         return link.student
 
     def get(self, request, student_id):
-        return Response(child_report(self._student(request, student_id)))
+        return Response(child_report(self._student(request, student_id), request_language(request)))
 
     def delete(self, request, student_id):
         student = self._student(request, student_id)
@@ -226,7 +229,7 @@ class ChildDetailView(APIView):
 class NotParent(BasePermission):
     """Keeps parent accounts out of student spaces such as study-group chats."""
 
-    message = "Study groups are for students and teachers."
+    message = gettext_lazy("Study groups are for students and teachers.")
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and not request.user.is_parent
@@ -234,4 +237,4 @@ class NotParent(BasePermission):
 
 def deny_parents(user):
     if user.is_parent:
-        raise PermissionDenied("This is only for students and teachers.")
+        raise PermissionDenied(_("This is only for students and teachers."))

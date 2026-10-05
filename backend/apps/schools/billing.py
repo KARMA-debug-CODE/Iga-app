@@ -14,6 +14,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import ValidationError
 
 from .models import Payment, School
@@ -37,9 +38,13 @@ def currencies():
 
 def price(months: int, currency: str) -> Decimal:
     if months not in settings.SUBSCRIPTION_MONTH_OPTIONS:
-        raise ValidationError({"months": f"Choose one of {settings.SUBSCRIPTION_MONTH_OPTIONS} months."})
+        raise ValidationError(
+            {"months": _("Choose %(options)s months.") % {"options": ", ".join(map(str, settings.SUBSCRIPTION_MONTH_OPTIONS))}}
+        )
     if currency not in settings.SUBSCRIPTION_PRICES:
-        raise ValidationError({"currency": f"Choose one of {currencies()}."})
+        raise ValidationError(
+            {"currency": _("Choose one of these currencies: %(options)s.") % {"options": ", ".join(currencies())}}
+        )
     step = Decimal("1") if currency in ZERO_DECIMAL_CURRENCIES else Decimal("0.01")
     return (settings.SUBSCRIPTION_PRICES[currency] * months).quantize(step)
 
@@ -50,7 +55,7 @@ def new_reference():
 
 def start_payment(school: School, user, months: int, currency: str, provider: str) -> Payment:
     if not school.is_verified:
-        raise ValidationError("Your school must be verified by the Iga team before it can subscribe.")
+        raise ValidationError(_("Your school must be verified by the Iga team before it can subscribe."))
     return Payment.objects.create(
         reference=new_reference(),
         school=school,
@@ -109,11 +114,11 @@ def record_manual_payment(school: School, admin, months: int, amount: Decimal, c
     """A platform administrator records money received outside the app (bank transfer, cash,
     mobile money to the company account) or a complimentary extension (amount 0)."""
     if months < 1 or months > 24:
-        raise ValidationError({"months": "Between 1 and 24 months."})
+        raise ValidationError({"months": _("Between 1 and 24 months.")})
     if amount < 0:
-        raise ValidationError({"amount": "The amount can't be negative."})
+        raise ValidationError({"amount": _("The amount can't be negative.")})
     if not note.strip():
-        raise ValidationError({"note": "Say how it was paid (bank reference, receipt number, or why it is free)."})
+        raise ValidationError({"note": _("Say how it was paid (bank reference, receipt number, or why it is free).")})
     payment = Payment.objects.create(
         reference=new_reference(),
         school=school,

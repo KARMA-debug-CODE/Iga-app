@@ -1,0 +1,669 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: apps/accounts/authentication.py:10
+msgid "Choose a new password before continuing."
+msgstr "Choisissez un nouveau mot de passe avant de continuer."
+
+#: apps/accounts/parents.py:41
+msgid "Only students can do this."
+msgstr "Seuls les élèves peuvent faire cela."
+
+#: apps/accounts/parents.py:48
+msgid "Only parent or guardian accounts can do this."
+msgstr "Seuls les comptes de parent ou de tuteur peuvent faire cela."
+
+#: apps/accounts/parents.py:231
+msgid "Study groups are for students and teachers."
+msgstr "Les groupes d'étude sont réservés aux élèves et aux enseignants."
+
+#: apps/accounts/parents.py:239
+msgid "This is only for students and teachers."
+msgstr "Ceci est réservé aux élèves et aux enseignants."
+
+#: apps/accounts/parents.py:202
+msgid "That code is not valid or has expired. Ask your child to make a new one."
+msgstr "Ce code n'est pas valide ou a expiré. Demandez à votre enfant d'en créer un nouveau."
+
+#: apps/accounts/parents.py:204
+msgid "That account is not active."
+msgstr "Ce compte n'est pas actif."
+
+#: apps/accounts/serializers.py:90
+msgid "Unknown grade."
+msgstr "Niveau inconnu."
+
+#: apps/accounts/serializers.py:103
+#: apps/accounts/serializers.py:209
+msgid "An account with this email already exists."
+msgstr "Un compte existe déjà avec cette adresse e-mail."
+
+#: apps/accounts/serializers.py:202
+msgid "Usernames can't contain @. Use letters, numbers, dots or dashes."
+msgstr "Un nom d'utilisateur ne peut pas contenir @. Utilisez des lettres, des chiffres, des points ou des tirets."
+
+#: apps/accounts/serializers.py:204
+msgid "That username is taken."
+msgstr "Ce nom d'utilisateur est déjà pris."
+
+#: apps/accounts/serializers.py:96
+#: apps/accounts/serializers.py:167
+msgid "School administrators need an email address for receipts and reminders."
+msgstr "Les administrateurs d'école ont besoin d'une adresse e-mail pour les reçus et les rappels."
+
+#: apps/accounts/serializers.py:159
+msgid "Students must choose their grade (S1–S6)."
+msgstr "Les élèves doivent choisir leur niveau (S1–S6)."
+
+#: apps/accounts/serializers.py:163
+msgid "Parents don't join a school; link to your child instead."
+msgstr "Les parents ne rejoignent pas d'école : reliez plutôt votre compte à celui de votre enfant."
+
+#: apps/accounts/serializers.py:190
+msgid "That school has already been registered and is waiting for the Iga team. If you run it, contact the Iga team."
+msgstr "Cette école a déjà été inscrite et attend la vérification de l'équipe Iga. Si vous la dirigez, contactez l'équipe Iga."
+
+#: apps/accounts/serializers.py:251
+msgid "Incorrect password."
+msgstr "Mot de passe incorrect."
+
+#: apps/accounts/serializers.py:253
+msgid "Choose a password different from the current one."
+msgstr "Choisissez un mot de passe différent de l'actuel."
+
+#: apps/accounts/serializers.py:170
+msgid "Choose your school, or register a new one (not both)."
+msgstr "Choisissez votre école ou inscrivez-en une nouvelle (pas les deux)."
+
+#: apps/accounts/serializers.py:173
+msgid "School administrators are approved by the Iga team or an existing administrator."
+msgstr "Les administrateurs d'école sont approuvés par l'équipe Iga ou par un administrateur existant."
+
+#: apps/accounts/serializers.py:176
+msgid "Only school administrators register schools."
+msgstr "Seuls les administrateurs d'école peuvent inscrire une école."
+
+#: apps/accounts/serializers.py:186
+msgid "That school is already on Iga. Choose it from the list instead."
+msgstr "Cette école est déjà sur Iga. Choisissez-la plutôt dans la liste."
+
+#: apps/accounts/serializers.py:228
+msgid "That school has just been registered. Choose it from the list."
+msgstr "Cette école vient d'être inscrite. Choisissez-la dans la liste."
+
+#: apps/accounts/views.py:93
+msgid "Invalid username/email or password."
+msgstr "Nom d'utilisateur, e-mail ou mot de passe incorrect."
+
+#: apps/accounts/views.py:121
+msgid "Not logged in."
+msgstr "Vous n'êtes pas connecté."
+
+#: apps/accounts/views.py:200
+msgid "Password updated. You were logged out on other devices."
+msgstr "Mot de passe modifié. Vous avez été déconnecté sur vos autres appareils."
+
+#: apps/accounts/views.py:212
+msgid "Two-factor authentication is already on."
+msgstr "La vérification en deux étapes est déjà activée."
+
+#: apps/accounts/views.py:229
+#: apps/accounts/views.py:245
+#: apps/accounts/views.py:104
+msgid "That code is not valid."
+msgstr "Ce code n'est pas valide."
+
+#: apps/accounts/views.py:99
+msgid "Enter the code from your authenticator app."
+msgstr "Saisissez le code de votre application d'authentification."
+
+#: apps/accounts/views.py:127
+msgid "Session expired."
+msgstr "Session expirée."
+
+#: apps/assessments/analytics.py:20
+#: apps/classroom/views.py:98
+msgid "That is not your class."
+msgstr "Ce n'est pas votre classe."
+
+#: apps/assessments/serializers.py:57
+msgid "Give a list of accepted answers (text)."
+msgstr "Donnez une liste de réponses acceptées (texte)."
+
+#: apps/assessments/serializers.py:60
+msgid "Use at most 50 accepted answers of up to 200 characters each."
+msgstr "Utilisez au plus 50 réponses acceptées de 200 caractères maximum chacune."
+
+#: apps/assessments/serializers.py:298
+msgid "Only administrators can publish past papers."
+msgstr "Seuls les administrateurs peuvent publier des épreuves d'examen."
+
+#: apps/assessments/serializers.py:318
+msgid "A question appears twice."
+msgstr "Une question apparaît deux fois."
+
+#: apps/assessments/serializers.py:81
+msgid "Only administrators can add official past-paper questions."
+msgstr "Seuls les administrateurs peuvent ajouter des questions d'épreuves officielles."
+
+#: apps/assessments/serializers.py:106
+msgid "Students have already answered this question, so its answer can't change. Make a new question instead."
+msgstr "Des élèves ont déjà répondu à cette question : sa réponse ne peut plus changer. Créez plutôt une nouvelle question."
+
+#: apps/assessments/serializers.py:120
+msgid "Students have already answered this question, so its options can't change. Make a new question instead."
+msgstr "Des élèves ont déjà répondu à cette question : ses options ne peuvent plus changer. Créez plutôt une nouvelle question."
+
+#: apps/assessments/serializers.py:316
+msgid "Unknown or private questions: %(ids)s"
+msgstr "Questions inconnues ou privées : %(ids)s"
+
+#: apps/assessments/serializers.py:68
+msgid "Add at least two options."
+msgstr "Ajoutez au moins deux options."
+
+#: apps/assessments/serializers.py:71
+msgid "Mark at least one option as correct."
+msgstr "Indiquez au moins une option correcte."
+
+#: apps/assessments/serializers.py:73
+msgid "Only one option can be correct."
+msgstr "Une seule option peut être correcte."
+
+#: apps/assessments/serializers.py:75
+msgid "Multiple-choice questions need options."
+msgstr "Les questions à choix multiples ont besoin d'options."
+
+#: apps/assessments/serializers.py:79
+msgid "Numeric questions need an answer."
+msgstr "Les questions numériques ont besoin d'une réponse."
+
+#: apps/assessments/services.py:99
+msgid "This quiz has no questions yet."
+msgstr "Ce quiz n'a pas encore de questions."
+
+#: apps/assessments/services.py:132
+#: apps/assessments/services.py:152
+msgid "This attempt has already been submitted."
+msgstr "Cette tentative a déjà été remise."
+
+#: apps/assessments/services.py:135
+msgid "Time is up — your attempt was submitted automatically."
+msgstr "Le temps est écoulé : votre tentative a été remise automatiquement."
+
+#: apps/assessments/services.py:144
+#: apps/tutor/services.py:173
+msgid "That question is not part of this attempt."
+msgstr "Cette question ne fait pas partie de cette tentative."
+
+#: apps/assessments/services.py:166
+msgid "You already checked this answer, so it can't be changed."
+msgstr "Vous avez déjà vérifié cette réponse : elle ne peut plus être modifiée."
+
+#: apps/assessments/services.py:232
+msgid "Answers are revealed after you submit in exam mode."
+msgstr "En mode examen, les réponses sont révélées après la remise."
+
+#: apps/assessments/services.py:301
+msgid "The student hasn't submitted yet."
+msgstr "L'élève n'a pas encore remis sa copie."
+
+#: apps/assessments/services.py:95
+msgid "You have used all your attempts for this quiz."
+msgstr "Vous avez utilisé toutes vos tentatives pour ce quiz."
+
+#: apps/assessments/services.py:142
+#: apps/tutor/services.py:171
+msgid "Unknown question."
+msgstr "Question inconnue."
+
+#: apps/assessments/services.py:175
+#: apps/assessments/services.py:172
+msgid "Invalid option selected."
+msgstr "Option choisie non valide."
+
+#: apps/assessments/services.py:177
+msgid "Choose only one option."
+msgstr "Choisissez une seule option."
+
+#: apps/assessments/services.py:238
+msgid "Your teacher will mark this answer."
+msgstr "Votre enseignant corrigera cette réponse."
+
+#: apps/assessments/services.py:297
+msgid "Marks must be between 0 and %(max)s."
+msgstr "La note doit être comprise entre 0 et %(max)s."
+
+#: apps/assessments/services.py:187
+msgid "Enter a number."
+msgstr "Saisissez un nombre."
+
+#: apps/assessments/views.py:64
+msgid "You can only change questions you wrote."
+msgstr "Vous ne pouvez modifier que les questions que vous avez écrites."
+
+#: apps/assessments/views.py:78
+msgid "Students have already answered this question; archive the quiz instead."
+msgstr "Des élèves ont déjà répondu à cette question ; archivez plutôt le quiz."
+
+#: apps/assessments/views.py:139
+msgid "You can only edit quizzes you created."
+msgstr "Vous ne pouvez modifier que les quiz que vous avez créés."
+
+#: apps/assessments/views.py:164
+msgid "You can only delete quizzes you created."
+msgstr "Vous ne pouvez supprimer que les quiz que vous avez créés."
+
+#: apps/assessments/views.py:186
+msgid "This quiz is no longer available."
+msgstr "Ce quiz n'est plus disponible."
+
+#: apps/assessments/views.py:265
+msgid "This is not your attempt."
+msgstr "Ce n'est pas votre tentative."
+
+#: apps/assessments/views.py:146
+msgid "Students have started this quiz; duplicate it to change the questions."
+msgstr "Des élèves ont commencé ce quiz ; dupliquez-le pour en changer les questions."
+
+#: apps/assessments/views.py:194
+msgid "Unknown assignment."
+msgstr "Devoir inconnu."
+
+#: apps/classroom/roster.py:76
+msgid "The list is empty."
+msgstr "La liste est vide."
+
+#: apps/classroom/roster.py:84
+msgid "The first row must name the columns, e.g. first_name,last_name (username and email are optional)."
+msgstr "La première ligne doit nommer les colonnes, par exemple first_name,last_name (username et email sont facultatifs)."
+
+#: apps/classroom/roster.py:101
+msgid "No students found under the header row."
+msgstr "Aucun élève trouvé sous la ligne d'en-tête."
+
+#: apps/classroom/roster.py:99
+msgid "Import at most %(n)s students at a time."
+msgstr "Importez au plus %(n)s élèves à la fois."
+
+#: apps/classroom/roster.py:113
+msgid "First name is missing."
+msgstr "Le prénom manque."
+
+#: apps/classroom/roster.py:115
+msgid "Name is too long."
+msgstr "Le nom est trop long."
+
+#: apps/classroom/roster.py:122
+msgid "Usernames can't contain @."
+msgstr "Un nom d'utilisateur ne peut pas contenir @."
+
+#: apps/classroom/roster.py:124
+msgid "That username is already taken."
+msgstr "Ce nom d'utilisateur est déjà pris."
+
+#: apps/classroom/roster.py:126
+msgid "That username appears twice in the list."
+msgstr "Ce nom d'utilisateur apparaît deux fois dans la liste."
+
+#: apps/classroom/roster.py:120
+msgid "Usernames may use letters, numbers and . _ - only."
+msgstr "Un nom d'utilisateur ne peut contenir que des lettres, des chiffres et . _ -"
+
+#: apps/classroom/roster.py:138
+msgid "That email is already used by another account."
+msgstr "Cette adresse e-mail est déjà utilisée par un autre compte."
+
+#: apps/classroom/roster.py:140
+msgid "That email address isn't valid."
+msgstr "Cette adresse e-mail n'est pas valide."
+
+#: apps/classroom/views.py:94
+msgid "Attach exactly one quiz, lesson or simulation."
+msgstr "Joignez exactement un quiz, une leçon ou une simulation."
+
+#: apps/classroom/views.py:238
+msgid "Only students join classes with a code."
+msgstr "Seuls les élèves rejoignent une classe avec un code."
+
+#: apps/classroom/views.py:266
+msgid "This class is archived."
+msgstr "Cette classe est archivée."
+
+#: apps/classroom/views.py:100
+msgid "Quiz not found."
+msgstr "Quiz introuvable."
+
+#: apps/classroom/views.py:102
+#: apps/tutor/services.py:149
+msgid "Lesson not found."
+msgstr "Leçon introuvable."
+
+#: apps/classroom/views.py:242
+msgid "No class has that code. Check with your teacher."
+msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
+
+#: apps/classroom/views.py:257
+#: apps/classroom/views.py:288
+msgid "That student is not in this class."
+msgstr "Cet élève n'est pas dans cette classe."
+
+#: apps/community/views.py:124
+msgid "Join the group first."
+msgstr "Rejoignez d'abord le groupe."
+
+#: apps/community/views.py:142
+msgid "Only the group owner can edit the group."
+msgstr "Seul le créateur du groupe peut le modifier."
+
+#: apps/community/views.py:147
+msgid "Only the group owner can delete the group."
+msgstr "Seul le créateur du groupe peut le supprimer."
+
+#: apps/community/views.py:175
+msgid "This group is private; ask a member for the code."
+msgstr "Ce groupe est privé ; demandez le code à un membre."
+
+#: apps/community/views.py:252
+msgid "You are not in this group."
+msgstr "Vous n'êtes pas dans ce groupe."
+
+#: apps/community/views.py:260
+msgid "Thanks — a moderator will review this message."
+msgstr "Merci, un modérateur examinera ce message."
+
+#: apps/community/views.py:266
+msgid "Only moderators can hide messages."
+msgstr "Seuls les modérateurs peuvent masquer des messages."
+
+#: apps/community/views.py:165
+msgid "This group is full."
+msgstr "Ce groupe est complet."
+
+#: apps/community/views.py:183
+msgid "No group has that code."
+msgstr "Aucun groupe n'a ce code."
+
+#: apps/community/views.py:227
+msgid "Write something first."
+msgstr "Écrivez d'abord quelque chose."
+
+#: apps/community/views.py:229
+msgid "Messages are limited to 2000 characters."
+msgstr "Les messages sont limités à 2000 caractères."
+
+#: apps/core/admin_login.py:27
+msgid "Too many attempts. Wait a minute and try again."
+msgstr "Trop de tentatives. Attendez une minute et réessayez."
+
+#: apps/core/admin_login.py:35
+msgid "Enter the current 6-digit code from your authenticator app."
+msgstr "Saisissez le code à 6 chiffres actuel de votre application d'authentification."
+
+#: apps/core/admin_login.py:38
+msgid "Turn on two-factor authentication in your Iga profile before using the admin site."
+msgstr "Activez la vérification en deux étapes dans votre profil Iga avant d'utiliser le site d'administration."
+
+#: apps/core/permissions.py:6
+msgid "Only approved teachers can do this."
+msgstr "Seuls les enseignants approuvés peuvent faire cela."
+
+#: apps/core/permissions.py:14
+msgid "Only administrators can do this."
+msgstr "Seuls les administrateurs peuvent faire cela."
+
+#: apps/core/uploads.py:73
+msgid "The file's contents don't match its type. Re-save it and try again."
+msgstr "Le contenu du fichier ne correspond pas à son type. Enregistrez-le à nouveau et réessayez."
+
+#: apps/core/uploads.py:63
+msgid "Upload a PDF, image, audio/video or office document (%(types)s)."
+msgstr "Envoyez un PDF, une image, un fichier audio ou vidéo, ou un document bureautique (%(types)s)."
+
+#: apps/core/uploads.py:67
+msgid "Files can be at most %(mb)s MB."
+msgstr "Les fichiers ne peuvent pas dépasser %(mb)s Mo."
+
+#: apps/core/views.py:255
+msgid "You can't remove your own administrator role."
+msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
+
+#: apps/core/views.py:323
+msgid "Unknown content type."
+msgstr "Type de contenu inconnu."
+
+#: apps/curriculum/serializers.py:131
+msgid "Provide a link or upload a file."
+msgstr "Donnez un lien ou envoyez un fichier."
+
+#: apps/curriculum/views.py:196
+msgid "You can only edit lessons you wrote."
+msgstr "Vous ne pouvez modifier que les leçons que vous avez écrites."
+
+#: apps/curriculum/views.py:242
+msgid "You can only edit resources you uploaded."
+msgstr "Vous ne pouvez modifier que les ressources que vous avez envoyées."
+
+#: apps/curriculum/views.py:249
+msgid "You can only delete resources you uploaded."
+msgstr "Vous ne pouvez supprimer que les ressources que vous avez envoyées."
+
+#: apps/gamification/views.py:48
+msgid "Class not found."
+msgstr "Classe introuvable."
+
+#: apps/schools/access.py:26
+msgid "This is part of the full Iga library. Ask your school to subscribe to unlock it."
+msgstr "Ce contenu fait partie de la bibliothèque complète d'Iga. Demandez à votre école de s'abonner pour le débloquer."
+
+#: apps/schools/billing.py:58
+msgid "Your school must be verified by the Iga team before it can subscribe."
+msgstr "Votre école doit être vérifiée par l'équipe Iga avant de pouvoir s'abonner."
+
+#: apps/schools/billing.py:117
+msgid "Between 1 and 24 months."
+msgstr "Entre 1 et 24 mois."
+
+#: apps/schools/billing.py:119
+msgid "The amount can't be negative."
+msgstr "Le montant ne peut pas être négatif."
+
+#: apps/schools/billing.py:121
+msgid "Say how it was paid (bank reference, receipt number, or why it is free)."
+msgstr "Indiquez comment le paiement a été fait (référence bancaire, numéro de reçu, ou raison de la gratuité)."
+
+#: apps/schools/billing.py:42
+msgid "Choose %(options)s months."
+msgstr "Choisissez %(options)s mois."
+
+#: apps/schools/billing.py:46
+msgid "Choose one of these currencies: %(options)s."
+msgstr "Choisissez l'une de ces devises : %(options)s."
+
+#: apps/schools/flutterwave.py:52
+msgid "The payment service isn't answering right now. Please try again in a few minutes."
+msgstr "Le service de paiement ne répond pas pour le moment. Veuillez réessayer dans quelques minutes."
+
+#: apps/schools/flutterwave.py:124
+msgid "%(app)s school subscription"
+msgstr "Abonnement scolaire %(app)s"
+
+#: apps/schools/flutterwave.py:125
+msgid "%(school)s: %(months)s month(s)"
+msgstr "%(school)s : %(months)s mois"
+
+#: apps/schools/membership.py:103
+msgid "Only this school's administrators can do that."
+msgstr "Seuls les administrateurs de cette école peuvent faire cela."
+
+#: apps/schools/membership.py:32
+msgid "Only students, teachers and school staff belong to a school."
+msgstr "Seuls les élèves, les enseignants et le personnel d'une école en font partie."
+
+#: apps/schools/membership.py:36
+msgid "That school isn't verified yet."
+msgstr "Cette école n'est pas encore vérifiée."
+
+#: apps/schools/membership.py:41
+msgid "That code doesn't match this school. Check it with your school, or leave it empty to ask for approval."
+msgstr "Ce code ne correspond pas à cette école. Vérifiez-le auprès de votre école, ou laissez-le vide pour demander une approbation."
+
+#: apps/schools/membership.py:152
+msgid "That person isn't a member of this school."
+msgstr "Cette personne n'est pas membre de cette école."
+
+#: apps/schools/membership.py:154
+msgid "You can't remove yourself."
+msgstr "Vous ne pouvez pas vous retirer vous-même."
+
+#: apps/schools/notify.py:57
+msgid "%(app)s: payment received for %(school)s"
+msgstr "%(app)s : paiement reçu pour %(school)s"
+
+#: apps/schools/notify.py:96
+msgid "Renew here: %(url)s"
+msgstr "Renouveler ici : %(url)s"
+
+#: apps/schools/notify.py:82
+msgid "%(app)s: %(school)s's subscription ends in %(days)s day(s)"
+msgstr "%(app)s : l'abonnement de %(school)s se termine dans %(days)s jour(s)"
+
+#: apps/schools/notify.py:83
+msgid "%(school)s's %(app)s subscription is paid until %(date)s."
+msgstr "L'abonnement %(app)s de %(school)s est payé jusqu'au %(date)s."
+
+#: apps/schools/notify.py:60
+msgid "Thank you. We received %(amount)s for %(months)s month(s) of %(app)s for %(school)s."
+msgstr "Merci. Nous avons reçu %(amount)s pour %(months)s mois de %(app)s pour %(school)s."
+
+#: apps/schools/notify.py:63
+msgid "Reference: %(reference)s"
+msgstr "Référence : %(reference)s"
+
+#: apps/schools/notify.py:64
+msgid "Access paid until: %(date)s"
+msgstr "Accès payé jusqu'au : %(date)s"
+
+#: apps/schools/notify.py:66
+msgid "All approved students and teachers of %(school)s have full access."
+msgstr "Tous les élèves et enseignants approuvés de %(school)s ont un accès complet."
+
+#: apps/schools/notify.py:67
+msgid "Receipts: %(url)s"
+msgstr "Reçus : %(url)s"
+
+#: apps/schools/notify.py:85
+msgid "%(app)s: %(school)s's subscription has ended"
+msgstr "%(app)s : l'abonnement de %(school)s est terminé"
+
+#: apps/schools/notify.py:86
+msgid "%(school)s's %(app)s subscription ended on %(date)s. Students keep full access until %(grace)s; after that they will only see the free lessons."
+msgstr "L'abonnement %(app)s de %(school)s s'est terminé le %(date)s. Les élèves gardent l'accès complet jusqu'au %(grace)s ; ensuite, ils ne verront plus que les leçons gratuites."
+
+#: apps/schools/notify.py:91
+msgid "%(app)s: %(school)s's students no longer have full access"
+msgstr "%(app)s : les élèves de %(school)s n'ont plus l'accès complet"
+
+#: apps/schools/notify.py:92
+msgid "%(school)s's %(app)s subscription ended on %(date)s. Students now only see the free lessons until the school renews."
+msgstr "L'abonnement %(app)s de %(school)s s'est terminé le %(date)s. Les élèves ne voient plus que les leçons gratuites jusqu'au renouvellement."
+
+#: apps/schools/providers.py:70
+msgid "Unknown payment provider."
+msgstr "Prestataire de paiement inconnu."
+
+#: apps/schools/serializers.py:163
+msgid "Another school in this district already has this name."
+msgstr "Une autre école de ce district porte déjà ce nom."
+
+#: apps/schools/views.py:113
+msgid "Only approved school administrators can do this."
+msgstr "Seuls les administrateurs d'école approuvés peuvent faire cela."
+
+#: apps/schools/views.py:231
+msgid "This payment belongs to another school."
+msgstr "Ce paiement appartient à une autre école."
+
+#: apps/schools/views.py:214
+msgid "Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team."
+msgstr "Le paiement en ligne n'est pas encore disponible. Veuillez payer par virement bancaire et contacter l'équipe Iga."
+
+#: apps/schools/views.py:271
+msgid "Test payments are switched off."
+msgstr "Les paiements de test sont désactivés."
+
+#: apps/schools/views.py:274
+msgid "This payment can't be completed here."
+msgstr "Ce paiement ne peut pas être finalisé ici."
+
+#: apps/schools/views.py:95
+msgid "School administrators change school through the Iga team."
+msgstr "Les administrateurs d'école changent d'école en passant par l'équipe Iga."
+
+#: apps/schools/views.py:104
+msgid "School administrators leave a school through the Iga team."
+msgstr "Les administrateurs d'école quittent une école en passant par l'équipe Iga."
+
+#: apps/schools/views.py:398
+msgid "Unknown action."
+msgstr "Action inconnue."
+
+#: apps/schools/views.py:393
+msgid "Only a school waiting for verification, with no payments, can be rejected."
+msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
+
+#: apps/simulations/views.py:48
+#: apps/simulations/views.py:58
+msgid "Not found."
+msgstr "Introuvable."
+
+#: apps/tutor/services.py:77
+msgid "Must be a list of messages."
+msgstr "Doit être une liste de messages."
+
+#: apps/tutor/services.py:90
+msgid "The history must end with a tutor reply."
+msgstr "L'historique doit se terminer par une réponse du tuteur."
+
+#: apps/tutor/services.py:162
+msgid "Attempt not found."
+msgstr "Tentative introuvable."
+
+#: apps/tutor/services.py:166
+msgid "The tutor is switched off during exams and timed tests. Good luck!"
+msgstr "Le tuteur est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
+
+#: apps/tutor/services.py:199
+msgid "Write a question for the tutor."
+msgstr "Écrivez une question pour le tuteur."
+
+#: apps/tutor/services.py:87
+msgid "Messages must alternate between the student and the tutor."
+msgstr "Les messages doivent alterner entre l'élève et le tuteur."
+
+#: apps/tutor/services.py:201
+msgid "Please keep questions under %(n)s characters."
+msgstr "Veuillez limiter vos questions à %(n)s caractères."
+
+#: apps/tutor/views.py:43
+msgid "The AI tutor is not switched on for this school yet."
+msgstr "Le tuteur IA n'est pas encore activé pour cette école."
+
+#: apps/tutor/views.py:61
+msgid "The tutor is very busy right now. Try again in a minute."
+msgstr "Le tuteur est très sollicité en ce moment. Réessayez dans une minute."
+
+#: apps/tutor/views.py:67
+msgid "The AI tutor is not set up correctly. Please tell an administrator."
+msgstr "Le tuteur IA n'est pas correctement configuré. Veuillez prévenir un administrateur."
+
+#: apps/tutor/views.py:72
+msgid "Couldn't reach the tutor. Check your connection and try again."
+msgstr "Impossible de joindre le tuteur. Vérifiez votre connexion et réessayez."
+
+#: apps/tutor/views.py:78
+msgid "The tutor couldn't answer just now. Please try again."
+msgstr "Le tuteur n'a pas pu répondre pour le moment. Veuillez réessayer."

@@ -108,7 +108,7 @@ These two forces are called an **action–reaction pair**. They:
 
 Examples:
 
-- A fisherman on Lake Kivu pushes the water **backwards** with his paddle; the water pushes the canoe **forwards**.
+- A fisherman on Lake Kivu pushes the water **backwards** with his paddle; the water pushes the paddle **forwards**, and so moves the canoe.
 - When you walk, your foot pushes the ground backwards; the ground pushes you forwards.
 - A rocket pushes hot gases downwards; the gases push the rocket upwards.
 

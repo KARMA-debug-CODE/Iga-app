@@ -95,6 +95,15 @@ class Lesson(models.Model):
         return self.title
 
 
+def localized_lesson_titles(lessons, lang):
+    """{lesson id: title in `lang`}, falling back to the English title where there's no translation."""
+    titles = {lesson.id: lesson.title for lesson in lessons}
+    if lang != "en" and titles:
+        translated = LessonTranslation.objects.filter(lesson_id__in=titles, language=lang).values_list("lesson_id", "title")
+        titles.update(dict(translated))
+    return titles
+
+
 class LessonTranslation(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="translations")
     language = models.CharField(max_length=2, choices=LANGUAGES)

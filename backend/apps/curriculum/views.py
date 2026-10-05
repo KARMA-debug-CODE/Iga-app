@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.db.models import Count, IntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
+from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -192,7 +193,7 @@ class LessonViewSet(
         user = self.request.user
         lesson = serializer.instance
         if not user.is_platform_admin and lesson.author_id != user.id:
-            raise PermissionDenied("You can only edit lessons you wrote.")
+            raise PermissionDenied(_("You can only edit lessons you wrote."))
         extra = {}
         if not user.is_platform_admin:
             extra["is_free"] = True
@@ -205,7 +206,7 @@ class LessonViewSet(
     def complete(self, request, slug=None):
         lesson = self.get_object()
         require(request.user, lesson)  # no XP for lessons the student can't open
-        _, created = LessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
+        _obj, created = LessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
         xp = gamification.on_lesson_completed(request.user, lesson) if created else 0
         return Response({"completed": True, "xp_gained": xp, "xp": request.user.xp}, status=status.HTTP_200_OK)
 
@@ -238,14 +239,14 @@ class ResourceViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         if not user.is_platform_admin and serializer.instance.uploaded_by_id != user.id:
-            raise PermissionDenied("You can only edit resources you uploaded.")
+            raise PermissionDenied(_("You can only edit resources you uploaded."))
         resource = serializer.save(status=serializer.instance.status if user.is_platform_admin else ContentStatus.REVIEW)
         audit.record(self.request, "update_resource", resource)
 
     def perform_destroy(self, instance):
         user = self.request.user
         if not user.is_platform_admin and instance.uploaded_by_id != user.id:
-            raise PermissionDenied("You can only delete resources you uploaded.")
+            raise PermissionDenied(_("You can only delete resources you uploaded."))
         audit.record(self.request, "delete_resource", instance, title=instance.title)
         instance.delete()
 

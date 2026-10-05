@@ -3,6 +3,8 @@ import logging
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
@@ -90,7 +92,7 @@ class MySchoolView(APIView):
     def post(self, request):
         user = request.user
         if user.is_school_admin and user.school_id and user.school_status == User.SchoolStatus.APPROVED:
-            raise ValidationError({"school": "School administrators change school through the Iga team."})
+            raise ValidationError({"school": _("School administrators change school through the Iga team.")})
         data = ChooseSchoolSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         membership.choose_school(user, data.validated_data["school"], data.validated_data.get("school_code", ""), request=request)
@@ -99,7 +101,7 @@ class MySchoolView(APIView):
     def delete(self, request):
         user = request.user
         if user.is_school_admin and user.school_id and user.school_status == User.SchoolStatus.APPROVED:
-            raise ValidationError({"school": "School administrators leave a school through the Iga team."})
+            raise ValidationError({"school": _("School administrators leave a school through the Iga team.")})
         membership.leave_school(user, request=request)
         return Response(self._payload(user))
 
@@ -108,7 +110,7 @@ class MySchoolView(APIView):
 
 
 class IsSchoolAdmin(BasePermission):
-    message = "Only approved school administrators can do this."
+    message = gettext_lazy("Only approved school administrators can do this.")
 
     def has_permission(self, request, view):
         user = request.user
@@ -209,7 +211,7 @@ class CheckoutView(APIView):
         data.is_valid(raise_exception=True)
         provider = providers.online_provider()
         if provider is None:
-            raise ValidationError("Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team.")
+            raise ValidationError(_("Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team."))
         payment = billing.start_payment(
             school, request.user, data.validated_data["months"], data.validated_data["currency"].upper(), provider.key
         )
@@ -226,7 +228,7 @@ def _payment_for(request, reference):
     payment = get_object_or_404(Payment.objects.select_related("school"), reference=reference)
     user = request.user
     if not (user.is_platform_admin or (user.managed_school is not None and user.managed_school.pk == payment.school_id)):
-        raise PermissionDenied("This payment belongs to another school.")
+        raise PermissionDenied(_("This payment belongs to another school."))
     return payment
 
 
@@ -266,10 +268,10 @@ class DevCompleteView(APIView):
     def post(self, request, reference):
         provider = providers.get(Payment.Provider.DEV)
         if not provider.available():
-            raise PermissionDenied("Test payments are switched off.")
+            raise PermissionDenied(_("Test payments are switched off."))
         payment = _payment_for(request, reference)
         if payment.provider != Payment.Provider.DEV or payment.status != Payment.Status.PENDING:
-            raise ValidationError("This payment can't be completed here.")
+            raise ValidationError(_("This payment can't be completed here."))
         outcome = "success" if request.data.get("outcome") == "success" else "cancel"
         payment.provider_data = {"dev_outcome": outcome}
         payment.save(update_fields=["provider_data"])
@@ -388,12 +390,12 @@ class PlatformSchoolActionView(APIView):
             school.save(update_fields=["status"])
         elif action == "reject":
             if school.status != School.Status.PENDING or school.payments.exists():
-                raise ValidationError("Only a school waiting for verification, with no payments, can be rejected.")
+                raise ValidationError(_("Only a school waiting for verification, with no payments, can be rejected."))
             audit.record(request, "reject_school", school, name=school.name, district=school.district)
             school.delete()  # its members are released (signals.release_members)
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            raise ValidationError("Unknown action.")
+            raise ValidationError(_("Unknown action."))
         audit.record(request, f"{action}_school", school)
         return Response(PlatformSchoolSerializer(school).data)
 

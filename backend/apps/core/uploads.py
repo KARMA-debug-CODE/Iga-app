@@ -11,6 +11,7 @@ import uuid
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.deconstruct import deconstructible
+from django.utils.translation import gettext as _
 
 _ZIP = (b"PK\x03\x04",)
 SIGNATURES = {
@@ -58,14 +59,16 @@ def _matches(ext, head):
 def validate_upload(file):
     ext = os.path.splitext(file.name or "")[1].lower()
     if ext not in SIGNATURES:
-        raise ValidationError(f"Upload a PDF, image, audio/video or office document ({', '.join(ALLOWED_EXTENSIONS)}).")
+        raise ValidationError(
+            _("Upload a PDF, image, audio/video or office document (%(types)s).") % {"types": ", ".join(ALLOWED_EXTENSIONS)}
+        )
     limit = settings.UPLOAD_MAX_MB * 1024 * 1024
     if file.size > limit:
-        raise ValidationError(f"Files can be at most {settings.UPLOAD_MAX_MB} MB.")
+        raise ValidationError(_("Files can be at most %(mb)s MB.") % {"mb": settings.UPLOAD_MAX_MB})
     position = file.tell() if hasattr(file, "tell") else 0
     file.seek(0)
     head = file.read(16)
     file.seek(position)
     if not _matches(ext, head):
-        raise ValidationError("The file's contents don't match its type. Re-save it and try again.")
+        raise ValidationError(_("The file's contents don't match its type. Re-save it and try again."))
     return file

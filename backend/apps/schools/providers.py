@@ -10,6 +10,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework.exceptions import ValidationError
 
 from .models import Payment
@@ -66,7 +67,7 @@ def _registry():
 def get(key):
     provider = _registry().get(key)
     if provider is None:
-        raise ValidationError("Unknown payment provider.")
+        raise ValidationError(_("Unknown payment provider."))
     return provider
 
 

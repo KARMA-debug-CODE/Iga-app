@@ -141,6 +141,8 @@ Same format as a quiz plus a `paper` block:
 | `geogebra` | `graphing`, `geometry`, `3d`, `scientific`, or a GeoGebra material ID | Apps load via GeoGebra's official deploy script |
 | `external` | a full `https://` URL | Must allow embedding in an iframe |
 
+Give each entry a French title in `title_fr` (and `description_fr` / `learning_goals_fr` when it has a description or goals); French readers see those, and the English texts otherwise.
+
 To add a new built-in lab, put a component in `frontend/src/sims/`, register it in `sims/registry.js`, keep its maths in a pure function with a unit test (see `physics.js`), and add a catalogue entry with `"provider": "builtin"`.
 
 ## Review workflow

@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -10,6 +11,7 @@ from apps.accounts.parents import NotParent
 from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin
 from apps.core.throttles import JoinRateThrottle
+from apps.core.utils import serializer_language
 from apps.gamification import services as gamification
 
 from .models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
@@ -20,7 +22,7 @@ REMOVED_TEXT = "[message removed by a moderator]"
 class StudyGroupSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
     is_member = serializers.BooleanField(read_only=True)
-    subject_name = serializers.CharField(source="subject.name", read_only=True, default=None)
+    subject_name = serializers.SerializerMethodField()
     subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="👥")
     join_code = serializers.SerializerMethodField()
 
@@ -45,6 +47,9 @@ class StudyGroupSerializer(serializers.ModelSerializer):
 
     def get_join_code(self, group):
         return group.join_code if getattr(group, "is_member", False) else None
+
+    def get_subject_name(self, obj):
+        return obj.subject.localized_name(serializer_language(self)) if obj.subject_id else None
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -120,7 +125,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
     def _member_group(self, pk):
         group = get_object_or_404(self.get_queryset(), pk=pk)
         if not group.is_member and not self.request.user.is_platform_admin:
-            raise PermissionDenied("Join the group first.")
+            raise PermissionDenied(_("Join the group first."))
         return group
 
     def perform_create(self, serializer):
@@ -138,12 +143,12 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         if not (user.is_platform_admin or is_owner(user, serializer.instance)):
-            raise PermissionDenied("Only the group owner can edit the group.")
+            raise PermissionDenied(_("Only the group owner can edit the group."))
         serializer.save()
 
     def perform_destroy(self, instance):
         if not (self.request.user.is_platform_admin or is_owner(self.request.user, instance)):
-            raise PermissionDenied("Only the group owner can delete the group.")
+            raise PermissionDenied(_("Only the group owner can delete the group."))
         audit.record(self.request, "delete_group", instance, name=instance.name)
         instance.delete()
 
@@ -161,8 +166,8 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
             StudyGroup.objects.select_for_update().filter(pk=group.pk).first()  # so two joins can't overfill it
             already = GroupMembership.objects.filter(group=group, user=request.user).exists()
             if not already and group.memberships.count() >= group.max_members:
-                raise ValidationError("This group is full.")
-            _, created = GroupMembership.objects.get_or_create(group=group, user=request.user)
+                raise ValidationError(_("This group is full."))
+            _obj, created = GroupMembership.objects.get_or_create(group=group, user=request.user)
         if created:
             gamification.on_group_joined(request.user, group)
         return Response(self.get_serializer(self.get_queryset().get(pk=group.pk)).data)
@@ -171,7 +176,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
     def join(self, request, pk=None):
         group = self.get_object()
         if group.is_private:
-            raise PermissionDenied("This group is private; ask a member for the code.")
+            raise PermissionDenied(_("This group is private; ask a member for the code."))
         return self._join(request, group)
 
     @action(detail=False, methods=["post"], url_path="join-by-code", throttle_classes=[JoinRateThrottle])
@@ -179,7 +184,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
         code = (request.data.get("code") or "").strip().upper()
         group = StudyGroup.objects.filter(join_code=code).first()
         if not group:
-            raise ValidationError({"code": "No group has that code."})
+            raise ValidationError({"code": _("No group has that code.")})
         return self._join(request, group)
 
     @action(detail=True, methods=["post"])
@@ -223,9 +228,9 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
     def _post_message(self, request, group):
         body = (request.data.get("body") or "").strip()
         if not body:
-            raise ValidationError({"body": "Write something first."})
+            raise ValidationError({"body": _("Write something first.")})
         if len(body) > 2000:
-            raise ValidationError({"body": "Messages are limited to 2000 characters."})
+            raise ValidationError({"body": _("Messages are limited to 2000 characters.")})
         message = Message.objects.create(group=group, author=request.user, body=body)
         return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
 
@@ -248,7 +253,7 @@ class MessageViewSet(viewsets.GenericViewSet):
         message = get_object_or_404(self.queryset, pk=self.kwargs["pk"])
         user = self.request.user
         if not user.is_platform_admin and not GroupMembership.objects.filter(group=message.group, user=user).exists():
-            raise PermissionDenied("You are not in this group.")
+            raise PermissionDenied(_("You are not in this group."))
         return message
 
     @action(detail=True, methods=["post"])
@@ -256,13 +261,13 @@ class MessageViewSet(viewsets.GenericViewSet):
         message = self.get_object()
         reason = (request.data.get("reason") or "").strip()[:300] or "No reason given"
         MessageReport.objects.get_or_create(message=message, reporter=request.user, defaults={"reason": reason})
-        return Response({"detail": "Thanks — a moderator will review this message."}, status=status.HTTP_201_CREATED)
+        return Response({"detail": _("Thanks — a moderator will review this message.")}, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post"])
     def hide(self, request, pk=None):
         message = self.get_object()
         if not can_moderate(request.user, message.group):
-            raise PermissionDenied("Only moderators can hide messages.")
+            raise PermissionDenied(_("Only moderators can hide messages."))
         message.is_hidden = True
         message.hidden_by = request.user
         message.save(update_fields=["is_hidden", "hidden_by"])

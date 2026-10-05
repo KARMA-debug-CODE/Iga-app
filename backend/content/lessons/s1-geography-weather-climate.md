@@ -85,7 +85,7 @@ Rwanda is called the "land of a thousand hills". Most of the country lies betwee
 Temperature **falls as altitude rises**, by about **6.5 °C for every 1,000 m** (roughly 0.65 °C for every 100 m). This happens because:
 
 - The sun heats the ground, and the ground then heats the air just above it. Air high above the lowlands is further from this source of heat.
-- Air at high altitude is **thinner** (less dense), so it holds less heat.
+- Air that rises **expands** as the pressure around it falls, and expanding air **cools**. Air high up is at lower pressure, so it is cooler.
 
 This is why the lower land of Bugesera and Kirehe in the east (around 1,300 to 1,500 m) is warm, while Musanze and the Nyungwe forest highlands (around 1,800 to 2,900 m) are cool, and the summit of Karisimbi can be close to freezing.
 

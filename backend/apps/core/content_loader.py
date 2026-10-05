@@ -105,12 +105,15 @@ def load_simulations(path):
             slug=item["slug"],
             defaults={
                 "title": item["title"],
+                "title_fr": item.get("title_fr", ""),
                 "provider": item["provider"],
                 "provider_id": item["provider_id"],
                 "description": item.get("description", ""),
+                "description_fr": item.get("description_fr", ""),
                 "grades": item.get("grades", []),
                 "topics": item.get("topics", ""),
                 "learning_goals": item.get("learning_goals", ""),
+                "learning_goals_fr": item.get("learning_goals_fr", ""),
                 "order": order,
             },
         )

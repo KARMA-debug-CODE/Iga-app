@@ -6,6 +6,7 @@ from django.db import connection
 from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
@@ -18,7 +19,7 @@ from apps.assessments.services import markable_answers, visible_quizzes
 from apps.classroom.models import Assignment, Classroom
 from apps.classroom.views import AssignmentSerializer, assignment_statuses
 from apps.core.utils import request_language
-from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject
+from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject, localized_lesson_titles
 from apps.curriculum.views import visible_lessons
 from apps.schools.access import has_premium
 from apps.schools.views import revenue_summary
@@ -165,15 +166,25 @@ def search(request):
     if len(term) < 2:
         return Response({"lessons": [], "simulations": [], "quizzes": [], "subjects": []})
     user = request.user
+    lang = request_language(request)
     premium = has_premium(user)
     # Without a subscription, premium lesson text isn't searchable (it would reveal what's inside).
-    body_match = Q(body__icontains=term) if premium else Q(body__icontains=term, is_free=True)
-    lessons = (
-        visible_lessons(user)
-        .filter(Q(title__icontains=term) | Q(summary__icontains=term) | body_match)
-        .select_related("unit", "unit__subject")[:10]
-    )
-    sims = Simulation.objects.filter(Q(title__icontains=term) | Q(topics__icontains=term))[:8]
+    free_only = {} if premium else {"is_free": True}
+    match = Q(title__icontains=term) | Q(summary__icontains=term) | Q(body__icontains=term, **free_only)
+    if lang != "en":
+        # French readers search the French text too (titles, summaries, and bodies under the same rule).
+        translated = Q(translations__language=lang) & (
+            Q(translations__title__icontains=term)
+            | Q(translations__summary__icontains=term)
+            | Q(translations__body__icontains=term, **free_only)
+        )
+        match |= translated
+    lessons = list(visible_lessons(user).filter(match).distinct().select_related("unit", "unit__subject")[:10])
+    titles = localized_lesson_titles(lessons, lang)
+    sim_match = Q(title__icontains=term) | Q(topics__icontains=term)
+    if lang == "fr":
+        sim_match |= Q(title_fr__icontains=term)
+    sims = Simulation.objects.filter(sim_match)[:8]
     quizzes = visible_quizzes(user).filter(title__icontains=term).select_related("subject")[:8]
     subjects = Subject.objects.filter(Q(name__icontains=term) | Q(name_fr__icontains=term))[:5]
     return Response(
@@ -181,20 +192,28 @@ def search(request):
             "lessons": [
                 {
                     "slug": les.slug,
-                    "title": les.title,
-                    "subject": les.unit.subject.name,
+                    "title": titles[les.id],
+                    "subject": les.unit.subject.localized_name(lang),
                     "grade": les.unit.grade,
                     "icon": les.unit.subject.icon,
                     "locked": not (les.is_free or premium),
                 }
                 for les in lessons
             ],
-            "simulations": [{"slug": s.slug, "title": s.title, "provider": s.provider} for s in sims],
+            "simulations": [
+                {"slug": s.slug, "title": (s.title_fr if lang == "fr" else "") or s.title, "provider": s.provider} for s in sims
+            ],
             "quizzes": [
-                {"id": q.id, "title": q.title, "kind": q.kind, "subject": q.subject.name, "locked": not (q.is_free or premium)}
+                {
+                    "id": q.id,
+                    "title": q.title,
+                    "kind": q.kind,
+                    "subject": q.subject.localized_name(lang),
+                    "locked": not (q.is_free or premium),
+                }
                 for q in quizzes
             ],
-            "subjects": [{"code": s.code, "name": s.name, "icon": s.icon} for s in subjects],
+            "subjects": [{"code": s.code, "name": s.localized_name(lang), "icon": s.icon} for s in subjects],
         }
     )
 
@@ -251,7 +270,7 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         before = {f: getattr(serializer.instance, f) for f in ("role", "teacher_approved", "is_active")}
         if serializer.instance == self.request.user and serializer.validated_data.get("role", "admin") != "admin":
-            raise ValidationError("You can't remove your own administrator role.")
+            raise ValidationError(_("You can't remove your own administrator role."))
         user = serializer.save()
         if before["teacher_approved"] != user.teacher_approved:
             # The Iga team's decision replaces any school's, and a withdrawal sticks.
@@ -269,6 +288,7 @@ class ReviewViewSet(viewsets.ViewSet):
     MODELS = {"lesson": Lesson, "quiz": Quiz, "resource": Resource}
 
     def list(self, request):
+        lang = request_language(request)
         lessons = Lesson.objects.filter(status=ContentStatus.REVIEW).select_related("unit__subject", "author")
         quizzes = Quiz.objects.filter(status=ContentStatus.REVIEW).select_related("subject", "author")
         resources = Resource.objects.filter(status=ContentStatus.REVIEW).select_related("subject", "uploaded_by")
@@ -280,7 +300,7 @@ class ReviewViewSet(viewsets.ViewSet):
                         "id": les.id,
                         "title": les.title,
                         "slug": les.slug,
-                        "subject": les.unit.subject.name,
+                        "subject": les.unit.subject.localized_name(lang),
                         "grade": les.unit.grade,
                         "author": les.author.display_name if les.author else None,
                         "updated_at": les.updated_at,
@@ -292,7 +312,7 @@ class ReviewViewSet(viewsets.ViewSet):
                         "type": "quiz",
                         "id": q.id,
                         "title": q.title,
-                        "subject": q.subject.name,
+                        "subject": q.subject.localized_name(lang),
                         "grade": q.grade,
                         "author": q.author.display_name if q.author else None,
                         "updated_at": q.updated_at,
@@ -304,7 +324,7 @@ class ReviewViewSet(viewsets.ViewSet):
                         "type": "resource",
                         "id": r.id,
                         "title": r.title,
-                        "subject": r.subject.name,
+                        "subject": r.subject.localized_name(lang),
                         "grade": r.grade,
                         "author": r.uploaded_by.display_name if r.uploaded_by else None,
                         "updated_at": r.created_at,
@@ -319,7 +339,7 @@ class ReviewViewSet(viewsets.ViewSet):
     def decide(self, request):
         model = self.MODELS.get(request.data.get("type"))
         if model is None:
-            raise ValidationError({"type": "Unknown content type."})
+            raise ValidationError({"type": _("Unknown content type.")})
         obj = get_object_or_404(model, pk=request.data.get("id"))
         approve = bool(request.data.get("approve"))
         obj.status = ContentStatus.PUBLISHED if approve else ContentStatus.DRAFT

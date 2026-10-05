@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.accounts.models import User
@@ -159,7 +160,7 @@ class PlatformSchoolSerializer(SchoolAdminSerializer):
         if self.instance is not None:
             clash = clash.exclude(pk=self.instance.pk)
         if clash.exists():
-            raise serializers.ValidationError({"name": "Another school in this district already has this name."})
+            raise serializers.ValidationError({"name": _("Another school in this district already has this name.")})
         return attrs
 
     def get_admins(self, school):

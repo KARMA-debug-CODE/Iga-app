@@ -27,3 +27,11 @@ class SimulationSerializer(serializers.ModelSerializer):
 
     def get_embed_url(self, sim):
         return sim.embed_url(self.context.get("lang", "en"))
+
+    def to_representation(self, sim):
+        data = super().to_representation(sim)
+        if self.context.get("lang") == "fr":
+            # French texts where they exist; English otherwise.
+            for field in ("title", "description", "learning_goals"):
+                data[field] = getattr(sim, f"{field}_fr") or data[field]
+        return data

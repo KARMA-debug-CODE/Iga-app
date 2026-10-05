@@ -70,6 +70,8 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Answers (error messages included) in the reader's language: the app sends Accept-Language.
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -115,6 +117,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en"
 LANGUAGES = [("en", "English"), ("fr", "Français")]
+# The French catalogue of Iga's own messages (see scripts/messages.py).
+LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Africa/Kigali"
 USE_I18N = True
 USE_TZ = True

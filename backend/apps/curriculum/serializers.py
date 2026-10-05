@@ -1,6 +1,8 @@
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.core.utils import serializer_language
 from apps.schools.access import content_access
 
 from .models import Lesson, LessonTranslation, Resource, Subject, Unit
@@ -127,7 +129,7 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if not attrs.get("url") and not attrs.get("file") and not (self.instance and (self.instance.url or self.instance.file)):
-            raise serializers.ValidationError("Provide a link or upload a file.")
+            raise serializers.ValidationError(_("Provide a link or upload a file."))
         return attrs
 
 
@@ -222,10 +224,10 @@ class LessonDetailSerializer(serializers.ModelSerializer):
 
 
 class LessonListSerializer(serializers.ModelSerializer):
-    subject = serializers.CharField(source="unit.subject.name", read_only=True)
+    subject = serializers.SerializerMethodField()
     subject_code = serializers.CharField(source="unit.subject.code", read_only=True)
     grade = serializers.CharField(source="unit.grade", read_only=True)
-    unit_title = serializers.CharField(source="unit.title", read_only=True)
+    unit_title = serializers.SerializerMethodField()
     locked = serializers.SerializerMethodField()
 
     class Meta:
@@ -248,6 +250,12 @@ class LessonListSerializer(serializers.ModelSerializer):
 
     def get_locked(self, lesson):
         return is_locked(self, lesson)
+
+    def get_subject(self, lesson):
+        return lesson.unit.subject.localized_name(serializer_language(self))
+
+    def get_unit_title(self, lesson):
+        return lesson.unit.localized_title(serializer_language(self))
 
 
 class LessonTranslationSerializer(serializers.ModelSerializer):
