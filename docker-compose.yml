@@ -70,7 +70,8 @@ services:
     build: ./backend
     # Every 10 minutes: re-check open payments (lost webhooks, abandoned checkouts) and send any
     # subscription reminders that are due (each is sent once, so running often is safe).
-    command: sh -c "while true; do python manage.py reconcile_payments; python manage.py billing_reminders; sleep 600; done"
+    # Waits until the backend has applied the database migrations, so the first run finds the tables.
+    command: sh -c "until python manage.py migrate --check > /dev/null 2>&1; do sleep 5; done; while true; do python manage.py reconcile_payments; python manage.py billing_reminders; sleep 600; done"
     environment: *backend-env
     depends_on:
       db:
