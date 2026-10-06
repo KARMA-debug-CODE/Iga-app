@@ -1788,3 +1788,73 @@ tr:last-child td {
     display: none !important;
   }
 }
+
+/* Books on lessons and units */
+
+.books .list-link {
+  align-items: flex-start;
+}
+
+.book-pill {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.book-hint {
+  margin-top: 2px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* SQL playground */
+
+.sql-output {
+  min-width: 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+}
+
+/* Side by side with the editor on wide screens: scroll inside instead of growing the page. */
+@media (min-width: 760px) {
+  .sql-output {
+    max-height: 640px;
+    overflow-y: auto;
+  }
+}
+
+.sql-result {
+  margin-bottom: 14px;
+}
+
+.sql-statement {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  white-space: pre-wrap;
+  margin-bottom: 4px;
+}
+
+.sql-output table {
+  font-size: 0.88rem;
+}
+
+.sql-changed code {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.sql-error {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}
+
+.playground-note {
+  margin: 0;
+  padding: 6px 10px;
+  border-top: 1px solid var(--border);
+}

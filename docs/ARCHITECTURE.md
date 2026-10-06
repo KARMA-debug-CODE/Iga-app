@@ -126,7 +126,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET/POST groups/` · `POST groups/{id}/join/` · `GET/POST groups/{id}/messages/?after=` · `GET/POST groups/{id}/notes/` | user | Study groups |
 | `POST messages/{id}/report/` · `POST messages/{id}/hide/` | member / moderator | Moderation |
 | `GET dashboard/` · `GET search/?q=` · `GET leaderboard/` · `GET badges/` | user | Home screen, search, motivation |
-| `GET tutor/status/` · `POST tutor/ask/` | user | AI tutor (lesson or question context; off during timed attempts; needs the school subscription) |
+| `GET tutor/status/` · `POST tutor/ask/` | user | AI tutor: from a lesson or question, or the Ask AI page with an optional `subject`; off everywhere while the student has a timed test or exam running; needs the school subscription |
 | `GET schools/?q=&district=` · `GET schools/districts/` | anyone | Verified school directory for the sign-up picker |
 | `GET/POST/DELETE my-school/` | user | See, choose (optionally with the school code) or leave a school |
 | `GET/PATCH school/` · `GET school/members/` · `POST school/members/decide/` · `POST school/members/{id}/remove/` · `POST school/new-code/` · `GET school/payments/` | school admin | Manage the school |
@@ -144,7 +144,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | Second factor | Optional TOTP (any authenticator app); each code works once. Required for the Django admin, which is off in production unless `DJANGO_ADMIN_ENABLED` |
 | Brute force | 10 login attempts/min **per account**; per-IP limits are generous because whole schools share one public IP; per-user limits on guessing class, group and parent codes and on password/2FA changes; shared through Redis across processes. Client IPs only trust `X-Forwarded-For` entries from our own proxies (`TRUSTED_PROXY_COUNT`) |
 | Authorisation | Role checks on every endpoint; teachers see only students enrolled in their current classes; students never reach the question bank; teacher self-registration needs admin approval; accounts with a teacher-issued temporary password can do nothing but change it |
-| Content injection | Markdown is rendered without raw HTML; code-playground previews run in a sandboxed iframe; Python runs in a Web Worker. Uploads get random names, must be an allowed type whose bytes match the extension, and nginx serves them with `nosniff`, a sandboxing CSP, and as downloads unless they are PDFs, images or media |
+| Content injection | Markdown is rendered without raw HTML; code-playground previews run in a sandboxed iframe; Python and SQL run in Web Workers, entirely in the browser. Uploads get random names, must be an allowed type whose bytes match the extension, and nginx serves them with `nosniff`, a sandboxing CSP, and as downloads unless they are PDFs, images or media |
 | Minors' safety | No direct messages, only group chat; reporting and hiding; teacher badge only for approved teachers; group members, chat and leaderboards show first name + initial; parents see only their linked child, read-only; the AI tutor never sees other students' data |
 | Accountability | `AuditLog` records content changes, approvals, marks, role changes and moderation, with actor and IP |
 | Transport | HTTPS enforced (redirect, HSTS, secure cookies) when `HTTPS` is on, which is the default in production |

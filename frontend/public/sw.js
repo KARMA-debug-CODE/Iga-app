@@ -81,8 +81,13 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-  // Built assets and the Python runtime never change under the same name.
-  if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/pyodide/") || SHELL.includes(url.pathname)) {
+  // Built assets and the language runtimes never change under the same name.
+  if (
+    url.pathname.startsWith("/assets/") ||
+    url.pathname.startsWith("/pyodide/") ||
+    url.pathname.startsWith("/runtimes/") ||
+    SHELL.includes(url.pathname)
+  ) {
     event.respondWith(cacheFirst(request));
   }
 });

@@ -17,6 +17,8 @@ LEVELS = [("O", "O-Level (S1–S3)"), ("A", "A-Level (S4–S6)")]
 
 LANGUAGES = [("en", "English"), ("fr", "Français")]
 LANGUAGE_CODES = [code for code, _ in LANGUAGES]
+# Books and other study material can also be in Rwanda's other school languages.
+RESOURCE_LANGUAGES = [*LANGUAGES, ("rw", "Kinyarwanda"), ("sw", "Kiswahili")]
 
 
 def level_for_grade(grade):

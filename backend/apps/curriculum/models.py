@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from apps.core.constants import GRADES, LANGUAGES, ContentStatus
+from apps.core.constants import GRADES, LANGUAGES, RESOURCE_LANGUAGES, ContentStatus
 from apps.core.uploads import RandomName, validate_upload
 
 
@@ -120,7 +120,10 @@ class LessonTranslation(models.Model):
 
 
 class Resource(models.Model):
-    """Textbooks, teacher guides, syllabi, videos and other study material."""
+    """Textbooks, teacher guides, syllabi, videos and other study material.
+
+    Books listed in content/books.json are loaded with a `content_id` and kept in step with that file;
+    material uploaded by teachers has no content_id."""
 
     class Kind(models.TextChoices):
         TEXTBOOK = "textbook", "Student textbook"
@@ -131,16 +134,28 @@ class Resource(models.Model):
         VIDEO = "video", "Video"
         LINK = "link", "Web link"
 
+    class Format(models.TextChoices):
+        PDF = "pdf", "PDF download"
+        PAGE = "page", "Page that links the book"
+        WEB = "web", "Read online"
+
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="resources")
     grade = models.CharField(max_length=2, choices=GRADES, blank=True)
     unit = models.ForeignKey(Unit, null=True, blank=True, on_delete=models.SET_NULL, related_name="resources")
     kind = models.CharField(max_length=20, choices=Kind.choices)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    url = models.URLField(blank=True)
+    description_fr = models.TextField("Description (French)", blank=True)
+    url = models.URLField(max_length=500, blank=True)
+    format = models.CharField(max_length=4, choices=Format.choices, blank=True)
     file = models.FileField(upload_to=RandomName("resources"), blank=True, validators=[validate_upload])
-    language = models.CharField(max_length=2, choices=LANGUAGES, default="en")
+    language = models.CharField(max_length=2, choices=RESOURCE_LANGUAGES, default="en")
+    publisher = models.CharField(max_length=120, blank=True)
+    licence = models.CharField(max_length=120, blank=True)
     is_official = models.BooleanField(default=False, help_text="Published by REB/NESA")
+    content_id = models.CharField(
+        max_length=100, blank=True, db_index=True, help_text="Set for books loaded from content/books.json"
+    )
     status = models.CharField(max_length=10, choices=ContentStatus.CHOICES, default=ContentStatus.PUBLISHED)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)

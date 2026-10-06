@@ -48,8 +48,8 @@ class LessonAdmin(admin.ModelAdmin):
 @admin.register(Resource)
 class ResourceAdmin(admin.ModelAdmin):
     list_display = ("title", "kind", "subject", "grade", "language", "is_official", "status")
-    list_filter = ("kind", "subject", "grade", "is_official", "status")
-    search_fields = ("title",)
+    list_filter = ("kind", "subject", "grade", "is_official", "status", "format")
+    search_fields = ("title", "content_id")
 
 
 admin.site.register(LessonProgress)

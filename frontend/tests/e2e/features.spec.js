@@ -88,6 +88,39 @@ test("Python runs in the browser", async ({ page }) => {
   await expect(page.locator(".python-output")).toContainText("Total: 55", { timeout: 45_000 });
 });
 
+test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
+  await login(page, "aline");
+  await page.goto("/playground");
+  await page.getByRole("tab", { name: /sql/i }).click();
+  await page.getByRole("button", { name: /run/i }).click();
+  const output = page.locator(".sql-output");
+  // The starter script: 4 + 6 rows inserted, then two queries.
+  await expect(output.locator("table").first()).toContainText("Aline", { timeout: 30_000 });
+  await expect(output.locator("table").nth(1)).toContainText("Grace90Aline71Eric63Jean48"); // best average first
+  await expect(output).toContainText("4 rows changed");
+
+  await page.getByLabel("SQL editor").fill("CREATE TABLE t (x INTEGER);\nSELEC x FROM t;");
+  await page.getByRole("button", { name: /run/i }).click();
+  await expect(output.locator(".sql-error")).toContainText(/syntax error/i);
+});
+
+test("books: every lesson lists the official textbook, and empty units point to it", async ({ page }) => {
+  await login(page, "aline");
+  await page.goto("/lessons/s2-maths-linear-graphs");
+  const books = page.locator("#books");
+  await expect(books.getByRole("heading", { name: /books for this lesson/i })).toBeVisible();
+  const official = books.locator("li", { hasText: /official/i }).first();
+  await expect(official).toContainText(/senior 2/i);
+  await expect(official).toContainText(/look for the unit about/i);
+  await expect(official.getByRole("link")).toHaveAttribute("href", /^https:\/\/elearning\.reb\.rw\//);
+
+  // Kinyarwanda has no Iga lessons yet: each unit sends students to the official book.
+  await page.goto("/learn/kinyarwanda?grade=S1");
+  await page.locator("details.unit summary").first().click();
+  await expect(page.getByText(/no iga lesson for this unit yet/i).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /books for s1/i })).toBeVisible();
+});
+
 test("teacher opens results analysis for a class quiz", async ({ page }) => {
   await login(page, "teacher");
   await page.goto("/classes");

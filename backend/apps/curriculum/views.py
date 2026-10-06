@@ -173,7 +173,7 @@ class LessonViewSet(
         data["resources"] = ResourceSerializer(
             Resource.objects.filter(status=ContentStatus.PUBLISHED)
             .filter(Q(unit=lesson.unit) | Q(unit__isnull=True, subject=lesson.unit.subject, grade=lesson.unit.grade))
-            .order_by("-is_official", "kind"),
+            .order_by("-is_official", "kind", "title"),
             many=True,
             context={"request": request},
         ).data
@@ -236,7 +236,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(**{field: params[param]})
         if params.get("official") in ("1", "true"):
             qs = qs.filter(is_official=True)
-        return qs
+        return qs.order_by("-is_official", "kind", "title")
 
     def perform_create(self, serializer):
         user = self.request.user

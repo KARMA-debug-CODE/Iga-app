@@ -6,6 +6,7 @@ idempotent: running it twice updates rather than duplicates.
 
     content/subjects.json          subjects with names in English and French
     content/units.json             unit titles per subject per grade
+    content/books.json             textbooks linked from every lesson and unit (official REB books + open books)
     content/simulations.json       virtual-lab catalogue
     content/lessons/*.md           lessons (front matter + Markdown)
     content/translations/*.<lang>.md
@@ -19,8 +20,8 @@ from pathlib import Path
 from django.db import transaction
 
 from apps.assessments.models import Choice, ExamPaper, Question, Quiz, QuizQuestion
-from apps.core.constants import GRADE_CODES, LANGUAGE_CODES, ContentStatus
-from apps.curriculum.models import Lesson, LessonTranslation, Subject, Unit
+from apps.core.constants import GRADE_CODES, LANGUAGE_CODES, RESOURCE_LANGUAGES, ContentStatus
+from apps.curriculum.models import Lesson, LessonTranslation, Resource, Subject, Unit
 from apps.simulations.models import Simulation
 
 DEFAULT_CONTENT_DIR = Path(__file__).resolve().parent.parent.parent / "content"
@@ -96,6 +97,65 @@ def load_units(path):
                 )
                 count += 1
     return count
+
+
+BOOK_FIELDS = ("id", "subject", "grades", "kind", "title", "url", "format", "language", "licence")
+
+
+def load_books(path):
+    """books.json: the books shown on lessons and units, one Resource per book and grade.
+
+    The file is the source of truth for these rows: books removed from it are removed from the site.
+    Material uploaded by teachers (no content_id) is never touched. Books are linked, never copied."""
+    path = Path(path)
+    if not path.exists():
+        return 0
+    data = json.loads(path.read_text(encoding="utf-8"))
+    subjects = {s.code: s for s in Subject.objects.all()}
+    languages = {code for code, _ in RESOURCE_LANGUAGES}
+    seen = set()
+    with transaction.atomic():
+        for item in data["books"]:
+            source = f"books.json: {item.get('id', '?')}"
+            missing = [name for name in BOOK_FIELDS if not item.get(name)]
+            if missing:
+                raise ContentError(f"{source}: missing {', '.join(missing)}")
+            if item["subject"] not in subjects:
+                raise ContentError(f"{source}: unknown subject {item['subject']}")
+            if item["kind"] not in Resource.Kind.values or item["format"] not in Resource.Format.values:
+                raise ContentError(f"{source}: bad kind or format")
+            if item["language"] not in languages:
+                raise ContentError(f"{source}: unknown language {item['language']}")
+            if not item["url"].startswith("https://"):
+                raise ContentError(f"{source}: the link must start with https://")
+            for grade in item["grades"]:
+                if grade not in GRADE_CODES:
+                    raise ContentError(f"{source}: unknown grade {grade}")
+                content_id = f"{item['id']}@{grade}"
+                if content_id in seen:
+                    raise ContentError(f"{source}: listed twice for {grade}")
+                seen.add(content_id)
+                Resource.objects.update_or_create(
+                    content_id=content_id,
+                    defaults={
+                        "subject": subjects[item["subject"]],
+                        "grade": grade,
+                        "unit": None,
+                        "kind": item["kind"],
+                        "title": item["title"],
+                        "description": item.get("description", ""),
+                        "description_fr": item.get("description_fr", ""),
+                        "url": item["url"],
+                        "format": item["format"],
+                        "language": item["language"],
+                        "publisher": item.get("publisher", ""),
+                        "licence": item["licence"],
+                        "is_official": bool(item.get("official")),
+                        "status": ContentStatus.PUBLISHED,
+                    },
+                )
+        Resource.objects.exclude(content_id="").exclude(content_id__in=seen).delete()
+    return len(seen)
 
 
 def load_simulations(path):
@@ -318,6 +378,7 @@ def load_all(content_dir=DEFAULT_CONTENT_DIR, log=print):
     content_dir = Path(content_dir)
     log(f"Subjects:     {load_subjects(content_dir / 'subjects.json')}")
     log(f"Units:        {load_units(content_dir / 'units.json')}")
+    log(f"Books:        {load_books(content_dir / 'books.json')}")
     log(f"Simulations:  {load_simulations(content_dir / 'simulations.json')}")
     log(f"Lessons:      {load_lessons(content_dir / 'lessons')}")
     log(f"Translations: {load_translations(content_dir / 'translations')}")

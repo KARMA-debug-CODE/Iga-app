@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "copy-pyodide": "node scripts/copy-pyodide.mjs",
-    "predev": "npm run copy-pyodide",
+    "copy-runtimes": "node scripts/copy-runtimes.mjs",
+    "predev": "npm run copy-runtimes",
     "dev": "vite",
-    "prebuild": "npm run copy-pyodide",
+    "prebuild": "npm run copy-runtimes",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -23,7 +23,8 @@
     "react-router-dom": "^7.18.4",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "sql.js": "^1.14.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

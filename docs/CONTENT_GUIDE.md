@@ -132,6 +132,51 @@ Same format as a quiz plus a `paper` block:
 - Use `--draft` to import for admin review before students see it.
 - Written questions (`essay`) go to teachers' marking queues. The `marking_guide` is shown to teachers, and to students after they submit.
 
+## Books: `content/books.json`
+
+Every lesson and every unit shows **📚 Books**: the official REB student's book for that subject and grade first, then a few
+free open textbooks. Units that have no Iga lesson yet point students to the official book, with the unit to look for.
+Books are **links** to the publishers' own sites (REB's e-learning portal, OpenStax, Standard Ebooks…); the app never copies
+them, so a book's licence does not need to allow redistribution. They need internet; they are not saved for offline use.
+
+```json
+{
+  "id": "reb-mathematics-s2",
+  "subject": "mathematics",
+  "grades": ["S2"],
+  "kind": "textbook",
+  "official": true,
+  "title": "Mathematics Senior 2 Student's Book",
+  "publisher": "Rwanda Basic Education Board (REB)",
+  "language": "en",
+  "url": "https://elearning.reb.rw/…",
+  "format": "pdf",
+  "licence": "© REB, free to read",
+  "description": "One short sentence for students.",
+  "description_fr": "La même phrase en français.",
+  "source": "Where the link came from (for editors; not shown in the app)"
+}
+```
+
+- `id` stays the same when you edit an entry. Official books are `reb-<subject>-<grade>`.
+- `grades`: the book is shown on every lesson and unit of those grades. `kind`: `textbook`, `teacher_guide` or `link`.
+- `official: true` only for REB books; keep **one** official student's book for every subject and grade (a test checks it).
+- `language`: `en`, `fr`, `rw` (Kinyarwanda) or `sw` (Kiswahili). `format`: `pdf` (the link downloads a PDF), `page` (a page
+  that links the book, such as a REB folder) or `web` (read online).
+- The link must start with `https://`. Removing an entry removes the book from the site on the next `load_curriculum`;
+  books that teachers add in the app are never touched.
+
+**Links change.** REB replaces its files from time to time, and the old links stop working. Every term, from a computer with
+normal internet access, run:
+
+```bash
+python manage.py check_book_links            # or --subject mathematics
+```
+
+It lists every broken link; find the new one on [elearning.reb.rw](https://elearning.reb.rw/) (guest access, no account)
+and update `books.json`. The links in the file were collected from REB's portal listings and the publishers' own pages;
+run the checker before a pilot.
+
 ## Simulations: `content/simulations.json`
 
 | provider | `provider_id` | Notes |

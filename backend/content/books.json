@@ -1,0 +1,1463 @@
+{
+  "_note": "Provisional: official REB books only, generated from the research. Replaced by the curated list.",
+  "books": [
+    {
+      "id": "reb-mathematics-s1",
+      "subject": "mathematics",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86879/mod_resource/content/1/Math%20S1-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-physics-s1",
+      "subject": "physics",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275110/mod_folder/content/0/SB/S1%20Physics%20SB%202026-207.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-chemistry-s1",
+      "subject": "chemistry",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85873/mod_resource/content/1/GENERAL%20EDU-Chemistry-S1-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-biology-s1",
+      "subject": "biology",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology and Health Sciences Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17480",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-ict-s1",
+      "subject": "ict",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85739/mod_resource/content/1/ICT%20S1%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-english-s1",
+      "subject": "english",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/5637/mod_resource/content/1/English%20S1.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kinyarwanda-s1",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kinyarwanda Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1428&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kiswahili-s1",
+      "subject": "kiswahili",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1917&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-french-s1",
+      "subject": "french",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "French Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/5644/mod_resource/content/1/FRENCH%20S1%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-history-s1",
+      "subject": "history",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/9192/mod_resource/content/1/HISTORY%20%20CITIZENSHIP%20S1%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-geography-s1",
+      "subject": "geography",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=12880&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-entrepreneurship-s1",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/9400/mod_resource/content/1/Entrepreneurship%20S1.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-mathematics-s2",
+      "subject": "mathematics",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10107/mod_resource/content/1/S2%20Maths.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-physics-s2",
+      "subject": "physics",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10149/mod_resource/content/2/Physics%20Learners%20book%20S2.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-chemistry-s2",
+      "subject": "chemistry",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85874/mod_resource/content/1/GENERAL%20EDU-Chemistry-S2-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-biology-s2",
+      "subject": "biology",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology and Health Sciences Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10649/mod_resource/content/1/Biology%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-ict-s2",
+      "subject": "ict",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10659/mod_resource/content/1/ICT%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-english-s2",
+      "subject": "english",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10097/mod_resource/content/1/English%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kinyarwanda-s2",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kinyarwanda Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/5268/mod_resource/content/1/S2%20KinyaRwanda%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kiswahili-s2",
+      "subject": "kiswahili",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=2948",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-french-s2",
+      "subject": "french",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "French Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/10144/mod_resource/content/1/S2%20French%20SB%20%282%29.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-history-s2",
+      "subject": "history",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/84702/mod_resource/content/1/HISTORY%20AND%20CITIZENSHIP%20STUDENT%20BOOK%20S2.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-geography-s2",
+      "subject": "geography",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10818/mod_resource/content/1/Geography%20and%20Environment%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-entrepreneurship-s2",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10855/mod_resource/content/1/Entrepreneurship%20S2.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-mathematics-s3",
+      "subject": "mathematics",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20Mathematics%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-physics-s3",
+      "subject": "physics",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11635/mod_resource/content/2/S3%20Physics%20Student%20Book.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-chemistry-s3",
+      "subject": "chemistry",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85875/mod_resource/content/1/GENERAL%20EDU-Chemistry-S3-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-biology-s3",
+      "subject": "biology",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology and Health Sciences Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11689/mod_resource/content/1/Biology%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-ict-s3",
+      "subject": "ict",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11698/mod_resource/content/1/ICT%20%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-english-s3",
+      "subject": "english",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20English%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kinyarwanda-s3",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kinyarwanda Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/11570/mod_resource/content/1/Kinyarwanda%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kiswahili-s3",
+      "subject": "kiswahili",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17482",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-french-s3",
+      "subject": "french",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "French Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/11628/mod_resource/content/1/French%20%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-history-s3",
+      "subject": "history",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/84705/mod_resource/content/1/S3%20HISTORY%20AND%20CITIZENSHIP%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-geography-s3",
+      "subject": "geography",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20Geography%20SB%20F%202026-2027....pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-entrepreneurship-s3",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11724/mod_resource/content/1/S3%20Entrepreneurship%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-mathematics-s4",
+      "subject": "mathematics",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=10419",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-physics-s4",
+      "subject": "physics",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1596",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-chemistry-s4",
+      "subject": "chemistry",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/5916/mod_resource/content/1/chemistry%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-biology-s4",
+      "subject": "biology",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology and Health Sciences Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10666/mod_resource/content/1/Biology%20S4%20%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-ict-s4",
+      "subject": "ict",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85742/mod_resource/content/1/Computer%20Science%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-english-s4",
+      "subject": "english",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275114/mod_folder/content/0/SB/S4%20English%20SB%20non_language.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kinyarwanda-s4",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kinyarwanda Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86223/mod_resource/content/1/IKINYARWANDA%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kiswahili-s4",
+      "subject": "kiswahili",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86857/mod_resource/content/1/Kiswahili%20Languages%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-french-s4",
+      "subject": "french",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "French Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/5838/mod_resource/content/2/FRENCH%20LFK%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-history-s4",
+      "subject": "history",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275114/mod_folder/content/0/SB/S4%20History%20for%20Language%20SB%202026-2027%20.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-geography-s4",
+      "subject": "geography",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10641/mod_resource/content/1/Geography%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-economics-s4",
+      "subject": "economics",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Economics Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10721/mod_resource/content/1/Economics%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-entrepreneurship-s4",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/45712/mod_resource/content/1/Entrepreneurship%20S4_SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-literature-s4",
+      "subject": "literature",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Literature in English Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86873/mod_resource/content/1/GENERAL%20EDU-Literature%20in%20english-S4-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-general-studies-s4",
+      "subject": "general-studies",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "General Studies and Communication Skills Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86283/mod_resource/content/1/GENERAL%20EDU-GSCS-S4-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-mathematics-s5",
+      "subject": "mathematics",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/15666/mod_resource/content/1/MATH%20S5%20SB%20Core.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-physics-s5",
+      "subject": "physics",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11053/mod_resource/content/1/PHYSICS%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-chemistry-s5",
+      "subject": "chemistry",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20Chemistry%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-biology-s5",
+      "subject": "biology",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology and Health Sciences Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=3633&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-ict-s5",
+      "subject": "ict",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20ICT%20SB%20F%202026-2027....pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-english-s5",
+      "subject": "english",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=10363",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kinyarwanda-s5",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kinyarwanda Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86224/mod_resource/content/1/IKINYARWANDA%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kiswahili-s5",
+      "subject": "kiswahili",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86863/mod_resource/content/1/Kiswahili%20Languages%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-french-s5",
+      "subject": "french",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "French Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20Franc%CC%A7ais,%20Manuel%20de%20l_eleve%20options%20litteraires.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-history-s5",
+      "subject": "history",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20History%20Advanced%20Level%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-geography-s5",
+      "subject": "geography",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11819/mod_resource/content/1/Geography%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-economics-s5",
+      "subject": "economics",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Economics Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11938/mod_resource/content/1/Economics%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-entrepreneurship-s5",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/45714/mod_resource/content/1/Entrepreneurship%20S5_SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-literature-s5",
+      "subject": "literature",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Literature in English Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86875/mod_resource/content/1/GENERAL%20EDU-Literature%20in%20english-S5-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-general-studies-s5",
+      "subject": "general-studies",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "General Studies and Communication Skills Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86285/mod_resource/content/1/GENERAL%20EDU-GSCS-S5-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-mathematics-s6",
+      "subject": "mathematics",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/14797/mod_resource/content/1/Core%20Math%20S6%20SB..pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-physics-s6",
+      "subject": "physics",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=4136&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-chemistry-s6",
+      "subject": "chemistry",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11991/mod_resource/content/1/Chemistry%20S6%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-biology-s6",
+      "subject": "biology",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology and Health Sciences Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=4196&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-ict-s6",
+      "subject": "ict",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/84648/mod_resource/content/1/ICT%20S6%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-english-s6",
+      "subject": "english",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/42653/mod_resource/content/1/English%20S6%20SB%20CS6.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kinyarwanda-s6",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kinyarwanda Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/275856/mod_folder/content/0/SB/S6%20Ikinyarwanda%20SB%20amashami%20atari%20indimi.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-kiswahili-s6",
+      "subject": "kiswahili",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/pluginfile.php/275856/mod_folder/content/0/SB/S6%20Kiswahili%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-french-s6",
+      "subject": "french",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "French Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/11963/mod_resource/content/3/French%20S6%20SB%20LFK.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-history-s6",
+      "subject": "history",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=4215&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page that lists this book.",
+      "description_fr": "Ouvre la page du REB qui contient ce livre.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-geography-s6",
+      "subject": "geography",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/38901/mod_resource/content/1/Geography%20SB%20S6.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-economics-s6",
+      "subject": "economics",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Economics Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/14848/mod_resource/content/1/Economics%20S6%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-entrepreneurship-s6",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/55372/mod_resource/content/1/SB%20S6%20Entrepreneurship%20(1).pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-literature-s6",
+      "subject": "literature",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Literature in English Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/12059/mod_resource/content/1/Literature%20S6%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    },
+    {
+      "id": "reb-general-studies-s6",
+      "subject": "general-studies",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "General Studies and Communication Skills Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/12066/mod_resource/content/1/General%20Studies%20and%20Comm.%20Skills%20S6%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "The official REB student's book.",
+      "description_fr": "Le manuel officiel du REB.",
+      "source": "REB research (provisional list)"
+    }
+  ]
+}

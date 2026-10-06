@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import BookList, { officialTextbooks } from "../components/Books";
 import { LockBadge } from "../components/Locked";
 import { GradeChips, Loader, Progress } from "../components/ui";
 import { results } from "../api";
@@ -33,36 +34,6 @@ function SaveOffline({ unit }) {
   );
 }
 
-function ResourceList({ code, grade }) {
-  const { t } = useI18n();
-  const state = useApi("/resources/", { params: { subject: code, grade } });
-  const list = results(state.data);
-  if (!list.length) return null;
-  return (
-    <section className="section">
-      <h2>{t("learn.resources")}</h2>
-      <div className="card">
-        <ul className="list">
-          {list.map((r) => (
-            <li key={r.id}>
-              <a className="list-link" href={r.file_url || r.url} target="_blank" rel="noopener noreferrer">
-                <div className="icon-tile" aria-hidden>
-                  {r.kind === "video" ? "🎬" : r.kind === "link" ? "🔗" : "📄"}
-                </div>
-                <div className="grow">
-                  <strong>{r.title}</strong>
-                  {r.description && <div className="small muted">{r.description}</div>}
-                </div>
-                {r.is_official && <span className="pill pill-success">{t("learn.official")}</span>}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 function QuizList({ code, grade }) {
   const { t } = useI18n();
   const state = useApi("/quizzes/", { params: { subject: code, grade } });
@@ -91,6 +62,8 @@ export default function Subject() {
   const [params, setParams] = useSearchParams();
   const grade = params.get("grade") || user.grade || "S1";
   const state = useApi(`/subjects/${code}/`, { params: { grade, lang } });
+  const books = results(useApi("/resources/", { params: { subject: code, grade } }).data);
+  const textbooks = officialTextbooks(books);
 
   return (
     <Loader state={state}>
@@ -123,6 +96,13 @@ export default function Subject() {
             </div>
           )}
 
+          {books.length > 0 && (
+            <section className="section" id="books">
+              <h2>📚 {t("books.forGrade", { grade })}</h2>
+              <BookList books={books} />
+            </section>
+          )}
+
           <div className="stack" style={{ marginTop: 16 }}>
             {subject.units.map((unit) => (
               <details className="unit" key={unit.id} open={unit.lessons.length > 0}>
@@ -153,6 +133,13 @@ export default function Subject() {
                         </li>
                       ))}
                     </ul>
+                  ) : textbooks.length ? (
+                    <>
+                      <p className="small" style={{ margin: "0 0 6px" }}>
+                        {t("books.noLessonYet")}
+                      </p>
+                      <BookList books={textbooks} unit={unit} />
+                    </>
                   ) : (
                     <p className="muted small" style={{ margin: 0 }}>
                       {t("learn.noLessons")}
@@ -164,7 +151,6 @@ export default function Subject() {
           </div>
 
           <QuizList code={code} grade={grade} />
-          <ResourceList code={code} grade={grade} />
         </>
       )}
     </Loader>

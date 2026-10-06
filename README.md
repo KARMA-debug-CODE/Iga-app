@@ -5,7 +5,8 @@
 - **Lessons** that follow the competence-based curriculum, with maths rendering, worked examples and live code editors (HTML/JS and Python)
 - **Virtual labs**: our own offline simulations plus PhET and GeoGebra
 - **Practice quizzes** with instant feedback, and **past papers** in timed exam mode
-- **An AI study tutor** (Claude) that explains lessons and gives hints without handing out answers
+- **An AI study tutor** (Claude) that explains lessons and gives hints without handing out answers, plus an **Ask AI** page for questions on any subject
+- **Books on every lesson and unit**: the official REB student's book for that subject and grade, plus free open textbooks
 - **Classes** where teachers set work, mark written answers, analyse results and track progress
 - **Parent access** so a guardian can follow a child's progress
 - **Study groups** with moderated chat and shared notes
@@ -14,8 +15,6 @@
 It is mobile-first, installable as an app (PWA), works in **English and French**, and whole units can be saved for offline study.
 
 **Schools pay, students learn.** Students and teachers choose their school; the school administrator pays one monthly subscription (USD 200 by default) and every approved member of that school gets the full library. Members of schools that haven't subscribed get the free starter lessons. See [School subscriptions](docs/SUBSCRIPTIONS.md).
-
-> This repository also contains some older, unrelated files (`robot.py.4`, `crypto.py.3`, …). They are untouched.
 
 ---
 
@@ -26,7 +25,8 @@ It is mobile-first, installable as an app (PWA), works in **English and French**
 | **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, all 39 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
 | **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
 | **Coding** | HTML/CSS/JS playground, and real Python in the browser (Pyodide, self-hosted, works offline) inside lessons and in the playground |
-| **AI tutor** | Lesson and question help from Claude, with context the server controls: switched off during exams and timed tests, never shown answers before the student may see them, rate-limited, and off unless an Anthropic API key is configured |
+| **AI tutor** | Lesson and question help from Claude, and an **Ask AI** page (pick a subject, or ask about anything you study), with context the server controls: switched off everywhere while a student has an exam or timed test running, never shown answers before the student may see them, rate-limited, and off unless `ANTHROPIC_API_KEY` is set |
+| **Books** | Every lesson lists the official REB student's book for its subject and grade (with the unit to look for) and free open textbooks (OpenStax, Standard Ebooks, Saylor, CS Field Guide…); units without an Iga lesson point to the textbook. Books are links, kept in `content/books.json`; `check_book_links` finds links that have moved |
 | **Offline** | Save a unit for offline use (lessons, maths fonts, built-in labs); the app opens without a connection for a student who logged in before, and logging out clears the saved pages on shared computers |
 | **Assessment** | 6 question types (MCQ, multi-select, true/false, numeric with tolerance, short answer, essay); practice and exam modes; server-enforced time limits; per-attempt shuffling; answers never sent before submit; partial credit; teacher marking queue; explanations and marking guides |
 | **Past papers** | Library filtered by level, year and subject; PDF and marking-guide links; interactive versions. Ships with **2 clearly-labelled unofficial sample papers**. Real NESA papers go in through the importer |
@@ -134,6 +134,6 @@ docker-compose.yml       PostgreSQL + Redis + backend + nginx
 
 - **Curriculum alignment.** Unit titles follow the usual progression of the Rwandan competence-based curriculum, but they **have not yet been checked line by line against the official REB syllabi**. Every unit is flagged `alignment_verified = false` and the app shows a "draft outline" notice until a teacher verifies it.
 - **Past papers.** The two bundled papers are **unofficial practice papers** written for this project and are labelled as such everywhere. Official national exam papers belong to NESA; import them with `import_exam_paper` once you have permission to publish them.
-- **Textbooks.** REB textbooks are linked from the REB e-learning portal rather than copied. Confirm redistribution rights before uploading PDFs.
+- **Textbooks.** Every lesson and unit links the official REB student's book for its subject and grade, plus free open textbooks (`content/books.json`). Books are linked, never copied: confirm redistribution rights before uploading any PDF. REB links change when REB re-uploads a file, so run `python manage.py check_book_links` each term (see the [content guide](docs/CONTENT_GUIDE.md#books-contentbooksjson)).
 - **Translations.** The French interface strings, server messages and emails, unit titles, lab descriptions and lesson translations were machine-translated and checked, but not yet by a fluent teacher. Have them reviewed before a pilot (lessons carry `reviewed: false` until then). Quizzes are in English only for now. Server messages live in `backend/locale/fr/LC_MESSAGES/django.po`: after marking a new message with `_()`, run `python scripts/messages.py extract`, translate it, then `python scripts/messages.py compile` (a test fails until every message has a French translation).
 - **Simulations.** PhET simulations are © University of Colorado Boulder, licensed CC-BY 4.0. GeoGebra apps are loaded from geogebra.org under GeoGebra's terms.

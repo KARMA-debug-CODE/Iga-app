@@ -72,6 +72,8 @@ class LessonSummarySerializer(serializers.ModelSerializer):
 class UnitSerializer(serializers.ModelSerializer):
     lessons = serializers.SerializerMethodField()
     title = serializers.SerializerMethodField()
+    # Both titles, so the app can name the unit in the language of each textbook.
+    title_en = serializers.CharField(source="title", read_only=True)
 
     class Meta:
         model = Unit
@@ -80,6 +82,8 @@ class UnitSerializer(serializers.ModelSerializer):
             "grade",
             "number",
             "title",
+            "title_en",
+            "title_fr",
             "summary",
             "key_unit_competence",
             "syllabus_reference",
@@ -110,10 +114,14 @@ class ResourceSerializer(serializers.ModelSerializer):
             "kind",
             "title",
             "description",
+            "description_fr",
             "url",
+            "format",
             "file",
             "file_url",
             "language",
+            "publisher",
+            "licence",
             "is_official",
             "status",
             "created_at",
@@ -206,6 +214,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             "id": unit.id,
             "number": unit.number,
             "title": unit.localized_title(self.context.get("lang", "en")),
+            "title_en": unit.title,
+            "title_fr": unit.title_fr,
             "grade": unit.grade,
         }
 

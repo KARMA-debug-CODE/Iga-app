@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "../api";
 import Markdown from "../components/Markdown";
+import BookList from "../components/Books";
 import { LockBadge, LockedNotice } from "../components/Locked";
 import SimEmbed from "../components/SimEmbed";
 import TutorPanel from "../components/TutorPanel";
@@ -101,6 +102,14 @@ export default function Lesson() {
               </>
             )}
 
+            {/* Shown on locked lessons too: the REB books are free for every student. */}
+            {lesson.resources.length > 0 && (
+              <section className="section" id="books">
+                <h2>📚 {t("books.forLesson")}</h2>
+                <BookList books={lesson.resources} unit={lesson.unit} />
+              </section>
+            )}
+
             {extraSims.length > 0 && (
               <section className="section">
                 <h2>🔬 {t("learn.simulations")}</h2>
@@ -140,22 +149,6 @@ export default function Lesson() {
                     </button>
                   ))}
                 </div>
-              </section>
-            )}
-
-            {lesson.resources.length > 0 && (
-              <section className="section">
-                <h2>{t("learn.resources")}</h2>
-                <ul className="list card">
-                  {lesson.resources.map((r) => (
-                    <li key={r.id}>
-                      <a href={r.file_url || r.url} target="_blank" rel="noopener noreferrer">
-                        {r.title}
-                      </a>{" "}
-                      {r.is_official && <span className="pill pill-success">{t("learn.official")}</span>}
-                    </li>
-                  ))}
-                </ul>
               </section>
             )}
 
