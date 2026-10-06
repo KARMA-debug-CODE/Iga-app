@@ -52,6 +52,21 @@ test("Ask AI page: choose a subject, ask, keep the chat for the tab, start again
   await expect(page.locator(".ask .bubble")).toHaveCount(0);
 });
 
+test("logging out in one tab ends the session and the Ask AI chat in the others", async ({ page, context }) => {
+  await context.route("**/api/tutor/status/", (route) => route.fulfill({ json: { enabled: true, reason: "" } }));
+  await context.route("**/api/tutor/ask/", (route) => route.fulfill({ json: { reply: "A cell is the basic unit of life." } }));
+  await login(page, "aline");
+  const other = await context.newPage();
+  await other.goto("/ask");
+  await other.getByLabel(/type your question/i).fill("What is a cell?");
+  await other.getByLabel(/type your question/i).press("Enter");
+  await expect(other.getByText(/basic unit of life/)).toBeVisible();
+
+  await logout(page);
+  await expect(other).toHaveURL(/\/login/);
+  expect(await other.evaluate(() => Object.keys(sessionStorage).filter((k) => k.startsWith("iga.ask.")))).toEqual([]);
+});
+
 test("Ask AI page explains when the student's school hasn't subscribed", async ({ page }) => {
   await page.route("**/api/tutor/status/", (route) =>
     route.fulfill({ json: { enabled: false, reason: "subscription_required" } }),

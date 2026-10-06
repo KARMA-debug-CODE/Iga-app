@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { api, ApiError, refreshSession, setAccessToken, setSessionExpiredHandler } from "./api";
-import { clearOfflineData, forgetPremiumLessons } from "./offline";
+import { clearAskHistory, clearOfflineData, forgetPremiumLessons } from "./offline";
 
 const AuthContext = createContext(null);
 const USER_KEY = "iga.user";
@@ -60,6 +60,7 @@ export function AuthProvider({ children }) {
           // The server says this session is over (expired or revoked) without anyone pressing
           // Log out: don't leave that person's saved pages for whoever signs in next.
           if (rememberedUser()) clearOfflineData().catch(() => {});
+          clearAskHistory(); // this tab's chats, even if another tab already logged out
           setUser(null);
           return;
         }
@@ -70,6 +71,28 @@ export function AuthProvider({ children }) {
       })
       .finally(() => setReady(true));
   }, []);
+
+  // Logging out (or someone else logging in) in another tab ends this tab's session too, so a shared
+  // computer never keeps showing the previous student's pages or Ask AI chats.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return undefined;
+    function onStorage(event) {
+      if (event.key !== USER_KEY) return;
+      let other = null;
+      try {
+        other = JSON.parse(event.newValue || "null");
+      } catch {
+        /* unreadable: treat as logged out */
+      }
+      if (other?.id === userId) return;
+      setAccessToken(null);
+      clearAskHistory();
+      setUser(null);
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [userId]);
 
   // Without the subscription, saved copies of premium lessons are deleted.
   const premium = Boolean(user?.access?.premium);

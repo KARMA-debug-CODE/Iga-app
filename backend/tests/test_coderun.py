@@ -110,6 +110,21 @@ def test_runner_down_or_broken(client_for, student, piston, settings):
     assert response.status_code == 503 and response.data["code"] == "unavailable"
 
 
+def test_one_run_per_student_and_a_site_wide_cap(client_for, student, other_student, piston, settings):
+    from django.core.cache import cache
+
+    from apps.coderun import services
+
+    settings.CODE_RUNNER_MAX_RUNNING = 1
+    with services.run_slot(student.pk):  # this student's first program is still running
+        response = run(client_for(student))
+        assert response.status_code == 429 and response.data["code"] == "already_running"
+        response = run(client_for(other_student))  # the only slot is taken
+        assert response.status_code == 503 and response.data["code"] == "busy"
+    assert run(client_for(other_student)).status_code == 200  # slots are given back
+    assert cache.get(f"coderun:user:{other_student.pk}") is None and cache.get("coderun:slot:0") is None
+
+
 def test_input_is_checked(client_for, student, piston):
     client = client_for(student)
     assert run(client, language="python").status_code == 400

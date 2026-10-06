@@ -225,13 +225,19 @@ def test_an_expired_timed_test_does_not_keep_the_tutor_off(client_for, student, 
     assert Attempt.objects.get(pk=attempt["id"]).status != Attempt.Status.IN_PROGRESS
 
 
-def test_an_abandoned_exam_mode_quiz_stops_blocking_after_a_while(client_for, student, subject, unit, tutor):
+def test_an_open_exam_mode_quiz_keeps_the_tutor_off_until_submitted(client_for, student, subject, unit, tutor):
+    from datetime import timedelta
+
     from apps.assessments.models import Attempt
 
-    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], feedback_mode="after_submit")
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], feedback_mode="after_submit", title="Class test")
     client = client_for(student)
     attempt = _start(client, quiz)
-    assert client.post("/api/tutor/ask/", {"message": "?"}, format="json").status_code == 403
-    started = Attempt.objects.get(pk=attempt["id"]).started_at
-    Attempt.objects.filter(pk=attempt["id"]).update(started_at=started - services.EXAM_WINDOW)
+    # Even the next day: the exam is still open, so the tutor stays off and says what to submit.
+    Attempt.objects.filter(pk=attempt["id"]).update(
+        started_at=Attempt.objects.get(pk=attempt["id"]).started_at - timedelta(days=1)
+    )
+    response = client.post("/api/tutor/ask/", {"message": "?"}, format="json")
+    assert response.status_code == 403 and "Class test" in response.data["detail"]
+    client.post(f"/api/attempts/{attempt['id']}/submit/")
     assert client.post("/api/tutor/ask/", {"message": "?"}, format="json").status_code == 200

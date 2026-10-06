@@ -218,7 +218,10 @@ TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
 # A Piston server (https://github.com/engineer-man/piston) that only Django can reach; empty = off.
 # Docker Compose starts one at http://coderunner:2000. See apps/coderun/services.py.
 CODE_RUNNER_URL = os.environ.get("CODE_RUNNER_URL", "").strip()
-CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "30"))
+# Compile (10 s) + run (6 s) + a margin. Runs at once across the site: match Piston's
+# PISTON_MAX_CONCURRENT_JOBS so requests never wait in its queue holding a web-server thread.
+CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "20"))
+CODE_RUNNER_MAX_RUNNING = int(os.environ.get("CODE_RUNNER_MAX_RUNNING", "4"))
 
 # --- School subscriptions -------------------------------------------------
 # Each school pays a flat monthly price for all its members. Prices per currency:

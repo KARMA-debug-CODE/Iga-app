@@ -10,11 +10,9 @@ What the tutor is allowed to see is decided here, not by the model:
 """
 
 import logging
-from datetime import timedelta
 
 import anthropic
 from django.conf import settings
-from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
@@ -30,8 +28,6 @@ log = logging.getLogger(__name__)
 LANGUAGE_NAMES = {"en": "English", "fr": "French"}
 MAX_HISTORY_MESSAGES = 10
 MAX_MESSAGE_CHARS = 2000
-# An untimed exam-mode quiz counts as "being sat" for this long after it was started.
-EXAM_WINDOW = timedelta(hours=3)
 
 SYSTEM_PROMPT = """You are Iga Tutor, a patient and encouraging study helper for secondary-school students in Rwanda (Senior 1 to Senior 6) following the Rwandan competence-based curriculum.
 
@@ -137,19 +133,20 @@ def _solution_text(question, answer):
     return "\n".join(parts)
 
 
-def exam_in_progress(user):
-    """True while the student is sitting a timed test or an exam-mode quiz, so no tutor (in a lesson,
-    on the Ask AI page or in another tab) can help with it."""
-    now = timezone.now()
-    open_attempts = Attempt.objects.filter(user=user, status=Attempt.Status.IN_PROGRESS).select_related("quiz")
+def open_exam(user):
+    """The timed test or exam-mode quiz this student still has open, if any.
+
+    While there is one, no tutor (in a lesson, on the Ask AI page or in another tab) can help with it,
+    until it is submitted or its time runs out."""
+    open_attempts = (
+        Attempt.objects.filter(user=user, status=Attempt.Status.IN_PROGRESS).select_related("quiz").order_by("-started_at")
+    )
     for attempt in open_attempts:
         if assessment_services.finalize_if_expired(attempt):
             continue
-        if attempt.deadline is not None:
-            return True
-        if attempt.quiz.feedback_mode == Quiz.FeedbackMode.AFTER_SUBMIT and now - attempt.started_at < EXAM_WINDOW:
-            return True
-    return False
+        if attempt.deadline is not None or attempt.quiz.feedback_mode == Quiz.FeedbackMode.AFTER_SUBMIT:
+            return attempt
+    return None
 
 
 def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lang=None, subject_code=None):
@@ -232,8 +229,14 @@ def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question
         raise ValidationError({"message": _("Please keep questions under %(n)s characters.") % {"n": MAX_MESSAGE_CHARS}})
     history = clean_history(history)
     context, lesson, attempt, question, subject = build_context(user, lesson_slug, attempt_id, question_id, lang, subject_code)
-    if exam_in_progress(user):
-        raise PermissionDenied(_("The tutor is switched off during exams and timed tests. Good luck!"))
+    exam = open_exam(user)
+    if exam is not None:
+        raise PermissionDenied(
+            _(
+                "The tutor is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use the tutor again."
+            )
+            % {"quiz": exam.quiz.title}
+        )
     code = reply_language(user, lang)
 
     response = get_client().beta.messages.create(

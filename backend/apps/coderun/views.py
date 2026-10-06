@@ -38,7 +38,18 @@ class CodeRunView(APIView):
         data.is_valid(raise_exception=True)
         v = data.validated_data
         try:
-            result = services.run(v["language"], v["code"], v.get("stdin", ""))
+            with services.run_slot(request.user.pk):
+                result = services.run(v["language"], v["code"], v.get("stdin", ""))
+        except services.AlreadyRunning:
+            return Response(
+                {"detail": _("Your last program is still running. Wait for it to finish."), "code": "already_running"},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+        except services.RunnerBusy:
+            return Response(
+                {"detail": _("Many students are running programs right now. Try again in a few seconds."), "code": "busy"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         except services.RunnerUnavailable as exc:
             log.warning("Code runner unavailable: %s", exc)
             return Response(

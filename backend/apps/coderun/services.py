@@ -10,8 +10,10 @@ is empty, C++ and Java are switched off. Python and SQL run in the browser and n
 import json
 import urllib.error
 import urllib.request
+from contextlib import contextmanager
 
 from django.conf import settings
+from django.core.cache import cache
 
 MAX_CODE_CHARS = 20_000
 MAX_STDIN_CHARS = 8_000
@@ -31,6 +33,36 @@ class RunnerUnavailable(Exception):
 
 class RunnerError(Exception):
     """Piston answered with an error (for example, a runtime that isn't installed)."""
+
+
+class AlreadyRunning(Exception):
+    """This user already has a program running."""
+
+
+class RunnerBusy(Exception):
+    """Every run slot is taken."""
+
+
+@contextmanager
+def run_slot(user_id):
+    """Allow one run per user and CODE_RUNNER_MAX_RUNNING runs in all, refusing at once instead of queueing.
+
+    Each waiting run would hold a web-server thread, so without this a few accounts could tie up the
+    whole API. Slots are cache keys that expire on their own, so a crashed request can't keep one."""
+    ttl = int(settings.CODE_RUNNER_TIMEOUT_SECONDS) + 5
+    user_key = f"coderun:user:{user_id}"
+    if not cache.add(user_key, 1, ttl):
+        raise AlreadyRunning
+    slot = next(
+        (f"coderun:slot:{i}" for i in range(settings.CODE_RUNNER_MAX_RUNNING) if cache.add(f"coderun:slot:{i}", 1, ttl)), None
+    )
+    if slot is None:
+        cache.delete(user_key)
+        raise RunnerBusy
+    try:
+        yield
+    finally:
+        cache.delete_many([slot, user_key])
 
 
 def enabled():
