@@ -42,6 +42,7 @@ export default function Layout() {
         { to: "/labs", icon: "🔬", label: t("nav.labs") },
         { to: "/practice", icon: "📝", label: t("nav.practice") },
         { to: "/playground", icon: "💻", label: t("nav.playground") },
+        { to: "/ask", icon: "🤖", label: t("nav.ask") },
       ]
     : [
         ...(isParent
@@ -51,6 +52,7 @@ export default function Layout() {
               { to: "/leaderboard", icon: "🏆", label: t("nav.leaderboard") },
             ]),
         { to: "/playground", icon: "💻", label: t("nav.playground") },
+        { to: "/ask", icon: "🤖", label: t("nav.ask") },
         ...(isTeacher
           ? [
               { to: "/teach", icon: "🧑🏽‍🏫", label: t("nav.teach") },

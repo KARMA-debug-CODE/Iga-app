@@ -179,3 +179,59 @@ def test_tutor_follows_the_reading_language(client_for, student, lesson, tutor):
     tutor.response = fake_response(text="", stop_reason="refusal")
     refused = client_for(student).post("/api/tutor/ask/", {"message": "hors sujet", "lang": "fr"}, format="json")
     assert refused.data["reply"] == services.REFUSAL_REPLIES["fr"]
+
+
+def test_ask_ai_page_sends_the_chosen_subject(client_for, student, subject, tutor):
+    response = client_for(student).post(
+        "/api/tutor/ask/", {"message": "What is a ratio?", "subject": subject.code}, format="json"
+    )
+    assert response.status_code == 200
+    assert "chose the subject Mathematics" in system_text(tutor.calls[0])
+    assert TutorExchange.objects.get().subject == subject
+
+
+def test_ask_ai_page_rejects_an_unknown_subject(client_for, student, tutor):
+    response = client_for(student).post("/api/tutor/ask/", {"message": "?", "subject": "astrology"}, format="json")
+    assert response.status_code == 404
+    assert tutor.calls == []
+
+
+def test_no_tutor_anywhere_while_a_timed_test_is_open(client_for, student, subject, unit, lesson, tutor):
+    """A timed test in one tab switches the tutor off on the Ask AI page and in lessons too."""
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], feedback_mode="immediate", time_limit_minutes=20)
+    client = client_for(student)
+    attempt = _start(client, quiz)
+    for extra in ({"subject": subject.code}, {"lesson": lesson.slug}, {}):
+        response = client.post("/api/tutor/ask/", {"message": "answer?", **extra}, format="json")
+        assert response.status_code == 403
+    assert tutor.calls == []
+
+    client.post(f"/api/attempts/{attempt['id']}/submit/")
+    assert client.post("/api/tutor/ask/", {"message": "now?", "subject": subject.code}, format="json").status_code == 200
+
+
+def test_an_expired_timed_test_does_not_keep_the_tutor_off(client_for, student, subject, unit, tutor):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.assessments.models import Attempt
+
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], time_limit_minutes=10)
+    client = client_for(student)
+    attempt = _start(client, quiz)
+    Attempt.objects.filter(pk=attempt["id"]).update(deadline=timezone.now() - timedelta(hours=1))
+    assert client.post("/api/tutor/ask/", {"message": "?", "subject": subject.code}, format="json").status_code == 200
+    assert Attempt.objects.get(pk=attempt["id"]).status != Attempt.Status.IN_PROGRESS
+
+
+def test_an_abandoned_exam_mode_quiz_stops_blocking_after_a_while(client_for, student, subject, unit, tutor):
+    from apps.assessments.models import Attempt
+
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], feedback_mode="after_submit")
+    client = client_for(student)
+    attempt = _start(client, quiz)
+    assert client.post("/api/tutor/ask/", {"message": "?"}, format="json").status_code == 403
+    started = Attempt.objects.get(pk=attempt["id"]).started_at
+    Attempt.objects.filter(pk=attempt["id"]).update(started_at=started - services.EXAM_WINDOW)
+    assert client.post("/api/tutor/ask/", {"message": "?"}, format="json").status_code == 200

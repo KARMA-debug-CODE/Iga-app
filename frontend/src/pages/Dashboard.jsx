@@ -127,6 +127,28 @@ function StudentDashboard({ data, user }) {
         )}
       </div>
 
+      {/* Phones have no side menu, so the study tools are linked from here too. */}
+      <div className="grid-2 section study-tools">
+        <Link to="/ask" className="card card-link row" style={{ flexWrap: "nowrap" }}>
+          <div className="icon-tile" aria-hidden>
+            🤖
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <strong style={{ display: "block" }}>{t("nav.ask")}</strong>
+            <span className="small muted">{t("dash.askHint")}</span>
+          </div>
+        </Link>
+        <Link to="/playground" className="card card-link row" style={{ flexWrap: "nowrap" }}>
+          <div className="icon-tile" aria-hidden>
+            💻
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <strong style={{ display: "block" }}>{t("nav.playground")}</strong>
+            <span className="small muted">{t("dash.playgroundHint")}</span>
+          </div>
+        </Link>
+      </div>
+
       <section className="section grid-2">
         <div className="card">
           <h2>{t("dash.assignments")}</h2>

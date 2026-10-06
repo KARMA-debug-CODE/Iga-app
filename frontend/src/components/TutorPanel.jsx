@@ -8,26 +8,40 @@ import { ErrorMessage } from "./ui";
 
 const statusRequests = new Map();
 
-/** Whether the tutor is on and this user may use it (asked once per user and access state). */
-export function useTutorEnabled() {
+const OFF = { enabled: false, reason: "" };
+
+/**
+ * The tutor's status for this user, asked once per user and access state:
+ * `{ enabled, reason, loading }`, where reason is "subscription_required" when the tutor is on
+ * but this student's school hasn't subscribed.
+ */
+export function useTutorStatus() {
   const { user } = useAuth();
   const key = user ? `${user.id}:${user.access?.premium ? 1 : 0}` : "";
-  const [enabled, setEnabled] = useState(false);
+  const [status, setStatus] = useState({ key: "", ...OFF });
   useEffect(() => {
-    if (!key) {
-      setEnabled(false);
-      return undefined;
-    }
+    if (!key) return undefined;
     if (!statusRequests.has(key)) {
-      statusRequests.set(key, api("/tutor/status/").then((s) => Boolean(s?.enabled)).catch(() => false));
+      statusRequests.set(
+        key,
+        api("/tutor/status/")
+          .then((s) => ({ enabled: Boolean(s?.enabled), reason: s?.reason || "" }))
+          .catch(() => OFF),
+      );
     }
     let alive = true;
-    statusRequests.get(key).then((value) => alive && setEnabled(value));
+    statusRequests.get(key).then((value) => alive && setStatus({ key, ...value }));
     return () => {
       alive = false;
     };
   }, [key]);
-  return enabled;
+  if (!key) return { ...OFF, loading: false };
+  return status.key === key ? { enabled: status.enabled, reason: status.reason, loading: false } : { ...OFF, loading: true };
+}
+
+/** Whether the tutor is on and this user may use it. */
+export function useTutorEnabled() {
+  return useTutorStatus().enabled;
 }
 
 /**

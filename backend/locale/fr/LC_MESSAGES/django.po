@@ -186,7 +186,7 @@ msgid "This quiz has no questions yet."
 msgstr "Ce quiz n'a pas encore de questions."
 
 #: apps/assessments/services.py:144
-#: apps/tutor/services.py:173
+#: apps/tutor/services.py:204
 msgid "That question is not part of this attempt."
 msgstr "Cette question ne fait pas partie de cette tentative."
 
@@ -216,7 +216,7 @@ msgid "Time is up — your attempt was submitted automatically."
 msgstr "Le temps est écoulé : votre tentative a été remise automatiquement."
 
 #: apps/assessments/services.py:142
-#: apps/tutor/services.py:171
+#: apps/tutor/services.py:202
 msgid "Unknown question."
 msgstr "Question inconnue."
 
@@ -338,7 +338,7 @@ msgid "Quiz not found."
 msgstr "Quiz introuvable."
 
 #: apps/classroom/views.py:106
-#: apps/tutor/services.py:149
+#: apps/tutor/services.py:180
 msgid "Lesson not found."
 msgstr "Leçon introuvable."
 
@@ -624,50 +624,55 @@ msgstr "Seule une école en attente de vérification, sans aucun paiement, peut 
 msgid "Not found."
 msgstr "Introuvable."
 
-#: apps/tutor/services.py:77
-msgid "Must be a list of messages."
-msgstr "Doit être une liste de messages."
-
-#: apps/tutor/services.py:90
-msgid "The history must end with a tutor reply."
-msgstr "L'historique doit se terminer par une réponse du tuteur."
-
-#: apps/tutor/services.py:162
-msgid "Attempt not found."
-msgstr "Tentative introuvable."
-
-#: apps/tutor/services.py:166
+#: apps/tutor/services.py:236
+#: apps/tutor/services.py:197
 msgid "The tutor is switched off during exams and timed tests. Good luck!"
 msgstr "Le tuteur est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
 
-#: apps/tutor/services.py:199
+#: apps/tutor/services.py:83
+msgid "Must be a list of messages."
+msgstr "Doit être une liste de messages."
+
+#: apps/tutor/services.py:96
+msgid "The history must end with a tutor reply."
+msgstr "L'historique doit se terminer par une réponse du tuteur."
+
+#: apps/tutor/services.py:171
+msgid "Unknown subject."
+msgstr "Matière inconnue."
+
+#: apps/tutor/services.py:193
+msgid "Attempt not found."
+msgstr "Tentative introuvable."
+
+#: apps/tutor/services.py:230
 msgid "Write a question for the tutor."
 msgstr "Écrivez une question pour le tuteur."
 
-#: apps/tutor/services.py:87
+#: apps/tutor/services.py:93
 msgid "Messages must alternate between the student and the tutor."
 msgstr "Les messages doivent alterner entre l'élève et le tuteur."
 
-#: apps/tutor/services.py:201
+#: apps/tutor/services.py:232
 msgid "Please keep questions under %(n)s characters."
 msgstr "Veuillez limiter vos questions à %(n)s caractères."
 
-#: apps/tutor/views.py:43
+#: apps/tutor/views.py:44
 msgid "The AI tutor is not switched on for this school yet."
 msgstr "Le tuteur IA n'est pas encore activé pour cette école."
 
-#: apps/tutor/views.py:61
+#: apps/tutor/views.py:63
 msgid "The tutor is very busy right now. Try again in a minute."
 msgstr "Le tuteur est très sollicité en ce moment. Réessayez dans une minute."
 
-#: apps/tutor/views.py:67
+#: apps/tutor/views.py:69
 msgid "The AI tutor is not set up correctly. Please tell an administrator."
 msgstr "Le tuteur IA n'est pas correctement configuré. Veuillez prévenir un administrateur."
 
-#: apps/tutor/views.py:72
+#: apps/tutor/views.py:74
 msgid "Couldn't reach the tutor. Check your connection and try again."
 msgstr "Impossible de joindre le tuteur. Vérifiez votre connexion et réessayez."
 
-#: apps/tutor/views.py:78
+#: apps/tutor/views.py:80
 msgid "The tutor couldn't answer just now. Please try again."
 msgstr "Le tuteur n'a pas pu répondre pour le moment. Veuillez réessayer."

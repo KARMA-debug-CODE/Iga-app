@@ -7,7 +7,7 @@ from .models import TutorExchange
 class TutorExchangeAdmin(admin.ModelAdmin):
     """Read-only log of tutor conversations, for safeguarding review and cost tracking."""
 
-    list_display = ("created_at", "user", "lesson", "question", "stop_reason", "input_tokens", "output_tokens")
+    list_display = ("created_at", "user", "subject", "lesson", "question", "stop_reason", "input_tokens", "output_tokens")
     list_filter = ("stop_reason", "model")
     search_fields = ("user__username", "message", "reply")
     readonly_fields = [f.name for f in TutorExchange._meta.fields]

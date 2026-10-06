@@ -1426,6 +1426,56 @@ tr:last-child td {
   font-size: 0.98rem;
 }
 
+/* Ask AI page */
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  border-left: 5px solid var(--blue);
+}
+
+.ask-bar {
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ask-subject {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 220px;
+  max-width: 360px;
+  margin: 0;
+}
+
+.ask-log {
+  min-height: 260px;
+  max-height: min(60vh, 560px);
+}
+
+.ask-log .bubble {
+  max-width: min(92%, 720px);
+}
+
+.ask-empty {
+  margin: auto 0;
+  text-align: center;
+}
+
+.ask-empty .chips {
+  justify-content: center;
+}
+
+.ask .chat-form textarea {
+  min-height: 48px;
+  flex: 1;
+}
+
+.ask .chat-form .btn {
+  align-self: flex-end;
+}
+
 /* Python playground */
 
 .python-output-wrap {

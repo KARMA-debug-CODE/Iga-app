@@ -5,18 +5,22 @@ What the tutor is allowed to see is decided here, not by the model:
 * a quiz question and the student's own answer, but the correct answer,
   explanation and marking guide only once the student is allowed to see them
   (after submitting, or after checking a practice answer);
-* nothing at all during a timed or exam-mode attempt that is still running.
+* nothing at all while the student has a timed or exam-mode attempt still running,
+  whichever page they ask from.
 """
 
 import logging
+from datetime import timedelta
 
 import anthropic
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from apps.assessments import services as assessment_services
 from apps.assessments.models import Attempt, Question, Quiz
+from apps.curriculum.models import Subject
 from apps.curriculum.views import visible_lessons
 
 from .models import TutorExchange
@@ -26,6 +30,8 @@ log = logging.getLogger(__name__)
 LANGUAGE_NAMES = {"en": "English", "fr": "French"}
 MAX_HISTORY_MESSAGES = 10
 MAX_MESSAGE_CHARS = 2000
+# An untimed exam-mode quiz counts as "being sat" for this long after it was started.
+EXAM_WINDOW = timedelta(hours=3)
 
 SYSTEM_PROMPT = """You are Iga Tutor, a patient and encouraging study helper for secondary-school students in Rwanda (Senior 1 to Senior 6) following the Rwandan competence-based curriculum.
 
@@ -131,17 +137,42 @@ def _solution_text(question, answer):
     return "\n".join(parts)
 
 
-def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lang=None):
-    """Return (context_text, lesson, attempt, question) for what the student is looking at.
+def exam_in_progress(user):
+    """True while the student is sitting a timed test or an exam-mode quiz, so no tutor (in a lesson,
+    on the Ask AI page or in another tab) can help with it."""
+    now = timezone.now()
+    open_attempts = Attempt.objects.filter(user=user, status=Attempt.Status.IN_PROGRESS).select_related("quiz")
+    for attempt in open_attempts:
+        if assessment_services.finalize_if_expired(attempt):
+            continue
+        if attempt.deadline is not None:
+            return True
+        if attempt.quiz.feedback_mode == Quiz.FeedbackMode.AFTER_SUBMIT and now - attempt.started_at < EXAM_WINDOW:
+            return True
+    return False
 
-    `lang` is the language the student is reading in (defaults to their saved preference)."""
+
+def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lang=None, subject_code=None):
+    """Return (context_text, lesson, attempt, question, subject) for what the student is looking at.
+
+    `lang` is the language the student is reading in (defaults to their saved preference).
+    `subject_code` is the subject chosen on the Ask AI page, when there is no lesson or quiz."""
     code = reply_language(user, lang)
     lang = LANGUAGE_NAMES[code]
     grade = user.grade or "secondary school"
     sections = [
         f"The student is in {grade}. Reply in {lang} unless the student writes in another language; then reply in theirs."
     ]
-    lesson = attempt = question = None
+    lesson = attempt = question = subject = None
+
+    if subject_code:
+        subject = Subject.objects.filter(code=subject_code).first()
+        if subject is None:
+            raise NotFound(_("Unknown subject."))
+        sections.append(
+            f"The student opened the Ask AI page and chose the subject {subject.name}. Help with questions about it at "
+            "their grade; if they ask about another school subject, help with that too."
+        )
 
     if lesson_slug:
         lesson = visible_lessons(user).select_related("unit__subject").filter(slug=lesson_slug).first()
@@ -190,17 +221,19 @@ def build_context(user, lesson_slug=None, attempt_id=None, question_id=None, lan
         else:
             sections.append(f'The student is working on the quiz "{attempt.quiz.title}".')
 
-    return "\n\n".join(sections), lesson, attempt, question
+    return "\n\n".join(sections), lesson, attempt, question, subject
 
 
-def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question_id=None, lang=None):
+def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question_id=None, lang=None, subject_code=None):
     message = (message or "").strip()
     if not message:
         raise ValidationError({"message": _("Write a question for the tutor.")})
     if len(message) > MAX_MESSAGE_CHARS:
         raise ValidationError({"message": _("Please keep questions under %(n)s characters.") % {"n": MAX_MESSAGE_CHARS}})
     history = clean_history(history)
-    context, lesson, attempt, question = build_context(user, lesson_slug, attempt_id, question_id, lang)
+    context, lesson, attempt, question, subject = build_context(user, lesson_slug, attempt_id, question_id, lang, subject_code)
+    if exam_in_progress(user):
+        raise PermissionDenied(_("The tutor is switched off during exams and timed tests. Good luck!"))
     code = reply_language(user, lang)
 
     response = get_client().beta.messages.create(
@@ -229,6 +262,7 @@ def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question
         lesson=lesson,
         attempt=attempt,
         question=question,
+        subject=subject,
         message=message,
         reply=reply,
         model=getattr(response, "model", "") or "",

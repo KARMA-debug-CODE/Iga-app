@@ -9,6 +9,8 @@ class TutorExchange(models.Model):
     lesson = models.ForeignKey("curriculum.Lesson", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     attempt = models.ForeignKey("assessments.Attempt", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     question = models.ForeignKey("assessments.Question", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    # The subject chosen on the Ask AI page (empty for questions asked from a lesson or a quiz).
+    subject = models.ForeignKey("curriculum.Subject", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     message = models.TextField()
     reply = models.TextField(blank=True)
     model = models.CharField(max_length=64, blank=True)

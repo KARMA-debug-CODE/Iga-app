@@ -24,6 +24,44 @@ test("AI tutor answers questions about a lesson", async ({ page }) => {
   expect(asked.message).toContain("gradient");
 });
 
+test("Ask AI page: choose a subject, ask, keep the chat for the tab, start again", async ({ page }) => {
+  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: { enabled: true, reason: "" } }));
+  const asked = [];
+  await page.route("**/api/tutor/ask/", async (route) => {
+    asked.push(route.request().postDataJSON());
+    await route.fulfill({ json: { reply: "Photosynthesis makes **glucose**: $6CO_2 + 6H_2O \\to C_6H_{12}O_6 + 6O_2$" } });
+  });
+
+  await login(page, "aline");
+  await page.goto("/ask");
+  await expect(page.getByRole("heading", { name: /ask ai/i })).toBeVisible();
+  await page.getByLabel(/^subject$/i).selectOption("biology");
+  await page.getByRole("button", { name: /explain a topic to me/i }).click();
+  await expect(page.getByText(/makes glucose/i)).toBeVisible();
+  await expect(page.locator(".ask .katex").first()).toBeVisible();
+  expect(asked[0]).toMatchObject({ subject: "biology", history: [] });
+
+  await page.getByLabel(/type your question/i).fill("And where does it happen?");
+  await page.getByLabel(/type your question/i).press("Enter");
+  await expect(page.locator(".ask .bubble.mine")).toHaveCount(2);
+  expect(asked[1].history.map((m) => m.role)).toEqual(["user", "assistant"]);
+
+  await page.reload();
+  await expect(page.locator(".ask .bubble.mine")).toHaveCount(2);
+  await page.getByRole("button", { name: /new chat/i }).click();
+  await expect(page.locator(".ask .bubble")).toHaveCount(0);
+});
+
+test("Ask AI page explains when the student's school hasn't subscribed", async ({ page }) => {
+  await page.route("**/api/tutor/status/", (route) =>
+    route.fulfill({ json: { enabled: false, reason: "subscription_required" } }),
+  );
+  await login(page, "samuel");
+  await page.goto("/ask");
+  await expect(page.locator(".locked-notice")).toBeVisible();
+  await expect(page.getByLabel(/type your question/i)).toHaveCount(0);
+});
+
 test("a parent links to their child with a code and sees progress", async ({ page }) => {
   await login(page, "eric");
   await page.goto("/profile");

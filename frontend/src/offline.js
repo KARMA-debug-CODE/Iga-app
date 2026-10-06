@@ -121,6 +121,8 @@ export async function clearOfflineData() {
   try {
     localStorage.removeItem(KEY);
     localStorage.removeItem("iga.user");
+    // Ask AI conversations are kept for the browser tab; they go with the student on logout.
+    for (const name of Object.keys(sessionStorage).filter((k) => k.startsWith("iga.ask."))) sessionStorage.removeItem(name);
   } catch {
     /* ignore */
   }
