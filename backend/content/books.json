@@ -1,5 +1,5 @@
 {
-  "_note": "Provisional: official REB books only, generated from the research. Replaced by the curated list.",
+  "_note": "Books shown on every lesson and unit. Official REB student's books (one per subject and grade) and free open textbooks, linked, never copied. Links were collected from REB's portal listings and the publishers' own repositories; check them with: python manage.py check_book_links",
   "books": [
     {
       "id": "reb-mathematics-s1",
@@ -15,207 +15,9 @@
       "url": "https://elearning.reb.rw/pluginfile.php/86879/mod_resource/content/1/Math%20S1-SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-physics-s1",
-      "subject": "physics",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Physics Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275110/mod_folder/content/0/SB/S1%20Physics%20SB%202026-207.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-chemistry-s1",
-      "subject": "chemistry",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Chemistry Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/85873/mod_resource/content/1/GENERAL%20EDU-Chemistry-S1-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-biology-s1",
-      "subject": "biology",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Biology and Health Sciences Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17480",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-ict-s1",
-      "subject": "ict",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "ICT Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/85739/mod_resource/content/1/ICT%20S1%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-english-s1",
-      "subject": "english",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "English Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/5637/mod_resource/content/1/English%20S1.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kinyarwanda-s1",
-      "subject": "kinyarwanda",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kinyarwanda Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "rw",
-      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1428&forceview=1",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kiswahili-s1",
-      "subject": "kiswahili",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kiswahili Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "sw",
-      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1917&forceview=1",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-french-s1",
-      "subject": "french",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "French Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "fr",
-      "url": "https://elearning.reb.rw/pluginfile.php/5644/mod_resource/content/1/FRENCH%20S1%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-history-s1",
-      "subject": "history",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "History and Citizenship Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/9192/mod_resource/content/1/HISTORY%20%20CITIZENSHIP%20S1%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-geography-s1",
-      "subject": "geography",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Geography and Environment Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/mod/resource/view.php?id=12880&forceview=1",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-entrepreneurship-s1",
-      "subject": "entrepreneurship",
-      "grades": [
-        "S1"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Entrepreneurship Senior 1 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/9400/mod_resource/content/1/Entrepreneurship%20S1.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Mathematics student's book for Senior 1, earlier edition (before the 2026–2027 revision). PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de mathématiques du REB pour la S1 (Senior 1), édition précédente (avant la révision 2026–2027). PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry mathematics S1; research provenance: NOT OPENED: the egress proxy blocks elearning.reb.rw (403 on CONNECT for curl and WebFetch). Exact URL copied from a school page, GitHub Mugsh044/Yvens noselect.html (fetched HTTP 200 from raw.githubusercontent.com), where it is the link labelled 'MATHEMATICS'. Research notes: pre-2026 edition."
     },
     {
       "id": "reb-mathematics-s2",
@@ -231,207 +33,9 @@
       "url": "https://elearning.reb.rw/pluginfile.php/10107/mod_resource/content/1/S2%20Maths.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-physics-s2",
-      "subject": "physics",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Physics Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10149/mod_resource/content/2/Physics%20Learners%20book%20S2.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-chemistry-s2",
-      "subject": "chemistry",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Chemistry Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/85874/mod_resource/content/1/GENERAL%20EDU-Chemistry-S2-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-biology-s2",
-      "subject": "biology",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Biology and Health Sciences Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10649/mod_resource/content/1/Biology%20S2%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-ict-s2",
-      "subject": "ict",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "ICT Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10659/mod_resource/content/1/ICT%20S2%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-english-s2",
-      "subject": "english",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "English Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10097/mod_resource/content/1/English%20S2%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kinyarwanda-s2",
-      "subject": "kinyarwanda",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kinyarwanda Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "rw",
-      "url": "https://elearning.reb.rw/pluginfile.php/5268/mod_resource/content/1/S2%20KinyaRwanda%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kiswahili-s2",
-      "subject": "kiswahili",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kiswahili Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "sw",
-      "url": "https://elearning.reb.rw/mod/folder/view.php?id=2948",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-french-s2",
-      "subject": "french",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "French Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "fr",
-      "url": "https://elearning.reb.rw/pluginfile.php/10144/mod_resource/content/1/S2%20French%20SB%20%282%29.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-history-s2",
-      "subject": "history",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "History and Citizenship Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/84702/mod_resource/content/1/HISTORY%20AND%20CITIZENSHIP%20STUDENT%20BOOK%20S2.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-geography-s2",
-      "subject": "geography",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Geography and Environment Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10818/mod_resource/content/1/Geography%20and%20Environment%20S2%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-entrepreneurship-s2",
-      "subject": "entrepreneurship",
-      "grades": [
-        "S2"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Entrepreneurship Senior 2 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10855/mod_resource/content/1/Entrepreneurship%20S2.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Mathematics student's book for Senior 2, earlier edition (before the 2026–2027 revision). PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de mathématiques du REB pour la S2 (Senior 2), édition précédente (avant la révision 2026–2027). PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry mathematics S2; research provenance: NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s2.html (fetched OK), link labelled 'MATHEMATICS'. Research notes: the 2026 'S2 Math SB F 2026-2027' is in folder 17481."
     },
     {
       "id": "reb-mathematics-s3",
@@ -447,9 +51,249 @@
       "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20Mathematics%20SB%202026-2027.pdf?forcedownload=1",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Mathematics student's book for Senior 3, 2026–2027 revised edition. PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de mathématiques du REB pour la S3 (Senior 3), édition révisée 2026–2027. PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry mathematics S3; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL (several queries) with the title '1 Mathematics Student's Book Senior 3 Version Edited in 2026'."
+    },
+    {
+      "id": "reb-mathematics-s4",
+      "subject": "mathematics",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Mathematics Senior 4 Student's Book (Core)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=10419",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page 'S4: Math core SB' (core mathematics, earlier edition); open the file shown there to read or download the book.",
+      "description_fr": "Ouvre la page du REB « S4: Math core SB » (mathématiques principales, édition précédente) ; ouvrez le fichier affiché pour lire ou télécharger le livre.",
+      "source": "books-research.json reb entry mathematics S4; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'S4_MCB_Math: S4: Math core SB'. Research notes: 2026 S4 Core/Basic Mathematics SBs are reported elsewhere (course 2528)."
+    },
+    {
+      "id": "reb-mathematics-s5",
+      "subject": "mathematics",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Advanced Mathematics Senior 5 Student's Book (Core)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/15666/mod_resource/content/1/MATH%20S5%20SB%20Core.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB core (advanced) mathematics student's book for Senior 5, for combinations with Mathematics as a main subject; earlier edition, before the 2026–2027 revision.",
+      "description_fr": "Manuel officiel du REB de mathématiques « core » (principales) pour la S5, destiné aux combinaisons où les mathématiques sont une matière principale ; édition précédente.",
+      "source": "books-research.json reb entry mathematics S5; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'Advanced Mathematics Senior Five Student's Book'."
+    },
+    {
+      "id": "reb-mathematics-s6",
+      "subject": "mathematics",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Advanced Mathematics for Rwandan Schools Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/14797/mod_resource/content/1/Core%20Math%20S6%20SB..pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB core (advanced) mathematics student's book for Senior 6, for combinations with Mathematics as a main subject; earlier edition, before the 2026–2027 revision.",
+      "description_fr": "Manuel officiel du REB de mathématiques « core » (principales) pour la S6, destiné aux combinaisons où les mathématiques sont une matière principale ; édition précédente.",
+      "source": "books-research.json reb entry mathematics S6; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'Advanced Mathematics for Rwandan Schools Student's Book Senior Six'. Mugsh044/Yvens links the same URL. Research notes: a 2026 'S6 Core MATHEMATICS SB 2026-2027.pdf' is reported in folder 17486."
+    },
+    {
+      "id": "open-openstax-prealgebra-2e",
+      "subject": "mathematics",
+      "grades": [
+        "S1",
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Prealgebra 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/prealgebra-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax book: whole numbers, integers, fractions, decimals, percentages, simple equations, basic geometry, polynomials and graphs. Read online or as a PDF.",
+      "description_fr": "Manuel OpenStax gratuit : entiers naturels et relatifs, fractions, décimaux, pourcentages, équations simples, géométrie de base, polynômes et graphiques. En ligne ou en PDF.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-prealgebra-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-elementary-algebra-2e",
+      "subject": "mathematics",
+      "grades": [
+        "S2",
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Elementary Algebra 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/elementary-algebra-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax book: linear equations and inequalities, graphs, simultaneous equations, polynomials, factorising, algebraic fractions, surds, quadratics.",
+      "description_fr": "Manuel OpenStax gratuit : équations et inéquations du 1er degré, graphiques, systèmes, polynômes, factorisation, fractions rationnelles, radicaux, équations du second degré.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-prealgebra-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-intermediate-algebra-2e",
+      "subject": "mathematics",
+      "grades": [
+        "S3",
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Intermediate Algebra 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/intermediate-algebra-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax book: functions and graphs, systems, polynomials, factorising, radicals, quadratics, exponentials and logarithms, conics, sequences, binomial theorem.",
+      "description_fr": "Manuel OpenStax gratuit : fonctions, systèmes, polynômes, factorisation, radicaux, équations du second degré, exponentielles et logarithmes, coniques, suites, binôme.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-prealgebra-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-algebra-and-trigonometry-2e",
+      "subject": "mathematics",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Algebra and Trigonometry 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/algebra-and-trigonometry-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax book (university entry level): equations, functions, polynomials, exponentials and logarithms, trigonometry, matrices, conics. Online or PDF from its page.",
+      "description_fr": "Manuel OpenStax gratuit (niveau début d'université) : équations, fonctions, polynômes, exponentielles et logarithmes, trigonométrie, matrices, coniques. En ligne ou en PDF.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-college-algebra-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-statistics",
+      "subject": "mathematics",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Statistics",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/statistics",
+      "format": "web",
+      "licence": "CC BY 4.0",
+      "description": "Free OpenStax high-school statistics book: data, descriptive statistics, probability, random variables, normal distribution, regression and correlation.",
+      "description_fr": "Manuel OpenStax gratuit de statistique (niveau secondaire) : données, statistique descriptive, probabilités, variables aléatoires, loi normale, régression et corrélation.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-statistics/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-calculus-volume-1",
+      "subject": "mathematics",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Calculus Volume 1",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/calculus-volume-1",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax calculus book (first-year university level): limits, derivatives and their uses, integration and its applications. For confident A-level students.",
+      "description_fr": "Manuel OpenStax gratuit d'analyse (niveau première année d'université) : limites, dérivées et applications, intégrales et applications. Pour les élèves à l'aise.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-calculus-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-precalculus-2e",
+      "subject": "mathematics",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Precalculus 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/precalculus-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax book: functions, exponentials and logarithms, trigonometry, complex numbers, matrices, conics, sequences, probability, intro to limits.",
+      "description_fr": "Manuel OpenStax gratuit : fonctions, exponentielles et logarithmes, trigonométrie, nombres complexes, matrices, coniques, suites, probabilités, introduction aux limites.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-college-algebra-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-calculus-volume-2",
+      "subject": "mathematics",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Calculus Volume 2",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/calculus-volume-2",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax calculus book (university level): integrals and their uses, integration techniques, differential equations, sequences and series, Taylor series.",
+      "description_fr": "Manuel OpenStax gratuit d'analyse (niveau université) : intégrales et applications, techniques d'intégration, équations différentielles, suites et séries, séries de Taylor.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-calculus-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "reb-physics-s1",
+      "subject": "physics",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275110/mod_folder/content/0/SB/S1%20Physics%20SB%202026-207.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Physics student's book for Senior 1, 2026–2027 revised edition (experimental version). PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de physique du REB pour la S1 (Senior 1), édition révisée 2026–2027 (version expérimentale). PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry physics S1; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'PHYSICS STUDENT'S BOOK Senior One Experimental Version'. The snippet said '(c) 2026 Rwanda Basic Education Board'. File name really is spelled '2026-207'."
+    },
+    {
+      "id": "reb-physics-s2",
+      "subject": "physics",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Physics Senior 2 Learner's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10149/mod_resource/content/2/Physics%20Learners%20book%20S2.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Physics learner's book for Senior 2, earlier edition (before the 2026–2027 revision). PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de physique du REB pour la S2 (Senior 2), édition précédente (avant la révision 2026–2027). PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry physics S2; research provenance: NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s2.html, link labelled 'PHYSICS'. Research notes: a 2026 revised SB is reported in folder 17481."
     },
     {
       "id": "reb-physics-s3",
@@ -465,207 +309,9 @@
       "url": "https://elearning.reb.rw/pluginfile.php/11635/mod_resource/content/2/S3%20Physics%20Student%20Book.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-chemistry-s3",
-      "subject": "chemistry",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Chemistry Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/85875/mod_resource/content/1/GENERAL%20EDU-Chemistry-S3-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-biology-s3",
-      "subject": "biology",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Biology and Health Sciences Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/11689/mod_resource/content/1/Biology%20S3%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-ict-s3",
-      "subject": "ict",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "ICT Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/11698/mod_resource/content/1/ICT%20%20S3%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-english-s3",
-      "subject": "english",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "English Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20English%20SB%202026-2027.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kinyarwanda-s3",
-      "subject": "kinyarwanda",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kinyarwanda Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "rw",
-      "url": "https://elearning.reb.rw/pluginfile.php/11570/mod_resource/content/1/Kinyarwanda%20S3%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kiswahili-s3",
-      "subject": "kiswahili",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kiswahili Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "sw",
-      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17482",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-french-s3",
-      "subject": "french",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "French Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "fr",
-      "url": "https://elearning.reb.rw/pluginfile.php/11628/mod_resource/content/1/French%20%20S3%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-history-s3",
-      "subject": "history",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "History and Citizenship Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/84705/mod_resource/content/1/S3%20HISTORY%20AND%20CITIZENSHIP%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-geography-s3",
-      "subject": "geography",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Geography and Environment Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20Geography%20SB%20F%202026-2027....pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-entrepreneurship-s3",
-      "subject": "entrepreneurship",
-      "grades": [
-        "S3"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Entrepreneurship Senior 3 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/11724/mod_resource/content/1/S3%20Entrepreneurship%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-mathematics-s4",
-      "subject": "mathematics",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Mathematics Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/mod/resource/view.php?id=10419",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Physics student's book for Senior 3, earlier edition (before the 2026–2027 revision). PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de physique du REB pour la S3 (Senior 3), édition précédente (avant la révision 2026–2027). PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry physics S3; research provenance: NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s3.html, link labelled 'PHYSICS'. Research notes: a 2026 revised SB is reported in folder 17482."
     },
     {
       "id": "reb-physics-s4",
@@ -681,261 +327,9 @@
       "url": "https://elearning.reb.rw/mod/resource/view.php?id=1596",
       "format": "page",
       "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-chemistry-s4",
-      "subject": "chemistry",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Chemistry Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/5916/mod_resource/content/1/chemistry%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-biology-s4",
-      "subject": "biology",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Biology and Health Sciences Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10666/mod_resource/content/1/Biology%20S4%20%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-ict-s4",
-      "subject": "ict",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "ICT Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/85742/mod_resource/content/1/Computer%20Science%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-english-s4",
-      "subject": "english",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "English Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275114/mod_folder/content/0/SB/S4%20English%20SB%20non_language.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kinyarwanda-s4",
-      "subject": "kinyarwanda",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kinyarwanda Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "rw",
-      "url": "https://elearning.reb.rw/pluginfile.php/86223/mod_resource/content/1/IKINYARWANDA%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kiswahili-s4",
-      "subject": "kiswahili",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kiswahili Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "sw",
-      "url": "https://elearning.reb.rw/pluginfile.php/86857/mod_resource/content/1/Kiswahili%20Languages%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-french-s4",
-      "subject": "french",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "French Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "fr",
-      "url": "https://elearning.reb.rw/pluginfile.php/5838/mod_resource/content/2/FRENCH%20LFK%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-history-s4",
-      "subject": "history",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "History and Citizenship Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275114/mod_folder/content/0/SB/S4%20History%20for%20Language%20SB%202026-2027%20.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-geography-s4",
-      "subject": "geography",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Geography and Environment Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10641/mod_resource/content/1/Geography%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-economics-s4",
-      "subject": "economics",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Economics Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/10721/mod_resource/content/1/Economics%20S4%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-entrepreneurship-s4",
-      "subject": "entrepreneurship",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Entrepreneurship Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/45712/mod_resource/content/1/Entrepreneurship%20S4_SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-literature-s4",
-      "subject": "literature",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Literature in English Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/86873/mod_resource/content/1/GENERAL%20EDU-Literature%20in%20english-S4-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-general-studies-s4",
-      "subject": "general-studies",
-      "grades": [
-        "S4"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "General Studies and Communication Skills Senior 4 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/86283/mod_resource/content/1/GENERAL%20EDU-GSCS-S4-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-mathematics-s5",
-      "subject": "mathematics",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Mathematics Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/15666/mod_resource/content/1/MATH%20S5%20SB%20Core.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Opens the REB page 'Physics S4 SB' (earlier edition); open the file shown there to read or download the book.",
+      "description_fr": "Ouvre la page du REB « Physics S4 SB » (édition précédente) ; ouvrez le fichier affiché pour lire ou télécharger le livre.",
+      "source": "books-research.json reb entry physics S4; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'S4_MCE_Phys: Physics S4 SB'."
     },
     {
       "id": "reb-physics-s5",
@@ -951,261 +345,9 @@
       "url": "https://elearning.reb.rw/pluginfile.php/11053/mod_resource/content/1/PHYSICS%20S5%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-chemistry-s5",
-      "subject": "chemistry",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Chemistry Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20Chemistry%20SB%202026-2027.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-biology-s5",
-      "subject": "biology",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Biology and Health Sciences Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/mod/resource/view.php?id=3633&forceview=1",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-ict-s5",
-      "subject": "ict",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "ICT Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20ICT%20SB%20F%202026-2027....pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-english-s5",
-      "subject": "english",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "English Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/mod/resource/view.php?id=10363",
-      "format": "page",
-      "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kinyarwanda-s5",
-      "subject": "kinyarwanda",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kinyarwanda Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "rw",
-      "url": "https://elearning.reb.rw/pluginfile.php/86224/mod_resource/content/1/IKINYARWANDA%20S5%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-kiswahili-s5",
-      "subject": "kiswahili",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Kiswahili Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "sw",
-      "url": "https://elearning.reb.rw/pluginfile.php/86863/mod_resource/content/1/Kiswahili%20Languages%20S5%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-french-s5",
-      "subject": "french",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "French Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "fr",
-      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20Franc%CC%A7ais,%20Manuel%20de%20l_eleve%20options%20litteraires.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-history-s5",
-      "subject": "history",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "History and Citizenship Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20History%20Advanced%20Level%20SB%202026-2027.pdf?forcedownload=1",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-geography-s5",
-      "subject": "geography",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Geography and Environment Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/11819/mod_resource/content/1/Geography%20S5%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-economics-s5",
-      "subject": "economics",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Economics Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/11938/mod_resource/content/1/Economics%20S5%20SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-entrepreneurship-s5",
-      "subject": "entrepreneurship",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Entrepreneurship Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/45714/mod_resource/content/1/Entrepreneurship%20S5_SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-literature-s5",
-      "subject": "literature",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Literature in English Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/86875/mod_resource/content/1/GENERAL%20EDU-Literature%20in%20english-S5-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-general-studies-s5",
-      "subject": "general-studies",
-      "grades": [
-        "S5"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "General Studies and Communication Skills Senior 5 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/86285/mod_resource/content/1/GENERAL%20EDU-GSCS-S5-SB.pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
-    },
-    {
-      "id": "reb-mathematics-s6",
-      "subject": "mathematics",
-      "grades": [
-        "S6"
-      ],
-      "kind": "textbook",
-      "official": true,
-      "title": "Mathematics Senior 6 Student's Book",
-      "publisher": "Rwanda Basic Education Board (REB)",
-      "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/14797/mod_resource/content/1/Core%20Math%20S6%20SB..pdf",
-      "format": "pdf",
-      "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Physics student's book for Senior 5, earlier edition (before the 2026–2027 revision). PDF from the REB e-learning site.",
+      "description_fr": "Manuel officiel de physique du REB pour la S5 (Senior 5), édition précédente (avant la révision 2026–2027). PDF sur le site e-learning du REB.",
+      "source": "books-research.json reb entry physics S5; research provenance: NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens pcbcourses1.html, link 'Physics'. Research notes: an 'S5 Physics SB 2026-2027.pdf' was mentioned but no URL found."
     },
     {
       "id": "reb-physics-s6",
@@ -1221,9 +363,139 @@
       "url": "https://elearning.reb.rw/mod/resource/view.php?id=4136&forceview=1",
       "format": "page",
       "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
+      "description": "Opens the REB page 'S6 Physics SB' (earlier edition); open the file shown there to read or download the book.",
+      "description_fr": "Ouvre la page du REB « S6 Physics SB » (édition précédente) ; ouvrez le fichier affiché pour lire ou télécharger le livre.",
+      "source": "books-research.json reb entry physics S6; research provenance: NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'S6_Phy: S6 Physics SB - e-learning Platform - REB'. Research notes: a 2026 'S6 Physics SB 2026-2027.pdf' is reported in folder 17486."
+    },
+    {
+      "id": "open-openstax-physics",
+      "subject": "physics",
+      "grades": [
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Physics",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/physics",
+      "format": "web",
+      "licence": "CC BY 4.0",
+      "description": "Free OpenStax high-school physics book: motion, forces, energy, momentum, heat, waves, sound, light, electricity, magnetism, atoms. Early chapters suit S3.",
+      "description_fr": "Manuel OpenStax gratuit de physique (secondaire) : mouvement, forces, énergie, quantité de mouvement, chaleur, ondes, lumière, électricité, magnétisme, atomes. Utile dès la S3.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-physics/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "open-openstax-college-physics-2e",
+      "subject": "physics",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "College Physics 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/college-physics-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax algebra-based physics book (first-year university level): mechanics, fluids, heat, waves, electricity, magnetism, optics, modern physics.",
+      "description_fr": "Manuel OpenStax gratuit de physique sans calcul infinitésimal (1re année d'université) : mécanique, fluides, chaleur, ondes, électricité, magnétisme, optique, physique moderne.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-college-physics-bundle/main/README.md (URL appears verbatim in this README; re-fetched and checked by the reviewer on 2026-10-06; openstax.org itself is blocked here and was not opened)"
+    },
+    {
+      "id": "reb-chemistry-s1",
+      "subject": "chemistry",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85873/mod_resource/content/1/GENERAL%20EDU-Chemistry-S1-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Chemistry Student's Book for Senior 1, earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de chimie du REB pour la S1, ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (chemistry, S1): URL copied from GitHub Mugsh044/Yvens noselect.html, link labelled 'CHEMISTRY'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-chemistry-s2",
+      "subject": "chemistry",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85874/mod_resource/content/1/GENERAL%20EDU-Chemistry-S2-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Chemistry Student's Book for Senior 2, earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de chimie du REB pour la S2, ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (chemistry, S2): URL copied from GitHub Mugsh044/Yvens s2.html, link labelled 'CHEMISTRY'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-chemistry-s3",
+      "subject": "chemistry",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85875/mod_resource/content/1/GENERAL%20EDU-Chemistry-S3-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Chemistry Student's Book for Senior 3, earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de chimie du REB pour la S3, ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (chemistry, S3): URL copied from GitHub Mugsh044/Yvens s3.html, link labelled 'CHEMISTRY'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-chemistry-s4",
+      "subject": "chemistry",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/5916/mod_resource/content/1/chemistry%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Chemistry Student's Book for Senior 4 (A-level), earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de chimie du REB pour la S4 (second cycle), ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (chemistry, S4): URL copied from GitHub Mugsh044/Yvens mcbcourses.html and pcbcourses.html, link 'Chemistry'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-chemistry-s5",
+      "subject": "chemistry",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Chemistry Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20Chemistry%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Chemistry Student's Book for Senior 5 (A-level), revised 2026–2027 edition (labelled 'Experimental version').",
+      "description_fr": "Livre de l'élève officiel de chimie du REB pour la S5 (second cycle), édition révisée 2026–2027 (portant la mention « Experimental version »).",
+      "source": "books-research.json reb.books (chemistry, S5): exact URL returned by WebSearch with the title 'CHEMISTRY Student's book Senior 5 Experimental version'. Not opened (elearning.reb.rw blocked)."
     },
     {
       "id": "reb-chemistry-s6",
@@ -1239,9 +511,138 @@
       "url": "https://elearning.reb.rw/pluginfile.php/11991/mod_resource/content/1/Chemistry%20S6%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Chemistry Student's Book for Senior 6 (A-level), earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de chimie du REB pour la S6 (second cycle), ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (chemistry, S6): exact URL returned by WebSearch (title 'Chemistry Senior Six Student Book') and also linked in GitHub Mugsh044/Yvens. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "open-openstax-chemistry-atoms-first-2e",
+      "subject": "chemistry",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Chemistry: Atoms First 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/chemistry-atoms-first-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax first-year university chemistry book, read online. Starts with atoms, electronic structure, the periodic table and bonding, then moles, gases and equilibrium.",
+      "description_fr": "Manuel gratuit d'OpenStax (chimie, 1re année d'université, en anglais), à lire en ligne : atomes, structure électronique, tableau périodique et liaisons, puis moles, gaz et équilibres.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-chemistry-bundle/main/README.md (link '_Chemistry: Atoms First 2e_ [online]'; re-fetched by checker, URL present verbatim). Licence from https://raw.githubusercontent.com/openstax/osbooks-chemistry-bundle/main/LICENSE (Attribution-NonCommercial-ShareAlike 4.0); chapter list from collections/chemistry-atoms-first-2e.collection.xml in the same repo."
+    },
+    {
+      "id": "open-openstax-chemistry-2e",
+      "subject": "chemistry",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Chemistry 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/chemistry-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax first-year university chemistry book, read online: stoichiometry, thermochemistry, kinetics, equilibrium, acids and bases, electrochemistry, organic chemistry.",
+      "description_fr": "Manuel gratuit d'OpenStax (chimie générale, 1re année d'université, en anglais), à lire en ligne : stœchiométrie, thermochimie, cinétique, équilibres, acides et bases, électrochimie, chimie organique.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-chemistry-bundle/main/README.md (link '_Chemistry 2e_ [online]'; re-fetched by checker, URL present verbatim). Licence from https://raw.githubusercontent.com/openstax/osbooks-chemistry-bundle/main/LICENSE (Attribution-NonCommercial-ShareAlike 4.0); chapter list from collections/chemistry-2e.collection.xml in the same repo."
+    },
+    {
+      "id": "reb-biology-s1",
+      "subject": "biology",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17480",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens REB's folder of revised 2026 Senior 1 books; choose 'S1 Biology SB 2026-2027' for the Biology Student's Book (2026–2027 edition).",
+      "description_fr": "Ouvre le dossier du REB contenant les manuels révisés 2026 de S1 ; choisissez « S1 Biology SB 2026-2027 » pour obtenir le livre de l'élève de biologie (édition 2026–2027).",
+      "source": "books-research.json reb.books (biology, S1): folder URL returned by WebSearch (title 'cd2026'); search summaries describe it as 'S1 Revised Students' Books and Teachers' Guides 2026' containing 'S1 Biology SB 2026-2027.pdf'. No direct SB PDF found. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-biology-s2",
+      "subject": "biology",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10649/mod_resource/content/1/Biology%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Biology Student's Book for Senior 2, earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de biologie du REB pour la S2, ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (biology, S2): URL copied from GitHub Mugsh044/Yvens s2.html, link labelled 'BIOLOGY'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-biology-s3",
+      "subject": "biology",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11689/mod_resource/content/1/Biology%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Biology Student's Book for Senior 3, earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de biologie du REB pour la S3, ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (biology, S3): URL copied from GitHub Mugsh044/Yvens s3.html, link labelled 'BIOLOGY'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-biology-s4",
+      "subject": "biology",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10666/mod_resource/content/1/Biology%20S4%20%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Biology Student's Book for Senior 4 (A-level), earlier CBC edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Livre de l'élève officiel de biologie du REB pour la S4 (second cycle), ancienne édition du programme par compétences (CBC), antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027.",
+      "source": "books-research.json reb.books (biology, S4): URL copied from GitHub Mugsh044/Yvens mcbcourses.html and pcbcourses.html, link 'Biology'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-biology-s5",
+      "subject": "biology",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Biology Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=3633&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens REB's page for the Senior 5 Biology Student's Book (A-level, earlier CBC edition, pre-2026); open the book file from that page.",
+      "description_fr": "Ouvre la page du REB consacrée au livre de l'élève de biologie de S5 (second cycle, ancienne édition du programme par compétences, antérieure à 2026) ; ouvrez le fichier du livre depuis cette page.",
+      "source": "books-research.json reb.books (biology, S5): exact URL returned by WebSearch with the title 'S5_Bio: Biology S5 SB'. Not opened (elearning.reb.rw blocked)."
     },
     {
       "id": "reb-biology-s6",
@@ -1251,15 +652,181 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "Biology and Health Sciences Senior 6 Student's Book",
+      "title": "Biology Senior 6 Student's Book",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
       "url": "https://elearning.reb.rw/mod/resource/view.php?id=4196&forceview=1",
       "format": "page",
       "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
+      "description": "Opens REB's page for the Senior 6 Biology Student's Book (A-level, earlier CBC edition, pre-2026); open the book file from that page.",
+      "description_fr": "Ouvre la page du REB consacrée au livre de l'élève de biologie de S6 (second cycle, ancienne édition du programme par compétences, antérieure à 2026) ; ouvrez le fichier du livre depuis cette page.",
+      "source": "books-research.json reb.books (biology, S6): exact URL returned by WebSearch with the title 'subject-3-3306-35: S6: Biology SB'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "open-openstax-biology-ap-courses",
+      "subject": "biology",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Biology for AP® Courses",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/biology-ap-courses",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax biology book for US high-school Advanced Placement (AP) courses, read online: biochemistry, cells, genetics, evolution, plants, body systems, ecology.",
+      "description_fr": "Manuel gratuit de biologie d'OpenStax conçu pour les cours AP (Advanced Placement) du secondaire américain, en anglais, à lire en ligne : biochimie, cellules, génétique, évolution, plantes, systèmes du corps et écologie.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-biology-bundle/main/README.md (link '_Biology for AP® Courses_ [online]'; re-fetched by checker, URL present verbatim). Licence from https://raw.githubusercontent.com/openstax/osbooks-biology-bundle/main/LICENSE (Attribution-NonCommercial-ShareAlike 4.0); chapter list from collections/biology-ap-courses.collection.xml in the same repo."
+    },
+    {
+      "id": "open-openstax-concepts-of-biology",
+      "subject": "biology",
+      "grades": [
+        "S4",
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Concepts of Biology",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/concepts-biology",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free, shorter OpenStax biology textbook, read online: cells, genetics, evolution, diversity of life, body systems and ecology. A gentle start to A-level biology.",
+      "description_fr": "Manuel gratuit de biologie d'OpenStax, plus court et accessible (en anglais), à lire en ligne : cellules, génétique, évolution, diversité du vivant, systèmes du corps et écologie. Un bon point de départ au second cycle.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-biology-bundle/main/README.md (link '_Concepts of Biology_ [online]'; re-fetched by checker, URL present verbatim). Licence from https://raw.githubusercontent.com/openstax/osbooks-biology-bundle/main/LICENSE (Attribution-NonCommercial-ShareAlike 4.0); chapter list from collections/concepts-biology.collection.xml in the same repo."
+    },
+    {
+      "id": "open-openstax-anatomy-physiology-2e",
+      "subject": "biology",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Anatomy and Physiology 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/anatomy-and-physiology-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "University-level OpenStax book on the human body, read online: tissues, skeleton and muscles, nerves and hormones, blood and heart, breathing, digestion, kidneys, reproduction.",
+      "description_fr": "Manuel d'OpenStax de niveau universitaire sur le corps humain (en anglais), à lire en ligne : tissus, squelette et muscles, nerfs et hormones, sang et cœur, respiration, digestion, reins, reproduction.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-anatomy-physiology/main/README.md (link 'The book can be viewed [online]'; re-fetched by checker, URL present verbatim). Licence from https://raw.githubusercontent.com/openstax/osbooks-anatomy-physiology/main/LICENSE (Attribution-NonCommercial-ShareAlike 4.0); chapter list from collections/anatomy-and-physiology-2e.collection.xml in the same repo."
+    },
+    {
+      "id": "open-openstax-biology-2e",
+      "subject": "biology",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Biology 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/biology-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Full university-level OpenStax biology textbook, read online; a deeper reference for S6: cell biology, genetics, biotechnology, evolution, plants, animals and ecology.",
+      "description_fr": "Manuel complet de biologie d'OpenStax, niveau universitaire (en anglais), à lire en ligne ; une référence approfondie pour la S6 : biologie cellulaire, génétique, biotechnologie, évolution, plantes, animaux et écologie.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-biology-bundle/main/README.md (link '_Biology 2e_ [online]'; re-fetched by checker, URL present verbatim). Licence from https://raw.githubusercontent.com/openstax/osbooks-biology-bundle/main/LICENSE (Attribution-NonCommercial-ShareAlike 4.0); chapter list from collections/biology-2e.collection.xml in the same repo."
+    },
+    {
+      "id": "reb-ict-s1",
+      "subject": "ict",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85739/mod_resource/content/1/ICT%20S1%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB ICT student's book for S1, pre-2026 CBC edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en TIC pour la S1, édition CBC antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (ict, S1): URL copied from GitHub Mugsh044/Yvens noselect.html, link 'ICT'. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-ict-s2",
+      "subject": "ict",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10659/mod_resource/content/1/ICT%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB ICT student's book for S2, pre-2026 CBC edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en TIC pour la S2, édition CBC antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (ict, S2): URL copied from GitHub Mugsh044/Yvens s2.html, link 'ICT'. Not opened."
+    },
+    {
+      "id": "reb-ict-s3",
+      "subject": "ict",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "ICT Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11698/mod_resource/content/1/ICT%20%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB ICT student's book for S3, pre-2026 CBC edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en TIC pour la S3, édition CBC antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (ict, S3): URL copied from GitHub Mugsh044/Yvens s3.html, link 'ICT'. Not opened."
+    },
+    {
+      "id": "reb-ict-s4",
+      "subject": "ict",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Computer Science Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85742/mod_resource/content/1/Computer%20Science%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Computer Science student's book for S4 (pre-2026 edition), for combinations that include Computer Science, such as MCE and MPC.",
+      "description_fr": "Manuel officiel de l'élève du REB en informatique (Computer Science) pour la S4, édition antérieure à 2026, destiné aux combinaisons avec informatique (MCE, MPC…).",
+      "source": "books-research.json reb.books (ict, S4): WebSearch returned this exact URL titled 'Computer Science Senior Four Student's Book'. Not opened."
+    },
+    {
+      "id": "reb-ict-s5",
+      "subject": "ict",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Information and Communication Technology Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20ICT%20SB%20F%202026-2027....pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB ICT student's book for S5, revised 2026–2027 edition. The link downloads the PDF directly.",
+      "description_fr": "Manuel officiel de l'élève du REB en TIC pour la S5, édition révisée 2026–2027. Le lien télécharge directement le PDF.",
+      "source": "books-research.json reb.books (ict, S5): WebSearch returned this exact URL titled 'Student's Book INFORMATION AND COMMUNICATION TECHNOLOGY Senior Five' (snippet: (c) 2026 REB). Not opened."
     },
     {
       "id": "reb-ict-s6",
@@ -1269,15 +836,239 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "ICT Senior 6 Student's Book",
+      "title": "ICT for General Education Senior 6 Student's Book",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
       "url": "https://elearning.reb.rw/pluginfile.php/84648/mod_resource/content/1/ICT%20S6%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB student's book for S6 general-education ICT (experimental, pre-2026 edition). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Manuel officiel de l'élève du REB en TIC pour l'enseignement général, S6 (version expérimentale antérieure à 2026). Une édition révisée 2026–2027 existe aussi.",
+      "source": "books-research.json reb.books (ict, S6): WebSearch returned this exact URL titled 'Experimental version ICT FOR GENERAL EDUCATION Senior 6 STUDENT BOOK'. Not opened."
+    },
+    {
+      "id": "open-cs-unplugged",
+      "subject": "ict",
+      "grades": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "CS Unplugged",
+      "publisher": "University of Canterbury CS Education Research Group",
+      "language": "en",
+      "url": "https://www.csunplugged.org/",
+      "format": "web",
+      "licence": "CC BY-SA 4.0",
+      "description": "Website of free activities that teach computer science without computers, using cards, string and games (binary numbers, sorting, algorithms).",
+      "description_fr": "Site d'activités gratuites pour apprendre l'informatique sans ordinateur, avec des cartes, de la ficelle et des jeux (nombres binaires, tri, algorithmes). En anglais.",
+      "source": "https://raw.githubusercontent.com/uccser/cs-unplugged/master/README.md ('Production website' link, verbatim; licence section: content CC BY-SA 4.0). Re-fetched by checker."
+    },
+    {
+      "id": "open-exo7-scratch-au-college",
+      "subject": "ict",
+      "grades": [
+        "S1",
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Scratch au collège",
+      "publisher": "Exo7 and IREM de Lille (Arnaud Bodin et al.)",
+      "language": "fr",
+      "url": "https://raw.githubusercontent.com/exo7math/scratch3-exo7/master/livre-scratch3.pdf",
+      "format": "pdf",
+      "licence": "CC BY-NC-SA 4.0 FR",
+      "description": "Free French-language PDF book: learn programming step by step with Scratch 3, plus unplugged algorithm activities. Suits S1–S2 students who read French.",
+      "description_fr": "Livre PDF gratuit en français pour apprendre pas à pas à programmer avec Scratch 3, complété par des activités débranchées sur les algorithmes. Pour les élèves de S1–S2.",
+      "source": "https://raw.githubusercontent.com/exo7math/scratch3-exo7/master/README.md links 'livre-scratch3.pdf' by relative path and states 'Creative Commons -- BY-NC-SA -- 4.0 FR'. Raw URL: curl -sI HTTP 200, 3,761,051 bytes (re-checked by checker)."
+    },
+    {
+      "id": "open-cs-field-guide",
+      "subject": "ict",
+      "grades": [
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Computer Science Field Guide",
+      "publisher": "University of Canterbury CS Education Research Group",
+      "language": "en",
+      "url": "https://csfieldguide.org.nz/",
+      "format": "web",
+      "licence": "CC BY-SA 4.0",
+      "description": "Free interactive online book for secondary students: algorithms, data representation, networks, encryption, AI and more. From the University of Canterbury (NZ).",
+      "description_fr": "Livre en ligne interactif et gratuit pour les élèves du secondaire : algorithmes, représentation des données, réseaux, chiffrement, IA, etc. En anglais.",
+      "source": "https://raw.githubusercontent.com/uccser/cs-field-guide/master/README.md ('Production website' link, verbatim; licence section: content CC BY-SA 4.0). Re-fetched by checker."
+    },
+    {
+      "id": "open-openstax-introduction-python-programming",
+      "subject": "ict",
+      "grades": [
+        "S4",
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Introduction to Python Programming",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/introduction-python-programming",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "OpenStax page for a free beginner's textbook on Python programming (introductory college level). Read it online or download it from that page.",
+      "description_fr": "Page OpenStax d'un manuel gratuit d'initiation à la programmation en Python (niveau première année d'université). En anglais, à lire en ligne ou à télécharger.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-introduction-python-programming/main/README.md (link 'online', verbatim; README states CC BY-NC-SA). Collection XML md:license by-nc-sa/4.0."
+    },
+    {
+      "id": "open-openstax-workplace-software-skills",
+      "subject": "ict",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Workplace Software and Skills",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/workplace-software-skills",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "OpenStax page for a free college textbook on office software: documents, spreadsheets, presentations and databases. Read it online or download it from that page.",
+      "description_fr": "Page OpenStax d'un manuel universitaire gratuit sur la bureautique : documents, tableurs, présentations et bases de données. En anglais, à lire en ligne ou à télécharger.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-workplace-software-skills/main/README.md (link 'online', verbatim; README states CC BY-NC-SA). Topics checked in collections/workplace-software-skills.collection.xml (md:license by-nc-sa/4.0)."
+    },
+    {
+      "id": "open-swc-databases-and-sql",
+      "subject": "ict",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "Databases and SQL",
+      "publisher": "The Carpentries (Software Carpentry)",
+      "language": "en",
+      "url": "https://swcarpentry.github.io/sql-novice-survey/",
+      "format": "web",
+      "licence": "CC BY 4.0",
+      "description": "Short free online lesson on databases and SQL with SQLite: selecting, sorting, filtering, joining and changing data. From Software Carpentry.",
+      "description_fr": "Courte leçon en ligne gratuite sur les bases de données et SQL avec SQLite : sélectionner, trier, filtrer, faire des jointures et modifier des données. En anglais.",
+      "source": "https://raw.githubusercontent.com/swcarpentry/sql-novice-survey/main/README.md ('rendered version of this material' link, verbatim; README: instructional material CC BY 4.0). Re-fetched by checker."
+    },
+    {
+      "id": "open-think-java-2e",
+      "subject": "ict",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Think Java, 2nd edition",
+      "publisher": "Allen B. Downey & Chris Mayfield",
+      "language": "en",
+      "url": "https://github.com/ChrisMayfield/ThinkJava2/raw/master/thinkjava2.pdf",
+      "format": "pdf",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free PDF of Think Java (2nd edition) by Allen Downey and Chris Mayfield: a beginner's introduction to programming in Java and object-oriented design.",
+      "description_fr": "PDF gratuit de Think Java (2e édition), d'Allen Downey et Chris Mayfield : initiation à la programmation en Java et à la conception orientée objet. En anglais.",
+      "source": "https://raw.githubusercontent.com/ChrisMayfield/ThinkJava2/master/README.md ('Free PDF: Download from GitHub ... (canonical)' link, verbatim; licence CC BY-NC-SA 4.0). Underlying file https://raw.githubusercontent.com/ChrisMayfield/ThinkJava2/master/thinkjava2.pdf: curl -sI HTTP 200, 1,957,646 bytes (re-checked by checker)."
+    },
+    {
+      "id": "reb-english-s1",
+      "subject": "english",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/5637/mod_resource/content/1/English%20S1.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB English Student's Book for Senior 1 (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel d'anglais du REB pour la S1 (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (english S1): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'English Senior 1 Student's Book'."
+    },
+    {
+      "id": "reb-english-s2",
+      "subject": "english",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10097/mod_resource/content/1/English%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB English Student's Book for Senior 2 (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel d'anglais du REB pour la S2 (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (english S2): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s2.html, link labelled 'ENGLISH'."
+    },
+    {
+      "id": "reb-english-s3",
+      "subject": "english",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20English%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB English Student's Book for Senior 3, 2026–2027 revised edition (experimental version).",
+      "description_fr": "Livre de l'élève officiel d'anglais du REB pour la S3, édition révisée 2026–2027 (version expérimentale).",
+      "source": "books-research.json reb entry (english S3): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'SENIOR THREE ENGLISH Student's Book Experimental Version'."
+    },
+    {
+      "id": "reb-english-s4",
+      "subject": "english",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 4 Student's Book (non-language pathways)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275114/mod_folder/content/0/SB/S4%20English%20SB%20non_language.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB English Student's Book for Senior 4, 2026 experimental edition for non-language pathways (such as maths and sciences).",
+      "description_fr": "Livre de l'élève officiel d'anglais du REB pour la S4, édition expérimentale 2026 pour les filières non linguistiques (maths et sciences, par exemple).",
+      "source": "books-research.json reb entry (english S4): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'ENGLISH Student's Book Senior Four Experimental version'. The summary said it covers the 'Maths and Sciences Pathway' and is (c) 2026 REB."
+    },
+    {
+      "id": "reb-english-s5",
+      "subject": "english",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "English Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=10363",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Official REB English Student's Book for Senior 5 (earlier edition). Opens REB's 'S5: English SB' page; open the PDF from there.",
+      "description_fr": "Livre de l'élève officiel d'anglais du REB pour la S5 (édition antérieure). Ouvre la page REB « S5: English SB » ; ouvrez le PDF depuis cette page.",
+      "source": "books-research.json reb entry (english S5): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'ENGS5Z: S5: English SB'."
     },
     {
       "id": "reb-english-s6",
@@ -1293,9 +1084,136 @@
       "url": "https://elearning.reb.rw/pluginfile.php/42653/mod_resource/content/1/English%20S6%20SB%20CS6.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB English Student's Book for Senior 6 (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel d'anglais du REB pour la S6 (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (english S6): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens mcbcourses2.html, megcourses2.html and mcecourses6.html, link 'English'."
+    },
+    {
+      "id": "open-african-storybook-english",
+      "subject": "english",
+      "grades": [
+        "S1"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "African Storybook (English stories)",
+      "publisher": "African Storybook Project",
+      "language": "en",
+      "url": "https://africanstorybook.org",
+      "format": "web",
+      "licence": "CC BY or CC BY-NC (varies by story)",
+      "description": "Free illustrated African storybooks for extra English reading practice at easy levels. Opens the African Storybook website; choose English as the language.",
+      "description_fr": "Histoires africaines illustrées et gratuites pour s'entraîner à lire en anglais, à des niveaux faciles. Ouvre le site African Storybook ; choisissez l'anglais.",
+      "source": "https://raw.githubusercontent.com/global-asp/asp-source/master/README.md (root README links the African Storybook Project as https://africanstorybook.org; per-story licences listed in https://raw.githubusercontent.com/global-asp/asp-source/master/en/README.md)"
+    },
+    {
+      "id": "open-openstax-writing-guide",
+      "subject": "english",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Writing Guide with Handbook",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/writing-guide",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax guide to essay writing, argument and research, with a grammar handbook. University level, useful for S5–S6. Opens the OpenStax book page.",
+      "description_fr": "Guide gratuit d'OpenStax sur la rédaction, l'argumentation et la recherche, avec un précis de grammaire. Niveau universitaire, utile en S5–S6. Ouvre la page du livre.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-writing-guide/main/README.md ('The book can be viewed [online](https://openstax.org/details/books/writing-guide)'); licence: README says Creative Commons Attribution-NonCommercial-ShareAlike; https://raw.githubusercontent.com/openstax/osbooks-writing-guide/main/LICENSE and collections/writing-guide.collection.xml say 4.0 International"
+    },
+    {
+      "id": "reb-kinyarwanda-s1",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Ikinyarwanda S1 – Igitabo cy'umunyeshuri",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1428&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kinyarwanda Student's Book for Senior 1, written in Kinyarwanda. Opens REB's 'S1: Kinyarwanda SB' page; open the PDF from there.",
+      "description_fr": "Livre de l'élève officiel de kinyarwanda du REB pour la S1, rédigé en kinyarwanda. Ouvre la page REB « S1: Kinyarwanda SB » ; ouvrez le PDF depuis cette page.",
+      "source": "books-research.json reb entry (kinyarwanda S1): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'S1_Kin: S1: Kinyarwanda SB'. It is also listed in GitHub Mutesa-Cedric/bwiza-data configs/books_sources.txt as 'S1 Kinyarwanda SB'."
+    },
+    {
+      "id": "reb-kinyarwanda-s2",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Ikinyarwanda S2 – Igitabo cy'umunyeshuri",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/5268/mod_resource/content/1/S2%20KinyaRwanda%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kinyarwanda Student's Book for Senior 2, written in Kinyarwanda (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de kinyarwanda du REB pour la S2, rédigé en kinyarwanda (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (kinyarwanda S2): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s2.html (link 'KINYARWANDA'). The same URL is listed in Mutesa-Cedric/bwiza-data books_sources.txt as 'S2 KinyaRwanda SB'."
+    },
+    {
+      "id": "reb-kinyarwanda-s3",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Ikinyarwanda S3 – Igitabo cy'umunyeshuri",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/11570/mod_resource/content/1/Kinyarwanda%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kinyarwanda Student's Book for Senior 3, written in Kinyarwanda (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de kinyarwanda du REB pour la S3, rédigé en kinyarwanda (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (kinyarwanda S3): NOT OPENED (egress blocked). Exact URL listed in GitHub Mutesa-Cedric/bwiza-data configs/books_sources.txt (fetched OK) as 'Kinyarwanda S3 Student Book'."
+    },
+    {
+      "id": "reb-kinyarwanda-s4",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Ikinyarwanda S4 – Igitabo cy'umunyeshuri",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86223/mod_resource/content/1/IKINYARWANDA%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kinyarwanda Student's Book for Senior 4, written in Kinyarwanda (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de kinyarwanda du REB pour la S4, rédigé en kinyarwanda (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (kinyarwanda S4): NOT OPENED (egress blocked). The exact URL appears in two independent GitHub files (fetched OK): Mugsh044/Yvens mcbcourses.html (link 'Kinyarwanda') and Mutesa-Cedric/bwiza-data books_sources.txt ('Ikinyarwanda S4 SB')."
+    },
+    {
+      "id": "reb-kinyarwanda-s5",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Ikinyarwanda S5 – Igitabo cy'umunyeshuri",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "rw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86224/mod_resource/content/1/IKINYARWANDA%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kinyarwanda Student's Book for Senior 5, written in Kinyarwanda (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de kinyarwanda du REB pour la S5, rédigé en kinyarwanda (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (kinyarwanda S5): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens mcbcourses1.html, link 'Kinyarwanda'."
     },
     {
       "id": "reb-kinyarwanda-s6",
@@ -1305,15 +1223,123 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "Kinyarwanda Senior 6 Student's Book",
+      "title": "Ikinyarwanda S6 – Igitabo cy'umunyeshuri (amashami atari ay'indimi)",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "rw",
       "url": "https://elearning.reb.rw/pluginfile.php/275856/mod_folder/content/0/SB/S6%20Ikinyarwanda%20SB%20amashami%20atari%20indimi.pdf?forcedownload=1",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Kinyarwanda Student's Book for Senior 6, written in Kinyarwanda; 2026 experimental edition for non-language pathways.",
+      "description_fr": "Livre de l'élève officiel de kinyarwanda du REB pour la S6, rédigé en kinyarwanda ; édition expérimentale 2026 pour les filières non linguistiques.",
+      "source": "books-research.json reb entry (kinyarwanda S6): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'IKINYARWANDA AMASHURI YISUMBUYE IGITABO CY'UMUNYESHURI AMASHAMI ATARI AY'INDIMI'. The summary said (c) 2026, 'Igitabo kiri mu igerageza' (experimental)."
+    },
+    {
+      "id": "open-african-storybook-kinyarwanda",
+      "subject": "kinyarwanda",
+      "grades": [
+        "S1"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "African Storybook (Kinyarwanda stories)",
+      "publisher": "African Storybook Project",
+      "language": "rw",
+      "url": "https://africanstorybook.org",
+      "format": "web",
+      "licence": "CC BY or CC BY-NC (varies by story)",
+      "description": "Free illustrated African storybooks in Kinyarwanda; very easy picture-book level, for extra reading only. Opens African Storybook; choose Kinyarwanda as the language.",
+      "description_fr": "Histoires africaines illustrées et gratuites en kinyarwanda ; livres d'images très faciles, en lecture complémentaire. Ouvre African Storybook ; choisissez le kinyarwanda.",
+      "source": "https://raw.githubusercontent.com/global-asp/asp-source/master/README.md (root README links the African Storybook Project as https://africanstorybook.org; per-story licences listed in https://raw.githubusercontent.com/global-asp/asp-source/master/rw/README.md)"
+    },
+    {
+      "id": "reb-kiswahili-s1",
+      "subject": "kiswahili",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili S1 – Kitabu cha Mwanafunzi",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1917&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kiswahili Student's Book for Senior 1, written in Kiswahili. Opens REB's 'Kiswahili S1SB' page; open the PDF from there.",
+      "description_fr": "Livre de l'élève officiel de kiswahili du REB pour la S1, rédigé en kiswahili. Ouvre la page REB « Kiswahili S1SB » ; ouvrez le PDF depuis cette page.",
+      "source": "books-research.json reb entry (kiswahili S1): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'S1_Kisw: Kiswahili S1SB'."
+    },
+    {
+      "id": "reb-kiswahili-s2",
+      "subject": "kiswahili",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili S2 – Kitabu cha Mwanafunzi",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=2948",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kiswahili Student's Book for Senior 2, written in Kiswahili. Opens REB's 'S2: Kiswahili' folder; choose 'Kiswahili S2 SB'.",
+      "description_fr": "Livre de l'élève officiel de kiswahili du REB pour la S2, rédigé en kiswahili. Ouvre le dossier REB « S2: Kiswahili » ; choisissez « Kiswahili S2 SB ».",
+      "source": "books-research.json reb entry (kiswahili S2): NOT OPENED (egress blocked). WebSearch returned this URL with the title 'S2: Kiswahili - E-learning - REB' (also as 'S2'). The search summary says it holds 'Kiswahili S2 SB.pdf'."
+    },
+    {
+      "id": "reb-kiswahili-s3",
+      "subject": "kiswahili",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili S3 – Kitabu cha Mwanafunzi",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17482",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kiswahili book for Senior 3, in Kiswahili. Opens REB's folder of revised 2026 S3 books; choose the Kiswahili Student's Book (SB), not the TG.",
+      "description_fr": "Livre officiel de kiswahili du REB pour la S3, en kiswahili. Ouvre le dossier REB des livres révisés de S3 (2026) ; choisissez le livre de l'élève (SB) de kiswahili.",
+      "source": "books-research.json reb entry (kiswahili S3): NOT OPENED (egress blocked). WebSearch returned this URL with the title 'cd2026' alongside S3 2026 files. The search summaries list Kiswahili among the S3 revised SBs. Research confidence that 17482 is the S3 folder: medium."
+    },
+    {
+      "id": "reb-kiswahili-s4",
+      "subject": "kiswahili",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili kwa Shule za Rwanda – Kidato cha 4 – Kitabu cha Mwanafunzi (Mchepuo wa Lugha)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86857/mod_resource/content/1/Kiswahili%20Languages%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kiswahili Student's Book for Senior 4, written in Kiswahili; earlier edition for language combinations (Mchepuo wa lugha).",
+      "description_fr": "Livre de l'élève officiel de kiswahili du REB pour la S4, rédigé en kiswahili ; édition antérieure pour les combinaisons de langues (Mchepuo wa lugha).",
+      "source": "books-research.json reb entry (kiswahili S4): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'KISWAHILI KWA SHULE ZA RWANDA Mchepuo wa lugha Kitabu cha Mwanafunzi'."
+    },
+    {
+      "id": "reb-kiswahili-s5",
+      "subject": "kiswahili",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Kiswahili Kidato cha 5 – Kitabu cha Mwanafunzi (Mchepuo wa Lugha)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "sw",
+      "url": "https://elearning.reb.rw/pluginfile.php/86863/mod_resource/content/1/Kiswahili%20Languages%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Kiswahili Student's Book for Senior 5, written in Kiswahili; earlier edition for language combinations (Mchepuo wa lugha).",
+      "description_fr": "Livre de l'élève officiel de kiswahili du REB pour la S5, rédigé en kiswahili ; édition antérieure pour les combinaisons de langues (Mchepuo wa lugha).",
+      "source": "books-research.json reb entry (kiswahili S5): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'MCHEPUO WA LUGHA KIDATO CHA 5 KISWAHILI KITABU CHA MWANAFUNZI'."
     },
     {
       "id": "reb-kiswahili-s6",
@@ -1323,15 +1349,125 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "Kiswahili Senior 6 Student's Book",
+      "title": "Kiswahili Kidato cha 6 – Kitabu cha Mwanafunzi (Mchepuo wa Lugha)",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "sw",
       "url": "https://elearning.reb.rw/pluginfile.php/275856/mod_folder/content/0/SB/S6%20Kiswahili%20SB%202026-2027.pdf?forcedownload=1",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Kiswahili Student's Book for Senior 6, written in Kiswahili; 2026–2027 edition for the languages pathway (Mchepuo wa lugha).",
+      "description_fr": "Livre de l'élève officiel de kiswahili du REB pour la S6, rédigé en kiswahili ; édition 2026–2027 pour la filière langues (Mchepuo wa lugha).",
+      "source": "books-research.json reb entry (kiswahili S6): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'Kiswahili Kidato cha 6 Mchepuo wa lugha Kitabu cha Mwanafunzi'."
+    },
+    {
+      "id": "open-african-storybook-kiswahili",
+      "subject": "kiswahili",
+      "grades": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "African Storybook (Kiswahili stories)",
+      "publisher": "African Storybook Project",
+      "language": "sw",
+      "url": "https://africanstorybook.org",
+      "format": "web",
+      "licence": "CC BY or CC BY-NC (varies by story)",
+      "description": "Free illustrated African storybooks in Kiswahili at graded levels, good for beginners in S1–S3. Opens the African Storybook website; choose Kiswahili.",
+      "description_fr": "Histoires africaines illustrées et gratuites en kiswahili, classées par niveau, adaptées aux débutants de S1–S3. Ouvre le site African Storybook ; choisissez le kiswahili.",
+      "source": "https://raw.githubusercontent.com/global-asp/asp-source/master/README.md (root README links the African Storybook Project as https://africanstorybook.org; per-story licences listed in https://raw.githubusercontent.com/global-asp/asp-source/master/sw/README.md)"
+    },
+    {
+      "id": "reb-french-s1",
+      "subject": "french",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Français 1re année secondaire – Livre de l'élève",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/5644/mod_resource/content/1/FRENCH%20S1%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB French Student's Book for Senior 1, written in French (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de français du REB pour la S1 (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (french S1): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'i Français 1ere Année Secondaire Livre de l'élève FRANÇAIS Livre de l'élève'."
+    },
+    {
+      "id": "reb-french-s2",
+      "subject": "french",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Français 2e année secondaire – Livre de l'élève",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/10144/mod_resource/content/1/S2%20French%20SB%20%282%29.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB French Student's Book for Senior 2, written in French (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de français du REB pour la S2 (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (french S2): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s2.html, link labelled 'FRANCE'."
+    },
+    {
+      "id": "reb-french-s3",
+      "subject": "french",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Français 3e année secondaire – Livre de l'élève",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/11628/mod_resource/content/1/French%20%20S3%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB French Student's Book for Senior 3, written in French (earlier edition, before the 2026–2027 revision).",
+      "description_fr": "Livre de l'élève officiel de français du REB pour la S3 (édition antérieure à la révision 2026–2027).",
+      "source": "books-research.json reb entry (french S3): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens s3.html, link labelled 'FRANCE'."
+    },
+    {
+      "id": "reb-french-s4",
+      "subject": "french",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Français 4e année secondaire – Livre de l'élève (LFK)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/5838/mod_resource/content/2/FRENCH%20LFK%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB French Student's Book for Senior 4, written in French; earlier edition for the LFK languages combination.",
+      "description_fr": "Livre de l'élève officiel de français du REB pour la S4 ; édition antérieure destinée à la combinaison LFK (langues).",
+      "source": "books-research.json reb entry (french S4): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'i Français 4ème Année Secondaire LFK Livre de l'élève FRANÇAIS'."
+    },
+    {
+      "id": "reb-french-s5",
+      "subject": "french",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Français 5e année secondaire – Manuel de l'élève (options littéraires)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "fr",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20Franc%CC%A7ais,%20Manuel%20de%20l_eleve%20options%20litteraires.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB French Student's Book for Senior 5, written in French; 2026 revised edition (experimental version) for literary options.",
+      "description_fr": "Manuel de l'élève officiel de français du REB pour la S5 ; édition révisée 2026 (version expérimentale) pour les options littéraires.",
+      "source": "books-research.json reb entry (french S5): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'FRANÇAIS ÉDITION RÉVISÉE-2026 Version expérimantale'."
     },
     {
       "id": "reb-french-s6",
@@ -1341,15 +1477,145 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "French Senior 6 Student's Book",
+      "title": "Français 6e année secondaire – Livre de l'élève (LFK)",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "fr",
       "url": "https://elearning.reb.rw/pluginfile.php/11963/mod_resource/content/3/French%20S6%20SB%20LFK.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB French Student's Book for Senior 6, written in French; earlier edition for the LFK languages combination.",
+      "description_fr": "Livre de l'élève officiel de français du REB pour la S6 ; édition antérieure destinée à la combinaison LFK (langues).",
+      "source": "books-research.json reb entry (french S6): NOT OPENED (egress blocked). Exact URL copied from Mugsh044/Yvens mcbcourses2.html, link 'French'."
+    },
+    {
+      "id": "open-african-storybook-french",
+      "subject": "french",
+      "grades": [
+        "S1",
+        "S2"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "African Storybook (histoires en français)",
+      "publisher": "African Storybook Project",
+      "language": "fr",
+      "url": "https://africanstorybook.org",
+      "format": "web",
+      "licence": "CC BY or CC BY-NC (varies by story)",
+      "description": "Free illustrated African storybooks in French for beginner readers (S1–S2). Opens the African Storybook website; choose French as the language.",
+      "description_fr": "Histoires africaines illustrées et gratuites en français, pour les lecteurs débutants (S1–S2). Ouvre le site African Storybook ; choisissez le français.",
+      "source": "https://raw.githubusercontent.com/global-asp/asp-source/master/README.md (root README links the African Storybook Project as https://africanstorybook.org; per-story licences listed in https://raw.githubusercontent.com/global-asp/asp-source/master/fr/README.md)"
+    },
+    {
+      "id": "open-la-fontaine-fables-tome-1",
+      "subject": "french",
+      "grades": [
+        "S3",
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Fables de La Fontaine – Tome premier",
+      "publisher": "Project Gutenberg",
+      "language": "fr",
+      "url": "https://www.gutenberg.org/ebooks/17941",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Book I of La Fontaine's Fables in the original French (La Cigale et la Fourmi, Le Corbeau et le Renard…). Opens the Project Gutenberg page to read online or download.",
+      "description_fr": "Livre I des Fables de La Fontaine, texte original (La Cigale et la Fourmi, Le Corbeau et le Renard…). Ouvre la page du Projet Gutenberg pour lire en ligne ou télécharger.",
+      "source": "https://raw.githubusercontent.com/GITenberg/Fables-de-La-FontaineTome-Premier_17941/master/metadata.yaml ('url: http://www.gutenberg.org/ebooks/17941'; 'rights: Public domain in the USA.'); README.rst in the same repo: 'This book is in the Public Domain'; 17941-8.txt table of contents is Livre I only (La Cigale et la Fourmi ... Le Chêne et le Roseau) (http upgraded to https; same Project Gutenberg page)"
+    },
+    {
+      "id": "reb-history-s1",
+      "subject": "history",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/9192/mod_resource/content/1/HISTORY%20%20CITIZENSHIP%20S1%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S1 History and Citizenship. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour l'histoire et la citoyenneté en S1. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[history S1] (WebSearch result; same URL in Mugsh044/Yvens noselect.html ('HISTORY'))"
+    },
+    {
+      "id": "reb-history-s2",
+      "subject": "history",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/84702/mod_resource/content/1/HISTORY%20AND%20CITIZENSHIP%20STUDENT%20BOOK%20S2.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S2 History and Citizenship. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour l'histoire et la citoyenneté en S2. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[history S2] (Mugsh044/Yvens s2.html ('HISTORY'))"
+    },
+    {
+      "id": "reb-history-s3",
+      "subject": "history",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History and Citizenship Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/84705/mod_resource/content/1/S3%20HISTORY%20AND%20CITIZENSHIP%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S3 History and Citizenship. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour l'histoire et la citoyenneté en S3. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[history S3] (Mugsh044/Yvens s3.html ('HISTORY'))"
+    },
+    {
+      "id": "reb-history-s4",
+      "subject": "history",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History for Languages Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275114/mod_folder/content/0/SB/S4%20History%20for%20Language%20SB%202026-2027%20.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB S4 History book, 2026–2027 revised edition written for the Languages pathway (language combinations).",
+      "description_fr": "Manuel officiel d'histoire du REB pour la S4, édition révisée 2026-2027 conçue pour la filière Langues (combinaisons de langues).",
+      "source": "books-research.json reb.books[history S4] (WebSearch result titled 'History For Languages Student's Book Senior Four')"
+    },
+    {
+      "id": "reb-history-s5",
+      "subject": "history",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "History Senior 5 Student's Book (Advanced Level)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275855/mod_folder/content/0/SB/S5%20History%20Advanced%20Level%20SB%202026-2027.pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB S5 History book, 2026–2027 revised edition (Advanced Level). REB publishes a separate edition for the Languages pathway.",
+      "description_fr": "Manuel officiel d'histoire du REB pour la S5, édition révisée 2026-2027 (niveau avancé). Le REB publie une édition distincte pour la filière Langues.",
+      "source": "books-research.json reb.books[history S5] (WebSearch result titled 'HISTORY Student's Book Senior Five')"
     },
     {
       "id": "reb-history-s6",
@@ -1359,15 +1625,162 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "History and Citizenship Senior 6 Student's Book",
+      "title": "History Senior 6 Student's Book",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
       "url": "https://elearning.reb.rw/mod/resource/view.php?id=4215&forceview=1",
       "format": "page",
       "licence": "© REB, free to read",
-      "description": "Opens the REB page that lists this book.",
-      "description_fr": "Ouvre la page du REB qui contient ce livre.",
-      "source": "REB research (provisional list)"
+      "description": "Opens the REB page 'S6_Hist: History S6 SB'; open the PDF shown there. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Lien vers la page du REB « S6_Hist: History S6 SB » : ouvrez le PDF qui s'y trouve. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[history S6] (WebSearch result titled 'S6_Hist: History S6 SB')"
+    },
+    {
+      "id": "open-openstax-world-history-volume-1",
+      "subject": "history",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "World History Volume 1, to 1500",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/world-history-volume-1",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax world history to 1500: early humans, ancient civilisations, Rome, Africa in ancient times, states of sub-Saharan Africa. College level.",
+      "description_fr": "Manuel OpenStax gratuit (anglais, niveau universitaire) : histoire mondiale jusqu'en 1500, premiers humains, civilisations anciennes, Rome, Afrique ancienne et subsaharienne.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-world-history/main/README.md (reader URL copied verbatim; README licence: CC BY-NC-SA). Licence also in collections/world-history-volume-1.collection.xml (md:license by-nc-sa/4.0) at main."
+    },
+    {
+      "id": "open-openstax-world-history-volume-2",
+      "subject": "history",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "World History Volume 2, from 1400",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/world-history-volume-2",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax world history from 1400 to today: early modern Africa, colonisation, revolutions, the world wars, the Cold War. College level.",
+      "description_fr": "Manuel OpenStax gratuit (anglais, niveau universitaire) : histoire mondiale depuis 1400, Afrique moderne, colonisation, révolutions, guerres mondiales, guerre froide.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-world-history/main/README.md (reader URL copied verbatim; README licence: CC BY-NC-SA). Licence also in collections/world-history-volume-2.collection.xml (md:license by-nc-sa/4.0) at main."
+    },
+    {
+      "id": "open-openstax-introduction-political-science",
+      "subject": "history",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Introduction to Political Science",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/introduction-political-science",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax book for the citizenship side of history: political ideologies, civil rights, elections, institutions, international law and organisations. College level.",
+      "description_fr": "Manuel OpenStax gratuit (anglais, niveau universitaire) pour la citoyenneté : idéologies, droits civiques, élections, institutions, droit et organisations internationales.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-introduction-political-science/main/README.md (reader URL copied verbatim; README licence: CC BY-NC-SA). Licence also in collections/introduction-political-science.collection.xml (md:license by-nc-sa/4.0) at main."
+    },
+    {
+      "id": "reb-geography-s1",
+      "subject": "geography",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=12880&forceview=1",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens the REB page 'S1_G&E: S1: Geography and Environment SB'; open the PDF shown there. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Lien vers la page du REB « S1_G&E: S1: Geography and Environment SB » : ouvrez le PDF qui s'y trouve. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[geography S1] (WebSearch result titled 'S1_G&E: S1: Geography and Environment SB')"
+    },
+    {
+      "id": "reb-geography-s2",
+      "subject": "geography",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10818/mod_resource/content/1/Geography%20and%20Environment%20S2%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S2 Geography and Environment. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour la géographie et l'environnement en S2. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[geography S2] (Mugsh044/Yvens s2.html ('GEOGRAPHY'))"
+    },
+    {
+      "id": "reb-geography-s3",
+      "subject": "geography",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography and Environment Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/275112/mod_folder/content/0/SB/S3%20Geography%20SB%20F%202026-2027....pdf?forcedownload=1",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S3 Geography and Environment, 2026–2027 revised edition.",
+      "description_fr": "Manuel officiel de l'élève du REB pour la géographie et l'environnement en S3, édition révisée 2026-2027.",
+      "source": "books-research.json reb.books[geography S3] (WebSearch result titled 'GEOGRAPHY ENVIRONMENT AND Senior 3 STUDENT'S BOOK')"
+    },
+    {
+      "id": "reb-geography-s4",
+      "subject": "geography",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10641/mod_resource/content/1/Geography%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S4 Geography. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour la géographie en S4. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[geography S4] (Mugsh044/Yvens megcourses.html ('Geography'))"
+    },
+    {
+      "id": "reb-geography-s5",
+      "subject": "geography",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Geography Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11819/mod_resource/content/1/Geography%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S5 Geography, edition dated January 2019 (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour la géographie en S5, édition datée de janvier 2019 (antérieure à la révision 2026-2027).",
+      "source": "books-research.json reb.books[geography S5] (WebSearch result titled 'Geography s5 Student's Book Kigali,January 2019'; same URL in Mugsh044/Yvens)"
     },
     {
       "id": "reb-geography-s6",
@@ -1377,15 +1790,51 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "Geography and Environment Senior 6 Student's Book",
+      "title": "Geography Senior 6 Student's Book",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
       "url": "https://elearning.reb.rw/pluginfile.php/38901/mod_resource/content/1/Geography%20SB%20S6.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB student's book for S6 Geography. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour la géographie en S6. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[geography S6] (Mugsh044/Yvens megcourses2.html ('Geography'))"
+    },
+    {
+      "id": "reb-economics-s4",
+      "subject": "economics",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Economics for Rwandan Schools Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10721/mod_resource/content/1/Economics%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S4 Economics. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour l'économie en S4. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[economics S4] (WebSearch result titled 'Economics For Rwandan Schools Senior Four Student's Book REB'; same URL in Mugsh044/Yvens)"
+    },
+    {
+      "id": "reb-economics-s5",
+      "subject": "economics",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Economics Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11938/mod_resource/content/1/Economics%20S5%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB student's book for S5 Economics. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour l'économie en S5. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[economics S5] (Mugsh044/Yvens megcourses1.html ('Economics'))"
     },
     {
       "id": "reb-economics-s6",
@@ -1395,15 +1844,163 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "Economics Senior 6 Student's Book",
+      "title": "Economics for Rwanda Schools Senior 6 Learner's Book",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
       "url": "https://elearning.reb.rw/pluginfile.php/14848/mod_resource/content/1/Economics%20S6%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB student's book for S6 Economics. Earlier edition (before the 2026–2027 revision).",
+      "description_fr": "Manuel officiel de l'élève du REB pour l'économie en S6. Édition antérieure à la révision 2026-2027.",
+      "source": "books-research.json reb.books[economics S6] (WebSearch result titled 'Economics for Rwanda Schools Learner's Book Senior Six'; same URL in Mugsh044/Yvens)"
+    },
+    {
+      "id": "open-openstax-microeconomics-ap-2e",
+      "subject": "economics",
+      "grades": [
+        "S4",
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Principles of Microeconomics for AP® Courses 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/principles-microeconomics-ap-courses-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax microeconomics book written for high-school (US AP) courses: demand and supply, elasticity, costs, competition and monopoly.",
+      "description_fr": "Manuel OpenStax gratuit (en anglais) de microéconomie pour le lycée (cours AP américains) : offre et demande, élasticité, coûts, concurrence et monopole.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-principles-economics-bundle/main/README.md (reader URL copied verbatim; README licence: CC BY-NC-SA). Licence also in collections/principles-microeconomics-ap-courses-2e.collection.xml (md:license by-nc-sa/4.0) at main."
+    },
+    {
+      "id": "open-openstax-principles-economics-3e",
+      "subject": "economics",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Principles of Economics 3e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/principles-economics-3e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax economics book: scarcity, demand and supply, elasticity, costs, market structures, national economy, money and banking, trade. College level.",
+      "description_fr": "Manuel OpenStax gratuit (anglais, niveau universitaire) : rareté, offre et demande, élasticité, coûts, structures de marché, macroéconomie, monnaie et banque, commerce.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-principles-economics-bundle/main/README.md (reader URL copied verbatim; README licence: CC BY-NC-SA). Licence also in collections/principles-economics-3e.collection.xml (md:license by-nc-sa/4.0) at main."
+    },
+    {
+      "id": "open-openstax-macroeconomics-ap-2e",
+      "subject": "economics",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Principles of Macroeconomics for AP® Courses 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/principles-macroeconomics-ap-courses-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "Free OpenStax macroeconomics book written for high-school (US AP) courses: growth, unemployment, inflation, money, trade, fiscal policy.",
+      "description_fr": "Manuel OpenStax gratuit (en anglais) de macroéconomie pour le lycée (cours AP américains) : croissance, chômage, inflation, monnaie, commerce, politique budgétaire.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-principles-economics-bundle/main/README.md (reader URL copied verbatim; README licence: CC BY-NC-SA). Licence also in collections/principles-macroeconomics-ap-courses-2e.collection.xml (md:license by-nc-sa/4.0) at main."
+    },
+    {
+      "id": "reb-entrepreneurship-s1",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S1"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 1 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/9400/mod_resource/content/1/Entrepreneurship%20S1.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Entrepreneurship student's book for S1, pre-2026 CBC edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en entrepreneuriat pour la S1, édition CBC antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (entrepreneurship, S1): URL copied from GitHub Mugsh044/Yvens noselect.html, link 'ENTREPRENEURSHIP'. Not opened."
+    },
+    {
+      "id": "reb-entrepreneurship-s2",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S2"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 2 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/10855/mod_resource/content/1/Entrepreneurship%20S2.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Entrepreneurship student's book for S2, pre-2026 CBC edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en entrepreneuriat pour la S2, édition CBC antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (entrepreneurship, S2): URL copied from GitHub Mugsh044/Yvens s2.html, link 'ENTREPRENEURSHIP'. Not opened."
+    },
+    {
+      "id": "reb-entrepreneurship-s3",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S3"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship Senior 3 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/11724/mod_resource/content/1/S3%20Entrepreneurship%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Entrepreneurship student's book for S3, pre-2026 CBC edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en entrepreneuriat pour la S3, édition CBC antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (entrepreneurship, S3): URL copied from GitHub Mugsh044/Yvens s3.html, link 'ENTREPRENEURSHIP'. Not opened."
+    },
+    {
+      "id": "reb-entrepreneurship-s4",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship for General Education Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/45712/mod_resource/content/1/Entrepreneurship%20S4_SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Entrepreneurship student's book for S4, general-education edition (pre-2026), not the accounting-option book.",
+      "description_fr": "Manuel officiel de l'élève du REB en entrepreneuriat pour la S4, édition de l'enseignement général (antérieure à 2026), et non celle de l'option comptabilité.",
+      "source": "books-research.json reb.books (entrepreneurship, S4): WebSearch returned this exact URL titled 'ENTREPRENEURSHIP for General Education Student's Book Senior Four'; Mugsh044/Yvens links the same URL. Not opened."
+    },
+    {
+      "id": "reb-entrepreneurship-s5",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Entrepreneurship for General Education Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/45714/mod_resource/content/1/Entrepreneurship%20S5_SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Entrepreneurship student's book for S5, general-education edition (pre-2026). REB has also released a revised 2026–2027 edition.",
+      "description_fr": "Manuel officiel de l'élève du REB en entrepreneuriat pour la S5, édition de l'enseignement général (antérieure à 2026). Une édition révisée 2026–2027 existe aussi.",
+      "source": "books-research.json reb.books (entrepreneurship, S5): WebSearch returned this exact URL titled 'Entrepreneurship for General Education Student's Book Senior Five'; Mugsh044/Yvens links the same URL. Not opened."
     },
     {
       "id": "reb-entrepreneurship-s6",
@@ -1419,9 +2016,85 @@
       "url": "https://elearning.reb.rw/pluginfile.php/55372/mod_resource/content/1/SB%20S6%20Entrepreneurship%20(1).pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Entrepreneurship student's book for S6, pre-2026 edition. REB has also released a revised 2026–2027 edition, which may differ.",
+      "description_fr": "Manuel officiel de l'élève du REB en entrepreneuriat pour la S6, édition antérieure à 2026. Le REB a aussi publié une édition révisée 2026–2027, qui peut différer.",
+      "source": "books-research.json reb.books (entrepreneurship, S6): WebSearch returned this exact URL titled 'SB S6 Entrepreneurship (1).pdf'; Mugsh044/Yvens links the same file. Not opened."
+    },
+    {
+      "id": "open-openstax-entrepreneurship",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Entrepreneurship",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/entrepreneurship",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "OpenStax page for a free college textbook on entrepreneurship: spotting opportunities, business models, marketing, financing and ethics. Read online or download.",
+      "description_fr": "Page OpenStax d'un manuel universitaire gratuit d'entrepreneuriat : opportunités, modèles d'affaires, marketing, financement, éthique. En anglais, en ligne ou à télécharger.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-entrepreneurship/main/README.md (link 'online', verbatim; README states CC BY-NC-SA). Topics checked in collections/entrepreneurship.collection.xml (md:license by-nc-sa/4.0)."
+    },
+    {
+      "id": "open-openstax-introduction-business-2e",
+      "subject": "entrepreneurship",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Introduction to Business 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/introduction-business-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "OpenStax page for a free introductory college business textbook: forms of business, starting a business, management, marketing, accounting and finance.",
+      "description_fr": "Page OpenStax d'un manuel universitaire gratuit d'introduction à l'entreprise : formes d'entreprise, création, gestion, marketing, comptabilité et finance. En anglais.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-introduction-business/main/README.md (link 'online', verbatim; README states CC BY-NC-SA). Topics checked in collections/introduction-business-2e.collection.xml (md:license by-nc-sa/4.0)."
+    },
+    {
+      "id": "reb-literature-s4",
+      "subject": "literature",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Literature in English Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86873/mod_resource/content/1/GENERAL%20EDU-Literature%20in%20english-S4-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Literature in English Student's Book for Senior 4 (earlier, pre-2026 edition).",
+      "description_fr": "Livre de l'élève officiel de littérature en anglais (Literature in English) du REB pour la S4 (édition antérieure à 2026).",
+      "source": "books-research.json reb entry (literature S4): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'Literature in English Senior 4 Student's Book'."
+    },
+    {
+      "id": "reb-literature-s5",
+      "subject": "literature",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Literature in English Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86875/mod_resource/content/1/GENERAL%20EDU-Literature%20in%20english-S5-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Literature in English Student's Book for Senior 5 (earlier, pre-2026 edition).",
+      "description_fr": "Livre de l'élève officiel de littérature en anglais (Literature in English) du REB pour la S5 (édition antérieure à 2026).",
+      "source": "books-research.json reb entry (literature S5): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'LITERATURE IN ENGLISH Senior 5 STUDENT'S BOOK'."
     },
     {
       "id": "reb-literature-s6",
@@ -1437,9 +2110,156 @@
       "url": "https://elearning.reb.rw/pluginfile.php/12059/mod_resource/content/1/Literature%20S6%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB Literature in English Student's Book for Senior 6 (earlier, pre-2026 edition).",
+      "description_fr": "Livre de l'élève officiel de littérature en anglais (Literature in English) du REB pour la S6 (édition antérieure à 2026).",
+      "source": "books-research.json reb entry (literature S6): NOT OPENED (egress blocked). WebSearch returned this exact URL with the title 'LITERATURE IN ENGLISH Senior 6 STUDENT'S BOOK'."
+    },
+    {
+      "id": "open-equiano-interesting-narrative",
+      "subject": "literature",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "The Interesting Narrative of the Life of Olaudah Equiano",
+      "publisher": "Standard Ebooks",
+      "language": "en",
+      "url": "https://standardebooks.org/ebooks/olaudah-equiano/the-interesting-narrative-of-the-life-of-olaudah-equiano",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Equiano's 1789 autobiography: kidnapped as a child in Africa and enslaved, he later wrote against slavery. Early African writing in English. Free edition.",
+      "description_fr": "L'autobiographie d'Equiano (1789) : enlevé enfant en Afrique et réduit en esclavage, il écrit ensuite contre l'esclavage. Un texte africain majeur en anglais.",
+      "source": "https://raw.githubusercontent.com/standardebooks/olaudah-equiano_the-interesting-narrative-of-the-life-of-olaudah-equiano/master/src/epub/content.opf (dc:identifier 'https://standardebooks.org/ebooks/olaudah-equiano/the-interesting-narrative-of-the-life-of-olaudah-equiano'); LICENSE.md in the same repo: US public domain text, Standard Ebooks contributions CC0 1.0"
+    },
+    {
+      "id": "open-shakespeare-romeo-and-juliet",
+      "subject": "literature",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Romeo and Juliet – William Shakespeare",
+      "publisher": "Standard Ebooks",
+      "language": "en",
+      "url": "https://standardebooks.org/ebooks/william-shakespeare/romeo-and-juliet",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Shakespeare's tragedy of two young lovers from feuding families; a good first Shakespeare play. Free public-domain edition from Standard Ebooks.",
+      "description_fr": "La tragédie de Shakespeare sur deux jeunes amants de familles ennemies ; une bonne première pièce de Shakespeare. Édition libre et gratuite de Standard Ebooks.",
+      "source": "https://raw.githubusercontent.com/standardebooks/william-shakespeare_romeo-and-juliet/master/src/epub/content.opf (dc:identifier 'https://standardebooks.org/ebooks/william-shakespeare/romeo-and-juliet'); LICENSE.md in the same repo: US public domain text, Standard Ebooks contributions CC0 1.0"
+    },
+    {
+      "id": "open-shaw-pygmalion",
+      "subject": "literature",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Pygmalion – George Bernard Shaw",
+      "publisher": "Standard Ebooks",
+      "language": "en",
+      "url": "https://standardebooks.org/ebooks/george-bernard-shaw/pygmalion",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Shaw's play (written 1912) about flower girl Eliza Doolittle and how the way we speak marks social class; modern English, easier than Shakespeare. Free edition.",
+      "description_fr": "La pièce de Shaw (écrite en 1912) sur Eliza Doolittle, une marchande de fleurs, et le langage comme marque de classe sociale ; anglais moderne, plus facile que Shakespeare.",
+      "source": "https://raw.githubusercontent.com/standardebooks/george-bernard-shaw_pygmalion/master/src/epub/content.opf (dc:identifier 'https://standardebooks.org/ebooks/george-bernard-shaw/pygmalion'); LICENSE.md in the same repo: US public domain text, Standard Ebooks contributions CC0 1.0"
+    },
+    {
+      "id": "open-shakespeare-julius-caesar",
+      "subject": "literature",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Julius Caesar – William Shakespeare",
+      "publisher": "Standard Ebooks",
+      "language": "en",
+      "url": "https://standardebooks.org/ebooks/william-shakespeare/julius-caesar",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Shakespeare's play about the plot against Julius Caesar, power and persuasive speeches. Free public-domain edition from Standard Ebooks.",
+      "description_fr": "La pièce de Shakespeare sur le complot contre Jules César, le pouvoir et l'art de convaincre. Édition libre et gratuite de Standard Ebooks.",
+      "source": "https://raw.githubusercontent.com/standardebooks/william-shakespeare_julius-caesar/master/src/epub/content.opf (dc:identifier 'https://standardebooks.org/ebooks/william-shakespeare/julius-caesar'); LICENSE.md in the same repo: US public domain text, Standard Ebooks contributions CC0 1.0"
+    },
+    {
+      "id": "open-shakespeare-macbeth",
+      "subject": "literature",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Macbeth – William Shakespeare",
+      "publisher": "Standard Ebooks",
+      "language": "en",
+      "url": "https://standardebooks.org/ebooks/william-shakespeare/macbeth",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Shakespeare's tragedy about ambition and the abuse of power, in a free public-domain edition. Opens the Standard Ebooks page to read online or download.",
+      "description_fr": "La tragédie de Shakespeare sur l'ambition et l'abus de pouvoir, en édition libre et gratuite. Ouvre la page Standard Ebooks pour lire en ligne ou télécharger.",
+      "source": "https://raw.githubusercontent.com/standardebooks/william-shakespeare_macbeth/master/src/epub/content.opf (dc:identifier 'https://standardebooks.org/ebooks/william-shakespeare/macbeth'); LICENSE.md in the same repo: US public domain text, Standard Ebooks contributions CC0 1.0"
+    },
+    {
+      "id": "open-shakespeare-othello",
+      "subject": "literature",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Othello – William Shakespeare",
+      "publisher": "Standard Ebooks",
+      "language": "en",
+      "url": "https://standardebooks.org/ebooks/william-shakespeare/othello",
+      "format": "web",
+      "licence": "Public domain",
+      "description": "Shakespeare's tragedy of jealousy and manipulation. Free public-domain edition from Standard Ebooks; read online or download.",
+      "description_fr": "La tragédie de Shakespeare sur la jalousie et la manipulation. Édition libre et gratuite de Standard Ebooks, à lire en ligne ou à télécharger.",
+      "source": "https://raw.githubusercontent.com/standardebooks/william-shakespeare_othello/master/src/epub/content.opf (dc:identifier 'https://standardebooks.org/ebooks/william-shakespeare/othello'); LICENSE.md in the same repo: US public domain text, Standard Ebooks contributions CC0 1.0"
+    },
+    {
+      "id": "reb-general-studies-s4",
+      "subject": "general-studies",
+      "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "General Studies and Communication Skills Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86283/mod_resource/content/1/GENERAL%20EDU-GSCS-S4-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB General Studies and Communication Skills (GSCS) student's book for S4, pre-2026 general-education edition.",
+      "description_fr": "Manuel officiel de l'élève du REB en General Studies and Communication Skills (études générales et compétences en communication) pour la S4, édition antérieure à 2026.",
+      "source": "books-research.json reb.books (general-studies, S4): WebSearch returned this exact URL titled 'General Studies and Communication Skills For Rwandan Schools Senior Four'; Mugsh044/Yvens links the same URL. Not opened."
+    },
+    {
+      "id": "reb-general-studies-s5",
+      "subject": "general-studies",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "General Studies and Communication Skills Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/86285/mod_resource/content/1/GENERAL%20EDU-GSCS-S5-SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB General Studies and Communication Skills (GSCS) student's book for S5, pre-2026 general-education edition.",
+      "description_fr": "Manuel officiel de l'élève du REB en General Studies and Communication Skills (études générales et compétences en communication) pour la S5, édition antérieure à 2026.",
+      "source": "books-research.json reb.books (general-studies, S5): URL copied from GitHub Mugsh044/Yvens mcbcourses1.html, link 'General Studies'. Not opened."
     },
     {
       "id": "reb-general-studies-s6",
@@ -1455,9 +2275,48 @@
       "url": "https://elearning.reb.rw/pluginfile.php/12066/mod_resource/content/1/General%20Studies%20and%20Comm.%20Skills%20S6%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "The official REB student's book.",
-      "description_fr": "Le manuel officiel du REB.",
-      "source": "REB research (provisional list)"
+      "description": "Official REB General Studies and Communication Skills (GSCS) student's book for S6, pre-2026 edition.",
+      "description_fr": "Manuel officiel de l'élève du REB en General Studies and Communication Skills (études générales et compétences en communication) pour la S6, édition antérieure à 2026.",
+      "source": "books-research.json reb.books (general-studies, S6): WebSearch returned this exact URL (snippet 'Property of the Government of Rwanda NOT FOR'); Mugsh044/Yvens links the same URL. Not opened."
+    },
+    {
+      "id": "open-openstax-college-success-2e",
+      "subject": "general-studies",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "College Success 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/college-success-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "OpenStax page for a free college study-skills textbook: time management, note-taking, tests, critical thinking, communication, cultural competence and money basics.",
+      "description_fr": "Page OpenStax d'un manuel universitaire gratuit : gestion du temps, prise de notes, examens, esprit critique, communication, interculturalité, budget. En anglais.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-college-success-bundle/main/README.md (link 'College Success 2e online', verbatim; README states CC BY-NC-SA). Chapters checked in collections/college-success-2e.collection.xml (md:license by-nc-sa/4.0)."
+    },
+    {
+      "id": "open-openstax-introduction-philosophy-2e",
+      "subject": "general-studies",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Introduction to Philosophy 2e",
+      "publisher": "OpenStax (Rice University)",
+      "language": "en",
+      "url": "https://openstax.org/details/books/introduction-philosophy-2e",
+      "format": "web",
+      "licence": "CC BY-NC-SA 4.0",
+      "description": "OpenStax page for a free introductory college philosophy textbook: critical thinking, logic, theory of knowledge, ethics and political philosophy.",
+      "description_fr": "Page OpenStax d'un manuel gratuit d'introduction à la philosophie : esprit critique, logique, théorie de la connaissance, éthique et philosophie politique. En anglais.",
+      "source": "https://raw.githubusercontent.com/openstax/osbooks-introduction-philosophy/main/README.md (link 'online', verbatim; README states CC BY-NC-SA). Topics checked in collections/introduction-philosophy-2e.collection.xml (md:license by-nc-sa/4.0)."
     }
   ]
 }
