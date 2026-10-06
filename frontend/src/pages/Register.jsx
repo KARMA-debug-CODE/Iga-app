@@ -61,7 +61,7 @@ export default function Register() {
       <form className="form" onSubmit={submit}>
         <div>
           <div style={{ fontWeight: 600, fontSize: "0.92rem", marginBottom: 6 }}>{t("auth.iAm")}</div>
-          <div className="chips">
+          <div className="chips wrap">
             {Object.keys(ROLES).map((role) => (
               <button
                 type="button"
@@ -116,7 +116,7 @@ export default function Register() {
           <fieldset className="fieldset">
             <legend>{t("auth.school")}</legend>
             {isSchoolAdmin && (
-              <div className="chips" style={{ marginBottom: 10 }}>
+              <div className="chips wrap" style={{ marginBottom: 10 }}>
                 <button type="button" className={`chip ${!newSchool ? "active" : ""}`} aria-pressed={!newSchool} onClick={() => setNewSchool(null)}>
                   {t("school.existing")}
                 </button>

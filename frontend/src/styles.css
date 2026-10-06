@@ -579,6 +579,12 @@ input[type="range"] {
   scrollbar-width: none;
 }
 
+/* Choices that must all be seen (sign-up roles, months to pay): wrap instead of scrolling sideways. */
+.chips.wrap {
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+
 .chip {
   border: 1px solid var(--border);
   background: var(--surface);

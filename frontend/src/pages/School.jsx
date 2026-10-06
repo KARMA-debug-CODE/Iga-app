@@ -346,7 +346,7 @@ export function SchoolBilling() {
                 <h2 style={{ marginTop: 0 }}>{t("billing.pay")}</h2>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: "0.92rem", marginBottom: 6 }}>{t("billing.months")}</div>
-                  <div className="chips">
+                  <div className="chips wrap">
                     {s.pricing.month_options.map((n) => (
                       <button type="button" key={n} className={`chip ${months === n ? "active" : ""}`} aria-pressed={months === n} onClick={() => setMonths(n)}>
                         {t("billing.monthsN", { n })}

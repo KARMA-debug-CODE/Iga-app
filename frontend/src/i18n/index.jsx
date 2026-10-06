@@ -11,7 +11,9 @@ const DICTIONARIES = { en, fr };
 const STORAGE_KEY = "iga.lang";
 
 export function translate(lang, key, vars) {
-  const text = DICTIONARIES[lang]?.[key] ?? en[key] ?? key;
+  // "<key>.one" is the singular form, used when vars.n is 1 ("1 month" rather than "1 months").
+  const singular = vars?.n === 1 ? (DICTIONARIES[lang]?.[`${key}.one`] ?? en[`${key}.one`]) : undefined;
+  const text = singular ?? DICTIONARIES[lang]?.[key] ?? en[key] ?? key;
   if (!vars) return text;
   return text.replace(/\{(\w+)\}/g, (_, name) => (vars[name] ?? `{${name}}`));
 }
