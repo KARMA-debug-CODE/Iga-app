@@ -37,6 +37,7 @@ router.register("admin/moderation", ModerationViewSet, basename="admin-moderatio
 api = [
     path("auth/", include("apps.accounts.urls")),
     path("tutor/", include("apps.tutor.urls")),
+    path("code/", include("apps.coderun.urls")),
     path("children/", parents.ChildrenView.as_view(), name="children"),
     path("children/<int:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
     path("health/", core_views.health, name="health"),

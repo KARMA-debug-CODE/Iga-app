@@ -1858,3 +1858,8 @@ tr:last-child td {
   padding: 6px 10px;
   border-top: 1px solid var(--border);
 }
+
+.playground-alert {
+  margin: 0;
+  border-radius: 0;
+}

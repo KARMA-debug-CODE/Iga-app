@@ -104,6 +104,53 @@ test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
   await expect(output.locator(".sql-error")).toContainText(/syntax error/i);
 });
 
+test("C++ and Java run on the code runner, with clear messages for errors", async ({ page }) => {
+  // The E2E server has no Piston code runner, so it is mocked here; tests/test_coderun.py covers the server side.
+  await page.route("**/api/code/status/", (route) => route.fulfill({ json: { enabled: true, languages: ["cpp", "java"] } }));
+  const sent = [];
+  await page.route("**/api/code/run/", async (route) => {
+    const body = route.request().postDataJSON();
+    sent.push(body);
+    if (body.language === "cpp" && body.code.includes("oops")) {
+      return route.fulfill({
+        json: { verdict: "compile_error", compile: { stdout: "", stderr: "main.cpp:3:5: error: 'oops' was not declared", code: 1 }, run: null },
+      });
+    }
+    if (body.language === "java") {
+      return route.fulfill({
+        json: { verdict: "runtime_error", compile: null, run: { stdout: "", stderr: "error: can't find main(String[]) method in class: Student", code: 1, signal: null } },
+      });
+    }
+    return route.fulfill({ json: { verdict: "ok", compile: { stdout: "", stderr: "", code: 0 }, run: { stdout: `Muraho, ${body.stdin}!\n`, stderr: "", code: 0 } } });
+  });
+
+  await login(page, "aline");
+  await page.goto("/playground");
+  await page.getByRole("tab", { name: /c\+\+/i }).click();
+  await page.getByRole("button", { name: /^▶ run$/i }).click();
+  const output = page.locator(".python-output");
+  await expect(output).toContainText("Muraho, Aline!");
+  await expect(output).toContainText("Finished");
+  expect(sent[0]).toMatchObject({ language: "cpp", stdin: "Aline" });
+
+  await page.getByLabel("C++ code editor").fill("int main() {\n  oops;\n}");
+  await page.getByRole("button", { name: /^▶ run$/i }).click();
+  await expect(output).toContainText("did not compile");
+  await expect(output).toContainText("'oops' was not declared");
+
+  await page.getByRole("tab", { name: /java/i }).click();
+  await page.getByRole("button", { name: /^▶ run$/i }).click();
+  await expect(output).toContainText(/class that has main\(\) first/i);
+});
+
+test("C++ and Java say when the server has no code runner", async ({ page }) => {
+  await login(page, "aline");
+  await page.goto("/playground");
+  await page.getByRole("tab", { name: /java/i }).click();
+  await expect(page.getByText(/not switched on for this server yet/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /^▶ run$/i })).toBeDisabled();
+});
+
 test("books: every lesson lists the official textbook, and empty units point to it", async ({ page }) => {
   await login(page, "aline");
   await page.goto("/lessons/s2-maths-linear-graphs");

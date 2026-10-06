@@ -1,4 +1,5 @@
-# Local trial of the production setup: PostgreSQL + Redis + Django (gunicorn) + nginx.
+# Local trial of the production setup: PostgreSQL + Redis + Django (gunicorn) + nginx, plus a Piston
+# code runner for C++ and Java in the code playground.
 #   cp .env.docker.example .env      # then fill in DJANGO_SECRET_KEY (see the file)
 #   docker compose up --build
 #   docker compose exec backend python manage.py load_curriculum
@@ -6,7 +7,8 @@
 # Then open http://localhost:8080
 #
 # For a real deployment, use strong secrets in .env, serve over HTTPS and remove
-# HTTPS=false from .env (HTTPS defaults to on).
+# HTTPS=false from .env (HTTPS defaults to on). Run the code runner on its own small machine there
+# (it needs a privileged container) and point CODE_RUNNER_URL at it; see docs/ARCHITECTURE.md.
 services:
   db:
     image: postgres:16-alpine
@@ -38,6 +40,8 @@ services:
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # C++ and Java in the code playground. Set CODE_RUNNER_URL= (empty) in .env to switch them off.
+      CODE_RUNNER_URL: ${CODE_RUNNER_URL-http://coderunner:2000}
       # Protected past-paper files are sent by nginx after Django checks access.
       PROTECTED_MEDIA_ACCEL: "true"
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
@@ -57,6 +61,8 @@ services:
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Iga <no-reply@iga.rw>}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
+      # Threads per worker, so slow calls (the AI tutor, C++/Java runs) don't hold up other requests.
+      GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
     volumes:
       - media:/app/media
     depends_on:
@@ -77,6 +83,40 @@ services:
       db:
         condition: service_healthy
 
+  # Compiles and runs students' C++ and Java in a sandbox (https://github.com/engineer-man/piston).
+  # Only Django talks to it: no port is published, and programs run with networking off.
+  # The container must be privileged (its sandbox uses Linux cgroups v2). Limits: 6 s and 256 MB per
+  # run (Java 512 MB), 10 s to compile, 16 KB of output, 4 programs at a time.
+  coderunner:
+    image: ghcr.io/engineer-man/piston@sha256:2f66b7456189c4d713aa986d98eccd0b6ee16d26c7ec5f21b30e942756fd127a
+    privileged: true
+    restart: unless-stopped
+    environment:
+      PISTON_DISABLE_NETWORKING: "true"
+      PISTON_RUN_TIMEOUT: "6000"
+      PISTON_RUN_CPU_TIME: "6000"
+      PISTON_COMPILE_TIMEOUT: "10000"
+      PISTON_COMPILE_CPU_TIME: "10000"
+      PISTON_RUN_MEMORY_LIMIT: "268435456"
+      PISTON_COMPILE_MEMORY_LIMIT: "536870912"
+      PISTON_LIMIT_OVERRIDES: '{"java":{"run_memory_limit":536870912,"max_process_count":128}}'
+      PISTON_OUTPUT_MAX_SIZE: "16384"
+      PISTON_MAX_CONCURRENT_JOBS: "4"
+    volumes:
+      - coderunner-packages:/piston/packages
+    tmpfs:
+      - /tmp:exec
+
+  # Installs the C++ (gcc 10.2.0) and Java (15.0.2) runtimes into the code runner the first time
+  # (a few hundred MB, downloaded once; later starts find them installed and exit at once).
+  coderunner-setup:
+    build: ./backend
+    command: python manage.py setup_code_runner --wait 180 --skip-if-off
+    environment: *backend-env
+    restart: "no"
+    depends_on:
+      - coderunner
+
   web:
     build: ./frontend
     ports:
@@ -89,3 +129,4 @@ services:
 volumes:
   pgdata:
   media:
+  coderunner-packages:

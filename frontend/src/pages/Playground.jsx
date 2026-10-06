@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import CodePlayground from "../components/CodePlayground";
 import PythonPlayground from "../components/PythonPlayground";
+import RemotePlayground from "../components/RemotePlayground";
 import SqlPlayground from "../components/SqlPlayground";
 import { Tabs } from "../components/ui";
 import { useI18n } from "../i18n";
@@ -71,6 +72,119 @@ for n in notes:
 `,
 };
 
+const CPP_STARTERS = {
+  en: `// Iga C++ playground: press Run (or Ctrl+Enter). Type input in the Input box.
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+    string name;
+    cout << "What is your name? ";
+    cin >> name;
+    cout << "\nMuraho, " << name << "!" << endl;
+
+    vector<int> marks = {72, 85, 64, 90};
+    int total = 0;
+    for (int mark : marks) {
+        total += mark;
+        cout << mark << (mark >= 50 ? " pass" : " try again") << endl;
+    }
+    cout << "Average mark: " << total / (double)marks.size() << endl;
+    return 0;
+}
+`,
+  fr: `// Atelier C++ d'Iga : appuyez sur Exécuter (ou Ctrl+Entrée). Tapez les entrées dans la case Entrée.
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+    string nom;
+    cout << "Comment vous appelez-vous ? ";
+    cin >> nom;
+    cout << "\nMuraho, " << nom << " !" << endl;
+
+    vector<int> notes = {72, 85, 64, 90};
+    int total = 0;
+    for (int note : notes) {
+        total += note;
+        cout << note << (note >= 50 ? " réussi" : " à retravailler") << endl;
+    }
+    cout << "Note moyenne : " << total / (double)notes.size() << endl;
+    return 0;
+}
+`,
+};
+
+// The class with main() comes first: Java runs the first class in the file.
+const JAVA_STARTERS = {
+  en: `// Iga Java playground: press Run (or Ctrl+Enter). Type input in the Input box.
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        System.out.print("What is your name? ");
+        String name = in.hasNextLine() ? in.nextLine() : "friend";
+        System.out.println("\nMuraho, " + name + "!");
+
+        Student[] students = { new Student("Aline", 78), new Student("Eric", 45) };
+        for (Student s : students) {
+            System.out.println(s.name + ": " + s.result());
+        }
+    }
+}
+
+class Student {
+    String name;
+    int mark;
+
+    Student(String name, int mark) {
+        this.name = name;
+        this.mark = mark;
+    }
+
+    String result() {
+        return mark >= 50 ? "pass" : "try again";
+    }
+}
+`,
+  fr: `// Atelier Java d'Iga : appuyez sur Exécuter (ou Ctrl+Entrée). Tapez les entrées dans la case Entrée.
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        System.out.print("Comment vous appelez-vous ? ");
+        String nom = in.hasNextLine() ? in.nextLine() : "ami";
+        System.out.println("\nMuraho, " + nom + " !");
+
+        Eleve[] eleves = { new Eleve("Aline", 78), new Eleve("Eric", 45) };
+        for (Eleve e : eleves) {
+            System.out.println(e.nom + " : " + e.resultat());
+        }
+    }
+}
+
+class Eleve {
+    String nom;
+    int note;
+
+    Eleve(String nom, int note) {
+        this.nom = nom;
+        this.note = note;
+    }
+
+    String resultat() {
+        return note >= 50 ? "réussi" : "à retravailler";
+    }
+}
+`,
+};
+
 const SQL_STARTERS = {
   en: `-- Iga SQL playground: press Run (or Ctrl+Enter)
 CREATE TABLE students (id INTEGER PRIMARY KEY, name TEXT, grade TEXT, district TEXT);
@@ -137,11 +251,19 @@ export default function Playground() {
         tabs={[
           { value: "web", label: "🌐 HTML · CSS · JS" },
           { value: "python", label: "🐍 Python" },
+          { value: "cpp", label: "⚙️ C++" },
+          { value: "java", label: "☕ Java" },
           { value: "sql", label: "🗃️ SQL" },
         ]}
       />
       {tab === "web" && <CodePlayground initialCode={STARTERS[lang] || STARTERS.en} height={420} />}
       {tab === "python" && <PythonPlayground initialCode={PY_STARTERS[lang] || PY_STARTERS.en} height={380} />}
+      {tab === "cpp" && (
+        <RemotePlayground key={`cpp-${lang}`} language="cpp" initialCode={CPP_STARTERS[lang] || CPP_STARTERS.en} initialInput="Aline" height={380} />
+      )}
+      {tab === "java" && (
+        <RemotePlayground key={`java-${lang}`} language="java" initialCode={JAVA_STARTERS[lang] || JAVA_STARTERS.en} initialInput="Aline" height={380} />
+      )}
       {tab === "sql" && <SqlPlayground key={lang} initialCode={SQL_STARTERS[lang] || SQL_STARTERS.en} height={380} />}
     </>
   );

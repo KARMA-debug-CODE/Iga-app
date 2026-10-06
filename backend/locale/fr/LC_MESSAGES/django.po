@@ -351,6 +351,18 @@ msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
 msgid "That student is not in this class."
 msgstr "Cet élève n'est pas dans cette classe."
 
+#: apps/coderun/views.py:34
+msgid "C++ and Java are not switched on for this server yet."
+msgstr "C++ et Java ne sont pas encore activés sur ce serveur."
+
+#: apps/coderun/views.py:45
+msgid "The code runner is not answering. Try again in a minute."
+msgstr "Le serveur d'exécution du code ne répond pas. Réessayez dans une minute."
+
+#: apps/coderun/views.py:51
+msgid "The code runner could not run this program. Please tell an administrator."
+msgstr "Le serveur d'exécution du code n'a pas pu lancer ce programme. Prévenez un administrateur."
+
 #: apps/community/views.py:128
 msgid "Join the group first."
 msgstr "Rejoignez d'abord le groupe."
@@ -435,7 +447,7 @@ msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
 msgid "Unknown content type."
 msgstr "Type de contenu inconnu."
 
-#: apps/curriculum/serializers.py:132
+#: apps/curriculum/serializers.py:140
 msgid "Provide a link or upload a file."
 msgstr "Donnez un lien ou envoyez un fichier."
 

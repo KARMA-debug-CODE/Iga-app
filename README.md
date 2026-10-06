@@ -24,7 +24,7 @@ It is mobile-first, installable as an app (PWA), works in **English and French**
 |---|---|
 | **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, all 39 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
 | **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
-| **Coding** | HTML/CSS/JS playground, and real Python in the browser (Pyodide, self-hosted, works offline) inside lessons and in the playground |
+| **Coding** | Code playground with HTML/CSS/JS, real Python (Pyodide) and SQL (SQLite via sql.js), all in the browser, self-hosted and working offline; plus **C++ and Java**, compiled and run on a sandboxed Piston code runner (keyboard input supported). Python and web code also run inside lessons |
 | **AI tutor** | Lesson and question help from Claude, and an **Ask AI** page (pick a subject, or ask about anything you study), with context the server controls: switched off everywhere while a student has an exam or timed test running, never shown answers before the student may see them, rate-limited, and off unless `ANTHROPIC_API_KEY` is set |
 | **Books** | Every lesson lists the official REB student's book for its subject and grade (with the unit to look for) and free open textbooks (OpenStax, Standard Ebooks, Saylor, CS Field Guide…); units without an Iga lesson point to the textbook. Books are links, kept in `content/books.json`; `check_book_links` finds links that have moved |
 | **Offline** | Save a unit for offline use (lessons, maths fonts, built-in labs); the app opens without a connection for a student who logged in before, and logging out clears the saved pages on shared computers |
@@ -96,7 +96,7 @@ docker compose exec backend python manage.py seed_demo --force   # optional demo
 # open http://localhost:8080
 ```
 
-This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, and nginx serving the built app. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
+This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, and a Piston code runner for C++ and Java. The first start downloads the C++ and Java runtimes into the code runner (a few hundred MB, once; `docker compose logs coderunner-setup` shows progress). The code runner's sandbox needs a privileged container on a Linux host with cgroups v2, which is the default on current Linux and Docker Desktop. To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env`. In production, put the code runner on its own small machine (see [Architecture → Security](docs/ARCHITECTURE.md#security-and-privacy)). The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
 
 ## Repository layout
 
@@ -109,7 +109,8 @@ backend/                 Django + Django REST Framework API
   apps/classroom         classes, enrolment, CSV roster import, assignments, reports
   apps/community         study groups, chat, notes, reports
   apps/gamification      XP ledger, streaks, badges, leaderboards
-  apps/tutor             AI study tutor (Claude API)
+  apps/tutor             AI study tutor and Ask AI page (Claude API)
+  apps/coderun           C++ and Java runs for the code playground (Piston code runner)
   apps/schools           schools, memberships, subscriptions, payments, access rule
   apps/core              shared constants, permissions, audit log, dashboard, admin API, content loader
   content/               curriculum content as files (JSON + Markdown), loaded by `load_curriculum`
@@ -120,7 +121,7 @@ frontend/                React 19 + Vite single-page app (PWA)
   src/i18n               en / fr interface strings
   tests/e2e              Playwright journeys
 docs/                    architecture, content guide, roadmap
-docker-compose.yml       PostgreSQL + Redis + backend + nginx
+docker-compose.yml       PostgreSQL + Redis + backend + nginx + code runner
 ```
 
 ## Documentation

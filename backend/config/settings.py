@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.community",
     "apps.gamification",
     "apps.tutor",
+    "apps.coderun",
     "apps.schools",
 ]
 
@@ -177,6 +178,8 @@ REST_FRAMEWORK = {
         # The billing return page asks every few seconds while mobile money is confirmed.
         "billing_confirm": os.environ.get("THROTTLE_BILLING_CONFIRM", "30/min"),
         "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
+        # Per user: C++ and Java runs in the code playground.
+        "code_run": os.environ.get("THROTTLE_CODE_RUN", "20/min"),
     },
 }
 
@@ -210,6 +213,12 @@ TUTOR_MODEL = os.environ.get("TUTOR_MODEL", "claude-opus-5-5")
 TUTOR_EFFORT = os.environ.get("TUTOR_EFFORT", "low")
 TUTOR_MAX_TOKENS = int(os.environ.get("TUTOR_MAX_TOKENS", "4000"))
 TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
+
+# --- Code runner (C++ and Java in the playground) ---------------------------
+# A Piston server (https://github.com/engineer-man/piston) that only Django can reach; empty = off.
+# Docker Compose starts one at http://coderunner:2000. See apps/coderun/services.py.
+CODE_RUNNER_URL = os.environ.get("CODE_RUNNER_URL", "").strip()
+CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "30"))
 
 # --- School subscriptions -------------------------------------------------
 # Each school pays a flat monthly price for all its members. Prices per currency:

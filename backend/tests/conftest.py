@@ -20,6 +20,7 @@ RELAXED_RATES = {
     "join": "1000/min",
     "billing_confirm": "1000/min",
     "tutor": "1000/min",
+    "code_run": "1000/min",
 }
 
 

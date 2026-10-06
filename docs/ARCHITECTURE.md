@@ -26,7 +26,10 @@
    phet.colorado.edu (iframes)   geogebra.org (deployggb.js)
 
    Called by the server only, when an API key is configured:
-   Claude API (AI tutor)
+   Claude API (AI tutor and Ask AI)
+
+   Called by the server only, when CODE_RUNNER_URL is set:
+   Piston code runner (compiles and runs C++ and Java in a sandbox; reachable only from Django)
 ```
 
 - **Frontend:** React 19 + React Router, built with Vite. Pages are code-split, so the first load is about 95 KB gzipped. KaTeX and the Markdown pipeline load only with lesson pages.
@@ -46,7 +49,8 @@
 | `community` | Study groups, chat, shared notes, reports | `StudyGroup`, `GroupMembership`, `Message`, `SharedNote`, `MessageReport` |
 | `gamification` | XP ledger, streaks, badges, leaderboards | `XPEvent`, `Badge`, `UserBadge` |
 | `schools` | Schools (verification, join code, paid-through date), memberships, payments (Flutterwave, manual, test), reminders, and the single access rule every content endpoint uses | `School`, `Payment`, `BillingReminder` |
-| `tutor` | AI study tutor: builds the context the model may see (lesson, or a question once its solution is visible), calls the Claude API, logs exchanges | `TutorExchange` |
+| `tutor` | AI study tutor and the Ask AI page: builds the context the model may see (lesson, chosen subject, or a question once its solution is visible), switches itself off while the student sits a timed test, calls the Claude API, logs exchanges | `TutorExchange` |
+| `coderun` | C++ and Java for the code playground: checks the request, sends the program to the Piston code runner, turns its result into a verdict (compile error, time limit, …). Stores nothing | – |
 | `core` | Constants, permissions, audit log, dashboard, search, admin API, content loader and management commands | `AuditLog` |
 
 ### Data model (simplified)
@@ -145,6 +149,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | Brute force | 10 login attempts/min **per account**; per-IP limits are generous because whole schools share one public IP; per-user limits on guessing class, group and parent codes and on password/2FA changes; shared through Redis across processes. Client IPs only trust `X-Forwarded-For` entries from our own proxies (`TRUSTED_PROXY_COUNT`) |
 | Authorisation | Role checks on every endpoint; teachers see only students enrolled in their current classes; students never reach the question bank; teacher self-registration needs admin approval; accounts with a teacher-issued temporary password can do nothing but change it |
 | Content injection | Markdown is rendered without raw HTML; code-playground previews run in a sandboxed iframe; Python and SQL run in Web Workers, entirely in the browser. Uploads get random names, must be an allowed type whose bytes match the extension, and nginx serves them with `nosniff`, a sandboxing CSP, and as downloads unless they are PDFs, images or media |
+| Student code | HTML/CSS/JS runs in a sandboxed iframe, Python (Pyodide) and SQL (sql.js) in Web Workers in the student's browser. C++ and Java never run on the Django server: Django sends them to a separate **Piston** code runner, which compiles and runs each program in an `isolate` sandbox with networking off, 6 s / 256 MB per run (Java 512 MB), 10 s to compile, 16 KB of output and 4 jobs at a time. Piston has no authentication, so it must only be reachable from Django (Docker Compose publishes no port for it). Its container must be privileged, so in production run it on its own small machine with no secrets on it, behind a firewall that only lets the Django host in, and set `CODE_RUNNER_URL`. Runs are limited to 20 per minute per user (`THROTTLE_CODE_RUN`) |
 | Minors' safety | No direct messages, only group chat; reporting and hiding; teacher badge only for approved teachers; group members, chat and leaderboards show first name + initial; parents see only their linked child, read-only; the AI tutor never sees other students' data |
 | Accountability | `AuditLog` records content changes, approvals, marks, role changes and moderation, with actor and IP |
 | Transport | HTTPS enforced (redirect, HSTS, secure cookies) when `HTTPS` is on, which is the default in production |
