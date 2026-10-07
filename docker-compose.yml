@@ -86,7 +86,8 @@ services:
   # Compiles and runs students' C++ and Java in a sandbox (https://github.com/engineer-man/piston).
   # Only Django talks to it: no port is published, and programs run with networking off.
   # The container must be privileged (its sandbox uses Linux cgroups v2). Limits: 6 s and 256 MB per
-  # run (Java 512 MB), 10 s to compile, 16 KB of output, 4 programs at a time.
+  # run (Java 512 MB, compiled in memory within its run), 10 s to compile C++, 16 KB of output,
+  # 4 programs at a time (keep equal to the backend's CODE_RUNNER_MAX_RUNNING).
   coderunner:
     image: ghcr.io/engineer-man/piston@sha256:2f66b7456189c4d713aa986d98eccd0b6ee16d26c7ec5f21b30e942756fd127a
     privileged: true

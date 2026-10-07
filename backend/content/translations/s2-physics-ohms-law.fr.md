@@ -58,7 +58,7 @@ Dans les années 1820, le scientifique allemand Georg Ohm a trouvé une règle s
 
 $$V = IR$$
 
-Ici, $V$ est en volts, $I$ en ampères et $R$ en ohms. Un composant qui obéit à la loi d'Ohm est appelé **conducteur ohmique**.
+Ici, $V$ est en volts, $I$ en ampères et $R$ en ohms. Un composant qui obéit à la loi d'Ohm est appelé **conducteur ohmique**. (Dans beaucoup de livres en français, la tension est notée $U$ et la loi s'écrit $U = RI$ : c'est la même loi.)
 
 ## Réarranger V = IR
 
@@ -150,7 +150,7 @@ Une élève de Huye teste une résistance et obtient ces mesures. Est-ce un cond
       0   0,10  0,20  0,30  0,40
 ```
 
-4. La **pente** (l'inclinaison) de la droite vaut montée ÷ avancée $= \dfrac{6.0 - 0}{0.40 - 0} = 15\ \Omega$. Sur un graphique de $V$ en fonction de $I$, la pente est égale à la résistance.
+4. La **pente** (l'inclinaison) de la droite est la hausse de $V$ divisée par la hausse de $I$ correspondante. Ici, elle vaut $\dfrac{6.0 - 0}{0.40 - 0} = 15\ \Omega$. Sur un graphique de $V$ en fonction de $I$, la pente est égale à la résistance.
 5. Vérification : quand $V$ double, de 3,0 V à 6,0 V, $I$ double aussi, de 0,20 A à 0,40 A, comme le dit la loi d'Ohm ✓.
 
 ## Une lampe n'obéit pas à la loi d'Ohm
@@ -158,6 +158,8 @@ Une élève de Huye teste une résistance et obtient ces mesures. Est-ce un cond
 Une lampe à filament contient un fil métallique très fin, le **filament**. Quand le courant augmente, le filament devient très chaud et brille. Obéit-il encore à la loi d'Ohm ?
 
 ### Exemple corrigé 5 : tester une lampe de torche
+
+Un élève mesure la tension aux bornes d'une petite lampe de torche et l'intensité du courant qui la traverse. Il obtient ces mesures. La lampe est-elle un conducteur ohmique ?
 
 | $V$ (V) | 1 | 2 | 4 | 6 |
 |---|---|---|---|---|

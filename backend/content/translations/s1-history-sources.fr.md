@@ -16,7 +16,7 @@ Une **source** est tout ce qui nous donne des informations sur le passé : un ob
 - Une **source primaire** a été produite à l'époque étudiée, par des personnes qui étaient présentes : une lettre, une photographie, un outil, le récit d'un témoin oculaire. Un **témoin oculaire** est une personne qui a vu un événement de ses propres yeux.
 - Une **source secondaire** a été produite plus tard, par quelqu'un qui a étudié le passé : un manuel scolaire, un documentaire, un article.
 
-> **Astuce :** « ancien » ne veut pas dire « primaire ». Un livre écrit en 1950 sur les années 1800 est une source secondaire, car son auteur n'était pas présent.
+> **Astuce :** « ancien » ne veut pas dire « primaire ». Un livre écrit en 1950 sur le XIXe siècle est une source secondaire, car son auteur n'était pas présent.
 
 ### Exemple corrigé 1 : classer six sources
 
@@ -28,10 +28,10 @@ Pour chaque source, demandez-vous : « A-t-elle été produite à l'époque, par
 | Une photographie d'un marché de Huye, prise dans les années 1950 | primaire | prise à l'époque |
 | Votre manuel d'histoire de S1 | secondaire | écrit plus tard, à partir d'autres sources |
 | Une poterie en argile mise au jour par des archéologues | primaire | fabriquée et utilisée à l'époque |
-| Un documentaire réalisé en 2020 sur la vie dans les années 1900 | secondaire | réalisé bien plus tard |
+| Un documentaire réalisé en 2020 sur la vie au début du XXe siècle | secondaire | réalisé bien plus tard |
 | Une lettre écrite par un fonctionnaire colonial en 1930 | primaire | écrite à l'époque |
 
-**Tout dépend de votre question.** Le documentaire est une source secondaire sur la vie dans les années 1900. Mais il devient une source primaire si votre question est : « Comment les réalisateurs de 2020 racontaient-ils le passé ? » De la même façon, quand votre grand-mère répète ce que *sa* propre grand-mère lui a raconté, cette partie relève de la tradition orale, pas de son témoignage oculaire.
+**Tout dépend de votre question.** Le documentaire est une source secondaire sur la vie au début du XXe siècle. Mais il devient une source primaire si votre question est : « Comment les réalisateurs de 2020 racontaient-ils le passé ? » De la même façon, quand votre grand-mère répète ce que *sa* propre grand-mère lui a raconté, cette partie relève de la tradition orale, pas de son témoignage oculaire.
 
 Vérification : 4 sources primaires et 2 secondaires, chacune avec une raison ✓
 
@@ -39,12 +39,12 @@ Vérification : 4 sources primaires et 2 secondaires, chacune avec une raison �
 
 ### La tradition orale
 
-La **tradition orale** est la connaissance du passé transmise de bouche à oreille, d'une génération à l'autre. Elle comprend des récits, des chants, des poèmes, des proverbes et des généalogies (arbres familiaux). Pendant des siècles, avant que l'écriture ne soit largement utilisée au Rwanda, elle a été le principal moyen de garder l'histoire vivante. Elle comprend plusieurs types, ou **genres** :
+La **tradition orale** est la connaissance du passé transmise de bouche à oreille, d'une génération à l'autre. Elle comprend des récits, des chants, des poèmes, des proverbes et des généalogies (arbres familiaux). Pendant des siècles, avant que l'écriture ne soit largement utilisée au Rwanda, elle a été le principal moyen de garder l'histoire vivante. On y distingue plusieurs types, ou **genres** :
 
 | Genre | Ce que c'est | Ce qu'il apprend à l'historien |
 |---|---|---|
 | **Ibitekerezo** | des récits historiques, parfois racontés sous forme de longs poèmes, sur les rois, les héros et les grands événements | les événements dont les gens se souvenaient, et comment ils les expliquaient |
-| **Ibisigo** | la poésie dynastique, composée par les poètes de la cour pour faire l'éloge des rois | les noms et les actions des rois, et ce que la cour valorisait |
+| **Ibisigo** | la poésie dynastique (des poèmes sur la famille des rois, la dynastie), composée par des poètes de la cour du roi pour faire l'éloge des rois | les noms et les actions des rois, et ce que la cour valorisait |
 | **Ubucurabwenge** | les généalogies royales : la liste des rois, récitée dans l'ordre | l'ordre des rois ; compter les générations donne des dates approximatives |
 | **Imigani** | les proverbes et les contes racontés en famille | les valeurs, les croyances et les modes de vie de tous les jours |
 
@@ -59,16 +59,16 @@ Certains textes royaux étaient appris par cœur par des spécialistes à la cou
 
 ### Les sources écrites
 
-Les livres, les lettres, les journaux intimes, les journaux, les archives de l'administration et les récits de voyageurs. La plupart des documents écrits sur le Rwanda datent de la fin des années 1800 ou d'après, et beaucoup ont été écrits par des Européens venus de l'extérieur.
+Les **sources écrites** comprennent les livres, les lettres, les journaux intimes, les journaux, les archives de l'administration et les récits de voyageurs. La plupart des documents écrits sur le Rwanda datent de la fin du XIXe siècle ou d'une époque plus récente, et beaucoup ont été écrits par des Européens venus de l'extérieur.
 
 - **Points forts :** des dates, des noms et des chiffres exacts.
 - **Points faibles :** l'auteur peut être partial ou mal comprendre ce qu'il a vu. Seules les personnes qui savaient écrire ont laissé des documents, donc beaucoup de voix ordinaires manquent.
 
 ### L'archéologie
 
-L'**archéologie** est l'étude des vestiges matériels, comme les outils, les poteries, les ossements et les bâtiments, retirés du sol. Les couches les plus profondes sont en général les plus anciennes.
+L'**archéologie** est l'étude des vestiges matériels, comme les outils, les poteries, les ossements et les bâtiments, mis au jour par des fouilles. Les couches les plus profondes sont en général les plus anciennes.
 
-Les scientifiques trouvent souvent l'âge des vestiges grâce à la **datation au carbone 14**. Les êtres vivants absorbent une toute petite quantité de **carbone 14**, un isotope que vous rencontrez dans la leçon de chimie de S1 « À l'intérieur de l'atome ». Après la mort, le carbone 14 disparaît lentement à un rythme connu (environ la moitié a disparu au bout d'environ 5 700 ans) : mesurer ce qui reste indique donc à peu près quand la plante ou l'animal est mort. Cela ne marche que pour ce qui a été vivant, comme le bois, le charbon de bois et les os. Une poterie en argile ne peut pas être datée au carbone 14, mais le charbon de bois trouvé à côté peut l'être.
+Les scientifiques trouvent souvent l'âge des vestiges grâce à la **datation au carbone 14**. Les êtres vivants absorbent une toute petite quantité de **carbone 14**, une forme particulière d'atome de carbone (un **isotope**) que vous rencontrez dans la leçon de chimie de S1 « À l'intérieur de l'atome ». Après la mort, le carbone 14 disparaît lentement à un rythme connu (environ la moitié a disparu au bout d'environ 5 700 ans) : mesurer ce qui reste indique donc à peu près quand la plante ou l'animal est mort. Cela ne marche que pour ce qui a été vivant, comme le bois, le charbon de bois et les os. L'argile d'une poterie ne peut pas être datée au carbone 14, car l'argile n'a jamais été vivante. Mais le charbon de bois trouvé à côté de la poterie peut l'être.
 
 - **Points forts :** des preuves sur des époques antérieures à l'écriture.
 - **Points faibles :** c'est lent et coûteux ; les objets ne s'expliquent pas d'eux-mêmes ; le bois et le tissu pourrissent.
@@ -89,7 +89,7 @@ Une source est **fiable** si l'on peut faire confiance à ce qu'elle nous dit. P
 3. **Pourquoi** a-t-elle été produite : pour informer, pour convaincre ou pour divertir ?
 4. Est-elle **en accord** avec d'autres sources ?
 
-Quand plusieurs sources indépendantes concordent, on parle de **corroboration** (ou de recoupement des sources). Cela donne une image plus fiable qu'une seule source.
+Quand plusieurs sources **indépendantes** concordent (des sources produites séparément, sans être copiées les unes sur les autres), on parle de **corroboration** (ou de recoupement des sources). Cela donne une image plus fiable qu'une seule source.
 
 ### Exemple corrigé 2 : le récit inventé d'un voyageur
 
@@ -99,7 +99,7 @@ Ce récit a été inventé pour s'entraîner. Ce n'est pas un vrai document.
 
 1. **Qui ?** Un étranger resté deux jours, qui ne parlait probablement pas la langue. Il a pu mal comprendre beaucoup de choses.
 2. **Quand ?** En 1905, à l'époque : c'est donc une source primaire. Mais la visite a été très courte.
-3. **Pourquoi ?** La dernière phrase montre son but : convaincre son gouvernement de prendre le contrôle. Il peut donc présenter les gens comme désorganisés.
+3. **Pourquoi ?** La dernière phrase montre son but : convaincre son gouvernement de prendre le contrôle de la région et de la gouverner comme une **colonie**. Il peut donc présenter les gens comme désorganisés.
 4. **En accord ?** Comparez avec les traditions orales sur les chefs locaux, les outils agricoles trouvés par les archéologues et d'autres documents sur les marchés. S'ils le contredisent, faites-lui moins confiance.
 5. **Conclusion :** une preuve faible sur les marchés et les chefs, mais une preuve utile de la façon dont certains Européens justifiaient la domination coloniale.
 
@@ -155,7 +155,7 @@ Ne partagez jamais un enregistrement sans la permission de la personne.
 ## Erreurs fréquentes
 
 - **Croire que primaire veut dire vrai.** Les sources primaires peuvent être partiales.
-- **Croire qu'ancien veut dire primaire.** Un livre de 1950 sur les années 1800 est une source secondaire.
+- **Croire qu'ancien veut dire primaire.** Un livre de 1950 sur le XIXe siècle est une source secondaire.
 - **N'utiliser qu'une seule source.** Cherchez toujours une corroboration.
 - **Confondre fait et opinion.** Cherchez les mots de jugement.
 - **Croire que la datation au carbone 14 marche sur tout.** Seulement sur ce qui a été vivant.
@@ -171,4 +171,4 @@ Ne partagez jamais un enregistrement sans la permission de la personne.
 7. La datation au carbone 14 peut-elle donner l'âge d'un outil en pierre ? Expliquez.
 8. Citez deux choses à faire avant d'interviewer une personne âgée.
 
-*Réponses : 1) primaire : par exemple, la lettre d'un soldat de 1916 ; secondaire : par exemple, un manuel scolaire · 2) point fort : par exemple, elle existe là où rien n'a été écrit ; point faible : par exemple, les détails changent quand on la répète · 3) pour voir si elles concordent (corroboration), ce qui donne une image plus fiable et fait apparaître la partialité ou les erreurs · 4) (a) primaire ; (b) secondaire · 5) les généalogies royales, la liste des rois dans l'ordre ; elles montrent l'ordre des rois et aident à estimer des dates · 6) (a) fait ; (b) opinion, car « le meilleur » est un jugement · 7) non, la pierre n'a jamais été vivante ; on pourrait plutôt dater du charbon de bois ou des os trouvés dans la même couche · 8) demander la permission, expliquer pourquoi, et demander si l'on peut prendre des notes ou enregistrer*
+*Réponses : 1) primaire : par exemple, la lettre d'un soldat de 1916 ; secondaire : par exemple, un manuel scolaire · 2) point fort : par exemple, elle existe là où rien n'a été écrit ; point faible : par exemple, les détails changent quand on la répète · 3) pour voir si elles concordent (corroboration), ce qui donne une image plus fiable et fait apparaître la partialité ou les erreurs · 4) (a) primaire ; (b) secondaire · 5) les généalogies royales, la liste des rois dans l'ordre ; elles montrent l'ordre des rois et aident à estimer des dates · 6) (a) fait ; (b) opinion, car « le meilleur » est un jugement · 7) non, la pierre n'a jamais été vivante ; on pourrait plutôt dater du charbon de bois ou des os trouvés dans la même couche · 8) par exemple : demander la permission, expliquer pourquoi on pose ces questions, demander si l'on peut prendre des notes ou enregistrer, et préparer ses questions*

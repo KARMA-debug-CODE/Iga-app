@@ -34,6 +34,7 @@ age = 16;                     // allowed, because age was made with let
 
 - `let` makes a variable whose value can change later.
 - `const` makes a **constant**: once it has a value, you cannot give it a new one. `school = "GS Huye";` would cause an error.
+- Older code often uses `var` instead. Like `let`, it makes a variable that can be changed. In this lesson we use only `let` and `const`.
 - `=` means "store this value". It is the **assignment** operator, and it does **not** mean "is equal to".
 - Text after `//` is a **comment**. The computer ignores it; comments explain the code to people.
 
@@ -74,7 +75,9 @@ Many books use `console.log()` to show results. The **console** is a hidden pane
 - **`textContent`** puts text inside an element on the page, such as a paragraph.
 - **`alert("Muraho!")`** pops up a small message box, which you close with OK.
 
-The boxes marked **HTML · CSS · JS** are live editors. Change the code, then press **Run** to see the result. Try it now:
+The boxes marked **HTML · CSS · JS** are live editors. Change the code, then press **Run** to see the result. If you get lost, **Reset** brings back the original code.
+
+In the code below, `document.querySelector("#line1")` finds the paragraph whose `id` is `line1` (the `#` means "id"). Then `.textContent = ...` puts text inside that paragraph. Try it now:
 
 ```playground html
 <!DOCTYPE html>
@@ -126,7 +129,7 @@ if (mark >= 50) {
 }
 ```
 
-If the condition is `true`, the code in the first pair of curly brackets `{ }` runs. If it is `false`, the code after `else` runs. Only one of the two blocks runs.
+The line `let message;` creates a variable with no value yet; the `if` statement gives it one. If the condition is `true`, the code in the first pair of curly brackets `{ }` runs. If it is `false`, the code after `else` runs. Only one of the two blocks runs.
 
 ### Worked example 2: tracing if/else
 

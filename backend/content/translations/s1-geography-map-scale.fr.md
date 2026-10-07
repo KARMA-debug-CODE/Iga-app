@@ -12,7 +12,7 @@ Une carte est un dessin réduit d'une région. Tout un district peut tenir sur u
 ## Trois façons d'indiquer l'échelle
 
 1. **Échelle verbale** : en mots, par exemple « 1 cm représente 1 km ».
-2. **Fraction représentative (FR)**, ou échelle numérique : un rapport sans unité. **1 : 50 000** signifie que 1 unité sur la carte correspond à 50 000 de ces *mêmes* unités sur le terrain. Ainsi, 1 cm sur la carte correspond à 50 000 cm sur le terrain, et 1 mm à 50 000 mm.
+2. **Fraction représentative (FR)**, ou échelle numérique : un rapport sans unité. **1 : 50 000** signifie que 1 unité sur la carte correspond à 50 000 de ces *mêmes* unités sur le terrain. Ainsi, 1 cm sur la carte correspond à 50 000 cm sur le terrain, et 1 mm à 50 000 mm. On peut aussi l'écrire sous forme de fraction : $\dfrac{1}{50\,000}$.
 3. **Échelle graphique (linéaire)** : une ligne graduée comme une règle, sur laquelle sont écrites les distances réelles.
 
 ```
@@ -79,7 +79,7 @@ Vérification : $4 \times 25\,000 = 100\,000$ cm $= 1$ km ✓
 
 Sur la carte topographique au 1 : 50 000 utilisée en classe, un chemin droit entre une école et un centre de santé mesure 8,4 cm. Quelle est la distance réelle ?
 
-1. Multipliez par l'échelle : $8.4 \times 50\,000 = 420\,000$ cm.
+1. Multipliez la distance sur la carte par le nombre de l'échelle, 50 000 : $8.4 \times 50\,000 = 420\,000$ cm.
 2. Convertissez en mètres : $420\,000 \div 100 = 4\,200$ m.
 3. Convertissez en kilomètres : $4\,200 \div 1\,000 = 4.2$ km.
 
@@ -100,13 +100,7 @@ Vérification : $7 \times 0.5 = 3.5$ km ✓
 
 ### Exemple corrigé 5 : lire une échelle graphique avec une bande de papier
 
-Sur beaucoup de cartes, la partie de l'échelle graphique située **à gauche du 0** est divisée en petites parties. Sur l'échelle ci-dessous, chaque petite partie vaut $1\ \text{km} \div 4 = 250$ m.
-
-1. Posez le bord droit d'une bande de papier entre les deux lieux sur la carte. Marquez le premier lieu A et le second B.
-2. Déplacez la bande sur l'échelle graphique. Placez la marque B sur un kilomètre entier, de sorte que la marque A tombe dans les petites parties à gauche du 0.
-3. Lisez B : elle est sur 2 km.
-4. Lisez A : elle est à 3 petites parties à gauche du 0, soit $3 \times 250 = 750$ m.
-5. Additionnez : 2 km + 750 m = **2,75 km**.
+Sur beaucoup de cartes, la partie de l'échelle graphique située **à gauche du 0** est divisée en petites parties. Sur l'échelle ci-dessous, le kilomètre situé à gauche du 0 est découpé en 4 petites parties : chaque petite partie vaut donc $1\,000\ \text{m} \div 4 = 250$ m.
 
 ```text
   A─────────────────────B
@@ -115,19 +109,25 @@ Sur beaucoup de cartes, la partie de l'échelle graphique située **à gauche du
 ├─┬─┬─┬─┼───────┼───────┼───────┤
 ```
 
+1. Posez le bord droit d'une bande de papier entre les deux lieux sur la carte. Marquez le premier lieu A et le second B.
+2. Déplacez la bande sur l'échelle graphique. Placez la marque B sur un kilomètre entier, de sorte que la marque A tombe dans les petites parties à gauche du 0.
+3. Lisez B : elle est sur 2 km.
+4. Lisez A : elle est à 3 petites parties à gauche du 0, soit $3 \times 250 = 750$ m.
+5. Additionnez : 2 km + 750 m = **2,75 km**.
+
 Vérification : $2 + 3 \times 0.25 = 2.75$ km ✓
 
 Vous n'avez pas eu besoin de la FR : l'échelle graphique a fait le travail.
 
 ### Exemple corrigé 6 : une route sinueuse
 
-Une route ou une rivière est rarement droite. Vous pouvez poser une **ficelle** le long du trajet, marquer les deux extrémités, puis tendre la ficelle le long d'une règle. Vous pouvez aussi découper la courbe en petites portions droites et mesurer chacune d'elles.
+Une route ou une rivière est rarement droite. Vous pouvez poser une **ficelle** le long du trajet, marquer les deux extrémités, puis tendre la ficelle le long d'une règle ou de l'échelle graphique. Vous pouvez aussi découper la courbe en petites portions droites et mesurer chacune d'elles.
 
 Une route sinueuse entre un marché et une école du district de Nyamagabe est mesurée sur une carte au 1 : 50 000 en quatre portions droites : 2,3 cm, 1,8 cm, 3,1 cm et 0,9 cm. Quelle est la longueur de la route, et combien de temps faut-il pour la parcourir à pied à 4 km/h ?
 
 1. Additionnez les portions : $2.3 + 1.8 + 3.1 + 0.9 = 8.1$ cm.
 2. Convertissez : $8.1 \times 0.5 = 4.05$ km.
-3. Temps = distance ÷ vitesse (voir la leçon de physique de S1 « Vitesse, vecteur vitesse et accélération ») : $4.05 \div 4 \approx 1.01$ h, soit **environ 1 heure**.
+3. À 4 km/h, on parcourt 4 km en une heure. Le temps est donc distance ÷ vitesse : $4.05 \div 4 \approx 1.01$ h, soit **environ 1 heure**. (C'est la formule vitesse = distance ÷ temps de la leçon de physique de S1 « Vitesse, vecteur vitesse et accélération », écrite dans l'autre sens.)
 
 Vérification : $4 \times 1 = 4$ km, très proche de 4,05 km ✓
 
@@ -153,7 +153,7 @@ L'échelle graphique grandit en même temps que la carte : elle reste donc juste
 | **Grande échelle** | 1 : 10 000 | petite, p. ex. un plan de la ville de Musanze | beaucoup |
 | **Petite échelle** | 1 : 1 000 000 | grande, p. ex. une carte de l'Afrique de l'Est | peu |
 
-Un bon moyen de s'en souvenir : dans 1 : 10 000, la *fraction* $\frac{1}{10\,000}$ est **plus grande** que $\frac{1}{1\,000\,000}$. Grande fraction, grande échelle, petite région.
+Un bon moyen de s'en souvenir : dans 1 : 10 000, la *fraction* $\dfrac{1}{10\,000}$ est **plus grande** que $\dfrac{1}{1\,000\,000}$. Grande fraction, grande échelle, petite région. Donc plus le nombre après les deux-points est **petit**, plus l'échelle est **grande** et plus on voit de détails.
 
 ## Erreurs fréquentes
 

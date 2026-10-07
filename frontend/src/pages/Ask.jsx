@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
@@ -9,15 +10,23 @@ import { ErrorMessage, Spinner } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
+// The server reads only the last 10 messages, so only those are sent (less mobile data).
+const HISTORY_SENT = 10;
+
 const STARTERS = ["ask.s.explain", "ask.s.steps", "ask.s.quiz", "ask.s.plan", "ask.s.summary", "ask.s.remember"];
 
 // The conversation lasts for this browser tab, per student; logging out clears it (offline.js).
 const storageKey = (user) => `iga.ask.${user.id}`;
 
+/** The finished part of a conversation: a question still waiting for its answer is left out. */
+function answered(messages) {
+  return messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages;
+}
+
 function loadSaved(user) {
   try {
     const saved = JSON.parse(sessionStorage.getItem(storageKey(user)) || "null");
-    if (saved && Array.isArray(saved.messages)) return { subject: saved.subject || "", messages: saved.messages };
+    if (saved && Array.isArray(saved.messages)) return { subject: saved.subject || "", messages: answered(saved.messages) };
   } catch {
     /* storage blocked or damaged: start a fresh chat */
   }
@@ -41,7 +50,7 @@ export default function Ask() {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(storageKey(user), JSON.stringify({ subject, messages }));
+      sessionStorage.setItem(storageKey(user), JSON.stringify({ subject, messages: answered(messages) }));
     } catch {
       /* private window or full storage: the chat still works, it just isn't kept */
     }
@@ -49,7 +58,7 @@ export default function Ask() {
 
   useEffect(() => {
     if (log.current) log.current.scrollTop = log.current.scrollHeight;
-  }, [messages.length, busy]);
+  }, [messages.length, busy, status.loading]);
 
   if (status.loading) return <Spinner />;
 
@@ -66,6 +75,8 @@ export default function Ask() {
         {header}
         {status.reason === "subscription_required" ? (
           <LockedNotice />
+        ) : status.reason === "unreachable" ? (
+          <ErrorMessage error={new Error(t("errors.network"))} onRetry={status.retry} />
         ) : (
           <div className="card" role="note">
             <strong>{t("ask.offTitle")}</strong>
@@ -89,7 +100,7 @@ export default function Ask() {
     try {
       const res = await api("/tutor/ask/", {
         method: "POST",
-        body: { message, history, subject: subject || undefined, lang },
+        body: { message, history: history.slice(-HISTORY_SENT), subject: subject || undefined, lang },
       });
       setMessages((current) => [...current, { role: "assistant", content: res.reply }]);
     } catch (err) {
@@ -165,6 +176,11 @@ export default function Ask() {
           {busy && <div className="bubble muted">{t("tutor.thinking")}</div>}
         </div>
         <ErrorMessage error={error} />
+        {error?.data?.attempt && (
+          <Link className="btn btn-sm" to={`/attempts/${error.data.attempt}`} style={{ marginBottom: 8 }}>
+            {t("ask.openExam")}
+          </Link>
+        )}
         <form
           className="chat-form"
           style={{ marginTop: 8 }}

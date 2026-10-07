@@ -90,6 +90,11 @@ def test_java_is_sent_as_main(client_for, student, piston):
         ({"compile": {"stdout": "", "stderr": "main.cpp:1: error", "code": 1, "signal": None}}, "compile_error"),
         ({"run": {"stdout": "", "stderr": "", "code": None, "signal": "SIGKILL", "status": "TO"}}, "time_limit"),
         ({"run": {"stdout": "aaaa", "stderr": "", "code": None, "signal": "SIGKILL", "status": "OL"}}, "output_limit"),
+        (
+            {"run": {"stdout": "", "stderr": "at Main.f" * 3000, "code": None, "signal": "SIGKILL", "status": "EL"}},
+            "output_limit",
+        ),
+        ({"compile": {"stdout": "", "stderr": "...", "code": None, "signal": "SIGKILL", "status": "EL"}}, "compile_error"),
         ({"run": {"stdout": "", "stderr": "", "code": None, "signal": "SIGKILL", "status": "SG"}}, "killed"),
         ({"run": {"stdout": "", "stderr": "Exception in thread", "code": 1, "signal": None, "status": "RE"}}, "runtime_error"),
     ],
@@ -97,6 +102,22 @@ def test_java_is_sent_as_main(client_for, student, piston):
 def test_problems_get_a_verdict(client_for, student, piston, reply, verdict):
     piston.reply = reply
     assert run(client_for(student)).data["verdict"] == verdict
+
+
+def test_a_failed_compile_is_shown_once(client_for, student, piston):
+    # Piston copies the failed compile stage into "run" (api/v2.js); the app shows it once, as a compile error.
+    failed = {"stdout": "", "stderr": "main.cpp:3: error: expected ';'", "code": 1, "signal": None, "status": None}
+    piston.reply = {"compile": failed, "run": failed}
+    data = run(client_for(student)).data
+    assert data["verdict"] == "compile_error" and data["run"] is None and "expected ';'" in data["compile"]["stderr"]
+
+
+def test_java_syntax_errors_are_compile_errors(client_for, student, piston):
+    # Java runs `java Main.java`, which compiles in memory first: a typo comes back from the run stage.
+    stderr = "Main.java:3: error: ';' expected\n        int x = 1\n                 ^\n1 error\nerror: compilation failed\n"
+    piston.reply = {"run": {"stdout": "", "stderr": stderr, "code": 1, "signal": None, "status": None}}
+    data = run(client_for(student), language="java", code="public class Main {}").data
+    assert data["verdict"] == "compile_error" and data["run"] is None and "';' expected" in data["compile"]["stderr"]
 
 
 def test_runner_down_or_broken(client_for, student, piston, settings):

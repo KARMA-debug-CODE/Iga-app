@@ -17,7 +17,7 @@ A map is a reduced drawing of an area. A whole district can fit on one page. The
 ## Three ways to show scale
 
 1. **Statement scale**: in words, for example "1 cm represents 1 km".
-2. **Representative fraction (RF)**: a ratio with no units. **1 : 50 000** means 1 unit on the map is 50 000 of the *same* units on the ground. So 1 cm on the map is 50 000 cm on the ground, and 1 mm is 50 000 mm.
+2. **Representative fraction (RF)**: a ratio with no units. **1 : 50 000** means 1 unit on the map is 50 000 of the *same* units on the ground. So 1 cm on the map is 50 000 cm on the ground, and 1 mm is 50 000 mm. It can also be written as a fraction, $\dfrac{1}{50\,000}$.
 3. **Linear (bar) scale**: a line divided like a ruler, with real distances written on it.
 
 ```
@@ -84,7 +84,7 @@ Check: $4 \times 25\,000 = 100\,000$ cm $= 1$ km ✓
 
 On the 1 : 50 000 topographic map used in class, a straight path from a school to a health centre measures 8.4 cm. How far is it really?
 
-1. Multiply by the scale: $8.4 \times 50\,000 = 420\,000$ cm.
+1. Multiply the map distance by the scale number, 50 000: $8.4 \times 50\,000 = 420\,000$ cm.
 2. Change to metres: $420\,000 \div 100 = 4\,200$ m.
 3. Change to kilometres: $4\,200 \div 1\,000 = 4.2$ km.
 
@@ -105,13 +105,7 @@ Check: $7 \times 0.5 = 3.5$ km ✓
 
 ### Worked example 5: reading a bar scale with a paper strip
 
-On many maps, the part of the bar scale to the **left of 0** is divided into small parts. On the bar below, each small part is $1\ \text{km} \div 4 = 250$ m.
-
-1. Lay the straight edge of a strip of paper between the two places on the map. Mark the first place A and the second B.
-2. Move the strip onto the bar scale. Put mark B on a whole kilometre, so that mark A lands in the small parts left of 0.
-3. Read B: it is on 2 km.
-4. Read A: it is 3 small parts left of 0, which is $3 \times 250 = 750$ m.
-5. Add: 2 km + 750 m = **2.75 km**.
+On many maps, the part of the bar scale to the **left of 0** is divided into small parts. On the bar below, the kilometre left of 0 is cut into 4 small parts, so each small part is $1\,000\ \text{m} \div 4 = 250$ m.
 
 ```text
   A─────────────────────B
@@ -120,19 +114,25 @@ On many maps, the part of the bar scale to the **left of 0** is divided into sma
 ├─┬─┬─┬─┼───────┼───────┼───────┤
 ```
 
+1. Lay the straight edge of a strip of paper between the two places on the map. Mark the first place A and the second B.
+2. Move the strip onto the bar scale. Put mark B on a whole kilometre, so that mark A lands in the small parts left of 0.
+3. Read B: it is on 2 km.
+4. Read A: it is 3 small parts left of 0, which is $3 \times 250 = 750$ m.
+5. Add: 2 km + 750 m = **2.75 km**.
+
 Check: $2 + 3 \times 0.25 = 2.75$ km ✓
 
 You did not need the RF at all: the bar scale did the work.
 
 ### Worked example 6: a curved road
 
-A road or river is rarely straight. You can lay a piece of **string** along it, mark the ends, then straighten the string against a ruler. Or you can split the curve into short straight parts and measure each one.
+A road or river is rarely straight. You can lay a piece of **string** along it, mark the ends, then straighten the string along a ruler or the bar scale. Or you can split the curve into short straight parts and measure each one.
 
 A winding road from a market to a school in Nyamagabe District is measured on a 1 : 50 000 map in four straight parts: 2.3 cm, 1.8 cm, 3.1 cm and 0.9 cm. How long is the road, and how long does it take to walk at 4 km/h?
 
 1. Add the parts: $2.3 + 1.8 + 3.1 + 0.9 = 8.1$ cm.
 2. Convert: $8.1 \times 0.5 = 4.05$ km.
-3. Time = distance ÷ speed (from the S1 physics lesson "Speed, velocity and acceleration"): $4.05 \div 4 \approx 1.01$ h, so **about 1 hour**.
+3. At 4 km/h you walk 4 km in each hour. So the time is distance ÷ speed: $4.05 \div 4 \approx 1.01$ h, which is **about 1 hour**. (This is the formula speed = distance ÷ time from the S1 physics lesson "Speed, velocity and acceleration", turned around.)
 
 Check: $4 \times 1 = 4$ km, very close to 4.05 km ✓
 
@@ -158,7 +158,7 @@ The bar scale grows together with the map, so it stays correct.
 | **Large scale** | 1 : 10 000 | small, e.g. a town plan of Musanze | a lot |
 | **Small scale** | 1 : 1 000 000 | large, e.g. a map of East Africa | little |
 
-A good way to remember: in 1 : 10 000 the *fraction* $\frac{1}{10\,000}$ is **larger** than $\frac{1}{1\,000\,000}$. Large fraction, large scale, small area.
+A good way to remember: in 1 : 10 000 the *fraction* $\dfrac{1}{10\,000}$ is **larger** than $\dfrac{1}{1\,000\,000}$. Large fraction, large scale, small area. So the **smaller** the number after the colon, the **larger** the scale and the more detail you see.
 
 ## Common mistakes
 

@@ -23,7 +23,7 @@ Tout ce qui influence la survie des individus, comme les prédateurs, les maladi
 ## D'où vient la variation ?
 
 - Une **mutation** est une modification aléatoire de l'ADN. C'est la source première de tous les nouveaux allèles. La plupart des mutations sont nuisibles ou sans effet ; quelques-unes sont utiles.
-- La **reproduction sexuée** crée de nouvelles combinaisons d'allèles existants, grâce au **crossing-over** et au **brassage indépendant** des chromosomes pendant la méiose, et grâce à la **fécondation au hasard**.
+- La **reproduction sexuée** crée de nouvelles combinaisons d'allèles existants. Pendant la méiose, le **crossing-over** échange des morceaux entre les deux chromosomes d'une paire, et la **répartition indépendante** des chromosomes distribue chaque paire dans les gamètes indépendamment des autres paires. Ensuite, la **fécondation au hasard** unit n'importe quel spermatozoïde à n'importe quel ovule.
 
 Les différences causées par l'environnement, comme un veau bien nourri qui devient plus grand, ne se transmettent pas. Elles ne mènent donc pas à l'évolution.
 
@@ -33,7 +33,7 @@ Le **pool génique** est l'ensemble des allèles d'une population. La **fréquen
 
 ### Exemple corrigé 1 : des souris des champs à Bugesera
 
-Imaginez 500 souris des champs dans un champ de sorgho. L'allèle **F** donne un pelage brun et l'allèle **f** un pelage blanc. Il y a 200 souris FF, 200 Ff et 100 ff. Trouvez la fréquence de chaque allèle.
+Imaginez 500 souris des champs dans un champ de sorgho. L'allèle **F** donne un pelage brun et l'allèle **f** un pelage blanc. F est dominant : les souris FF et Ff sont donc brunes et les souris ff sont blanches. Il y a 200 souris FF, 200 Ff et 100 ff. Trouvez la fréquence de chaque allèle.
 
 1. Nombre total d'allèles : $500 \times 2 = 1000$.
 2. Allèles F : chaque souris FF en a 2 et chaque souris Ff en a 1, donc $(200 \times 2) + 200 = 600$.
@@ -45,23 +45,26 @@ Supposons maintenant que les chouettes attrapent plus facilement les souris blan
 
 ## La sélection naturelle en action
 
-### Exemple corrigé 2 : pourquoi il faut terminer un traitement antibiotique
+### Exemple corrigé 2 : comment un antibiotique sélectionne les bactéries résistantes
 
-Une infection contient $10^9$ (un milliard) de bactéries. Une mutation a rendu 1 000 d'entre elles résistantes à un antibiotique. Le malade prend le médicament pendant deux jours, se sent mieux et arrête. Ces deux jours tuent 99,99 % des bactéries non résistantes, mais aucune bactérie résistante.
+Une infection contient $10^9$ (un milliard) de bactéries. Une mutation a rendu 1 000 d'entre elles résistantes à un antibiotique. L'antibiotique tue 99,99 % des bactéries non résistantes, mais aucune bactérie résistante. Quelle est la part des bactéries résistantes parmi les survivantes ?
 
 1. Part des résistantes au départ : $\dfrac{1000}{10^9} = 0.000001$, soit $0.0001\%$.
-2. 0,01 % des bactéries non résistantes survivent : $0.0001 \times 10^9 = 100\,000$.
-3. Total des survivantes : environ $100\,000 + 1000 = 101\,000$.
-4. Part des résistantes maintenant : $\dfrac{1000}{101\,000} \approx 0.0099$, soit environ $1\%$.
-5. Comparez : $\dfrac{1\%}{0.0001\%} = 10\,000$. Les bactéries résistantes sont maintenant environ 10 000 fois plus fréquentes.
+2. Si 99,99 % des bactéries non résistantes meurent, alors $100\% - 99.99\% = 0.01\%$ survivent. Sous forme décimale, $0.01\% = 0.0001$.
+3. Bactéries non résistantes survivantes : $0.0001 \times 10^9 = 100\,000$. (Il y a en réalité $10^9 - 1000$ bactéries non résistantes, mais retirer 1 000 ne change presque rien.)
+4. Total des survivantes : environ $100\,000 + 1000 = 101\,000$.
+5. Part des résistantes maintenant : $\dfrac{1000}{101\,000} \approx 0.0099$, soit environ $1\%$.
+6. Comparez : $\dfrac{1\%}{0.0001\%} = 10\,000$. Les bactéries résistantes sont maintenant environ 10 000 fois plus fréquentes.
 
 Vérification : $0.0099 \times 101\,000 \approx 1000$ bactéries résistantes ✓
 
-Les survivantes se multiplient. L'infection peut revenir avec beaucoup plus de bactéries résistantes, et celles-ci peuvent se transmettre à d'autres personnes. De plus, beaucoup de bactéries ne sont que **partiellement résistantes** : elles survivent à quelques jours de traitement mais meurent après un traitement complet. Terminer le traitement les tue. Pour la même raison, ne prenez des antibiotiques que lorsqu'un agent de santé les prescrit.
+L'antibiotique n'a pas créé la résistance. Il a seulement tué les autres bactéries : un allèle rare est donc devenu fréquent. Les survivantes se multiplient. L'infection peut revenir avec beaucoup plus de bactéries résistantes, et celles-ci peuvent se transmettre à d'autres personnes.
+
+Chaque utilisation d'un antibiotique est une pression de sélection : ne prenez donc des antibiotiques que lorsqu'un agent de santé les prescrit. Ensuite, **terminez le traitement**, même quand vous vous sentez mieux. Certaines bactéries ne sont que **partiellement résistantes** : elles survivent à quelques jours de traitement mais meurent après un traitement complet. Si vous arrêtez trop tôt, elles survivent, se multiplient et transmettent leurs allèles, et la prochaine infection sera plus difficile à soigner.
 
 **Le paludisme.** Le parasite du paludisme, *Plasmodium*, a développé une résistance à certains médicaments. La chloroquine a cessé d'être efficace dans une grande partie de l'Afrique, et le traitement a donc été remplacé par des médicaments plus récents. Des chercheurs ont aussi signalé au Rwanda des parasites porteurs de mutations liées à une résistance partielle aux médicaments de la famille de l'artémisinine ; les agents de santé continuent donc de vérifier l'efficacité des traitements.
 
-**La phalène du bouleau.** Dans l'Angleterre industrielle du XIXe siècle, la suie a noirci les troncs d'arbres. Les papillons sombres y étaient mieux cachés des oiseaux : ils sont donc devenus nombreux.
+**La phalène du bouleau.** Dans l'Angleterre industrielle du XIXe siècle, la suie a noirci les troncs d'arbres. Les papillons sombres y étaient mieux cachés des oiseaux : ils sont donc devenus nombreux. Après les lois contre la pollution de l'air des années 1950, les troncs sont redevenus clairs, et les papillons clairs sont redevenus nombreux.
 
 ## Réalisez l'expérience
 
@@ -99,7 +102,7 @@ Des caractères comme la masse à la naissance ou la taille du bec présentent u
 ```text
 STABILISANTE (masse à la naissance chez l'humain)
 avant :  ..::|||::..
-après :     .:|||:.
+après :    .:|||:.
          faible ------> élevée
 
 DIRECTIONNELLE (couleur de la phalène)
@@ -109,7 +112,7 @@ après :        ..::|||::..
 
 DIVERSIFIANTE (taille du bec d'un pinson)
 avant :  ..::|||::..
-après :  .:|:.   .:|:.
+après :  .:|.   .|:.
          petit -------> grand
 ```
 
@@ -121,7 +124,9 @@ après :  .:|:.   .:|:.
 
 La **dérive génétique** est une modification de la fréquence allélique causée par le **hasard**. Imaginez 10 scarabées, dont 2 portent un allèle rare. Si une vache marche par hasard sur ces 2 scarabées, l'allèle est perdu, alors qu'il n'était pas nuisible. La dérive compte surtout dans les petites populations.
 
-Dans l'**effet fondateur**, quelques individus fondent une nouvelle population, par exemple des animaux déplacés vers un nouveau parc national. Le nouveau pool génique ne contient que les allèles qu'ils portaient par hasard. Lors d'un **goulot d'étranglement**, une maladie ou la chasse ne laisse que quelques survivants, et une grande partie de la variation est perdue.
+Dans l'**effet fondateur**, quelques individus fondent une nouvelle population. Le nouveau pool génique ne contient que les allèles qu'ils portaient par hasard. Par exemple, en 2015, sept lions venus d'Afrique du Sud ont été amenés au parc national de l'Akagera, où les lions avaient disparu. Tous les lionceaux nés sur place avaient pour parents des lions de ce groupe de sept : en 2017, deux autres mâles ont donc été amenés pour apporter de nouveaux allèles.
+
+Lors d'un **goulot d'étranglement**, une maladie ou la chasse ne laisse que quelques survivants, et une grande partie de la variation est perdue.
 
 ## Comment se forment les nouvelles espèces
 
@@ -132,7 +137,7 @@ Les nouvelles espèces se forment souvent par **isolement géographique**, aussi
 1. Une population vit dans une zone et partage un seul pool génique.
 2. Une barrière, comme une rivière qui change de lit ou une coulée de lave, la sépare en deux.
 3. Les deux groupes ne peuvent plus se rencontrer, donc leurs allèles ne se mélangent plus.
-4. Chaque groupe reçoit des mutations différentes, subit des pressions de sélection différentes et dérive à sa façon.
+4. Des mutations différentes apparaissent dans chaque groupe ; chaque groupe subit des pressions de sélection différentes et dérive à sa façon.
 5. Au fil de nombreuses générations, les deux pools géniques deviennent très différents.
 6. Même si la barrière disparaît, les groupes ne peuvent plus donner ensemble des descendants fertiles. C'est l'**isolement reproductif** : ce sont maintenant deux espèces.
 

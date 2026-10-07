@@ -20,6 +20,7 @@ from apps.assessments import services as assessment_services
 from apps.assessments.models import Attempt, Question, Quiz
 from apps.curriculum.models import Subject
 from apps.curriculum.views import visible_lessons
+from apps.schools import access
 
 from .models import TutorExchange
 
@@ -141,11 +142,18 @@ def open_exam(user):
     open_attempts = (
         Attempt.objects.filter(user=user, status=Attempt.Status.IN_PROGRESS).select_related("quiz").order_by("-started_at")
     )
+    reachable = set(assessment_services.visible_quizzes(user).values_list("pk", flat=True))
     for attempt in open_attempts:
         if assessment_services.finalize_if_expired(attempt):
             continue
-        if attempt.deadline is not None or attempt.quiz.feedback_mode == Quiz.FeedbackMode.AFTER_SUBMIT:
-            return attempt
+        if not (attempt.deadline is not None or attempt.quiz.feedback_mode == Quiz.FeedbackMode.AFTER_SUBMIT):
+            continue
+        if attempt.quiz_id not in reachable or not access.can_open(user, attempt.quiz):
+            # The student can no longer open it (archived, left the class, access ended): close it with
+            # what was answered, as the attempt page does, so it can't keep the tutor off for good.
+            assessment_services.submit_attempt(attempt)
+            continue
+        return attempt
     return None
 
 
@@ -231,12 +239,10 @@ def ask(user, message, history=None, lesson_slug=None, attempt_id=None, question
     context, lesson, attempt, question, subject = build_context(user, lesson_slug, attempt_id, question_id, lang, subject_code)
     exam = open_exam(user)
     if exam is not None:
-        raise PermissionDenied(
-            _(
-                "The tutor is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use the tutor again."
-            )
-            % {"quiz": exam.quiz.title}
+        message = _(
+            "The tutor is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use the tutor again."
         )
+        raise PermissionDenied({"detail": message % {"quiz": exam.quiz.title}, "attempt": exam.pk})
     code = reply_language(user, lang)
 
     response = get_client().beta.messages.create(

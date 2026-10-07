@@ -239,5 +239,18 @@ def test_an_open_exam_mode_quiz_keeps_the_tutor_off_until_submitted(client_for, 
     )
     response = client.post("/api/tutor/ask/", {"message": "?"}, format="json")
     assert response.status_code == 403 and "Class test" in response.data["detail"]
+    assert str(response.data["attempt"]) == str(attempt["id"])  # so the app can link to it
     client.post(f"/api/attempts/{attempt['id']}/submit/")
     assert client.post("/api/tutor/ask/", {"message": "?"}, format="json").status_code == 200
+
+
+def test_an_exam_the_student_can_no_longer_open_does_not_lock_the_tutor(client_for, student, subject, unit, tutor):
+    from apps.assessments.models import Attempt
+
+    quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], feedback_mode="after_submit")
+    client = client_for(student)
+    attempt = _start(client, quiz)
+    quiz.status = "archived"
+    quiz.save()
+    assert client.post("/api/tutor/ask/", {"message": "?"}, format="json").status_code == 200
+    assert Attempt.objects.get(pk=attempt["id"]).status != Attempt.Status.IN_PROGRESS

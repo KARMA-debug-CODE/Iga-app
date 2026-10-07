@@ -12,13 +12,15 @@ const OFF = { enabled: false, reason: "" };
 
 /**
  * The tutor's status for this user, asked once per user and access state:
- * `{ enabled, reason, loading }`, where reason is "subscription_required" when the tutor is on
- * but this student's school hasn't subscribed.
+ * `{ enabled, reason, loading, retry }`. reason is "subscription_required" when the tutor is on but
+ * this student's school hasn't subscribed, and "unreachable" when the server couldn't be asked
+ * (that answer isn't kept, so the next page or `retry()` asks again).
  */
 export function useTutorStatus() {
   const { user } = useAuth();
   const key = user ? `${user.id}:${user.access?.premium ? 1 : 0}` : "";
   const [status, setStatus] = useState({ key: "", ...OFF });
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!key) return undefined;
     if (!statusRequests.has(key)) {
@@ -26,7 +28,10 @@ export function useTutorStatus() {
         key,
         api("/tutor/status/")
           .then((s) => ({ enabled: Boolean(s?.enabled), reason: s?.reason || "" }))
-          .catch(() => OFF),
+          .catch(() => {
+            statusRequests.delete(key);
+            return { enabled: false, reason: "unreachable" };
+          }),
       );
     }
     let alive = true;
@@ -34,9 +39,15 @@ export function useTutorStatus() {
     return () => {
       alive = false;
     };
-  }, [key]);
-  if (!key) return { ...OFF, loading: false };
-  return status.key === key ? { enabled: status.enabled, reason: status.reason, loading: false } : { ...OFF, loading: true };
+  }, [key, attempt]);
+  const retry = () => {
+    setStatus({ key: "", ...OFF });
+    setAttempt((n) => n + 1);
+  };
+  if (!key) return { ...OFF, loading: false, retry };
+  return status.key === key
+    ? { enabled: status.enabled, reason: status.reason, loading: false, retry }
+    : { ...OFF, loading: true, retry };
 }
 
 /** Whether the tutor is on and this user may use it. */

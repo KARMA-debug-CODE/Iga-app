@@ -48,7 +48,7 @@ L'**offre** est la quantité que les vendeurs sont disposés à proposer, et cap
 | 1 200 | 400 |
 | 1 400 | 500 |
 
-La **loi de l'offre** : ceteris paribus, quand le prix **augmente**, la quantité offerte **augmente**. La **courbe d'offre** est **croissante**.
+La **loi de l'offre** : *ceteris paribus*, quand le prix **augmente**, la quantité offerte **augmente**. La **courbe d'offre** est **croissante**.
 
 Pourquoi ? Deux raisons :
 
@@ -87,15 +87,17 @@ Trouvez l'équilibre. Expliquez ensuite ce qui se passe à 1 200 FRW et à 800 F
 
 ### Exemple corrigé 2 : L'équilibre à partir des équations
 
-Les barèmes viennent de $Q_d = 800 - 0.5P$ et $Q_s = -200 + 0.5P$ ($P$ en FRW par kg). Trouvez l'équilibre par le calcul.
+Les barèmes viennent de $Q_d = 800 - 0.5P$ et $Q_s = -200 + 0.5P$. Ici, $Q_d$ est la quantité demandée et $Q_s$ la quantité offerte (kg par jour), et $P$ est le prix (FRW par kg). Trouvez l'équilibre par le calcul.
 
 1. À l'équilibre, $Q_d = Q_s$ : $800 - 0.5P = -200 + 0.5P$.
-2. Faites passer les termes en $P$ d'un côté et les nombres de l'autre : $800 + 200 = 0.5P + 0.5P$.
-3. Simplifiez : $1\,000 = P$. Le prix d'équilibre est de 1 000 FRW le kg.
+2. Mettez les termes en $P$ d'un côté et les nombres de l'autre. Ajoutez $0.5P$ aux deux membres, et ajoutez $200$ aux deux membres : $800 + 200 = 0.5P + 0.5P$.
+3. Simplifiez : la moitié de $P$ plus la moitié de $P$ font un $P$ entier, donc $1\,000 = P$. Le prix d'équilibre est de 1 000 FRW le kg.
 4. Demande : $Q_d = 800 - 0.5(1\,000) = 800 - 500 = 300$ kg.
 5. Vérification avec l'offre : $Q_s = -200 + 0.5(1\,000) = -200 + 500 = 300$ kg ✓. Cela correspond au tableau.
 
 > **Astuce :** remplacez toujours le prix dans **les deux** équations. Si les quantités sont différentes, cherchez l'erreur.
+
+> **Des nombres différents devant $P$ ?** Suivez les mêmes étapes. Pour $Q_d = 70 - 2P$ et $Q_s = 3P - 10$ : $70 - 2P = 3P - 10$. Ajoutez $2P$ et $10$ aux deux membres : $80 = 5P$, donc $P = 80 \div 5 = 16$. Alors $Q_d = 70 - 2(16) = 38$, et la vérification donne $Q_s = 3(16) - 10 = 38$ ✓.
 
 ## Qu'est-ce qui déplace la courbe de demande ?
 
@@ -149,7 +151,7 @@ P
 +---------------- Q
 ```
 
-L'offre fonctionne de la même façon : une variation de son propre prix est un mouvement le long de la courbe d'offre ; les coûts, la météo ou la technologie la déplacent.
+L'offre fonctionne de la même façon. Une variation du prix du bien lui-même est un mouvement le long de la courbe d'offre : une variation de la **quantité offerte**. Les coûts, la météo ou la technologie déplacent toute la courbe : une variation de l'**offre**.
 
 ### Exemple corrigé 3 : Le prix des haricots augmente
 
@@ -187,6 +189,8 @@ Grâce à des revenus plus élevés, les acheteurs veulent 100 kg de plus à cha
 | La demande diminue | diminue | diminue |
 | L'offre augmente | diminue | augmente |
 | L'offre diminue | augmente | diminue |
+
+L'exemple corrigé 4 correspond à la première ligne de ce tableau, et l'exemple corrigé 5 à la dernière.
 
 ## Expérimentez
 

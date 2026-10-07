@@ -154,7 +154,7 @@ A student in Huye tests a resistor and gets these readings. Is it ohmic, and wha
       0   0.10  0.20  0.30  0.40
 ```
 
-4. The **gradient** (steepness) of the line is rise ÷ run $= \dfrac{6.0 - 0}{0.40 - 0} = 15\ \Omega$. On a graph of $V$ against $I$, the gradient equals the resistance.
+4. The **gradient** (steepness) of the line is the rise ÷ the run: how much $V$ goes up, divided by how much $I$ goes across. Here it is $\dfrac{6.0 - 0}{0.40 - 0} = 15\ \Omega$. On a graph of $V$ against $I$, the gradient equals the resistance.
 5. Check: doubling $V$ from 3.0 V to 6.0 V doubled $I$ from 0.20 A to 0.40 A, as Ohm's law says ✓.
 
 ## A lamp does not obey Ohm's law
@@ -162,6 +162,8 @@ A student in Huye tests a resistor and gets these readings. Is it ohmic, and wha
 A filament lamp has a thin metal wire, the **filament**, inside it. As more current flows, the filament gets very hot and glows. Does it still obey Ohm's law?
 
 ### Worked example 5: testing a torch lamp
+
+A student measures the voltage across a small torch lamp and the current through it, and gets these readings. Is the lamp ohmic?
 
 | $V$ (V) | 1 | 2 | 4 | 6 |
 |---|---|---|---|---|

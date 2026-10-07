@@ -53,7 +53,7 @@ Why? Two reasons:
 | 1,200 | 400 |
 | 1,400 | 500 |
 
-The **law of supply**: ceteris paribus, when the price **rises**, the quantity supplied **rises**. The **supply curve** slopes **upwards**.
+The **law of supply**: *ceteris paribus*, when the price **rises**, the quantity supplied **rises**. The **supply curve** slopes **upwards**.
 
 Why? Two reasons:
 
@@ -92,15 +92,17 @@ Find the equilibrium. Then explain what happens at 1,200 FRW and at 800 FRW.
 
 ### Worked example 2: Equilibrium from equations
 
-The schedules come from $Q_d = 800 - 0.5P$ and $Q_s = -200 + 0.5P$ ($P$ in FRW per kg). Find the equilibrium with algebra.
+The schedules come from $Q_d = 800 - 0.5P$ and $Q_s = -200 + 0.5P$. Here $Q_d$ is the quantity demanded and $Q_s$ the quantity supplied (kg per day), and $P$ is the price (FRW per kg). Find the equilibrium with algebra.
 
 1. At equilibrium $Q_d = Q_s$: $800 - 0.5P = -200 + 0.5P$.
-2. Move the $P$ terms to one side and the numbers to the other: $800 + 200 = 0.5P + 0.5P$.
-3. Simplify: $1\,000 = P$. The equilibrium price is 1,000 FRW per kg.
+2. Get the $P$ terms on one side and the numbers on the other. Add $0.5P$ to both sides, and add $200$ to both sides: $800 + 200 = 0.5P + 0.5P$.
+3. Simplify: half of $P$ plus half of $P$ is one whole $P$, so $1\,000 = P$. The equilibrium price is 1,000 FRW per kg.
 4. Demand: $Q_d = 800 - 0.5(1\,000) = 800 - 500 = 300$ kg.
 5. Check with supply: $Q_s = -200 + 0.5(1\,000) = -200 + 500 = 300$ kg ✓. This matches the table.
 
 > **Tip:** always put the price back into **both** equations. If the quantities differ, look for a mistake.
+
+> **Different numbers in front of $P$?** Use the same steps. For $Q_d = 70 - 2P$ and $Q_s = 3P - 10$: $70 - 2P = 3P - 10$. Add $2P$ and $10$ to both sides: $80 = 5P$, so $P = 80 \div 5 = 16$. Then $Q_d = 70 - 2(16) = 38$, and the check gives $Q_s = 3(16) - 10 = 38$ ✓.
 
 ## What shifts the demand curve?
 
@@ -154,7 +156,7 @@ P
 +---------------- Q
 ```
 
-Supply works the same way: an own-price change is a movement along the supply curve; costs, weather or technology shift it.
+Supply works the same way. An own-price change is a movement along the supply curve: a change in **quantity supplied**. Costs, weather or technology shift the whole curve: a change in **supply**.
 
 ### Worked example 3: The price of beans rises
 
@@ -192,6 +194,8 @@ A drought means sellers offer 100 kg less at every price: $Q_s = -300 + 0.5P$. D
 | Demand decreases | falls | falls |
 | Supply increases | falls | rises |
 | Supply decreases | rises | falls |
+
+Worked example 4 is the first row of this table, and Worked example 5 is the last row.
 
 ## Experiment
 

@@ -104,15 +104,13 @@ def _stage(data):
 
 def verdict(compile_stage, run_stage):
     """One word the app turns into a plain-language message."""
-    if compile_stage and compile_stage["code"] not in (0, None):
-        return "compile_error"
-    if compile_stage and compile_stage["status"] == "TO":
-        return "compile_time_limit"
+    if compile_stage and compile_stage["code"] != 0:  # also None: stopped by a limit
+        return "compile_time_limit" if compile_stage["status"] == "TO" else "compile_error"
     if not run_stage:
         return "compile_error"
     if run_stage["status"] == "TO":
         return "time_limit"
-    if run_stage["status"] == "OL":
+    if run_stage["status"] in ("OL", "EL"):  # stdout or stderr longer than Piston's output limit
         return "output_limit"
     if run_stage["signal"] == "SIGKILL":
         return "killed"  # usually the memory limit
@@ -135,4 +133,9 @@ def run(language, code, stdin=""):
         },
     )
     compile_stage, run_stage = _stage(data.get("compile")), _stage(data.get("run"))
+    if compile_stage and compile_stage["code"] != 0:
+        run_stage = None  # Piston copies the failed compile stage into "run"; don't show it twice
+    if language == "java" and run_stage and run_stage["code"] == 1 and "error: compilation failed" in run_stage["stderr"]:
+        # Java has no separate compile stage: `java Main.java` compiles in memory, then runs.
+        compile_stage, run_stage = run_stage, None
     return {"verdict": verdict(compile_stage, run_stage), "compile": compile_stage, "run": run_stage}

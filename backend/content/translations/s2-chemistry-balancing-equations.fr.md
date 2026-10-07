@@ -42,7 +42,7 @@ $$6\text{CO}_2 + 6\text{H}_2\text{O} \rightarrow \text{C}_6\text{H}_{12}\text{O}
 - À gauche : C $6 \times 1 = 6$ ; H $6 \times 2 = 12$ ; O $(6 \times 2) + (6 \times 1) = 18$.
 - À droite : C 6 ; H 12 ; O $6 + (6 \times 2) = 18$.
 
-Chaque élément correspond : cette équation est donc équilibrée ✓
+Le compte est le même pour chaque élément : cette équation est donc équilibrée ✓
 
 ## Équation en mots → équation chimique
 
@@ -58,9 +58,9 @@ Comptez : il y a 2 O à gauche, mais seulement 1 O à droite. Un atome d'oxygèn
 
 1. Écrivez la formule correcte de chaque réactif et de chaque produit. **Ne modifiez jamais une formule** pour équilibrer (H₂O doit rester H₂O).
 2. Faites un **tableau de comptage des atomes** : écrivez chaque élément, puis comptez ses atomes à gauche et à droite.
-3. Choisissez un élément qui ne correspond pas. Corrigez-le en changeant un **coefficient**. Gardez pour la fin les éléments qui apparaissent seuls (comme O₂, H₂ ou Fe).
+3. Choisissez un élément qui n'est pas équilibré. Corrigez-le en changeant un **coefficient**. Gardez pour la fin les éléments qui apparaissent seuls (comme O₂, H₂ ou Fe).
 4. Recomptez chaque élément. Un nouveau coefficient peut aussi changer le nombre d'atomes d'autres éléments.
-5. Recommencez jusqu'à ce que chaque ligne du tableau corresponde. Utilisez les plus petits nombres entiers.
+5. Recommencez jusqu'à ce que chaque ligne du tableau soit équilibrée. Utilisez les plus petits nombres entiers.
 
 Un coefficient égal à 1 ne s'écrit pas : CO₂ signifie 1CO₂.
 
@@ -70,9 +70,9 @@ Un coefficient égal à 1 ne s'écrit pas : CO₂ signifie 1CO₂.
 
 $$\text{H}_2 + \text{O}_2 \rightarrow \text{H}_2\text{O}$$
 
-1. Comptez. H : 2 à gauche, 2 à droite (ça correspond). O : 2 à gauche, 1 à droite (ça ne correspond pas).
-2. Corrigez O : placez 2 devant H₂O. La droite a maintenant 2 O, mais aussi $2 \times 2 = 4$ H.
-3. Recomptez H : 2 à gauche, 4 à droite. Placez 2 devant H₂. La gauche a maintenant $2 \times 2 = 4$ H.
+1. Comptez. H : 2 à gauche, 2 à droite (c'est équilibré). O : 2 à gauche, 1 à droite (ce n'est pas équilibré).
+2. Corrigez O : placez 2 devant H₂O. À droite, il y a maintenant 2 O, mais aussi $2 \times 2 = 4$ H.
+3. Recomptez H : 2 à gauche, 4 à droite. Placez 2 devant H₂. À gauche, il y a maintenant $2 \times 2 = 4$ H.
 4. Équation finale :
 
 $$2\text{H}_2 + \text{O}_2 \rightarrow 2\text{H}_2\text{O}$$
@@ -90,9 +90,9 @@ Le lac Kivu contient du méthane (CH₄) dissous dans ses eaux profondes. Une pa
 
 $$\text{CH}_4 + \text{O}_2 \rightarrow \text{CO}_2 + \text{H}_2\text{O}$$
 
-1. D'abord C : 1 à gauche, 1 à droite. Ça correspond.
-2. Ensuite H : 4 à gauche, 2 à droite. Placez 2 devant H₂O. La droite a maintenant $2 \times 2 = 4$ H.
-3. O en dernier : la droite a 2 O dans CO₂ et $2 \times 1 = 2$ O dans 2H₂O, donc 4 O. L'oxygène se présente sous forme de O₂ (2 atomes chacun), donc la gauche a besoin de $4 \div 2 = 2$ O₂.
+1. D'abord C : 1 à gauche, 1 à droite. C'est équilibré.
+2. Ensuite H : 4 à gauche, 2 à droite. Placez 2 devant H₂O. À droite, il y a maintenant $2 \times 2 = 4$ H.
+3. O en dernier : à droite, il y a 2 O dans CO₂ et $2 \times 1 = 2$ O dans 2H₂O, donc 4 O. L'oxygène se présente sous forme de O₂ (2 atomes par molécule) : il faut donc $4 \div 2 = 2$ O₂ à gauche.
 4. Équation finale :
 
 $$\text{CH}_4 + 2\text{O}_2 \rightarrow \text{CO}_2 + 2\text{H}_2\text{O}$$
@@ -112,10 +112,10 @@ Une casserole en aluminium neuve est brillante, mais sa surface se couvre vite d
 $$\text{Al} + \text{O}_2 \rightarrow \text{Al}_2\text{O}_3$$
 
 1. Comptez. Al : 1 à gauche, 2 à droite. O : 2 à gauche, 3 à droite.
-2. Les deux réactifs sont des éléments : commencez donc par le plus difficile, l'oxygène. À gauche, O vient par 2 ; à droite, il vient par 3.
+2. Les deux réactifs sont des éléments. Al est facile à corriger à la fin : commencez donc par le plus difficile, l'oxygène. À gauche, O vient par 2 ; à droite, il vient par 3.
 3. Cherchez le **plus petit commun multiple (PPCM)** de 2 et 3 : le plus petit nombre divisible à la fois par 2 et par 3. C'est 6.
 4. Formez 6 O de chaque côté : $3\text{O}_2$ donne $3 \times 2 = 6$, et $2\text{Al}_2\text{O}_3$ donne $2 \times 3 = 6$.
-5. Recomptez Al : la droite a maintenant $2 \times 2 = 4$ Al. Placez 4 devant Al.
+5. Recomptez Al : à droite, il y a maintenant $2 \times 2 = 4$ Al. Placez 4 devant Al.
 6. Équation finale :
 
 $$4\text{Al} + 3\text{O}_2 \rightarrow 2\text{Al}_2\text{O}_3$$
@@ -135,7 +135,7 @@ $$\text{C}_3\text{H}_8 + \text{O}_2 \rightarrow \text{CO}_2 + \text{H}_2\text{O}
 
 1. D'abord C : 3 à gauche, 1 à droite. Placez 3 devant CO₂.
 2. Ensuite H : 8 à gauche, 2 à droite. Placez 4 devant H₂O, car $4 \times 2 = 8$.
-3. O en dernier : la droite a $3 \times 2 = 6$ O dans 3CO₂ et $4 \times 1 = 4$ O dans 4H₂O. Cela fait $6 + 4 = 10$ O. La gauche a besoin de $10 \div 2 = 5$ O₂.
+3. O en dernier : à droite, il y a $3 \times 2 = 6$ O dans 3CO₂ et $4 \times 1 = 4$ O dans 4H₂O. Cela fait $6 + 4 = 10$ O. Il faut donc $10 \div 2 = 5$ O₂ à gauche.
 4. Équation finale :
 
 $$\text{C}_3\text{H}_8 + 5\text{O}_2 \rightarrow 3\text{CO}_2 + 4\text{H}_2\text{O}$$
@@ -162,10 +162,10 @@ On utilise la chaux pour rendre les sols acides moins acides. Une sorte de chaux
 $$\text{Ca(OH)}_2 + \text{HCl} \rightarrow \text{CaCl}_2 + \text{H}_2\text{O}$$
 
 1. Comptez en multipliant la parenthèse. À gauche : Ca 1, O 2, H $2 + 1 = 3$, Cl 1. À droite : Ca 1, Cl 2, H 2, O 1.
-2. Ca correspond.
-3. Cl : 1 à gauche, 2 à droite. Placez 2 devant HCl. La gauche a maintenant H $2 + 2 = 4$.
-4. H : 4 à gauche, 2 à droite. Placez 2 devant H₂O. La droite a maintenant 4 H et 2 O.
-5. O : 2 à gauche, 2 à droite. Ça correspond.
+2. Ca est équilibré.
+3. Cl : 1 à gauche, 2 à droite. Placez 2 devant HCl. À gauche, il y a maintenant H $2 + 2 = 4$.
+4. H : 4 à gauche, 2 à droite. Placez 2 devant H₂O. À droite, il y a maintenant 4 H et 2 O.
+5. O : 2 à gauche, 2 à droite. C'est équilibré.
 6. Équation finale :
 
 $$\text{Ca(OH)}_2 + 2\text{HCl} \rightarrow \text{CaCl}_2 + 2\text{H}_2\text{O}$$
@@ -177,7 +177,7 @@ $$\text{Ca(OH)}_2 + 2\text{HCl} \rightarrow \text{CaCl}_2 + 2\text{H}_2\text{O}$
 | H | 3 | 2 | 4 | 4 |
 | O | 2 | 1 | 2 | 2 |
 
-Vérification : chaque ligne correspond ✓. Ici, le groupe OH ne reste pas entier (ses atomes se retrouvent dans l'eau) : on compte donc O et H séparément.
+Vérification : chaque ligne est équilibrée ✓. Ici, le groupe OH ne reste pas entier (ses atomes se retrouvent dans l'eau) : on compte donc O et H séparément.
 
 ### Exemple corrigé 6 : l'hydroxyde de sodium et l'acide sulfurique
 
@@ -186,10 +186,11 @@ L'hydroxyde de sodium réagit avec l'acide sulfurique en formant du sulfate de s
 $$\text{NaOH} + \text{H}_2\text{SO}_4 \rightarrow \text{Na}_2\text{SO}_4 + \text{H}_2\text{O}$$
 
 1. Comptez, avec SO₄ comme une seule unité. À gauche : Na 1, SO₄ 1, H $1 + 2 = 3$, O hors de SO₄ 1. À droite : Na 2, SO₄ 1, H 2, O hors de SO₄ 1.
-2. Na : 1 à gauche, 2 à droite. Placez 2 devant NaOH. La gauche a maintenant H $2 + 2 = 4$ et 2 O hors de SO₄.
-3. SO₄ : 1 de chaque côté. Ça correspond.
-4. H : 4 à gauche, 2 à droite. Placez 2 devant H₂O. La droite a maintenant 4 H et 2 O.
-5. Équation finale :
+2. Na : 1 à gauche, 2 à droite. Placez 2 devant NaOH. À gauche, il y a maintenant H $2 + 2 = 4$ et 2 O hors de SO₄.
+3. SO₄ : 1 de chaque côté. C'est équilibré.
+4. H : 4 à gauche, 2 à droite. Placez 2 devant H₂O. À droite, il y a maintenant 4 H et 2 O.
+5. O hors de SO₄ : 2 à gauche, 2 à droite. C'est équilibré.
+6. Équation finale :
 
 $$2\text{NaOH} + \text{H}_2\text{SO}_4 \rightarrow \text{Na}_2\text{SO}_4 + 2\text{H}_2\text{O}$$
 
@@ -212,7 +213,7 @@ $$2\text{H}_2\text{(g)} + \text{O}_2\text{(g)} \rightarrow 2\text{H}_2\text{O(l)
 
 ## Entraînez-vous avec la simulation
 
-Sur le premier écran, changez les coefficients et observez les atomes de chaque côté. Jouez ensuite au jeu. Essayez de réussir le niveau 2 sans indices. Quand vous vous trompez, dessinez un tableau de comptage des atomes sur papier et cherchez la ligne qui ne correspond pas.
+Sur le premier écran, changez les coefficients et observez les atomes de chaque côté. Jouez ensuite au jeu. Essayez de réussir chaque équation du niveau 2 du premier coup. Quand vous vous trompez, dessinez un tableau de comptage des atomes sur papier et cherchez la ligne qui n'est pas équilibrée.
 
 ```sim
 phet-balancing-chemical-equations

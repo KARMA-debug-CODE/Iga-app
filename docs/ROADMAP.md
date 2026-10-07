@@ -4,10 +4,10 @@
 
 | Vision item | Status | Notes |
 |---|---|---|
-| All subjects, S1–S6, matching the REB curriculum | 🟡 Structure done, content started | 15 subjects and a 352-unit outline; 39 full lessons, each with a quiz. Units still need line-by-line checking against REB syllabi |
-| Official textbooks & guides | 🟡 | Resource library with an "official" flag and a link to the REB e-learning portal. Uploading PDFs is waiting on redistribution rights |
+| All subjects, S1–S6, matching the REB curriculum | 🟡 Structure done, content started | 15 subjects and a 352-unit outline; 39 full lessons, each with a quiz (10 of the shortest were expanded with worked examples and answers). Units still need line-by-line checking against REB syllabi |
+| Official textbooks & guides | 🟢 | Every lesson and unit links the official REB student's book for its subject and grade (81) plus 45 free open textbooks (`content/books.json`); units without a lesson point to the book. Links need checking each term (`check_book_links`). Hosting PDFs is waiting on redistribution rights |
 | Simplified lessons, visuals, rich media | 🟢 | Markdown lessons with maths, tables, embedded labs and video links |
-| ICT / coding modules (W3Schools-style) | 🟢 | Live HTML/CSS/JS editor and real Python (Pyodide, self-hosted) in lessons and a standalone playground |
+| ICT / coding modules (W3Schools-style) | 🟢 | Live HTML/CSS/JS editor, real Python (Pyodide) and SQL (sql.js) in the browser, and C++ and Java on a sandboxed Piston code runner, in a standalone playground (web and Python also inside lessons) |
 | English / French | 🟢 | Interface, server messages and emails, subject names, unit titles, lab descriptions and all 39 lessons in both languages; search works in French; the tutor answers in the student's reading language. French needs review by a fluent teacher; quizzes are English-only |
 | School subscriptions | 🟢 | Schools pay USD 200/month for all their members; free starter lessons for everyone else. Flutterwave (cards, mobile money), bank transfers recorded by the team, receipts and reminders |
 | Interactive simulations (PhET, GeoGebra) | 🟢 | 32 PhET, 3 GeoGebra, 4 built-in offline labs, mapped to subjects and grades |
@@ -21,9 +21,9 @@
 | Mobile-first, dark mode, Rwanda colours | 🟢 | Installable PWA |
 | Security (2FA, HTTPS, scoped access, anti-cheat) | 🟢 | Session revocation, refresh-token reuse detection, admin 2FA, upload checks. See the Architecture doc |
 | Scalable cloud deployment | 🟡 | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
-| Testing & QA | 🟢 | 294 API tests (SQLite + PostgreSQL), unit tests, 36 E2E runs (18 journeys on mobile and desktop; two school journeys run on desktop only), CI |
+| Testing & QA | 🟢 | 331 API tests (SQLite + PostgreSQL), unit tests, 48 E2E runs (25 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | 🟢 | Linked by a one-time code from the student; read-only progress report |
-| AI tutor | 🟢 | Claude-powered, off during exams, never reveals answers early; needs an API key and a usage budget |
+| AI tutor | 🟢 | Claude-powered, in lessons and quizzes and on an Ask AI page for any subject; off while an exam is open, never reveals answers early; needs an API key and a usage budget |
 | Offline use | 🟡 | Whole units can be saved for offline reading and labs; quizzes still need a connection |
 
 ## Before a pilot (next 4–8 weeks)
@@ -42,7 +42,6 @@
 
 - Full A-level content for each combination (PCM, PCB, MCB, MEG, HEG, …), and student "combination" on the profile
 - More built-in labs (titration, pendulum, genetics crosses, logic gates, sorting algorithms)
-- SQL playground for ICT
 - WebSocket chat (Django Channels) and live class quizzes, Kahoot-style
 - Analytics over time: progress per unit across a term, class-to-class comparison
 - Accessibility audit (screen readers, colour contrast, keyboard use) and fixes

@@ -27,7 +27,7 @@ Anything that affects which individuals survive, such as predators, disease, dro
 ## Where does variation come from?
 
 - **Mutation** is a random change in the DNA. It is the original source of all new alleles. Most mutations are harmful or have no effect; a few are useful.
-- **Sexual reproduction** makes new combinations of existing alleles, through **crossing over** and **independent assortment** in meiosis, and **random fertilisation**.
+- **Sexual reproduction** makes new combinations of existing alleles. In meiosis, **crossing over** swaps pieces between the two chromosomes of a pair, and **independent assortment** shares each pair out to the gametes separately from the other pairs. Then **random fertilisation** joins any sperm with any egg.
 
 Differences caused by the environment, such as a well-fed calf growing bigger, are not inherited. So they do not lead to evolution.
 
@@ -37,7 +37,7 @@ The **gene pool** is all the alleles in a population. The **allele frequency** i
 
 ### Worked example 1: field mice in Bugesera
 
-Imagine 500 field mice in a sorghum field. Allele **F** gives brown fur and allele **f** gives white fur. There are 200 FF, 200 Ff and 100 ff mice. Find the frequency of each allele.
+Imagine 500 field mice in a sorghum field. Allele **F** gives brown fur and allele **f** gives white fur. F is dominant, so FF and Ff mice are brown and ff mice are white. There are 200 FF, 200 Ff and 100 ff mice. Find the frequency of each allele.
 
 1. Total alleles: $500 \times 2 = 1000$.
 2. F alleles: each FF mouse has 2 and each Ff mouse has 1, so $(200 \times 2) + 200 = 600$.
@@ -49,23 +49,26 @@ Now suppose owls catch white mice more easily. A few generations later there are
 
 ## Natural selection in action
 
-### Worked example 2: why you must finish a course of antibiotics
+### Worked example 2: how an antibiotic selects resistant bacteria
 
-An infection contains $10^9$ (one thousand million) bacteria. A mutation has made 1,000 of them resistant to an antibiotic. The patient takes the medicine for two days, feels better and stops. Those two days kill 99.99% of the non-resistant bacteria, but none of the resistant ones.
+An infection contains $10^9$ (one thousand million) bacteria. A mutation has made 1,000 of them resistant to an antibiotic. The antibiotic kills 99.99% of the non-resistant bacteria, but none of the resistant ones. How common are resistant bacteria among the survivors?
 
 1. Resistant fraction at the start: $\dfrac{1000}{10^9} = 0.000001$, which is $0.0001\%$.
-2. 0.01% of the non-resistant bacteria survive: $0.0001 \times 10^9 = 100\,000$.
-3. Survivors in total: about $100\,000 + 1000 = 101\,000$.
-4. Resistant fraction now: $\dfrac{1000}{101\,000} \approx 0.0099$, which is about $1\%$.
-5. Compare: $\dfrac{1\%}{0.0001\%} = 10\,000$. Resistant bacteria are now about 10,000 times more common.
+2. If 99.99% of the non-resistant bacteria die, then $100\% - 99.99\% = 0.01\%$ survive. As a decimal, $0.01\% = 0.0001$.
+3. Non-resistant survivors: $0.0001 \times 10^9 = 100\,000$. (There are really $10^9 - 1000$ non-resistant bacteria, but taking away 1,000 makes almost no difference.)
+4. Survivors in total: about $100\,000 + 1000 = 101\,000$.
+5. Resistant fraction now: $\dfrac{1000}{101\,000} \approx 0.0099$, which is about $1\%$.
+6. Compare: $\dfrac{1\%}{0.0001\%} = 10\,000$. Resistant bacteria are now about 10,000 times more common.
 
 Check: $0.0099 \times 101\,000 \approx 1000$ resistant bacteria ✓
 
-The survivors multiply. The infection can come back with far more resistant bacteria, and these can spread to other people. Also, many bacteria are only **partly resistant**: they survive a few days of the drug but die after a full course. Finishing the course kills them. For the same reason, take antibiotics only when a health worker prescribes them.
+The antibiotic did not create the resistance. It only killed the other bacteria, so a rare allele became common. The survivors multiply. The infection can come back with far more resistant bacteria, and these can spread to other people.
+
+Every use of an antibiotic is a selection pressure, so take antibiotics only when a health worker prescribes them. Then **finish the course**, even when you feel better. Some bacteria are only **partly resistant**: they survive a few days of the drug but die after a full course. If you stop early, they survive, multiply and pass on their alleles, and the next infection is harder to treat.
 
 **Malaria.** The malaria parasite, *Plasmodium*, has evolved resistance to some drugs. Chloroquine stopped working well in much of Africa, so treatment changed to newer drugs. Researchers have also reported parasites in Rwanda with mutations linked to partial resistance to artemisinin-type drugs, so health workers keep checking how well treatments work.
 
-**The peppered moth.** In industrial England in the 1800s, soot blackened tree trunks. Dark moths were better hidden from birds there, so they became common.
+**The peppered moth.** In industrial England in the 1800s, soot blackened tree trunks. Dark moths were better hidden from birds there, so they became common. After clean-air laws in the 1950s, the trunks became lighter again, and pale moths became common again.
 
 ## Run the experiment
 
@@ -103,7 +106,7 @@ Features such as birth mass or beak size show **continuous variation**: a graph 
 ```text
 STABILISING (human birth mass)
 before:  ..::|||::..
-after:      .:|||:.
+after:     .:|||:.
          low --------> high
 
 DIRECTIONAL (peppered moth colour)
@@ -113,7 +116,7 @@ after:         ..::|||::..
 
 DISRUPTIVE (finch beak size)
 before:  ..::|||::..
-after:   .:|:.   .:|:.
+after:   .:|.   .|:.
          small ------> large
 ```
 
@@ -125,7 +128,9 @@ after:   .:|:.   .:|:.
 
 **Genetic drift** is a change in allele frequency caused by **chance**. Imagine 10 beetles, 2 of which carry a rare allele. If a cow happens to step on those 2, the allele is lost, although it was not harmful. Drift matters most in small populations.
 
-In the **founder effect**, a few individuals start a new population, for example animals moved to a new national park. The new gene pool holds only the alleles they happened to carry. In a **bottleneck**, disease or hunting leaves a few survivors, and much variation is lost.
+In the **founder effect**, a few individuals start a new population. The new gene pool holds only the alleles they happened to carry. For example, in 2015 seven lions from South Africa were brought to Akagera National Park, where lions had disappeared. Every cub born there had parents from those seven, so in 2017 two more males were brought in to add new alleles.
+
+In a **bottleneck**, disease or hunting leaves a few survivors, and much variation is lost.
 
 ## How new species form
 

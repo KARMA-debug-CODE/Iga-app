@@ -16,7 +16,7 @@ An **integer** is a whole number. It can be positive, negative or zero:
 
 $$\ldots,\ -3,\ -2,\ -1,\ 0,\ 1,\ 2,\ 3,\ \ldots$$
 
-The dots mean that the list goes on for ever in both directions. Numbers such as $\frac{1}{2}$ or 2.5 are not integers, because they are not whole.
+The dots mean that the list goes on for ever in both directions. Numbers such as $\dfrac{1}{2}$ or 2.5 are not integers, because they are not whole.
 
 - A **positive integer** is bigger than zero: 1, 2, 3, and so on. You may write a plus sign in front, so $+3$ is the same as $3$.
 - A **negative integer** is smaller than zero. It always has a minus sign in front: $-1$, $-2$, $-3$, and so on. We read $-3$ as "negative three" or "minus three".
@@ -40,7 +40,7 @@ A **number line** is a straight line with the integers marked at equal steps. Ze
 
 The arrow shows that the numbers keep getting bigger to the right. Here is the golden rule: **the further right, the bigger the number. The further left, the smaller the number.**
 
-So $-1$ is bigger than $-4$, because $-1$ is further to the right. Think about money: owing 4,000 FRW is worse than owing 1,000 FRW. So $-4$ is smaller than $-1$.
+So $-1$ is bigger than $-4$, because $-1$ is further to the right. Think about money: owing 4,000 FRW is worse than owing 1,000 FRW. So $-4\,000$ is smaller than $-1\,000$, in the same way that $-4$ is smaller than $-1$.
 
 We compare numbers with two symbols:
 
@@ -153,7 +153,7 @@ Work out (a) $7 + (-3)$, (b) $-2 - (+5)$ and (c) $-4 - (-9)$.
 
 **(c)** The signs $-$ and $-$ are the same, so they become $+$. Now $-4 - (-9) = -4 + 9$. Start at $-4$ and walk 9 steps right. After 4 steps you reach 0, and 5 more steps take you to $5$. The answer is $5$.
 
-Check (c): on the number line, $-9$ to $-4$ is 5 steps, so $-4 - (-9) = 5$ ✓.
+Check (c): a subtraction such as $-4 - (-9)$ also tells you how far it is from the second number to the first. On the number line, from $-9$ to $-4$ is 5 steps to the right, so $-4 - (-9) = 5$ ✓.
 
 ## Multiplying and dividing
 

@@ -75,8 +75,8 @@ A coefficient of 1 is not written: CO₂ means 1CO₂.
 $$\text{H}_2 + \text{O}_2 \rightarrow \text{H}_2\text{O}$$
 
 1. Count. H: 2 on the left, 2 on the right (matches). O: 2 on the left, 1 on the right (does not match).
-2. Fix O: put 2 in front of H₂O. The right now has 2 O, but also $2 \times 2 = 4$ H.
-3. Recount H: 2 on the left, 4 on the right. Put 2 in front of H₂. The left now has $2 \times 2 = 4$ H.
+2. Fix O: put 2 in front of H₂O. The right side now has 2 O, but also $2 \times 2 = 4$ H.
+3. Recount H: 2 on the left, 4 on the right. Put 2 in front of H₂. The left side now has $2 \times 2 = 4$ H.
 4. Final equation:
 
 $$2\text{H}_2 + \text{O}_2 \rightarrow 2\text{H}_2\text{O}$$
@@ -95,8 +95,8 @@ Lake Kivu holds methane gas (CH₄) dissolved in its deep water. Some of it is t
 $$\text{CH}_4 + \text{O}_2 \rightarrow \text{CO}_2 + \text{H}_2\text{O}$$
 
 1. C first: 1 on the left, 1 on the right. It matches.
-2. H next: 4 on the left, 2 on the right. Put 2 in front of H₂O. The right now has $2 \times 2 = 4$ H.
-3. O last: the right has 2 O in CO₂ and $2 \times 1 = 2$ O in 2H₂O, so 4 O. Oxygen comes as O₂ (2 atoms each), so the left needs $4 \div 2 = 2$ O₂.
+2. H next: 4 on the left, 2 on the right. Put 2 in front of H₂O. The right side now has $2 \times 2 = 4$ H.
+3. O last: the right side has 2 O in CO₂ and $2 \times 1 = 2$ O in 2H₂O, so 4 O. Oxygen comes as O₂ (2 atoms each), so the left side needs $4 \div 2 = 2$ O₂.
 4. Final equation:
 
 $$\text{CH}_4 + 2\text{O}_2 \rightarrow \text{CO}_2 + 2\text{H}_2\text{O}$$
@@ -116,10 +116,10 @@ A new aluminium saucepan is shiny, but its surface soon gets a very thin layer o
 $$\text{Al} + \text{O}_2 \rightarrow \text{Al}_2\text{O}_3$$
 
 1. Count. Al: 1 on the left, 2 on the right. O: 2 on the left, 3 on the right.
-2. Both reactants are elements, so start with the hard one, oxygen. On the left O comes in 2s; on the right it comes in 3s.
+2. Both reactants are elements. Al is easy to fix at the end, so start with the harder one, oxygen. On the left O comes in 2s; on the right it comes in 3s.
 3. Find the **lowest common multiple (LCM)** of 2 and 3: the smallest number that both 2 and 3 divide into. It is 6.
 4. Make 6 O on each side: $3\text{O}_2$ gives $3 \times 2 = 6$, and $2\text{Al}_2\text{O}_3$ gives $2 \times 3 = 6$.
-5. Recount Al: the right now has $2 \times 2 = 4$ Al. Put 4 in front of Al.
+5. Recount Al: the right side now has $2 \times 2 = 4$ Al. Put 4 in front of Al.
 6. Final equation:
 
 $$4\text{Al} + 3\text{O}_2 \rightarrow 2\text{Al}_2\text{O}_3$$
@@ -139,7 +139,7 @@ $$\text{C}_3\text{H}_8 + \text{O}_2 \rightarrow \text{CO}_2 + \text{H}_2\text{O}
 
 1. C first: 3 on the left, 1 on the right. Put 3 in front of CO₂.
 2. H next: 8 on the left, 2 on the right. Put 4 in front of H₂O, because $4 \times 2 = 8$.
-3. O last: the right has $3 \times 2 = 6$ O in 3CO₂ and $4 \times 1 = 4$ O in 4H₂O. That is $6 + 4 = 10$ O. The left needs $10 \div 2 = 5$ O₂.
+3. O last: the right side has $3 \times 2 = 6$ O in 3CO₂ and $4 \times 1 = 4$ O in 4H₂O. That is $6 + 4 = 10$ O. The left side needs $10 \div 2 = 5$ O₂.
 4. Final equation:
 
 $$\text{C}_3\text{H}_8 + 5\text{O}_2 \rightarrow 3\text{CO}_2 + 4\text{H}_2\text{O}$$
@@ -167,8 +167,8 @@ $$\text{Ca(OH)}_2 + \text{HCl} \rightarrow \text{CaCl}_2 + \text{H}_2\text{O}$$
 
 1. Count, multiplying the bracket. Left: Ca 1, O 2, H $2 + 1 = 3$, Cl 1. Right: Ca 1, Cl 2, H 2, O 1.
 2. Ca matches.
-3. Cl: 1 on the left, 2 on the right. Put 2 in front of HCl. The left now has H $2 + 2 = 4$.
-4. H: 4 on the left, 2 on the right. Put 2 in front of H₂O. The right now has 4 H and 2 O.
+3. Cl: 1 on the left, 2 on the right. Put 2 in front of HCl. The left side now has H $2 + 2 = 4$.
+4. H: 4 on the left, 2 on the right. Put 2 in front of H₂O. The right side now has 4 H and 2 O.
 5. O: 2 on the left, 2 on the right. It matches.
 6. Final equation:
 
@@ -190,10 +190,11 @@ Sodium hydroxide reacts with sulfuric acid to make sodium sulfate and water. SO�
 $$\text{NaOH} + \text{H}_2\text{SO}_4 \rightarrow \text{Na}_2\text{SO}_4 + \text{H}_2\text{O}$$
 
 1. Count, with SO₄ as one unit. Left: Na 1, SO₄ 1, H $1 + 2 = 3$, O outside SO₄ 1. Right: Na 2, SO₄ 1, H 2, O outside SO₄ 1.
-2. Na: 1 on the left, 2 on the right. Put 2 in front of NaOH. The left now has H $2 + 2 = 4$ and 2 O outside SO₄.
+2. Na: 1 on the left, 2 on the right. Put 2 in front of NaOH. The left side now has H $2 + 2 = 4$ and 2 O outside SO₄.
 3. SO₄: 1 on each side. It matches.
-4. H: 4 on the left, 2 on the right. Put 2 in front of H₂O. The right now has 4 H and 2 O.
-5. Final equation:
+4. H: 4 on the left, 2 on the right. Put 2 in front of H₂O. The right side now has 4 H and 2 O.
+5. O outside SO₄: 2 on the left, 2 on the right. It matches.
+6. Final equation:
 
 $$2\text{NaOH} + \text{H}_2\text{SO}_4 \rightarrow \text{Na}_2\text{SO}_4 + 2\text{H}_2\text{O}$$
 
@@ -216,7 +217,7 @@ $$2\text{H}_2\text{(g)} + \text{O}_2\text{(g)} \rightarrow 2\text{H}_2\text{O(l)
 
 ## Practise in the simulation
 
-On the first screen, change the coefficients and watch the atoms on each side. Then play the game. Aim to finish level 2 without hints. When you get one wrong, draw an atom-count table on paper and look for the row that does not match.
+On the first screen, change the coefficients and watch the atoms on each side. Then play the game. Aim to get every equation in level 2 right on your first try. When you get one wrong, draw an atom-count table on paper and look for the row that does not match.
 
 ```sim
 phet-balancing-chemical-equations

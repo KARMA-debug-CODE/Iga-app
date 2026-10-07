@@ -7,7 +7,7 @@ reviewed: false
 ---
 ## Besoins et désirs
 
-- Les **besoins** sont les choses indispensables pour vivre et étudier : la nourriture, un logement, les frais de scolarité, des vêtements de base, des cahiers.
+- Les **besoins** sont les choses indispensables pour vivre et étudier : la nourriture, un logement (un endroit où vivre), les frais de scolarité, des vêtements de base, des cahiers.
 - Les **désirs** sont les choses agréables à avoir, mais dont on peut se passer : un nouveau téléphone, des friandises, des chaussures à la mode.
 
 Posez-vous la question : « Que se passe-t-il si je n'achète pas cela ? » Si vous ne pouvez pas bien vivre ou étudier sans, c'est un besoin. Si la vie continue normalement, c'est un désir.
@@ -39,6 +39,8 @@ Un **budget** est un plan qui prévoit comment vous allez utiliser votre argent 
 - L'**épargne** est l'argent que vous gardez pour plus tard.
 
 $$\text{Revenus} - \text{Dépenses} = \text{Épargne (ou déficit)}$$
+
+Si les dépenses sont plus grandes que les revenus, il ne reste rien à épargner. La somme qui manque s'appelle un **déficit**.
 
 Il existe trois sortes de budget :
 
@@ -164,7 +166,8 @@ Voici une semaine du suivi de Keza :
 3. Total de la semaine : $1\,200 + 1\,100 = 2\,300$ FRW.
 4. Cherchez les petites dépenses qui reviennent : les bonbons, 3 fois à 100 FRW, donc 300 FRW par semaine.
 5. En 4 semaines : $300 \times 4 = 1\,200$ FRW. C'est autant que toute la somme qu'elle épargne d'abord !
-6. Vérification : $1\,200 + 1\,100 = 2\,300$ FRW ✓.
+6. Comparez avec son plan de l'exemple corrigé 2 : elle avait prévu 1 000 FRW de friandises par mois. Cette semaine, les bonbons et le chapati ont coûté $300 + 300 = 600$ FRW, donc environ $600 \times 4 = 2\,400$ FRW en 4 semaines. Elle dépense plus que prévu en friandises, donc la semaine prochaine elle peut supprimer les bonbons.
+7. Vérification : additionnez les huit montants du tableau : $500 + 100 + 100 + 500 + 500 + 100 + 200 + 300 = 2\,300$ FRW ✓.
 
 ## Erreurs fréquentes
 
@@ -185,4 +188,4 @@ Voici une semaine du suivi de Keza :
 7. Vos dépenses dépassent vos revenus. Que devez-vous réduire en premier, et pourquoi ?
 8. Votre oncle vous prête 5 000 FRW. Devez-vous l'inscrire comme revenu dans votre budget ? Pourquoi ?
 
-*Réponses : 1) uniforme : besoin ; chocolat : désir ; loyer : besoin ; jeux vidéo : désir · 2) $20\,000 - 17\,500 = 2\,500$ FRW · 3) la meilleure autre option à laquelle on renonce quand on choisit ; par exemple, « j'ai acheté un chapati au lieu de crédit téléphonique, donc le crédit était mon coût d'opportunité » · 4) $6\,000 \div 10 = 600$ FRW épargnés, et $6\,000 - 600 = 5\,400$ FRW restants · 5) un déficit de $9\,200 - 8\,000 = 1\,200$ FRW · 6) $9\,000 \div 1\,500 = 6$ semaines · 7) réduire d'abord les désirs, pour que les besoins restent payés · 8) non, car un prêt doit être remboursé, donc ce n'est pas un revenu*
+*Réponses : 1) uniforme : besoin ; chocolat : désir ; loyer : besoin (il paie le logement) ; jeux vidéo : désir · 2) $20\,000 - 17\,500 = 2\,500$ FRW · 3) la meilleure autre option à laquelle on renonce quand on choisit ; par exemple, « j'ai acheté un chapati au lieu d'acheter du crédit téléphonique, donc le crédit était mon coût d'opportunité » · 4) $6\,000 \div 10 = 600$ FRW épargnés, et $6\,000 - 600 = 5\,400$ FRW restants · 5) un déficit de $9\,200 - 8\,000 = 1\,200$ FRW · 6) $9\,000 \div 1\,500 = 6$ semaines · 7) réduire d'abord les désirs, pour que les besoins restent payés · 8) non, car un prêt doit être remboursé, donc ce n'est pas un revenu*

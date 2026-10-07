@@ -15,7 +15,7 @@ Une page Web est construite avec trois langages qui travaillent ensemble :
 
 Quand vous touchez un bouton et qu'un message apparaît aussitôt, sans qu'une nouvelle page se charge, c'est en général JavaScript qui travaille. Il s'exécute dans le **navigateur**, l'application qui sert à ouvrir les pages Web.
 
-Un **programme** est une suite d'ordres que l'ordinateur exécute dans l'ordre, de haut en bas. Chaque ordre s'appelle une **instruction** (en anglais *statement*), et on termine chacune par un point-virgule `;`. Dans une page Web, le JavaScript se place entre les balises `<script>` et `</script>`, en général juste avant `</body>`.
+Un **programme** est une liste de consignes que l'ordinateur exécute une par une, de haut en bas. Chaque consigne s'appelle une **instruction** (en anglais *statement*), et on termine chacune par un point-virgule `;`. Dans une page Web, le JavaScript se place entre les balises `<script>` et `</script>`, en général juste avant `</body>`.
 
 ## Les variables
 
@@ -30,6 +30,7 @@ age = 16;                     // autorisé, car age a été créée avec let
 
 - `let` crée une variable dont la valeur peut changer plus tard.
 - `const` crée une **constante** : une fois qu'elle a une valeur, on ne peut pas lui en donner une nouvelle. `school = "GS Huye";` provoquerait une erreur.
+- Dans du code plus ancien, on trouve souvent `var` à la place. Comme `let`, il crée une variable que l'on peut modifier. Dans cette leçon, nous utilisons seulement `let` et `const`.
 - `=` veut dire « range cette valeur ». C'est l'opérateur d'**affectation**, et il ne veut **pas** dire « est égal à ».
 - Le texte placé après `//` est un **commentaire**. L'ordinateur l'ignore ; les commentaires expliquent le code aux personnes.
 
@@ -70,7 +71,9 @@ Beaucoup de livres utilisent `console.log()` pour afficher les résultats. La **
 - **`textContent`** met du texte dans un élément de la page, par exemple un paragraphe.
 - **`alert("Muraho !")`** ouvre une petite boîte de message, que l'on ferme avec OK.
 
-Les cadres marqués **HTML · CSS · JS** sont des éditeurs en direct. Modifiez le code, puis appuyez sur **Exécuter** pour voir le résultat. Essayez maintenant :
+Les cadres marqués **HTML · CSS · JS** sont des éditeurs en direct. Modifiez le code, puis appuyez sur **Exécuter** pour voir le résultat. Si vous vous perdez, **Réinitialiser** remet le code de départ.
+
+Dans le code ci-dessous, `document.querySelector("#line1")` trouve le paragraphe dont l'`id` est `line1` (le `#` veut dire « id »). Ensuite, `.textContent = ...` met du texte dans ce paragraphe. Essayez maintenant :
 
 ```playground html
 <!DOCTYPE html>
@@ -122,11 +125,11 @@ if (mark >= 50) {
 }
 ```
 
-Si la condition est `true`, le code dans la première paire d'accolades `{ }` s'exécute. Si elle est `false`, c'est le code après `else` qui s'exécute. Un seul des deux blocs s'exécute.
+La ligne `let message;` crée une variable qui n'a pas encore de valeur ; l'instruction `if` lui en donne une. Si la condition est `true`, le code dans la première paire d'accolades `{ }` s'exécute. Si elle est `false`, c'est le code après `else` qui s'exécute. Un seul des deux blocs s'exécute.
 
 ### Exemple corrigé 2 : suivre un if/else pas à pas
 
-**Tracer** du code veut dire le suivre pas à pas, comme le fait l'ordinateur.
+**Faire la trace** d'un code veut dire le suivre pas à pas, comme le fait l'ordinateur.
 
 **Quand la note est 72 :**
 
@@ -236,7 +239,7 @@ Exécutez la boucle ci-dessous. Remplacez le `5` par `10`, et prévoyez le derni
 
 ## Les événements : réagir à l'utilisateur
 
-Un **événement** est quelque chose qui se passe sur la page, comme un clic, une touche sur l'écran ou l'appui sur une touche du clavier. JavaScript peut trouver un élément et exécuter une fonction quand un événement lui arrive :
+Un **événement** est quelque chose qui se passe sur la page, comme un clic, une pression du doigt sur l'écran ou l'appui sur une touche du clavier. JavaScript peut trouver un élément et exécuter une fonction quand un événement lui arrive :
 
 ```js
 function sayHello() {

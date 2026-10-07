@@ -12,7 +12,7 @@ access: free
 ---
 ## Needs and wants
 
-- **Needs** are things you must have to live and study: food, shelter, school fees, basic clothing, exercise books.
+- **Needs** are things you must have to live and study: food, shelter (a place to live), school fees, basic clothing, exercise books.
 - **Wants** are things that are nice to have, but you can live without them: a new phone, snacks, fashionable shoes.
 
 Ask yourself: "What happens if I do not buy this?" If you cannot live or study well without it, it is a need. If life goes on fine, it is a want.
@@ -44,6 +44,8 @@ A **budget** is a plan for how you will use your money over a period of time (a 
 - **Savings** are the money you keep for later.
 
 $$\text{Income} - \text{Expenses} = \text{Savings (or deficit)}$$
+
+If expenses are bigger than income, nothing is left to save. The missing amount is called a **deficit**.
 
 There are three kinds of budget:
 
@@ -169,7 +171,8 @@ Here is one week of Keza's tracker:
 3. Total for the week: $1\,200 + 1\,100 = 2\,300$ FRW.
 4. Look for small things that repeat: sweets, 3 times at 100 FRW, so 300 FRW a week.
 5. In 4 weeks: $300 \times 4 = 1\,200$ FRW. That is as much as her whole "save first" amount!
-6. Check: $1\,200 + 1\,100 = 2\,300$ FRW ✓.
+6. Compare with her plan in Worked example 2: snacks were planned at 1,000 FRW a month. This week, sweets and chapati cost $300 + 300 = 600$ FRW, so in 4 weeks about $600 \times 4 = 2\,400$ FRW. She is spending more than she planned on snacks, so next week she can cut the sweets.
+7. Check: add all eight amounts in the table: $500 + 100 + 100 + 500 + 500 + 100 + 200 + 300 = 2\,300$ FRW ✓.
 
 ## Common mistakes
 
@@ -190,4 +193,4 @@ Here is one week of Keza's tracker:
 7. Your expenses are bigger than your income. What should you cut first, and why?
 8. Your uncle lends you 5,000 FRW. Should you write it as income in your budget? Why?
 
-*Answers: 1) uniform: need; chocolate: want; rent: need; video games: want · 2) $20\,000 - 17\,500 = 2\,500$ FRW · 3) the next-best thing you give up when you choose; for example, "I bought a chapati instead of airtime, so the airtime was my opportunity cost" · 4) $6\,000 \div 10 = 600$ FRW saved, and $6\,000 - 600 = 5\,400$ FRW left · 5) a deficit of $9\,200 - 8\,000 = 1\,200$ FRW · 6) $9\,000 \div 1\,500 = 6$ weeks · 7) cut wants first, so that your needs are still paid for · 8) no, because a loan must be paid back, so it is not income*
+*Answers: 1) uniform: need; chocolate: want; rent: need (it pays for shelter); video games: want · 2) $20\,000 - 17\,500 = 2\,500$ FRW · 3) the next-best thing you give up when you choose; for example, "I bought a chapati instead of airtime, so the airtime was my opportunity cost" · 4) $6\,000 \div 10 = 600$ FRW saved, and $6\,000 - 600 = 5\,400$ FRW left · 5) a deficit of $9\,200 - 8\,000 = 1\,200$ FRW · 6) $9\,000 \div 1\,500 = 6$ weeks · 7) cut wants first, so that your needs are still paid for · 8) no, because a loan must be paid back, so it is not income*

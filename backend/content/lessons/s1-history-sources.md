@@ -33,10 +33,10 @@ For each source, ask: "Was it made at the time, by someone who was there?"
 | A photograph of a market in Huye, taken in the 1950s | primary | taken at the time |
 | Your S1 history textbook | secondary | written later, from other sources |
 | A clay pot dug up by archaeologists | primary | made and used at the time |
-| A documentary made in 2020 about life in the 1900s | secondary | made long after |
+| A documentary made in 2020 about life in the early 1900s | secondary | made long after |
 | A letter written by a colonial official in 1930 | primary | written at the time |
 
-**It depends on your question.** The documentary is secondary for life in the 1900s. But it is primary if your question is "How did film-makers in 2020 tell the story of the past?" In the same way, when your grandmother repeats what *her* grandmother told her, that part is oral tradition, not her eyewitness account.
+**It depends on your question.** The documentary is secondary for life in the early 1900s. But it is primary if your question is "How did film-makers in 2020 tell the story of the past?" In the same way, when your grandmother repeats what *her* grandmother told her, that part is oral tradition, not her eyewitness account.
 
 Check: 4 primary and 2 secondary, each with a reason ✓
 
@@ -49,7 +49,7 @@ Check: 4 primary and 2 secondary, each with a reason ✓
 | Genre | What it is | What it tells a historian |
 |---|---|---|
 | **Ibitekerezo** | historical stories, some told as long poems, about kings, heroes and great events | which events people remembered, and how they explained them |
-| **Ibisigo** | dynastic poetry, made by court poets to praise the kings | the names and deeds of kings, and what the court valued |
+| **Ibisigo** | dynastic poetry (poems about the family of kings, the dynasty), made by poets at the king's court to praise the kings | the names and deeds of kings, and what the court valued |
 | **Ubucurabwenge** | royal genealogies: the list of kings, recited in order | the order of the kings; counting generations gives rough dates |
 | **Imigani** | proverbs and tales told in families | everyday values, beliefs and ways of life |
 
@@ -64,7 +64,7 @@ Some royal texts were learned by heart by specialists at the king's court, which
 
 ### Written sources
 
-Books, letters, diaries, newspapers, government records and travellers' accounts. Most written records about Rwanda date from the late 1800s onwards, and many were written by European outsiders.
+**Written sources** include books, letters, diaries, newspapers, government records and travellers' accounts. Most written records about Rwanda date from the late 1800s onwards, and many were written by European outsiders.
 
 - **Strengths:** exact dates, names and numbers.
 - **Weaknesses:** the writer may be biased or misunderstand what they saw. Only people who could write left records, so many ordinary voices are missing.
@@ -73,7 +73,7 @@ Books, letters, diaries, newspapers, government records and travellers' accounts
 
 **Archaeology** is the study of material remains, such as tools, pottery, bones and buildings, dug from the ground. Deeper layers are usually older.
 
-Scientists often find the age of remains by **carbon dating**. Living things take in a tiny amount of **carbon-14**, an isotope you meet in the S1 chemistry lesson "Inside the atom". After death, the carbon-14 slowly disappears at a known rate (about half is gone after about 5,700 years), so measuring what is left shows roughly when the plant or animal died. It only works for things that were once alive, like wood, charcoal and bone. A clay pot cannot be carbon-dated, but charcoal found beside it can.
+Scientists often find the age of remains by **carbon dating**. Living things take in a tiny amount of **carbon-14**, a special kind of carbon atom (an **isotope**) that you meet in the S1 chemistry lesson "Inside the atom". After death, the carbon-14 slowly disappears at a known rate (about half is gone after about 5,700 years), so measuring what is left shows roughly when the plant or animal died. It only works for things that were once alive, like wood, charcoal and bone. The clay of a pot cannot be carbon-dated, because clay was never alive. But charcoal found beside the pot can be dated.
 
 - **Strengths:** evidence from times before writing.
 - **Weaknesses:** slow and expensive; objects do not explain themselves; wood and cloth rot away.
@@ -94,7 +94,7 @@ A source is **reliable** if we can trust what it tells us. Ask four questions:
 3. **Why** was it made: to inform, to persuade or to entertain?
 4. Does it **agree** with other sources?
 
-When several independent sources agree, we call it **corroboration**. It gives a more reliable picture than one source alone.
+When several **independent** sources agree (sources made separately, not copied from each other), we call it **corroboration**. It gives a more reliable picture than one source alone.
 
 ### Worked example 2: an invented traveller's account
 
@@ -104,7 +104,7 @@ This account was invented for practice. It is not a real document.
 
 1. **Who?** An outsider who stayed two days and probably did not speak the language. He may have misunderstood a lot.
 2. **When?** 1905, at the time, so it is primary. But the visit was very short.
-3. **Why?** The last sentence shows his aim: to persuade his government to take control. So he may make the people look disorganised.
+3. **Why?** The last sentence shows his aim: to persuade his government to take control of the region and rule it as a **colony**. So he may make the people look disorganised.
 4. **Agree?** Compare it with oral traditions about local chiefs, farming tools found by archaeologists and other records of markets. If they disagree, trust him less.
 5. **Conclusion:** weak evidence about markets and chiefs, but useful evidence about how some Europeans argued for colonial rule.
 
@@ -176,4 +176,4 @@ Never share a recording without the person's permission.
 7. Can carbon dating find the age of a stone tool? Explain.
 8. Name two things you should do before interviewing an elder.
 
-*Answers: 1) primary: for example, a soldier's letter from 1916; secondary: for example, a textbook · 2) strength: for example, it exists where nothing was written; weakness: for example, details change when it is retold · 3) to see if they agree (corroboration), which gives a more reliable picture and shows up bias or mistakes · 4) (a) primary; (b) secondary · 5) the royal genealogies, the list of kings in order; it shows the order of the kings and helps estimate dates · 6) (a) fact; (b) opinion, because "best" is a judgement · 7) no, stone was never alive; charcoal or bone from the same layer could be dated instead · 8) ask permission, explain why, and ask if you may take notes or record*
+*Answers: 1) primary: for example, a soldier's letter from 1916; secondary: for example, a textbook · 2) strength: for example, it exists where nothing was written; weakness: for example, details change when it is retold · 3) to see if they agree (corroboration), which gives a more reliable picture and shows up bias or mistakes · 4) (a) primary; (b) secondary · 5) the royal genealogies, the list of kings in order; it shows the order of the kings and helps estimate dates · 6) (a) fact; (b) opinion, because "best" is a judgement · 7) no, stone was never alive; charcoal or bone from the same layer could be dated instead · 8) for example: ask permission, explain why you are asking, ask if you may take notes or record, and prepare your questions*

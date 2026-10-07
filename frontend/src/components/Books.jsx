@@ -2,7 +2,12 @@
 // They are links to the publishers' own sites, so they need internet (they are not saved offline).
 import { useI18n } from "../i18n";
 
-const LANGUAGE_NAMES = { en: "English", fr: "Français", rw: "Kinyarwanda", sw: "Kiswahili" };
+// Licences that books.json repeats, shown in the reader's language; any other licence is shown as written.
+const LICENCE_KEYS = {
+  "© REB, free to read": "books.licence.reb",
+  "Public domain": "books.licence.publicDomain",
+  "CC BY or CC BY-NC (varies by story)": "books.licence.storybook",
+};
 
 function icon(book) {
   if (book.kind === "teacher_guide") return "🧑🏽‍🏫";
@@ -34,9 +39,9 @@ export default function BookList({ books, unit }) {
           const description = (lang === "fr" && book.description_fr) || book.description;
           const meta = [
             book.publisher,
-            LANGUAGE_NAMES[book.language] || book.language,
+            t(`books.lang.${book.language}`),
             book.format && t(`books.format.${book.format}`),
-            book.licence,
+            LICENCE_KEYS[book.licence] ? t(LICENCE_KEYS[book.licence]) : book.licence,
           ].filter(Boolean);
           return (
             <li key={book.id}>
