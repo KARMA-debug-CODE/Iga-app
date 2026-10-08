@@ -33,10 +33,10 @@ Si l'on écrit l'expression du second degré comme le produit de deux parenthès
 
 Résolvez $x^2 - 5x - 14 = 0$.
 
-- Il nous faut deux nombres de produit $-14$ et de somme $-5$. Essayons les couples : $1$ et $-14$ (somme $-13$), $2$ et $-7$ (somme $-5$) ✓.
+- Il nous faut deux nombres de produit $-14$ et de somme $-5$. Essayons les couples : $1$ et $-14$ (somme $-13$), $2$ et $-7$ (somme $-5$). Ce couple convient.
 - Donc $(x + 2)(x - 7) = 0$.
 - Soit $x + 2 = 0$, ce qui donne $x = -2$, soit $x - 7 = 0$, ce qui donne $x = 7$.
-- Vérification : $7^2 - 5(7) - 14 = 49 - 35 - 14 = 0$ ✓ et $(-2)^2 - 5(-2) - 14 = 4 + 10 - 14 = 0$ ✓.
+- Vérification : $7^2 - 5(7) - 14 = 49 - 35 - 14 = 0$ et $(-2)^2 - 5(-2) - 14 = 4 + 10 - 14 = 0$. Les deux sont justes.
 
 Deux cas particuliers reviennent souvent :
 
@@ -111,7 +111,7 @@ Un agriculteur de Musanze possède une parcelle rectangulaire de pommes de terre
 - Soit $w$ la largeur en mètres ; la longueur est alors $w + 5$ mètres.
 - Aire : $w(w + 5) = 84$, donc $w^2 + 5w - 84 = 0$.
 - Deux nombres de produit $-84$ et de somme $5$ : $12$ et $-7$. Donc $(w + 12)(w - 7) = 0$.
-- $w = -12$ ou $w = 7$. Une largeur ne peut pas être négative, donc $w = 7$ m et la longueur est de $12$ m. Vérification : $7 \times 12 = 84$ ✓.
+- $w = -12$ ou $w = 7$. Une largeur ne peut pas être négative, donc $w = 7$ m et la longueur est de $12$ m. Vérification : $7 \times 12 = 84$. C'est juste.
 - Périmètre $= 2(7 + 12) = 38$ m. Coût $= 38 \times 1\,500 = 57\,000$ FRW.
 
 Demandez-vous toujours si chaque racine a un sens dans la situation réelle, et rejetez celles qui n'en ont pas.

@@ -59,7 +59,7 @@ A **Venn diagram** shows sets as pictures. A rectangle stands for the universal 
 | in $B$ but not in $A$ | only $B$ | $A' \cap B$ | $\{3, 9\}$ |
 | outside both circles | neither | $(A \cup B)'$ | $\{1, 5, 7, 11\}$ |
 
-Every element of $\xi$ sits in exactly one region, so the four regions together hold all 12 numbers: $4 + 2 + 2 + 4 = 12$ ✓.
+Every element of $\xi$ sits in exactly one region, so the four regions together hold all 12 numbers: $4 + 2 + 2 + 4 = 12$.
 
 ## Counting with a Venn diagram
 
@@ -67,7 +67,7 @@ When we add $n(A)$ and $n(B)$, the elements in the overlap are counted **twice**
 
 $$n(A \cup B) = n(A) + n(B) - n(A \cap B)$$
 
-Check with worked example 1: $6 + 4 - 2 = 8$ ✓.
+Check with worked example 1: $6 + 4 - 2 = 8$. Correct.
 
 **Tip:** when filling in a Venn diagram, always start with the **overlap** and work outwards.
 
@@ -78,7 +78,7 @@ In an S3 class of 40 students at a school in Huye, 25 play football ($F$), 18 pl
 - Students who play at least one sport: $n(F \cup V) = 40 - 7 = 33$.
 - Use the formula: $33 = 25 + 18 - n(F \cap V)$, so $n(F \cap V) = 43 - 33 = 10$.
 - Fill the diagram from the middle: both $= 10$, football only $= 25 - 10 = 15$, volleyball only $= 18 - 10 = 8$, neither $= 7$.
-- Check: $15 + 10 + 8 + 7 = 40$ ✓.
+- Check: $15 + 10 + 8 + 7 = 40$. Correct.
 
 ### Worked example 3: using an unknown
 
@@ -87,7 +87,7 @@ A survey of 60 households in a village in Rwamagana found that 35 keep cows, 30 
 - Cows only $= 35 - x$, both $= x$, goats only $= 30 - x$, neither $= 5$.
 - The four regions add up to 60: $(35 - x) + x + (30 - x) + 5 = 60$.
 - Simplify: $70 - x = 60$, so $x = 10$.
-- So 10 households keep both, 25 keep cows only and 20 keep goats only. Check: $25 + 10 + 20 + 5 = 60$ ✓.
+- So 10 households keep both, 25 keep cows only and 20 keep goats only. Check: $25 + 10 + 20 + 5 = 60$. Correct.
 
 ## Common mistakes
 

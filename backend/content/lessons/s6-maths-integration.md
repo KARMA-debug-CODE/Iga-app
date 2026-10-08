@@ -36,7 +36,7 @@ Find $\int (6x^2 - 4x + 5)\,dx$.
 
 1. Raise each power by one and divide by the new power: $\dfrac{6x^3}{3} - \dfrac{4x^2}{2} + 5x$
 2. Simplify and add the constant: $2x^3 - 2x^2 + 5x + C$
-3. Check by differentiating: $6x^2 - 4x + 5$ ✓
+3. Check by differentiating: $6x^2 - 4x + 5$, the function we started with.
 
 ## Integration by substitution
 

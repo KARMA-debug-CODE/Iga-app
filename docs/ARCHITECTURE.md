@@ -13,7 +13,7 @@
         └───────────────┬─────────────────────────────────────┘
                         │
         ┌───────────────▼────────────────┐       ┌──────────────┐
-        │ Django + DRF on gunicorn       │──────▶│ Redis        │ shared rate limits
+        │ Django + DRF on gunicorn       │──────►│ Redis        │ shared rate limits
         │ (stateless; scale horizontally)│       └──────────────┘ (cache)
         └───────┬───────────────┬────────┘
                 │               │

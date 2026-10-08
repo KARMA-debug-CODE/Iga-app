@@ -32,7 +32,7 @@ Calculez $\int (6x^2 - 4x + 5)\,dx$.
 
 1. On augmente chaque exposant de un et on divise par le nouvel exposant : $\dfrac{6x^3}{3} - \dfrac{4x^2}{2} + 5x$
 2. On simplifie et on ajoute la constante : $2x^3 - 2x^2 + 5x + C$
-3. On vérifie en dérivant : $6x^2 - 4x + 5$ ✓
+3. On vérifie en dérivant : $6x^2 - 4x + 5$, la fonction de départ.
 
 ## L'intégration par changement de variable
 

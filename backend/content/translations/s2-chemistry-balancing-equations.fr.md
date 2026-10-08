@@ -42,7 +42,7 @@ $$6\text{CO}_2 + 6\text{H}_2\text{O} \rightarrow \text{C}_6\text{H}_{12}\text{O}
 - À gauche : C $6 \times 1 = 6$ ; H $6 \times 2 = 12$ ; O $(6 \times 2) + (6 \times 1) = 18$.
 - À droite : C 6 ; H 12 ; O $6 + (6 \times 2) = 18$.
 
-Le compte est le même pour chaque élément : cette équation est donc équilibrée ✓
+Le compte est le même pour chaque élément : cette équation est donc équilibrée.
 
 ## Équation en mots → équation chimique
 
@@ -82,7 +82,7 @@ $$2\text{H}_2 + \text{O}_2 \rightarrow 2\text{H}_2\text{O}$$
 | H | 2 | 2 | 4 | 4 |
 | O | 2 | 1 | 2 | 2 |
 
-Vérification : H 4 = 4, O 2 = 2 ✓
+Vérification : H 4 = 4, O 2 = 2. C'est équilibré.
 
 ### Exemple corrigé 2 : brûler le méthane du lac Kivu
 
@@ -103,7 +103,7 @@ $$\text{CH}_4 + 2\text{O}_2 \rightarrow \text{CO}_2 + 2\text{H}_2\text{O}$$
 | H | 4 | 2 | 4 | 4 |
 | O | 2 | 3 | 4 | 4 |
 
-Vérification : C 1 = 1, H 4 = 4, O 4 = 4 ✓. Vous retrouverez ce méthane dans la leçon sur la notion de mole.
+Vérification : C 1 = 1, H 4 = 4, O 4 = 4. C'est équilibré. Vous retrouverez ce méthane dans la leçon sur la notion de mole.
 
 ### Exemple corrigé 3 : l'aluminium et l'oxygène (l'astuce du PPCM)
 
@@ -125,7 +125,7 @@ $$4\text{Al} + 3\text{O}_2 \rightarrow 2\text{Al}_2\text{O}_3$$
 | Al | 1 | 2 | 4 | 4 |
 | O | 2 | 3 | 6 | 6 |
 
-Vérification : Al 4 = 4, O 6 = 6 ✓
+Vérification : Al 4 = 4, O 6 = 6. C'est équilibré.
 
 ### Exemple corrigé 4 : le gaz de cuisine
 
@@ -146,7 +146,7 @@ $$\text{C}_3\text{H}_8 + 5\text{O}_2 \rightarrow 3\text{CO}_2 + 4\text{H}_2\text
 | H | 8 | 2 | 8 | 8 |
 | O | 2 | 3 | 10 | 10 |
 
-Vérification : C 3 = 3, H 8 = 8, O 10 = 10 ✓
+Vérification : C 3 = 3, H 8 = 8, O 10 = 10. C'est équilibré.
 
 ## Les équations avec parenthèses et groupes d'atomes
 
@@ -177,7 +177,7 @@ $$\text{Ca(OH)}_2 + 2\text{HCl} \rightarrow \text{CaCl}_2 + 2\text{H}_2\text{O}$
 | H | 3 | 2 | 4 | 4 |
 | O | 2 | 1 | 2 | 2 |
 
-Vérification : chaque ligne est équilibrée ✓. Ici, le groupe OH ne reste pas entier (ses atomes se retrouvent dans l'eau) : on compte donc O et H séparément.
+Vérification : chaque ligne est équilibrée. Ici, le groupe OH ne reste pas entier (ses atomes se retrouvent dans l'eau) : on compte donc O et H séparément.
 
 ### Exemple corrigé 6 : l'hydroxyde de sodium et l'acide sulfurique
 
@@ -201,7 +201,7 @@ $$2\text{NaOH} + \text{H}_2\text{SO}_4 \rightarrow \text{Na}_2\text{SO}_4 + 2\te
 | H | 3 | 2 | 4 | 4 |
 | O hors de SO₄ | 1 | 1 | 2 | 2 |
 
-Vérification en comptant tous les atomes : O vaut $2 + 4 = 6$ à gauche et $4 + 2 = 6$ à droite ; Na 2 = 2, S 1 = 1, H 4 = 4 ✓
+Vérification en comptant tous les atomes : O vaut $2 + 4 = 6$ à gauche et $4 + 2 = 6$ à droite ; Na 2 = 2, S 1 = 1, H 4 = 4. C'est équilibré.
 
 ## Symboles d'état
 

@@ -16,6 +16,6 @@
     {"type": "short", "difficulty": 1, "prompt": "What is the name of the set that contains all the elements under discussion, often written $\\xi$ or $U$?", "accepted": ["universal set", "the universal set", "a universal set", "universal", "universe", "universal sets"],
      "explanation": "It is the **universal set**. In a Venn diagram it is drawn as the rectangle around the circles."},
     {"type": "numeric", "difficulty": 3, "prompt": "In a class of 45 students in Rubavu, 28 like mathematics, 20 like physics and 8 like neither subject. How many students like **both** subjects?", "answer": 11,
-     "explanation": "Students who like at least one subject: $45 - 8 = 37$. Then $37 = 28 + 20 - n(\\text{both})$, so $n(\\text{both}) = 48 - 37 = 11$. Check: maths only $17$, both $11$, physics only $9$, neither $8$, and $17 + 11 + 9 + 8 = 45$ ✓."}
+     "explanation": "Students who like at least one subject: $45 - 8 = 37$. Then $37 = 28 + 20 - n(\\text{both})$, so $n(\\text{both}) = 48 - 37 = 11$. Check: maths only $17$, both $11$, physics only $9$, neither $8$, and $17 + 11 + 9 + 8 = 45$. Correct."}
   ]
 }

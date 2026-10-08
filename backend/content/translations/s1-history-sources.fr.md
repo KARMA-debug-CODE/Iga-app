@@ -33,7 +33,7 @@ Pour chaque source, demandez-vous : « A-t-elle été produite à l'époque, par
 
 **Tout dépend de votre question.** Le documentaire est une source secondaire sur la vie au début du XXe siècle. Mais il devient une source primaire si votre question est : « Comment les réalisateurs de 2020 racontaient-ils le passé ? » De la même façon, quand votre grand-mère répète ce que *sa* propre grand-mère lui a raconté, cette partie relève de la tradition orale, pas de son témoignage oculaire.
 
-Vérification : 4 sources primaires et 2 secondaires, chacune avec une raison ✓
+Vérification : 4 sources primaires et 2 secondaires, chacune avec une raison. C'est fait.
 
 ## Les principales sources de l'histoire
 
@@ -103,7 +103,7 @@ Ce récit a été inventé pour s'entraîner. Ce n'est pas un vrai document.
 4. **En accord ?** Comparez avec les traditions orales sur les chefs locaux, les outils agricoles trouvés par les archéologues et d'autres documents sur les marchés. S'ils le contredisent, faites-lui moins confiance.
 5. **Conclusion :** une preuve faible sur les marchés et les chefs, mais une preuve utile de la façon dont certains Européens justifiaient la domination coloniale.
 
-Vérification : les quatre questions ont une réponse ✓
+Vérification : les quatre questions ont une réponse. C'est fait.
 
 ### Exemple corrigé 3 : quand le marché a-t-il commencé ?
 
@@ -118,7 +118,7 @@ Cet exemple est inventé. Une élève veut savoir quand le marché de son villag
 3. C donne une date environ 20 ans plus tôt. L'article a été écrit bien plus tard et ne dit pas d'où vient son chiffre.
 4. **Conclusion :** le marché a très probablement commencé vers 1965–1966.
 
-Vérification : deux sources primaires indépendantes concordent, la réponse est donc corroborée ✓
+Vérification : deux sources primaires indépendantes concordent, la réponse est donc corroborée.
 
 ## Partialité, faits et opinions
 
@@ -136,7 +136,7 @@ Un **fait** peut être vérifié et prouvé vrai ou faux. Une **opinion** est ce
 4. « La tradition orale se transmettait de bouche à oreille. » **Fait**.
 5. « Les proverbes sont la plus belle partie de notre culture. » **Opinion** : les gens peuvent ne pas être d'accord.
 
-Vérification : 3 faits et 2 opinions ; chaque opinion contient un mot de jugement ✓
+Vérification : 3 faits et 2 opinions ; chaque opinion contient un mot de jugement. C'est fait.
 
 ## À faire chez vous : interviewer une personne âgée
 

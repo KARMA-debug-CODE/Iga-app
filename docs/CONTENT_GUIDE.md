@@ -16,7 +16,7 @@ Both commands are **idempotent**: running them again updates existing items, mat
 
 ## Subjects and units
 
-- `content/subjects.json` holds code, names in English and French (`name_fr`), icon, colour, and whether the subject is offered at O-level and/or A-level.
+- `content/subjects.json` holds code, names in English and French (`name_fr`), icon (the name of a line icon in `frontend/src/components/Icon.jsx`, such as `atom`; no emojis), colour, and whether the subject is offered at O-level and/or A-level.
 - `content/units.json` maps `{subject_code: {grade: [unit titles in order]}}`.
 
 After checking a unit against the official REB syllabus, tick **alignment verified** in the Django admin (and fill in *syllabus reference* and *key unit competence*). The "draft outline" notice then disappears for that unit.
@@ -134,7 +134,7 @@ Same format as a quiz plus a `paper` block:
 
 ## Books: `content/books.json`
 
-Every lesson and every unit shows **📚 Books**: the official REB student's book for that subject and grade first, then a few
+Every lesson and every unit shows **Books**: the official REB student's book for that subject and grade first, then a few
 free open textbooks. Units that have no Iga lesson yet point students to the official book, with the unit to look for.
 Books are **links** to the publishers' own sites (REB's e-learning portal, OpenStax, Standard Ebooks…); the app never copies
 them, so a book's licence does not need to allow redistribution. They need internet; they are not saved for offline use.

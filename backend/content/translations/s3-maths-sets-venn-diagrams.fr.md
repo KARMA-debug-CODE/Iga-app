@@ -55,7 +55,7 @@ Un **diagramme de Venn** représente des ensembles par des dessins. Un rectangle
 | dans $B$ mais pas dans $A$ | seulement $B$ | $A' \cap B$ | $\{3, 9\}$ |
 | à l'extérieur des deux cercles | ni l'un ni l'autre | $(A \cup B)'$ | $\{1, 5, 7, 11\}$ |
 
-Chaque élément de $\xi$ se trouve dans une seule région ; les quatre régions réunies contiennent donc les 12 nombres : $4 + 2 + 2 + 4 = 12$ ✓.
+Chaque élément de $\xi$ se trouve dans une seule région ; les quatre régions réunies contiennent donc les 12 nombres : $4 + 2 + 2 + 4 = 12$.
 
 ## Dénombrer avec un diagramme de Venn
 
@@ -63,7 +63,7 @@ Quand on additionne $n(A)$ et $n(B)$, les éléments de la partie commune sont c
 
 $$n(A \cup B) = n(A) + n(B) - n(A \cap B)$$
 
-Vérification avec l'exemple corrigé 1 : $6 + 4 - 2 = 8$ ✓.
+Vérification avec l'exemple corrigé 1 : $6 + 4 - 2 = 8$. C'est juste.
 
 **Astuce :** pour remplir un diagramme de Venn, commencez toujours par la **partie commune**, puis allez vers l'extérieur.
 
@@ -74,7 +74,7 @@ Dans une classe de S3 de 40 élèves d'une école de Huye, 25 élèves jouent au
 - Élèves qui pratiquent au moins un sport : $n(F \cup V) = 40 - 7 = 33$.
 - Utilisez la formule : $33 = 25 + 18 - n(F \cap V)$, donc $n(F \cap V) = 43 - 33 = 10$.
 - Remplissez le diagramme en partant du centre : les deux $= 10$, football seulement $= 25 - 10 = 15$, volley-ball seulement $= 18 - 10 = 8$, aucun des deux $= 7$.
-- Vérification : $15 + 10 + 8 + 7 = 40$ ✓.
+- Vérification : $15 + 10 + 8 + 7 = 40$. C'est juste.
 
 ### Exemple corrigé 3 : utiliser une inconnue
 
@@ -83,7 +83,7 @@ Une enquête menée auprès de 60 ménages d'un village de Rwamagana a montré q
 - Vaches seulement $= 35 - x$, les deux $= x$, chèvres seulement $= 30 - x$, aucun des deux $= 5$.
 - La somme des quatre régions vaut 60 : $(35 - x) + x + (30 - x) + 5 = 60$.
 - On simplifie : $70 - x = 60$, donc $x = 10$.
-- Ainsi, 10 ménages élèvent les deux, 25 élèvent seulement des vaches et 20 seulement des chèvres. Vérification : $25 + 10 + 20 + 5 = 60$ ✓.
+- Ainsi, 10 ménages élèvent les deux, 25 élèvent seulement des vaches et 20 seulement des chèvres. Vérification : $25 + 10 + 20 + 5 = 60$. C'est juste.
 
 ## Erreurs fréquentes
 

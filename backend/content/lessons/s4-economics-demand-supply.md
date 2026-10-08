@@ -88,7 +88,7 @@ Find the equilibrium. Then explain what happens at 1,200 FRW and at 800 FRW.
 1. Find the price where both schedules give the same quantity: at 1,000 FRW, 300 kg are demanded and 300 kg supplied. Equilibrium: 1,000 FRW per kg, 300 kg per day.
 2. At 1,200 FRW: demanded 200 kg, supplied 400 kg. Surplus $= 400 - 200 = 200$ kg. Sellers do not want to carry beans home, so they cut the price. Buyers then buy more and sellers offer less, until the price is back at 1,000 FRW.
 3. At 800 FRW: demanded 400 kg, supplied 200 kg. Shortage $= 400 - 200 = 200$ kg. Buyers compete for the few beans, so sellers raise the price back towards 1,000 FRW.
-4. Check: at 1,000 FRW the gap is $300 - 300 = 0$ ✓.
+4. Check: at 1,000 FRW the gap is $300 - 300 = 0$. Correct.
 
 ### Worked example 2: Equilibrium from equations
 
@@ -98,11 +98,11 @@ The schedules come from $Q_d = 800 - 0.5P$ and $Q_s = -200 + 0.5P$. Here $Q_d$ i
 2. Get the $P$ terms on one side and the numbers on the other. Add $0.5P$ to both sides, and add $200$ to both sides: $800 + 200 = 0.5P + 0.5P$.
 3. Simplify: half of $P$ plus half of $P$ is one whole $P$, so $1\,000 = P$. The equilibrium price is 1,000 FRW per kg.
 4. Demand: $Q_d = 800 - 0.5(1\,000) = 800 - 500 = 300$ kg.
-5. Check with supply: $Q_s = -200 + 0.5(1\,000) = -200 + 500 = 300$ kg ✓. This matches the table.
+5. Check with supply: $Q_s = -200 + 0.5(1\,000) = -200 + 500 = 300$ kg. Correct. This matches the table.
 
 > **Tip:** always put the price back into **both** equations. If the quantities differ, look for a mistake.
 
-> **Different numbers in front of $P$?** Use the same steps. For $Q_d = 70 - 2P$ and $Q_s = 3P - 10$: $70 - 2P = 3P - 10$. Add $2P$ and $10$ to both sides: $80 = 5P$, so $P = 80 \div 5 = 16$. Then $Q_d = 70 - 2(16) = 38$, and the check gives $Q_s = 3(16) - 10 = 38$ ✓.
+> **Different numbers in front of $P$?** Use the same steps. For $Q_d = 70 - 2P$ and $Q_s = 3P - 10$: $70 - 2P = 3P - 10$. Add $2P$ and $10$ to both sides: $80 = 5P$, so $P = 80 \div 5 = 16$. Then $Q_d = 70 - 2(16) = 38$, and the check gives $Q_s = 3(16) - 10 = 38$, the same.
 
 ## What shifts the demand curve?
 
@@ -164,7 +164,7 @@ The price rises from 800 to 1,000 FRW per kg. Nothing else changes.
 
 1. Only the own price changed, so this is a **movement along** the demand curve, from B to A.
 2. Quantity demanded falls from 400 kg to 300 kg: a **contraction** of 100 kg.
-3. Check: $Q_d = 800 - 0.5(1\,000) = 300$ kg ✓. Say "quantity demanded fell", not "demand fell".
+3. Check: $Q_d = 800 - 0.5(1\,000) = 300$ kg. Correct. Say "quantity demanded fell", not "demand fell".
 
 ### Worked example 4: Incomes rise in Kigali
 
@@ -173,7 +173,7 @@ Higher incomes mean buyers want 100 kg more at every price: $Q_d = 900 - 0.5P$. 
 1. Income is not the own price, so demand **shifts right**.
 2. Set demand equal to supply: $900 - 0.5P = -200 + 0.5P$. Then $900 + 200 = 0.5P + 0.5P$, so $P = 1\,100$ FRW.
 3. Quantity: $Q_d = 900 - 0.5(1\,100) = 900 - 550 = 350$ kg.
-4. Check: $Q_s = -200 + 0.5(1\,100) = -200 + 550 = 350$ kg ✓.
+4. Check: $Q_s = -200 + 0.5(1\,100) = -200 + 550 = 350$ kg. Correct.
 5. Price rises from 1,000 to 1,100 FRW, and quantity rises from 300 to 350 kg. Supply did not shift; sellers moved along it.
 
 ### Worked example 5: A drought hits the bean harvest
@@ -183,7 +183,7 @@ A drought means sellers offer 100 kg less at every price: $Q_s = -300 + 0.5P$. D
 1. Weather is not the own price, so supply **shifts left**.
 2. Set them equal: $800 - 0.5P = -300 + 0.5P$. Then $800 + 300 = 0.5P + 0.5P$, so $P = 1\,100$ FRW.
 3. Quantity: $Q_d = 800 - 0.5(1\,100) = 800 - 550 = 250$ kg.
-4. Check: $Q_s = -300 + 0.5(1\,100) = -300 + 550 = 250$ kg ✓.
+4. Check: $Q_s = -300 + 0.5(1\,100) = -300 + 550 = 250$ kg. Correct.
 5. Price rises from 1,000 to 1,100 FRW, but quantity falls from 300 to 250 kg. Buyers pay more and get less.
 
 ## Summary table

@@ -66,7 +66,7 @@ Keza sells tomatoes at the market. She types two sales, 500 FRW and 300 FRW, int
 3. `Number("500")` gives the number 500, and `Number("300")` gives 300.
 4. Now `+` has two numbers, so it adds: `500 + 300` gives `800`.
 
-Check: 500 FRW + 300 FRW = 800 FRW ✓. The rule: **text from a box is always a string, so convert it with `Number()` before you do maths.**
+Check: 500 FRW + 300 FRW = 800 FRW. Correct. The rule: **text from a box is always a string, so convert it with `Number()` before you do maths.**
 
 ## Showing results on the page
 
@@ -146,7 +146,7 @@ To **trace** code means to follow it step by step, as the computer does.
 1. The condition becomes `45 >= 50`. This is `false`, because 45 is less than 50.
 2. The first block is skipped, and the `else` block runs. `message` is `"Try again"`.
 
-Check: a mark of exactly 50 gives `50 >= 50`, which is `true`, because `>=` means "greater than **or equal to**". So 50 gives `"Pass"` ✓.
+Check: a mark of exactly 50 gives `50 >= 50`, which is `true`, because `>=` means "greater than **or equal to**". So 50 gives `"Pass"`. Correct.
 
 ## Functions
 
@@ -183,7 +183,7 @@ What is stored in `total`?
 3. Then the addition: 2400 + 500 = 2900.
 4. `return` sends 2900 back, so `total` stores `2900`.
 
-Check: 3 kg cost 2,400 FRW, and 500 FRW for transport makes 2,900 FRW ✓.
+Check: 3 kg cost 2,400 FRW, and 500 FRW for transport makes 2,900 FRW. Correct.
 
 ## Loops: repeating code
 
@@ -217,7 +217,7 @@ A **trace table** records the variables after each pass of a loop. `text` starts
 
 After pass 5, `i++` makes `i` equal to 6. Now `6 <= 5` is `false`, so the loop stops.
 
-Check: the loop ran 5 times, and the last square is 5 × 5 = 25 ✓.
+Check: the loop ran 5 times, and the last square is 5 × 5 = 25. Correct.
 
 Counting can also start at 0: `for (let i = 0; i < 5; i++)` also runs 5 times, with `i` = 0, 1, 2, 3, 4. It stops when `i` is 5, because `5 < 5` is `false`.
 
@@ -321,7 +321,7 @@ Here is what happens when you type 70, 85 and 92 and press Calculate.
 7. `"Average: " + "82.3"` joins the strings into `"Average: 82.3"`.
 8. `textContent` puts that text in the paragraph with `id="result"`, so it appears on the page.
 
-Check: 70 + 85 + 92 = 247, and 247 ÷ 3 ≈ 82.3 ✓.
+Check: 70 + 85 + 92 = 247, and 247 ÷ 3 ≈ 82.3. Correct.
 
 Without `Number()`, `a + b + c` would join `"70"`, `"85"` and `"92"` into `"708592"`, and the page would show `Average: 236197.3`. Nonsense!
 

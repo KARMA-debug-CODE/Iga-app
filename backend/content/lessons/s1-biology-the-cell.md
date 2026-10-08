@@ -20,14 +20,14 @@ Most cells are too small to see without a **microscope**.
 
 | Part | Job | Animal cell | Plant cell |
 |---|---|---|---|
-| Cell membrane | controls what enters and leaves | ✓ | ✓ |
-| Cytoplasm | jelly where most reactions happen | ✓ | ✓ |
-| Nucleus | contains DNA; controls the cell | ✓ | ✓ |
-| Mitochondria | release energy by respiration | ✓ | ✓ |
-| Ribosomes | make proteins | ✓ | ✓ |
-| Cell wall | made of cellulose; gives shape and support | ✗ | ✓ |
-| Chloroplasts | contain chlorophyll; photosynthesis | ✗ | ✓ |
-| Large permanent vacuole | holds cell sap; keeps the cell firm | ✗ | ✓ |
+| Cell membrane | controls what enters and leaves | yes | yes |
+| Cytoplasm | jelly where most reactions happen | yes | yes |
+| Nucleus | contains DNA; controls the cell | yes | yes |
+| Mitochondria | release energy by respiration | yes | yes |
+| Ribosomes | make proteins | yes | yes |
+| Cell wall | made of cellulose; gives shape and support | no | yes |
+| Chloroplasts | contain chlorophyll; photosynthesis | no | yes |
+| Large permanent vacuole | holds cell sap; keeps the cell firm | no | yes |
 
 > **Memory trick:** plants have the **3 Cs**: **C**ell wall, **C**hloroplasts and a big **C**entral vacuole.
 

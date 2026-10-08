@@ -16,6 +16,6 @@
     {"type": "short", "difficulty": 1, "prompt": "What is the name of the expression $b^2 - 4ac$, which tells you how many real roots a quadratic equation has?", "accepted": ["discriminant", "the discriminant", "discriminent", "the discriminent", "discriminant delta", "delta", "Δ"],
      "explanation": "$b^2 - 4ac$ is the **discriminant**: positive gives two roots, zero gives one repeated root, negative gives no real roots."},
     {"type": "numeric", "difficulty": 3, "prompt": "A rectangular vegetable garden at a school in Huye is 3 m longer than it is wide. Its area is 40 m². Find its width in metres.", "answer": 5,
-     "explanation": "Let the width be $w$. Then $w(w + 3) = 40$, so $w^2 + 3w - 40 = 0$ and $(w + 8)(w - 5) = 0$. A width cannot be negative, so $w = 5$ m (length 8 m, and $5 \\times 8 = 40$ ✓)."}
+     "explanation": "Let the width be $w$. Then $w(w + 3) = 40$, so $w^2 + 3w - 40 = 0$ and $(w + 8)(w - 5) = 0$. A width cannot be negative, so $w = 5$ m (length 8 m, and $5 \\times 8 = 40$)."}
   ]
 }
