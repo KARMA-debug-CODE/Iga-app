@@ -9,6 +9,7 @@ from apps.schools.constants import DISTRICTS
 from apps.schools.membership import choose_school
 from apps.schools.models import School
 
+from . import avatar
 from .models import User
 
 
@@ -50,6 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
             "school_status",
             "access",
             "preferred_language",
+            "avatar",
             "xp",
             "streak_days",
             "teacher_approved",
@@ -71,6 +73,9 @@ class UserSerializer(serializers.ModelSerializer):
             "badges",
             "date_joined",
         ]
+
+    def validate_avatar(self, value):
+        return avatar.clean(value)
 
     def get_school(self, user):
         return school_summary(user)
@@ -111,7 +116,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "display_name", "role", "grade", "xp"]
+        fields = ["id", "username", "display_name", "role", "grade", "xp", "avatar"]
 
 
 class NewSchoolSerializer(serializers.Serializer):

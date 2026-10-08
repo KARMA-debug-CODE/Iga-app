@@ -37,7 +37,9 @@ def visible_quizzes(user):
         return qs.filter(published | Q(author=user))
     # Use a subquery rather than a join so callers can safely aggregate over the result.
     assigned_ids = Quiz.objects.filter(
-        assignments__classroom__enrollments__student=user, assignments__classroom__archived=False
+        assignments__classroom__enrollments__student=user,
+        assignments__classroom__enrollments__active=True,
+        assignments__classroom__archived=False,
     ).values("id")
     return qs.filter(published | Q(id__in=assigned_ids)).exclude(status=ContentStatus.ARCHIVED)
 

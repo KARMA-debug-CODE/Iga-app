@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
+import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, scoreClass, Tabs } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -113,7 +114,9 @@ function Report({ id }) {
         <>
           {report.weak_units.length > 0 && (
             <div className="card" style={{ marginBottom: 16 }}>
-              <h3>📉 {t("classes.weakUnits")}</h3>
+              <h3 className="title-with-icon">
+                <Icon name="chart" /> {t("classes.weakUnits")}
+              </h3>
               <ul className="list">
                 {report.weak_units.map((u) => (
                   <li key={u.unit} className="spread">
@@ -125,7 +128,7 @@ function Report({ id }) {
             </div>
           )}
           {report.rows.length === 0 ? (
-            <Empty icon="👩🏽‍🎓">{t("classes.share")}</Empty>
+            <Empty icon="users">{t("classes.share")}</Empty>
           ) : (
             <div className="table-wrap">
               <table>
@@ -138,7 +141,9 @@ function Report({ id }) {
                       </th>
                     ))}
                     <th>{t("classes.average")}</th>
-                    <th>📖</th>
+                    <th>
+                      <Icon name="learn" label={t("classes.lessonsDone")} />
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -146,7 +151,10 @@ function Report({ id }) {
                     <tr key={row.student.id}>
                       <td>
                         <strong>{row.student.display_name}</strong>
-                        <div className="small muted">{row.student.xp} XP</div>
+                        <div className="small muted">
+                          {row.student.xp} XP
+                          {row.moved_to && <span className="pill pill-warn moved-pill">{t("classes.movedTo", { grade: row.moved_to })}</span>}
+                        </div>
                       </td>
                       {report.assignments.map((a) => {
                         const cell = row.assignments[a.id];
@@ -378,8 +386,8 @@ export default function ClassDetail() {
             </div>
             <div className="page-header spread">
               <div>
-                <h1 style={{ margin: 0 }}>
-                  {c.subject_icon} {c.name}
+                <h1 className="title-with-icon" style={{ margin: 0 }}>
+                  <Icon name={c.subject_icon || "classes"} size={28} /> {c.name}
                 </h1>
                 <p>
                   {c.grade} · {c.subject_name || ""} · {t("classes.teacher", { name: c.teacher_name })}
@@ -392,6 +400,13 @@ export default function ClassDetail() {
                 </div>
               )}
             </div>
+
+            {c.previous && (
+              <div className="alert alert-info" role="status">
+                <Icon name="info" />
+                <span>{t("classes.previousNotice", { grade: c.grade, now: user.grade })}</span>
+              </div>
+            )}
 
             {owner && (
               <Tabs
@@ -411,12 +426,12 @@ export default function ClassDetail() {
             {tab === "assignments" && (
               <div className={owner ? "grid-2" : ""}>
                 <div className="stack">
-                  {c.assignments.length === 0 && <Empty icon="📭">—</Empty>}
+                  {c.assignments.length === 0 && <Empty icon="inbox">—</Empty>}
                   {c.assignments.map((a) => (
                     <div className="card" key={a.id}>
                       <div className="spread">
-                        <strong>
-                          {{ quiz: "📝", lesson: "📖", simulation: "🔬" }[a.kind]} {a.title}
+                        <strong className="title-with-icon">
+                          <Icon name={{ quiz: "practice", lesson: "learn", simulation: "labs" }[a.kind]} /> {a.title}
                         </strong>
                         {a.my_status &&
                           (a.my_status.score != null ? (
@@ -440,10 +455,10 @@ export default function ClassDetail() {
                         </span>
                         {owner && a.quiz && (
                           <Link className="btn btn-sm btn-secondary" to={`/classes/${id}/quizzes/${a.quiz}/analytics`}>
-                            📊 {t("analytics.title")}
+                            <Icon name="chart" size={16} /> {t("analytics.title")}
                           </Link>
                         )}
-                        {user.role === "student" && (
+                        {user.role === "student" && !c.previous && (
                           <button
                             className="btn btn-sm"
                             onClick={() =>
@@ -456,7 +471,7 @@ export default function ClassDetail() {
                               )
                             }
                           >
-                            {t("practice.start")} →
+                            {t("practice.start")} <Icon name="next" size={16} />
                           </button>
                         )}
                       </div>
@@ -484,6 +499,7 @@ export default function ClassDetail() {
                       <li key={s.id} className="spread">
                         <span>
                           <strong>{s.display_name}</strong> <span className="muted small">@{s.username}</span>
+                          {s.moved_to && <span className="pill pill-warn moved-pill">{t("classes.movedTo", { grade: s.moved_to })}</span>}
                           {s.awaiting_first_login && (
                             <span className="pill" style={{ marginLeft: 6 }}>
                               {t("roster.awaiting")}
@@ -517,7 +533,7 @@ export default function ClassDetail() {
                               }
                             }}
                           >
-                            🔑 {t("roster.reset")}
+                            <Icon name="key" size={16} /> {t("roster.reset")}
                           </button>
                           <button
                             className="btn btn-sm btn-danger"

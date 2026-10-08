@@ -32,6 +32,8 @@ class User(AbstractUser):
     # What the user typed before schools were a list (kept for reference, not used for access).
     school_name = models.CharField(max_length=200, blank=True)
     preferred_language = models.CharField(max_length=2, choices=LANGUAGES, default="en")
+    # The avatar the user built in their profile (see avatar.py); empty = one drawn from their id.
+    avatar = models.JSONField(default=dict, blank=True)
 
     # Self-registered teachers must be approved by an administrator before they
     # can create classes or author content (safeguarding: classes contain minors).

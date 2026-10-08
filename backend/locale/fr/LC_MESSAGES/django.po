@@ -704,3 +704,8 @@ msgstr "Impossible de joindre le tuteur. Vérifiez votre connexion et réessayez
 #: apps/tutor/views.py:80
 msgid "The tutor couldn't answer just now. Please try again."
 msgstr "Le tuteur n'a pas pu répondre pour le moment. Veuillez réessayer."
+
+#: apps/accounts/avatar.py:26
+#: apps/accounts/avatar.py:31
+msgid "Choose an avatar from the options."
+msgstr "Choisissez un avatar parmi les options proposées."

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "../api";
 import { useAuth } from "../auth";
+import Avatar from "../components/Avatar";
 import Markdown from "../components/Markdown";
 import { Empty, ErrorMessage, Loader, Tabs, useToast } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
@@ -94,19 +95,22 @@ function Chat({ group }) {
     <div className="card chat">
       {toast}
       <div className="chat-log" ref={log} aria-live="polite">
-        {messages.length === 0 && <Empty icon="💬">{t("groups.typeMessage")}</Empty>}
+        {messages.length === 0 && <Empty icon="message">{t("groups.typeMessage")}</Empty>}
         {messages.map((m) => {
           const mine = m.author?.id === user.id;
           return (
-            <div key={m.id} className={`bubble ${mine ? "mine" : ""} ${m.is_hidden ? "hidden" : ""}`}>
-              <div className="meta">
-                <strong>{mine ? t("board.you") : m.author?.name || "—"}</strong>
-                {m.author?.role === "teacher" && <span className="pill pill-blue">🧑🏽‍🏫</span>}
-                <span>{formatDate(m.created_at, lang)}</span>
-                {!mine && !m.is_hidden && <button onClick={() => report(m)}>{t("groups.report")}</button>}
-                {group.can_moderate && !m.is_hidden && <button onClick={() => hide(m)}>{t("groups.hide")}</button>}
+            <div key={m.id} className={`msg-row ${mine ? "mine" : ""}`}>
+              {!mine && <Avatar user={m.author} size={32} title="" />}
+              <div className={`bubble ${mine ? "mine" : ""} ${m.is_hidden ? "hidden" : ""}`}>
+                <div className="meta">
+                  <strong>{mine ? t("board.you") : m.author?.name || "—"}</strong>
+                  {m.author?.role === "teacher" && <span className="pill pill-blue">{t("auth.teacher")}</span>}
+                  <span>{formatDate(m.created_at, lang)}</span>
+                  {!mine && !m.is_hidden && <button onClick={() => report(m)}>{t("groups.report")}</button>}
+                  {group.can_moderate && !m.is_hidden && <button onClick={() => hide(m)}>{t("groups.hide")}</button>}
+                </div>
+                <div>{m.body}</div>
               </div>
-              <div>{m.body}</div>
             </div>
           );
         })}

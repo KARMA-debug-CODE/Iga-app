@@ -63,7 +63,12 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_author(self, message):
         if message.author is None:
             return None
-        return {"id": message.author_id, "name": message.author.short_name, "role": message.author.public_role}
+        return {
+            "id": message.author_id,
+            "name": message.author.short_name,
+            "role": message.author.public_role,
+            "avatar": message.author.avatar,
+        }
 
     def get_body(self, message):
         return REMOVED_TEXT if message.is_hidden else message.body

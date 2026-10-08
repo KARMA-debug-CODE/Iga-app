@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 import { results } from "../api";
+import Avatar from "../components/Avatar";
+import { Icon } from "../components/Icon";
 import { Empty, Loader, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
-
-const MEDALS = ["🥇", "🥈", "🥉"];
 
 export default function Leaderboard() {
   const { t } = useI18n();
@@ -19,7 +19,9 @@ export default function Leaderboard() {
   return (
     <div style={{ maxWidth: 720 }}>
       <div className="page-header">
-        <h1>🏆 {t("board.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="leaderboard" size={28} /> {t("board.title")}
+        </h1>
       </div>
       <Tabs
         value={period}
@@ -52,13 +54,14 @@ export default function Leaderboard() {
       <Loader state={state}>
         {(board) =>
           board.entries.length === 0 ? (
-            <Empty icon="🏁">{t("board.empty")}</Empty>
+            <Empty icon="flag">{t("board.empty")}</Empty>
           ) : (
             <div className="card">
               <ol className="list">
                 {board.entries.map((e, i) => (
-                  <li key={`${e.rank}-${i}`} className={`row ${e.is_me ? "me-row" : ""}`} style={{ flexWrap: "nowrap" }}>
-                    <span className="rank">{MEDALS[e.rank - 1] || e.rank}</span>
+                  <li key={`${e.rank}-${i}`} className={`row ${e.is_me ? "me-row" : ""}`} style={{ flexWrap: "nowrap", gap: 10 }}>
+                    <span className={`rank ${e.rank <= 3 ? `rank-${e.rank}` : ""}`}>{e.rank}</span>
+                    <Avatar user={e} size={34} title="" />
                     <span style={{ flex: 1, minWidth: 0 }} className="truncate">
                       <strong>{e.name}</strong> {e.is_me && <span className="pill pill-warn">{t("board.you")}</span>}
                       <span className="small muted"> · {e.grade}</span>

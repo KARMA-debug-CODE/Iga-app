@@ -119,7 +119,9 @@ def child_report(student, lang="en"):
         .order_by("-submitted_at")[:10]
     )
     assignments = (
-        Assignment.objects.filter(classroom__enrollments__student=student, classroom__archived=False)
+        Assignment.objects.filter(
+            classroom__enrollments__student=student, classroom__enrollments__active=True, classroom__archived=False
+        )
         .select_related("classroom")
         .order_by("-created_at")[:15]
     )

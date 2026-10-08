@@ -79,7 +79,7 @@ test("Ask AI page explains when the student's school hasn't subscribed", async (
 
 test("a parent links to their child with a code and sees progress", async ({ page }) => {
   await login(page, "eric");
-  await page.goto("/profile");
+  await page.goto("/profile#security");
   await page.getByRole("button", { name: /create a code for my parent/i }).click();
   const code = (await page.locator(".code-display").innerText()).trim();
   expect(code).toMatch(/^[A-Z0-9]{8}$/);
