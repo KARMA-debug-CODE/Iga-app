@@ -23,7 +23,7 @@ class StudyGroupSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
     is_member = serializers.BooleanField(read_only=True)
     subject_name = serializers.SerializerMethodField()
-    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="👥")
+    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="users")
     join_code = serializers.SerializerMethodField()
 
     class Meta:

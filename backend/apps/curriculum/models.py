@@ -19,7 +19,9 @@ class Subject(models.Model):
     name_fr = models.CharField("Name (French)", max_length=100, blank=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER)
-    icon = models.CharField(max_length=8, default="📘", help_text="An emoji shown on subject cards")
+    icon = models.CharField(
+        max_length=32, default="book", help_text="Name of the line icon shown on subject cards (see Icon.jsx)"
+    )
     color = models.CharField(max_length=7, default="#00A1DE", help_text="Hex colour for the subject card")
     offered_o_level = models.BooleanField(default=True)
     offered_a_level = models.BooleanField(default=True)

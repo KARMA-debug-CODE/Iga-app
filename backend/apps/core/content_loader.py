@@ -63,7 +63,7 @@ def load_subjects(path):
                 "name_fr": item.get("name_fr", ""),
                 "description": item.get("description", ""),
                 "category": item.get("category", Subject.Category.OTHER),
-                "icon": item.get("icon", "📘"),
+                "icon": item.get("icon", "book"),
                 "color": item.get("color", "#00A1DE"),
                 "offered_o_level": item.get("o", True),
                 "offered_a_level": item.get("a", True),
