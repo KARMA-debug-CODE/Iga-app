@@ -649,17 +649,73 @@ msgstr "Seule une école en attente de vérification, sans aucun paiement, peut 
 msgid "Not found."
 msgstr "Introuvable."
 
-#: apps/tutor/services.py:242
-msgid "The tutor is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use the tutor again."
-msgstr "Le tuteur est désactivé tant que vous avez un examen ou un test chronométré ouvert (« %(quiz)s »). Rendez-le pour utiliser à nouveau le tuteur."
+#: apps/tutor/services.py
+msgid "Messages must alternate between the student and Santa."
+msgstr "Les messages doivent alterner entre l'élève et Santa."
+
+#: apps/tutor/services.py
+msgid "The history must end with a reply from Santa."
+msgstr "L'historique doit se terminer par une réponse de Santa."
+
+#: apps/tutor/services.py
+msgid "Santa is switched off during exams and timed tests. Good luck!"
+msgstr "Santa est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
+
+#: apps/tutor/services.py
+msgid "Write a question for Santa."
+msgstr "Écrivez une question pour Santa."
+
+#: apps/tutor/services.py
+msgid "Santa is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use Santa again."
+msgstr "Santa est désactivé tant que vous avez un examen ou un test chronométré ouvert (« %(quiz)s »). Rendez-le pour utiliser à nouveau Santa."
+
+#: apps/tutor/services.py
+msgid "(Santa stopped before finishing. Ask again, or check your lessons.)"
+msgstr "(Santa s'est arrêté avant la fin. Reposez la question ou consultez vos leçons.)"
+
+#: apps/tutor/services.py
+msgid "(Santa ran out of space. Ask me to continue.)"
+msgstr "(Santa n'a plus de place. Demandez-moi de continuer.)"
+
+#: apps/tutor/services.py
+msgid "I can't help with that one. Ask about your lessons or a practice question, or ask your teacher."
+msgstr "Je ne peux pas vous aider sur ce point. Posez une question sur vos leçons ou sur un exercice, ou demandez à votre enseignant."
+
+#: apps/tutor/services.py
+msgid "Santa is still answering your last question. Wait for it to finish, or stop it."
+msgstr "Santa répond encore à votre dernière question. Attendez la fin de la réponse ou arrêtez-la."
+
+#: apps/tutor/services.py
+msgid "Santa's AI model is not installed on this school's server yet."
+msgstr "Le modèle d'IA de Santa n'est pas encore installé sur le serveur de cette école."
+
+#: apps/tutor/services.py
+msgid "Santa is still waking up. Ask again in a minute for a full answer."
+msgstr "Santa se réveille encore. Reposez votre question dans une minute pour avoir une réponse complète."
+
+#: apps/tutor/services.py
+msgid "Santa is helping many students right now. Ask again in a minute for a full answer."
+msgstr "Santa aide beaucoup d'élèves en ce moment. Reposez votre question dans une minute pour avoir une réponse complète."
+
+#: apps/tutor/services.py
+msgid "Santa can't answer just now. Try again in a minute."
+msgstr "Santa ne peut pas répondre pour le moment. Réessayez dans une minute."
+
+#: apps/tutor/services.py
+msgid "I couldn't find this in your lessons. Try other words, open the lesson on this topic, or ask your teacher."
+msgstr "Je n'ai pas trouvé cela dans vos leçons. Essayez d'autres mots, ouvrez la leçon sur ce sujet ou demandez à votre enseignant."
+
+#: apps/tutor/services.py
+msgid "Here is what your lessons say:"
+msgstr "Voici ce que disent vos leçons :"
+
+#: apps/tutor/services.py
+msgid "If you feel unsafe or someone is hurting you, please talk to a trusted adult or a teacher today. In Rwanda you can call the free child helpline 116."
+msgstr "Si vous ne vous sentez pas en sécurité ou si quelqu'un vous fait du mal, parlez dès aujourd'hui à un adulte de confiance ou à un enseignant. Au Rwanda, vous pouvez appeler gratuitement la ligne d'aide à l'enfance 116."
 
 #: apps/tutor/services.py:80
 msgid "Must be a list of messages."
 msgstr "Doit être une liste de messages."
-
-#: apps/tutor/services.py:93
-msgid "The history must end with a tutor reply."
-msgstr "L'historique doit se terminer par une réponse du tuteur."
 
 #: apps/tutor/services.py:176
 msgid "Unknown subject."
@@ -669,41 +725,9 @@ msgstr "Matière inconnue."
 msgid "Attempt not found."
 msgstr "Tentative introuvable."
 
-#: apps/tutor/services.py:202
-msgid "The tutor is switched off during exams and timed tests. Good luck!"
-msgstr "Le tuteur est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
-
-#: apps/tutor/services.py:235
-msgid "Write a question for the tutor."
-msgstr "Écrivez une question pour le tuteur."
-
-#: apps/tutor/services.py:90
-msgid "Messages must alternate between the student and the tutor."
-msgstr "Les messages doivent alterner entre l'élève et le tuteur."
-
 #: apps/tutor/services.py:237
 msgid "Please keep questions under %(n)s characters."
 msgstr "Veuillez limiter vos questions à %(n)s caractères."
-
-#: apps/tutor/views.py:44
-msgid "The AI tutor is not switched on for this school yet."
-msgstr "Le tuteur IA n'est pas encore activé pour cette école."
-
-#: apps/tutor/views.py:63
-msgid "The tutor is very busy right now. Try again in a minute."
-msgstr "Le tuteur est très sollicité en ce moment. Réessayez dans une minute."
-
-#: apps/tutor/views.py:69
-msgid "The AI tutor is not set up correctly. Please tell an administrator."
-msgstr "Le tuteur IA n'est pas correctement configuré. Veuillez prévenir un administrateur."
-
-#: apps/tutor/views.py:74
-msgid "Couldn't reach the tutor. Check your connection and try again."
-msgstr "Impossible de joindre le tuteur. Vérifiez votre connexion et réessayez."
-
-#: apps/tutor/views.py:80
-msgid "The tutor couldn't answer just now. Please try again."
-msgstr "Le tuteur n'a pas pu répondre pour le moment. Veuillez réessayer."
 
 #: apps/accounts/avatar.py:26
 #: apps/accounts/avatar.py:31
