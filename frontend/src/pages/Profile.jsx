@@ -502,7 +502,7 @@ function Badges() {
             {list.map((b) => (
               <div key={b.code} className={`badge-tile ${b.earned ? "earned" : "locked"}`} title={t(`badge.${b.code}.desc`)}>
                 <div className="badge-icon">
-                  <BadgeIcon code={b.code} />
+                  <BadgeIcon name={b.icon} />
                 </div>
                 <strong className="small">{t(`badge.${b.code}.name`)}</strong>
                 <div className="small muted">{t(`badge.${b.code}.desc`)}</div>

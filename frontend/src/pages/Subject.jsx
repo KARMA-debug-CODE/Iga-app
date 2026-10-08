@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
 import BookList, { officialTextbooks } from "../components/Books";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge } from "../components/Locked";
 import { GradeChips, Loader, Progress } from "../components/ui";
 import { results } from "../api";
@@ -26,10 +27,16 @@ function SaveOffline({ unit }) {
       setState("error");
     }
   }
-  if (state === "saved") return <span className="pill pill-success">✓ {t("offline.saved")}</span>;
+  if (state === "saved")
+    return (
+      <span className="pill pill-success">
+        <Icon name="check" size={14} /> {t("offline.saved")}
+      </span>
+    );
   return (
     <button className="btn btn-sm btn-secondary" onClick={save} disabled={state === "saving"}>
-      {state === "saving" ? `${t("offline.saving")} ${progress}` : state === "error" ? t("offline.retry") : `⬇ ${t("offline.save")}`}
+      {state === "idle" && <Icon name="download" size={16} />}
+      {state === "saving" ? `${t("offline.saving")} ${progress}` : state === "error" ? t("offline.retry") : t("offline.save")}
     </button>
   );
 }
@@ -73,8 +80,8 @@ export default function Subject() {
             <Link to={`/learn?grade=${grade}`}>{t("learn.subjects")}</Link> <span>›</span> <span>{subject.display_name}</span>
           </div>
           <div className="page-header row" style={{ flexWrap: "nowrap" }}>
-            <div className="icon-tile" style={{ background: `${subject.color}22`, width: 56, height: 56, fontSize: "1.8rem" }} aria-hidden>
-              {subject.icon}
+            <div className="icon-tile subject-tile" style={{ "--subject": subject.color, width: 56, height: 56 }}>
+              <SubjectIcon name={subject.icon} size={28} />
             </div>
             <div>
               <h1 style={{ margin: 0 }}>{subject.display_name}</h1>
@@ -98,7 +105,9 @@ export default function Subject() {
 
           {books.length > 0 && (
             <section className="section" id="books">
-              <h2>📚 {t("books.forGrade", { grade })}</h2>
+              <h2 className="title-with-icon">
+                <Icon name="library" /> {t("books.forGrade", { grade })}
+              </h2>
               <BookList books={books} />
             </section>
           )}
@@ -112,7 +121,9 @@ export default function Subject() {
                 </summary>
                 <div className="unit-body">
                   <div className="spread" style={{ marginBottom: 6 }}>
-                    {!unit.alignment_verified ? <span className="small muted">ⓘ {t("learn.notVerified")}</span> : <span />}
+                    {!unit.alignment_verified ? <span className="small muted line-with-icon">
+                        <Icon name="info" size={14} /> <span>{t("learn.notVerified")}</span>
+                      </span> : <span />}
                     <SaveOffline unit={{ ...unit, grade }} />
                   </div>
                   {unit.lessons.length ? (
@@ -120,8 +131,12 @@ export default function Subject() {
                       {unit.lessons.map((lesson) => (
                         <li key={lesson.id}>
                           <Link className="list-link" to={`/lessons/${lesson.slug}`}>
-                            <span className={`done-dot ${lesson.completed ? "done" : ""}`} aria-label={lesson.completed ? t("learn.completed") : ""}>
-                              {lesson.completed ? "✓" : ""}
+                            <span
+                              className={`done-dot ${lesson.completed ? "done" : ""}`}
+                              role={lesson.completed ? "img" : undefined}
+                              aria-label={lesson.completed ? t("learn.completed") : undefined}
+                            >
+                              {lesson.completed && <Icon name="check" size={14} strokeWidth={3} />}
                             </span>
                             <div className="grow">
                               <div>{lesson.title}</div>

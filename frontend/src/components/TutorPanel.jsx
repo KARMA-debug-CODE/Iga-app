@@ -103,7 +103,7 @@ export default function TutorPanel({ lesson, attempt, question, starters = [], l
   if (!open) {
     return (
       <button className="btn btn-secondary btn-sm" onClick={() => setOpen(true)}>
-        {label || `🤖 ${t("tutor.open")}`}
+        {label || t("tutor.open")}
       </button>
     );
   }
@@ -111,7 +111,7 @@ export default function TutorPanel({ lesson, attempt, question, starters = [], l
   return (
     <section className="card tutor" aria-label={t("tutor.title")}>
       <div className="spread">
-        <strong>🤖 {t("tutor.title")}</strong>
+        <strong>{t("tutor.title")}</strong>
         <button className="btn btn-ghost btn-sm" onClick={() => setOpen(false)} aria-label={t("common.close")}>
           ✕
         </button>

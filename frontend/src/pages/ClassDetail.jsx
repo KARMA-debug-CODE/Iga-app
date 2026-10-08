@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
-import { Icon } from "../components/Icon";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, scoreClass, Tabs } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -66,13 +66,13 @@ function NewAssignment({ classroom, onCreated }) {
           <button
             type="button"
             key={k}
-            className={`chip ${kind === k ? "active" : ""}`}
+            className={`chip with-icon ${kind === k ? "active" : ""}`}
             onClick={() => {
               setKind(k);
               setForm((f) => ({ ...f, target: "" }));
             }}
           >
-            {{ quiz: "📝", lesson: "📖", simulation: "🔬" }[k]} {t(`classes.kind.${k}`)}
+            <Icon name={{ quiz: "practice", lesson: "learn", simulation: "labs" }[k]} size={16} /> {t(`classes.kind.${k}`)}
           </button>
         ))}
       </div>
@@ -279,10 +279,10 @@ function RosterImport({ classroom, onCreated }) {
               ])
             }
           >
-            ⬇ {t("roster.download")}
+            <Icon name="download" size={16} /> {t("roster.download")}
           </button>
           <button className="btn btn-secondary btn-sm" onClick={() => window.print()}>
-            🖨 {t("roster.print")}
+            <Icon name="print" size={16} /> {t("roster.print")}
           </button>
           <button className="btn btn-ghost btn-sm" onClick={() => setCreated(null)}>
             {t("common.close")}
@@ -296,12 +296,14 @@ function RosterImport({ classroom, onCreated }) {
   return (
     <details className="card">
       <summary>
-        <strong>➕ {t("roster.title")}</strong>
+        <strong className="with-icon">
+          <Icon name="plus" /> {t("roster.title")}
+        </strong>
       </summary>
       <div className="form" style={{ marginTop: 12 }}>
         <p className="small muted">{t("roster.help")}</p>
         <label className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }}>
-          📄 {t("roster.file")}
+          <Icon name="upload" size={16} /> {t("roster.file")}
           <input type="file" accept=".csv,text/csv,text/plain" onChange={readFile} hidden />
         </label>
         <textarea
@@ -335,8 +337,8 @@ function RosterImport({ classroom, onCreated }) {
                       <td>
                         {r.first_name} {r.last_name}
                         {r.errors.map((err) => (
-                          <div key={err} className="small" style={{ color: "var(--danger)" }}>
-                            ⚠ {err}
+                          <div key={err} className="small line-with-icon" style={{ color: "var(--danger)" }}>
+                            <Icon name="warning" size={14} /> {err}
                           </div>
                         ))}
                       </td>
@@ -387,7 +389,7 @@ export default function ClassDetail() {
             <div className="page-header spread">
               <div>
                 <h1 className="title-with-icon" style={{ margin: 0 }}>
-                  <Icon name={c.subject_icon || "classes"} size={28} /> {c.name}
+                  <SubjectIcon name={c.subject_icon || "classes"} size={28} /> {c.name}
                 </h1>
                 <p>
                   {c.grade} · {c.subject_name || ""} · {t("classes.teacher", { name: c.teacher_name })}

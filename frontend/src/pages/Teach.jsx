@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
+import { Icon } from "../components/Icon";
 import Markdown from "../components/Markdown";
 import { Empty, ErrorMessage, GRADES, Loader, Tabs, useToast } from "../components/ui";
 import { useApi } from "../hooks";
@@ -36,7 +37,7 @@ function useScope() {
         <select value={scope.subject} onChange={(e) => setScope({ ...scope, subject: e.target.value, unit: "" })}>
           {subjectList.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.icon} {s.name}
+              {s.name}
             </option>
           ))}
         </select>
@@ -159,7 +160,7 @@ function QuestionForm({ onSaved }) {
               <input value={c.text} onChange={(e) => setChoices((list) => list.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} placeholder={t("teach.optionN", { n: i + 1 })} />
               {choices.length > 2 && (
                 <button type="button" className="btn btn-sm btn-ghost" onClick={() => setChoices((list) => list.filter((_, j) => j !== i))} aria-label={t("teach.removeOption")}>
-                  ✕
+                  <Icon name="close" />
                 </button>
               )}
             </div>
@@ -222,7 +223,7 @@ function QuestionBank() {
       <Loader state={state}>
         {(data) => {
           const list = results(data);
-          if (!list.length) return <Empty icon="❓">—</Empty>;
+          if (!list.length) return <Empty icon="help">—</Empty>;
           return (
             <div className="stack">
               {list.map((q) => (
@@ -369,7 +370,7 @@ function QuizBuilder() {
                 </div>
                 <div className="row" style={{ gap: 6 }}>
                   <Link className="btn btn-sm btn-ghost" to={`/teach/quizzes/${q.id}/analytics`} aria-label={`${t("analytics.title")}: ${q.title}`}>
-                    📊
+                    <Icon name="chart" />
                   </Link>
                   <span className={`pill ${q.status === "published" ? "pill-success" : "pill-warn"}`}>{tOr(t, `teach.status.${q.status}`, q.status)}</span>
                 </div>
@@ -447,10 +448,10 @@ function LessonEditor() {
         </label>
         <div className="tabs" style={{ marginBottom: 0 }}>
           <button type="button" className={`tab ${!preview ? "active" : ""}`} onClick={() => setPreview(false)}>
-            ✏️ {t("teach.body")}
+            {t("teach.body")}
           </button>
           <button type="button" className={`tab ${preview ? "active" : ""}`} onClick={() => setPreview(true)}>
-            👁 {t("teach.preview")}
+            {t("teach.preview")}
           </button>
         </div>
         {preview ? (
@@ -545,7 +546,9 @@ export default function Teach() {
   return (
     <>
       <div className="page-header">
-        <h1>🧑🏽‍🏫 {t("teach.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="teach" size={28} /> {t("teach.title")}
+        </h1>
       </div>
       <Tabs
         value={tab}

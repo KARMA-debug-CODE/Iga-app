@@ -63,7 +63,7 @@ export default function SqlPlayground({ initialCode = "", height = 300 }) {
     worker.current?.terminate();
     worker.current = null;
     loadedOnce.current = false;
-    setError(`⏹ ${t("python.stopped")}`);
+    setError(t("python.stopped"));
     setStatus("idle");
   }
 

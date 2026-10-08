@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 
+import { Icon } from "../components/Icon";
 import SimEmbed from "../components/SimEmbed";
 import { Loader } from "../components/ui";
 import { useApi } from "../hooks";
@@ -22,13 +23,17 @@ export default function Lab() {
           <div className="grid-2 section">
             {sim.learning_goals && (
               <div className="card">
-                <h2>🎯 {t("labs.goals")}</h2>
+                <h2 className="title-with-icon">
+                  <Icon name="target" /> {t("labs.goals")}
+                </h2>
                 <p style={{ margin: 0 }}>{sim.learning_goals}</p>
               </div>
             )}
             {sim.lessons.length > 0 && (
               <div className="card">
-                <h2>📖 {t("labs.related")}</h2>
+                <h2 className="title-with-icon">
+                  <Icon name="learn" /> {t("labs.related")}
+                </h2>
                 <ul className="list">
                   {sim.lessons.map((l) => (
                     <li key={l.slug}>

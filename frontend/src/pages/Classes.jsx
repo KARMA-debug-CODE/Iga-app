@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
-import { Icon } from "../components/Icon";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, GRADES, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -91,7 +91,7 @@ function ClassCard({ c }) {
     <Link to={`/classes/${c.id}`} className="card card-link">
       <div className="row" style={{ flexWrap: "nowrap" }}>
         <div className="icon-tile">
-          <Icon name={c.subject_icon || "classes"} size={22} />
+          <SubjectIcon name={c.subject_icon || "classes"} />
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
           <strong>{c.name}</strong>

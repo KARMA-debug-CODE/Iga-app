@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import { Icon } from "../components/Icon";
 import { GradeChips, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
-const PROVIDER_ICON = { builtin: "⚡", phet: "🧪", geogebra: "📈", external: "🌐" };
+const PROVIDER_ICON = { builtin: "zap", phet: "flask", geogebra: "trend", external: "globe" };
 
 export function SubjectSelect({ value, onChange, label }) {
   const { t, lang } = useI18n();
@@ -17,7 +18,7 @@ export function SubjectSelect({ value, onChange, label }) {
         <option value="">{t("practice.all")}</option>
         {(meta.data?.subjects || []).map((s) => (
           <option key={s.code} value={s.code}>
-            {s.icon} {s.name}
+            {s.name}
           </option>
         ))}
       </select>
@@ -35,7 +36,9 @@ export default function Labs() {
   return (
     <>
       <div className="page-header">
-        <h1>🔬 {t("labs.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="labs" size={28} /> {t("labs.title")}
+        </h1>
         <p>{t("labs.subtitle")}</p>
       </div>
       <div className="form-row" style={{ marginBottom: 12 }}>
@@ -53,8 +56,8 @@ export default function Labs() {
               {sims.map((sim) => (
                 <Link key={sim.slug} to={`/labs/${sim.slug}`} className="card card-link">
                   <div className="spread" style={{ alignItems: "flex-start" }}>
-                    <div className="icon-tile" aria-hidden>
-                      {PROVIDER_ICON[sim.provider]}
+                    <div className="icon-tile">
+                      <Icon name={PROVIDER_ICON[sim.provider] || "labs"} size={22} />
                     </div>
                     {sim.provider === "builtin" && <span className="pill pill-success">{t("labs.offline")}</span>}
                   </div>

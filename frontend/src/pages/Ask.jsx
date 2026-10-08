@@ -64,7 +64,7 @@ export default function Ask() {
 
   const header = (
     <div className="page-header">
-      <h1>🤖 {t("ask.title")}</h1>
+      <h1>{t("ask.title")}</h1>
       <p>{t("ask.intro")}</p>
     </div>
   );
@@ -136,7 +136,6 @@ export default function Ask() {
               <option value="">{t("ask.anySubject")}</option>
               {subjectList.map((s) => (
                 <option key={s.code} value={s.code}>
-                  {s.icon ? `${s.icon} ` : ""}
                   {s.display_name || s.name}
                 </option>
               ))}

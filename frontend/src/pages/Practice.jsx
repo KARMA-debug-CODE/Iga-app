@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge, LockedNotice } from "../components/Locked";
 import { Empty, ErrorMessage, GradeChips, Loader, scoreClass, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
@@ -41,7 +42,7 @@ function QuizGrid({ subject, grade }) {
       <Loader state={state}>
         {(data) => {
           const list = results(data);
-          if (!list.length) return <Empty icon="📝">—</Empty>;
+          if (!list.length) return <Empty icon="practice">—</Empty>;
           return (
             <div className="grid">
               {list.map((q) => {
@@ -50,7 +51,7 @@ function QuizGrid({ subject, grade }) {
                   <div key={q.id} className="card subject-card" style={{ "--subject": q.subject.color }}>
                     <div className="spread" style={{ alignItems: "flex-start" }}>
                       <span className="pill">
-                        {q.subject.icon} {q.subject.name} · {q.grade}
+                        <SubjectIcon name={q.subject.icon} size={14} /> {q.subject.name} · {q.grade}
                       </span>
                       {pct != null && <span className={scoreClass(pct)}>{t("practice.best", { score: `${pct}%` })}</span>}
                     </div>
@@ -58,7 +59,13 @@ function QuizGrid({ subject, grade }) {
                     <div className="row small muted">
                       <span>{t("practice.questions", { n: q.question_count })}</span>
                       <span>·</span>
-                      <span>{q.time_limit_minutes ? `⏱ ${t("practice.timeLimit", { n: q.time_limit_minutes })}` : t("practice.untimed")}</span>
+                      {q.time_limit_minutes ? (
+                        <span className="with-icon">
+                          <Icon name="timer" size={14} /> {t("practice.timeLimit", { n: q.time_limit_minutes })}
+                        </span>
+                      ) : (
+                        <span>{t("practice.untimed")}</span>
+                      )}
                       <span>·</span>
                       <span>{q.feedback_mode === "immediate" ? t("practice.practiceMode") : t("practice.examMode")}</span>
                     </div>
@@ -116,15 +123,15 @@ function PastPapers({ subject }) {
       <Loader state={state}>
         {(data) => {
           const list = results(data);
-          if (!list.length) return <Empty icon="📄">{t("practice.noPapers")}</Empty>;
+          if (!list.length) return <Empty icon="file">{t("practice.noPapers")}</Empty>;
           return (
             <div className="stack">
               {list.map((p) => (
                 <div key={p.id} className="card">
                   <div className="spread" style={{ alignItems: "flex-start" }}>
                     <div className="row" style={{ flexWrap: "nowrap", minWidth: 0 }}>
-                      <div className="icon-tile" aria-hidden>
-                        {p.subject_icon}
+                      <div className="icon-tile">
+                        <SubjectIcon name={p.subject_icon} />
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <strong>{p.title}</strong>
@@ -146,17 +153,17 @@ function PastPapers({ subject }) {
                   <div className="row" style={{ marginTop: 12 }}>
                     {p.quiz && !p.locked && (
                       <button className="btn btn-sm" disabled={busy} onClick={() => start(p.quiz)}>
-                        ✍️ {t("practice.takeInteractive")}
+                        <Icon name="edit" size={16} /> {t("practice.takeInteractive")}
                       </button>
                     )}
                     {p.paper_link && (
                       <a className="btn btn-sm btn-secondary" href={p.paper_link} target="_blank" rel="noopener noreferrer">
-                        📄 {t("practice.openPaper")}
+                        <Icon name="file" size={16} /> {t("practice.openPaper")}
                       </a>
                     )}
                     {p.marking_guide_link && (
                       <a className="btn btn-sm btn-secondary" href={p.marking_guide_link} target="_blank" rel="noopener noreferrer">
-                        ✅ {t("practice.markingGuide")}
+                        <Icon name="fileCheck" size={16} /> {t("practice.markingGuide")}
                       </a>
                     )}
                   </div>
@@ -194,7 +201,9 @@ export default function Practice() {
   return (
     <>
       <div className="page-header">
-        <h1>📝 {t("nav.practice")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="practice" size={28} /> {t("nav.practice")}
+        </h1>
       </div>
       <ErrorMessage error={error} />
       <Tabs

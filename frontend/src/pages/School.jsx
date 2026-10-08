@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs, useToast } from "../components/ui";
 import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -28,18 +29,22 @@ function WaitingForVerification() {
   if (user.school?.suspended) {
     return (
       <div className="card" style={{ maxWidth: 640 }}>
-        <h1 style={{ marginTop: 0 }}>⚠️ {t("school.suspendedTitle")}</h1>
+        <h1 className="title-with-icon" style={{ marginTop: 0 }}>
+          <Icon name="warning" size={28} /> {t("school.suspendedTitle")}
+        </h1>
         <p>{t("school.suspendedText", { school: user.school.name })}</p>
       </div>
     );
   }
   return (
     <div className="card" style={{ maxWidth: 640 }}>
-      <h1 style={{ marginTop: 0 }}>⏳ {t("school.waitingTitle")}</h1>
+      <h1 className="title-with-icon" style={{ marginTop: 0 }}>
+        <Icon name="hourglass" size={28} /> {t("school.waitingTitle")}
+      </h1>
       <p>{schoolPending ? t("school.waitingSchool", { school: user.school.name }) : t("school.waitingAdmin", { school: user.school?.name || "" })}</p>
       <p className="small muted">{t("school.waitingHelp")}</p>
       <button className="btn btn-secondary" onClick={checkAgain} disabled={checking}>
-        ↻ {t("school.checkAgain")}
+        <Icon name="refresh" size={16} /> {t("school.checkAgain")}
       </button>
     </div>
   );
@@ -98,10 +103,10 @@ function JoinCode({ school, onChange }) {
           className="btn btn-sm btn-secondary"
           onClick={() => navigator.clipboard?.writeText(school.join_code).then(() => showToast(t("school.copied")))}
         >
-          📋 {t("school.copy")}
+          <Icon name="copy" size={16} /> {t("school.copy")}
         </button>
         <button className="btn btn-sm btn-ghost" onClick={regenerate}>
-          ↻ {t("school.newCode")}
+          <Icon name="refresh" size={16} /> {t("school.newCode")}
         </button>
       </div>
     </div>
@@ -119,7 +124,9 @@ export function SchoolHome() {
       {(school) => (
         <>
           <div className="page-header">
-            <h1>🏫 {school.name}</h1>
+            <h1 className="title-with-icon">
+              <Icon name="school" size={28} /> {school.name}
+            </h1>
             <p>
               {school.district}
               {school.province && ` · ${school.province}`}
@@ -214,15 +221,17 @@ export function SchoolMembers() {
     <>
       {toast}
       <div className="page-header">
-        <h1>👩🏽‍🎓 {t("school.members")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="members" size={28} /> {t("school.members")}
+        </h1>
         <p>{t("school.membersHelp")}</p>
       </div>
       <Tabs
         value={statusFilter}
         onChange={(value) => setFilter({ status: value })}
         tabs={[
-          { value: "pending", label: `⏳ ${t("school.tab.pending")}` },
-          { value: "approved", label: `✓ ${t("school.tab.approved")}` },
+          { value: "pending", label: t("school.tab.pending") },
+          { value: "approved", label: t("school.tab.approved") },
           { value: "rejected", label: t("school.tab.rejected") },
         ]}
       />
@@ -254,7 +263,7 @@ export function SchoolMembers() {
             {t("school.selectAll")}
           </button>
           <button className="btn btn-sm btn-success" disabled={!chosen.length} onClick={() => decide(true)}>
-            ✓ {t("school.approve")} ({chosen.length})
+            <Icon name="check" size={16} /> {t("school.approve")} ({chosen.length})
           </button>
           <button className="btn btn-sm btn-danger" disabled={!chosen.length} onClick={() => decide(false)}>
             {t("school.reject")}
@@ -264,7 +273,7 @@ export function SchoolMembers() {
       <Loader state={state}>
         {() =>
           members.length === 0 ? (
-            <Empty icon="👥">{t("school.noMembers")}</Empty>
+            <Empty icon="members">{t("school.noMembers")}</Empty>
           ) : (
             <div className="card">
               <ul className="list">
@@ -284,7 +293,7 @@ export function SchoolMembers() {
                     <div className="row" style={{ flexWrap: "nowrap" }}>
                       {m.needs_teacher_confirmation && (
                         <button className="btn btn-sm btn-success" onClick={() => confirmTeacher(m)}>
-                          ✓ {t("school.confirmTeacher")}
+                          <Icon name="check" size={16} /> {t("school.confirmTeacher")}
                         </button>
                       )}
                       {statusFilter !== "pending" && m.role !== "school_admin" && (
@@ -332,7 +341,9 @@ export function SchoolBilling() {
   return (
     <>
       <div className="page-header">
-        <h1>💳 {t("billing.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="billing" size={28} /> {t("billing.title")}
+        </h1>
         <p>{t("billing.help")}</p>
       </div>
       <Loader state={school}>
@@ -395,7 +406,7 @@ export function SchoolBilling() {
       <Loader state={payments}>
         {(list) =>
           list.length === 0 ? (
-            <Empty icon="🧾">{t("billing.noPayments")}</Empty>
+            <Empty icon="receipt">{t("billing.noPayments")}</Empty>
           ) : (
             <div className="table-wrap">
               <table>
@@ -419,7 +430,9 @@ export function SchoolBilling() {
                           {t(`billing.paymentStatus.${p.status}`)}
                         </span>
                       </td>
-                      <td>{p.status === "succeeded" && <Link to={`/school/billing/receipt/${p.reference}`}>🧾 {t("billing.view")}</Link>}</td>
+                      <td>{p.status === "succeeded" && <Link to={`/school/billing/receipt/${p.reference}`} className="with-icon">
+                          <Icon name="receipt" size={16} /> {t("billing.view")}
+                        </Link>}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -490,9 +503,12 @@ export function BillingReturn() {
         <p>{t("billing.checking")}</p>
       ) : (
         <>
-          <div style={{ fontSize: "3rem" }} aria-hidden>
-            {{ succeeded: "🎉", pending: "⏳", failed: "⚠️", cancelled: "⚠️" }[status]}
-          </div>
+          <Icon
+            name={{ succeeded: "ok", pending: "hourglass" }[status] || "warning"}
+            size={48}
+            strokeWidth={1.6}
+            style={{ color: { succeeded: "var(--success)", pending: "var(--warn)" }[status] || "var(--danger)" }}
+          />
           <h1>{t(`billing.result.${status}`)}</h1>
           <p>{t(`billing.resultHelp.${status}`)}</p>
         </>
@@ -503,7 +519,7 @@ export function BillingReturn() {
         </Link>
         {status === "succeeded" && (
           <Link className="btn btn-secondary" to={`/school/billing/receipt/${encodeURIComponent(reference)}`}>
-            🧾 {t("billing.receipt")}
+            <Icon name="receipt" size={16} /> {t("billing.receipt")}
           </Link>
         )}
       </div>
@@ -546,7 +562,7 @@ export function DevCheckout() {
             <ErrorMessage error={error} />
             <div className="row">
               <button className="btn btn-success" disabled={busy} onClick={() => finish("success")}>
-                ✓ {t("billing.devPay")}
+                <Icon name="check" size={16} /> {t("billing.devPay")}
               </button>
               <button className="btn btn-ghost" disabled={busy} onClick={() => finish("cancel")}>
                 {t("common.cancel")}
@@ -568,9 +584,11 @@ export function Receipt() {
       {(p) => (
         <div className="card receipt" style={{ maxWidth: 640 }}>
           <div className="spread">
-            <h1 style={{ margin: 0 }}>🧾 {t("billing.receiptTitle")}</h1>
+            <h1 className="title-with-icon" style={{ margin: 0 }}>
+              <Icon name="receipt" size={28} /> {t("billing.receiptTitle")}
+            </h1>
             <button className="btn btn-sm btn-secondary no-print" onClick={() => window.print()}>
-              🖨 {t("roster.print")}
+              <Icon name="print" size={16} /> {t("roster.print")}
             </button>
           </div>
           <dl className="receipt-lines">

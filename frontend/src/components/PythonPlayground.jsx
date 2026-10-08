@@ -86,7 +86,7 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
     <div className="playground python-playground">
       <div className="playground-bar">
         <strong className="playground-title">
-          <Icon name="python" /> Python
+          <Icon name="terminal" /> Python
         </strong>
         {!INTERACTIVE && (
           <button className="btn btn-sm btn-ghost" onClick={() => setShowInput((v) => !v)} aria-pressed={showInput}>
