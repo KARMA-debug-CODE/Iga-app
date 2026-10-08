@@ -180,6 +180,8 @@ REST_FRAMEWORK = {
         "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
         # Per user: C++ and Java runs in the code playground.
         "code_run": os.environ.get("THROTTLE_CODE_RUN", "20/min"),
+        # Per user: answers typed into a running program.
+        "code_input": os.environ.get("THROTTLE_CODE_INPUT", "120/min"),
     },
 }
 
@@ -215,13 +217,12 @@ TUTOR_MAX_TOKENS = int(os.environ.get("TUTOR_MAX_TOKENS", "4000"))
 TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
 
 # --- Code runner (C++ and Java in the playground) ---------------------------
-# A Piston server (https://github.com/engineer-man/piston) that only Django can reach; empty = off.
+# Iga's code runner (the coderunner/ folder), reachable only from Django; empty = C++ and Java are off.
 # Docker Compose starts one at http://coderunner:2000. See apps/coderun/services.py.
 CODE_RUNNER_URL = os.environ.get("CODE_RUNNER_URL", "").strip()
-# Compile (10 s) + run (6 s) + a margin. Runs at once across the site: match Piston's
-# PISTON_MAX_CONCURRENT_JOBS so requests never wait in its queue holding a web-server thread.
-CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "20"))
-CODE_RUNNER_MAX_RUNNING = int(os.environ.get("CODE_RUNNER_MAX_RUNNING", "4"))
+CODE_RUNNER_TOKEN = os.environ.get("CODE_RUNNER_TOKEN", "").strip()
+# Compiling (up to 30 s) plus running until the program ends or asks for input (up to 10 s), plus a margin.
+CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "45"))
 
 # --- School subscriptions -------------------------------------------------
 # Each school pays a flat monthly price for all its members. Prices per currency:

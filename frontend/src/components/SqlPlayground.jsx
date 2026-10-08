@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "../i18n";
+import CodeEditor from "./CodeEditor";
+import { Icon } from "./Icon";
 
 function newWorker() {
   return new Worker(new URL("../sql/sql.worker.js", import.meta.url));
@@ -70,7 +72,9 @@ export default function SqlPlayground({ initialCode = "", height = 300 }) {
   return (
     <div className="playground sql-playground">
       <div className="playground-bar">
-        <strong style={{ marginRight: "auto" }}>🗃️ SQL</strong>
+        <strong className="playground-title">
+          <Icon name="database" /> SQL
+        </strong>
         <button
           className="btn btn-sm btn-secondary"
           onClick={() => {
@@ -80,31 +84,20 @@ export default function SqlPlayground({ initialCode = "", height = 300 }) {
           }}
           disabled={busy}
         >
-          {t("common.reset")}
+          <Icon name="reset" /> {t("common.reset")}
         </button>
         {busy ? (
           <button className="btn btn-sm btn-danger" onClick={stop}>
-            ⏹ {t("python.stop")}
+            <Icon name="stop" /> {t("python.stop")}
           </button>
         ) : (
           <button className="btn btn-sm btn-success" onClick={run}>
-            ▶ {t("common.run")}
+            <Icon name="play" /> {t("common.run")}
           </button>
         )}
       </div>
       <div className="playground-panes">
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !busy) run();
-          }}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoCorrect="off"
-          aria-label={t("sql.editor")}
-          style={{ minHeight: height }}
-        />
+        <CodeEditor value={code} onChange={setCode} language="sql" onRun={() => !busy && run()} ariaLabel={t("sql.editor")} minHeight={height} />
         <div className="sql-output" aria-live="polite" style={{ minHeight: height }}>
           {status === "loading" && <p className="muted">{t("sql.loading")}</p>}
           {status === "idle" && !error && results.length === 0 && <p className="muted">{t("sql.empty")}</p>}
@@ -145,7 +138,7 @@ export default function SqlPlayground({ initialCode = "", height = 300 }) {
             ) : (
               result.changed > 0 && (
                 <p key={i} className="small sql-changed">
-                  ✓ {t("sql.changed", { n: result.changed })} <code>{result.sql.split("\n")[0].slice(0, 60)}</code>
+                  {t("sql.changed", { n: result.changed })} <code>{result.sql.split("\n")[0].slice(0, 60)}</code>
                 </p>
               )
             ),

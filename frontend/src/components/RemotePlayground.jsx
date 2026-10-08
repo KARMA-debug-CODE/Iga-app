@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api, NetworkError } from "../api";
 import { useOnline } from "../hooks";
 import { useI18n } from "../i18n";
+import CodeEditor from "./CodeEditor";
+import Console from "./Console";
+import { Icon } from "./Icon";
 
 const NAMES = { cpp: "C++", java: "Java" };
-const ICONS = { cpp: "⚙️", java: "☕" };
 
 let statusRequest = null;
 
@@ -29,124 +31,136 @@ function useCodeRunnerEnabled() {
 }
 
 /**
- * A C++ or Java editor. Unlike Python and SQL, these are compiled and run on the Iga server's sandboxed
- * code runner, so they need a connection; each run sends only the code and the input (a few KB).
+ * A C++ or Java editor with a terminal. The program is compiled and run on the Iga server's code runner; when
+ * it waits for keyboard input (cin, Scanner), the console shows the question and the student types the answer,
+ * as in a real terminal. Each step sends only the code or the answer (a few KB).
  */
-export default function RemotePlayground({ language, initialCode = "", initialInput = "", height = 300 }) {
+export default function RemotePlayground({ language, initialCode = "", height = 300 }) {
   const { t } = useI18n();
   const online = useOnline();
   const enabled = useCodeRunnerEnabled();
   const [code, setCode] = useState(initialCode);
-  const [stdin, setStdin] = useState(initialInput);
-  const [showInput, setShowInput] = useState(Boolean(initialInput));
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const [output, setOutput] = useState([]);
+  const [state, setState] = useState("idle"); // idle | running | waiting
+  const session = useRef(null);
   const name = NAMES[language];
 
+  // Leaving the page ends a program that is still waiting for an answer.
+  useEffect(
+    () => () => {
+      if (session.current) api("/code/stop/", { method: "POST", body: { session: session.current } }).catch(() => {});
+    },
+    [],
+  );
+
+  function append(entries) {
+    setOutput((o) => [...o, ...entries]);
+  }
+
+  function explain(result) {
+    const lines = {
+      ok: t("code.finished"),
+      compile_error: t("code.compileError"),
+      time_limit: t("code.timeLimit"),
+      output_limit: t("code.outputLimit"),
+      runtime_error:
+        result.signal === "SIGSEGV"
+          ? t("code.crashed")
+          : t("code.runtimeError", { code: result.exit_code ?? result.signal ?? "?" }),
+    };
+    return lines[result.verdict] || t("code.runtimeError", { code: result.exit_code ?? "?" });
+  }
+
+  function handle(result) {
+    append(result.output || []);
+    if (result.state === "waiting") {
+      session.current = result.session;
+      setState("waiting");
+      return;
+    }
+    session.current = null;
+    const javaMainHint = language === "java" && result.verdict === "runtime_error" && /main\(String\[\]\)|main method/i.test(
+      (result.output || []).map((o) => o.text).join(""),
+    );
+    append([{ stream: result.verdict === "ok" ? "info" : "stderr", text: `\n${explain(result)}` }]);
+    if (javaMainHint) append([{ stream: "info", text: `\n${t("code.javaMainHint")}` }]);
+    setState("idle");
+  }
+
+  function fail(err) {
+    session.current = null;
+    append([{ stream: "stderr", text: `\n${err instanceof NetworkError ? t("code.offline") : err.message}` }]);
+    setState("idle");
+  }
+
   async function run() {
-    if (busy) return;
-    setBusy(true);
-    setResult(null);
-    setError(null);
+    if (state !== "idle" || !code.trim()) return;
+    setOutput([]);
+    setState("running");
     try {
-      setResult(await api("/code/run/", { method: "POST", body: { language, code, stdin } }));
+      handle(await api("/code/run/", { method: "POST", body: { language, code } }));
     } catch (err) {
-      setError(err instanceof NetworkError ? new Error(t("code.offline")) : err);
-    } finally {
-      setBusy(false);
+      fail(err);
     }
   }
 
-  const compileOutput = result?.compile && (result.compile.stderr || result.compile.stdout);
-  const notice = {
-    compile_error: t("code.compileError"),
-    compile_time_limit: t("code.compileTimeLimit"),
-    time_limit: t("code.timeLimit"),
-    output_limit: t("code.outputLimit"),
-    killed: t("code.killed"),
-    runtime_error: t("code.runtimeError", { code: result?.run?.code ?? "?" }),
-  }[result?.verdict];
-  const javaMainHint =
-    language === "java" && result?.verdict === "runtime_error" && /main\(String\[\]\)|no main method/i.test(result.run?.stderr || "");
+  async function answer(text) {
+    append([{ stream: "stdin", text: `${text}\n` }]);
+    setState("running");
+    try {
+      handle(await api("/code/input/", { method: "POST", body: { session: session.current, text } }));
+    } catch (err) {
+      fail(err);
+    }
+  }
+
+  function stop() {
+    const id = session.current;
+    session.current = null;
+    if (id) api("/code/stop/", { method: "POST", body: { session: id } }).catch(() => {});
+    append([{ stream: "stderr", text: `\n${t("python.stopped")}` }]);
+    setState("idle");
+  }
 
   return (
     <div className="playground remote-playground">
       <div className="playground-bar">
-        <strong style={{ marginRight: "auto" }}>
-          {ICONS[language]} {name}
+        <strong className="playground-title">
+          <Icon name="code" /> {name}
         </strong>
-        <button className="btn btn-sm btn-ghost" onClick={() => setShowInput((v) => !v)} aria-pressed={showInput}>
-          ⌨ {t("python.input")}
-        </button>
         <button
           className="btn btn-sm btn-secondary"
           onClick={() => {
             setCode(initialCode);
-            setStdin(initialInput);
-            setResult(null);
-            setError(null);
+            setOutput([]);
           }}
-          disabled={busy}
+          disabled={state !== "idle"}
         >
-          {t("common.reset")}
+          <Icon name="reset" /> {t("common.reset")}
         </button>
-        <button className="btn btn-sm btn-success" onClick={run} disabled={busy || enabled === false || !code.trim()}>
-          ▶ {busy ? t("code.running") : t("common.run")}
-        </button>
+        {state === "waiting" ? (
+          <button className="btn btn-sm btn-danger" onClick={stop}>
+            <Icon name="stop" /> {t("python.stop")}
+          </button>
+        ) : (
+          <button className="btn btn-sm btn-success" onClick={run} disabled={state !== "idle" || enabled === false || !code.trim()}>
+            <Icon name="play" /> {state === "running" ? t("code.running") : t("common.run")}
+          </button>
+        )}
       </div>
       {enabled === false && <p className="alert alert-warn playground-alert">{t("code.notConfigured")}</p>}
       {enabled !== false && !online && <p className="alert alert-warn playground-alert">{t("code.offline")}</p>}
       <div className="playground-panes">
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Tab" && !e.shiftKey) {
-              e.preventDefault();
-              const el = e.currentTarget;
-              const { selectionStart: s, selectionEnd: end } = el;
-              setCode(`${code.slice(0, s)}    ${code.slice(end)}`);
-              requestAnimationFrame(() => {
-                el.selectionStart = el.selectionEnd = s + 4;
-              });
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") run();
-          }}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoCorrect="off"
-          aria-label={t("code.editor", { language: name })}
-          style={{ minHeight: height }}
+        <CodeEditor value={code} onChange={setCode} language={language} onRun={run} ariaLabel={t("code.editor", { language: name })} minHeight={height} />
+        <Console
+          entries={output}
+          waiting={state === "waiting"}
+          onAnswer={answer}
+          status={state === "running" && !output.length ? t("code.runningOnServer") : ""}
+          empty={t("code.empty")}
+          minHeight={height}
+          label={t("console.output")}
         />
-        <div className="python-output-wrap">
-          {showInput && (
-            <label className="python-stdin">
-              <span className="small">{t("python.inputHelp")}</span>
-              <textarea value={stdin} onChange={(e) => setStdin(e.target.value)} rows={3} spellCheck={false} />
-            </label>
-          )}
-          <pre className="python-output" aria-live="polite" style={{ minHeight: height }}>
-            {busy && <span className="muted">{t("code.runningOnServer")}</span>}
-            {!busy && !result && !error && <span className="muted">{t("code.empty")}</span>}
-            {error && <span className="py-stderr">{error.message}</span>}
-            {notice && (
-              <span className="py-stderr">
-                {notice}
-                {"\n"}
-              </span>
-            )}
-            {compileOutput && <span className="py-stderr">{compileOutput}</span>}
-            {result?.run?.stdout && <span className="py-stdout">{result.run.stdout}</span>}
-            {result?.run?.stderr && <span className="py-stderr">{result.run.stderr}</span>}
-            {javaMainHint && (
-              <span className="py-result">
-                {"\n"}💡 {t("code.javaMainFirst")}
-              </span>
-            )}
-            {result?.verdict === "ok" && <span className="muted">{`\n✓ ${t("code.finished")}`}</span>}
-          </pre>
-        </div>
       </div>
       <p className="small muted playground-note">{t("code.serverNote", { language: name })}</p>
     </div>

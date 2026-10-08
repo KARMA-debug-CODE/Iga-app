@@ -29,7 +29,7 @@
    Claude API (AI tutor and Ask AI)
 
    Called by the server only, when CODE_RUNNER_URL is set:
-   Piston code runner (compiles and runs C++ and Java in a sandbox; reachable only from Django)
+   Iga code runner (coderunner/: compiles and runs C++ and Java; internal network, no internet)
 ```
 
 - **Frontend:** React 19 + React Router, built with Vite. Pages are code-split, so the first load is about 95 KB gzipped. KaTeX and the Markdown pipeline load only with lesson pages.
@@ -50,7 +50,7 @@
 | `gamification` | XP ledger, streaks, badges, leaderboards | `XPEvent`, `Badge`, `UserBadge` |
 | `schools` | Schools (verification, join code, paid-through date), memberships, payments (Flutterwave, manual, test), reminders, and the single access rule every content endpoint uses | `School`, `Payment`, `BillingReminder` |
 | `tutor` | AI study tutor and the Ask AI page: builds the context the model may see (lesson, chosen subject, or a question once its solution is visible), switches itself off while the student sits a timed test, calls the Claude API, logs exchanges | `TutorExchange` |
-| `coderun` | C++ and Java for the code playground: checks the request, sends the program to the Piston code runner, turns its result into a verdict (compile error, time limit, …). Stores nothing | – |
+| `coderun` | C++ and Java for the code playground: checks the request, starts the program on the code runner, and passes the student's answers to a program waiting for input. Each session belongs to the student who started it. Stores nothing | – |
 | `core` | Constants, permissions, audit log, dashboard, search, admin API, content loader and management commands | `AuditLog` |
 
 ### Data model (simplified)
@@ -130,7 +130,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET/POST groups/` · `POST groups/{id}/join/` · `GET/POST groups/{id}/messages/?after=` · `GET/POST groups/{id}/notes/` | user | Study groups |
 | `POST messages/{id}/report/` · `POST messages/{id}/hide/` | member / moderator | Moderation |
 | `GET dashboard/` · `GET search/?q=` · `GET leaderboard/` · `GET badges/` | user | Home screen, search, motivation |
-| `GET code/status/` · `POST code/run/` | user | C++ and Java runs for the playground, sent to the Piston code runner (one run per student at a time, `CODE_RUNNER_MAX_RUNNING` site-wide, `THROTTLE_CODE_RUN`); 503 when it is off, busy or not answering |
+| `GET code/status/` · `POST code/run/` · `POST code/input/` · `POST code/stop/` | user | C++ and Java for the playground on the code runner: start a program, answer it when it waits for input, stop it (one program per student; `THROTTLE_CODE_RUN`, `THROTTLE_CODE_INPUT`); 503 when it is off, busy or not answering, 410 when the program has already finished |
 | `GET tutor/status/` · `POST tutor/ask/` | user | AI tutor: from a lesson or question, or the Ask AI page with an optional `subject`; off everywhere while the student has a timed test or exam running; needs the school subscription |
 | `GET schools/?q=&district=` · `GET schools/districts/` | anyone | Verified school directory for the sign-up picker |
 | `GET/POST/DELETE my-school/` | user | See, choose (optionally with the school code) or leave a school |
@@ -150,7 +150,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | Brute force | 10 login attempts/min **per account**; per-IP limits are generous because whole schools share one public IP; per-user limits on guessing class, group and parent codes and on password/2FA changes; shared through Redis across processes. Client IPs only trust `X-Forwarded-For` entries from our own proxies (`TRUSTED_PROXY_COUNT`) |
 | Authorisation | Role checks on every endpoint; teachers see only students enrolled in their current classes; students never reach the question bank; teacher self-registration needs admin approval; accounts with a teacher-issued temporary password can do nothing but change it |
 | Content injection | Markdown is rendered without raw HTML; code-playground previews run in a sandboxed iframe; Python and SQL run in Web Workers, entirely in the browser. Uploads get random names, must be an allowed type whose bytes match the extension, and nginx serves them with `nosniff`, a sandboxing CSP, and as downloads unless they are PDFs, images or media |
-| Student code | HTML/CSS/JS runs in a sandboxed iframe, Python (Pyodide) and SQL (sql.js) in Web Workers in the student's browser. C++ and Java never run on the Django server: Django sends them to a separate **Piston** code runner, which compiles and runs each program in an `isolate` sandbox with networking off, 6 s / 256 MB per run (Java 512 MB), 10 s to compile C++ (Java compiles in memory within its 6 s run), 16 KB of output and 4 jobs at a time. Piston has no authentication, so it must only be reachable from Django (Docker Compose publishes no port for it). Its container must be privileged, so in production run it on its own small machine with no secrets on it, behind a firewall that only lets the Django host in, and set `CODE_RUNNER_URL`. Each student can have one program running at a time and the whole site at most `CODE_RUNNER_MAX_RUNNING` (4, matching Piston's job limit); extra runs are refused at once ("try again in a few seconds") rather than queued, so they never hold up the web server's threads. Runs are also limited to 20 per minute per user (`THROTTLE_CODE_RUN`) |
+| Student code | HTML/CSS/JS runs in a sandboxed iframe, Python (Pyodide) and SQL (sql.js) in Web Workers in the student's browser. C++ and Java never run on the Django server: Django sends them to Iga's **code runner** (`coderunner/`), a separate container on an internal network with no internet access and no published port, which only accepts requests carrying `CODE_RUNNER_TOKEN`. It has no privileges except those needed to start each program as its slot's own unprivileged user (one user per slot, so programs running at once can't see or signal each other), in a fresh folder that is deleted afterwards, with limits: 10 s of CPU and 10 s to finish or ask for input after each answer, 512 MB (C++) or a 256 MB Java heap, 32/128 processes, 8 MB files, 64 KB of output, 120 s to answer, 10 minutes per session, and 4 sessions at a time (`CODE_RUNNER_SLOTS`; the container itself is capped at 2 GB and 2 CPUs). A program waiting for input is detected from `/proc` (every thread blocked reading stdin) and paused until the student answers. Each student's requests go one at a time, and starting a new program ends the previous one |
 | Minors' safety | No direct messages, only group chat; reporting and hiding; teacher badge only for approved teachers; group members, chat and leaderboards show first name + initial; parents see only their linked child, read-only; the AI tutor never sees other students' data |
 | Accountability | `AuditLog` records content changes, approvals, marks, role changes and moderation, with actor and IP |
 | Transport | HTTPS enforced (redirect, HSTS, secure cookies) when `HTTPS` is on, which is the default in production |

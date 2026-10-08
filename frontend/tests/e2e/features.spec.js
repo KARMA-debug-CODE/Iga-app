@@ -94,13 +94,31 @@ test("a parent links to their child with a code and sees progress", async ({ pag
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/Eric/);
 });
 
-test("Python runs in the browser", async ({ page }) => {
+test("Python asks for input in the console like a real interpreter, and indents automatically", async ({ page }) => {
   await login(page, "aline");
   await page.goto("/playground");
   await page.getByRole("tab", { name: /python/i }).click();
-  await page.getByLabel("Python code editor").fill("total = sum(range(1, 11))\nprint('Total:', total)");
-  await page.getByRole("button", { name: /run/i }).click();
-  await expect(page.locator(".python-output")).toContainText("Total: 55", { timeout: 45_000 });
+  const console_ = page.locator(".console");
+
+  // The starter program asks for a name: the question appears in the console and waits for the answer.
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(console_).toContainText("What is your name?", { timeout: 45_000 });
+  await page.getByLabel("Your answer").fill("Aline");
+  await page.getByLabel("Your answer").press("Enter");
+  await expect(console_).toContainText("Muraho, Aline!");
+  await expect(console_).toContainText("Average mark: 77.8");
+
+  // Enter after a line ending with ":" indents the next line, like a real editor.
+  const editor = page.getByLabel("Python code editor");
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.press("Delete");
+  await page.keyboard.type("for i in range(3):");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("print(i * 2)");
+  expect(await editor.innerText()).toMatch(/for i in range\(3\):\n {4}print\(i \* 2\)/);
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(console_).toContainText(/0\s+2\s+4/);
 });
 
 test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
@@ -114,48 +132,65 @@ test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
   await expect(output.locator("table").nth(1)).toContainText("Grace90Aline71Eric63Jean48"); // best average first
   await expect(output).toContainText("4 rows changed");
 
-  await page.getByLabel("SQL editor").fill("CREATE TABLE t (x INTEGER);\nSELEC x FROM t;");
+  await page.getByLabel("SQL editor").click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.type("CREATE TABLE t (x INTEGER);\nSELEC x FROM t;");
   await page.getByRole("button", { name: /run/i }).click();
   await expect(output.locator(".sql-error")).toContainText(/syntax error/i);
 });
 
-test("C++ and Java run on the code runner, with clear messages for errors", async ({ page }) => {
-  // The E2E server has no Piston code runner, so it is mocked here; tests/test_coderun.py covers the server side.
+test("C++ and Java run on the code runner and wait for answers in the console", async ({ page }) => {
+  // The E2E server has no code runner, so its API is mocked here; tests/test_coderun.py and
+  // coderunner/test_server.py cover the real thing.
   await page.route("**/api/code/status/", (route) => route.fulfill({ json: { enabled: true, languages: ["cpp", "java"] } }));
   const sent = [];
   await page.route("**/api/code/run/", async (route) => {
     const body = route.request().postDataJSON();
     sent.push(body);
-    if (body.language === "cpp" && body.code.includes("oops")) {
+    if (body.code.includes("oops")) {
       return route.fulfill({
-        json: { verdict: "compile_error", compile: { stdout: "", stderr: "main.cpp:3:5: error: 'oops' was not declared", code: 1 }, run: null },
+        json: { state: "finished", verdict: "compile_error", output: [{ stream: "compile", text: "main.cpp:2:3: error: 'oops' was not declared in this scope\n" }] },
       });
     }
     if (body.language === "java") {
-      return route.fulfill({
-        json: { verdict: "runtime_error", compile: null, run: { stdout: "", stderr: "error: can't find main(String[]) method in class: Student", code: 1, signal: null } },
-      });
+      return route.fulfill({ json: { session: "j1", state: "waiting", output: [{ stream: "stdout", text: "What is your name? " }] } });
     }
-    return route.fulfill({ json: { verdict: "ok", compile: { stdout: "", stderr: "", code: 0 }, run: { stdout: `Muraho, ${body.stdin}!\n`, stderr: "", code: 0 } } });
+    return route.fulfill({ json: { session: "c1", state: "waiting", output: [{ stream: "stdout", text: "What is your name? " }] } });
+  });
+  await page.route("**/api/code/input/", async (route) => {
+    const body = route.request().postDataJSON();
+    sent.push(body);
+    route.fulfill({
+      json: { session: body.session, state: "finished", verdict: "ok", exit_code: 0, output: [{ stream: "stdout", text: `\nMuraho, ${body.text}!\n` }] },
+    });
   });
 
   await login(page, "aline");
   await page.goto("/playground");
   await page.getByRole("tab", { name: /c\+\+/i }).click();
-  await page.getByRole("button", { name: /^▶ run$/i }).click();
-  const output = page.locator(".python-output");
-  await expect(output).toContainText("Muraho, Aline!");
-  await expect(output).toContainText("Finished");
-  expect(sent[0]).toMatchObject({ language: "cpp", stdin: "Aline" });
+  const console_ = page.locator(".console");
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(console_).toContainText("What is your name?");
+  await page.getByLabel("Your answer").fill("Aline");
+  await page.getByLabel("Your answer").press("Enter");
+  await expect(console_).toContainText("Muraho, Aline!");
+  await expect(console_).toContainText("Finished");
+  expect(sent[0].language).toBe("cpp");
+  expect(sent[1]).toEqual({ session: "c1", text: "Aline" });
 
-  await page.getByLabel("C++ code editor").fill("int main() {\n  oops;\n}");
-  await page.getByRole("button", { name: /^▶ run$/i }).click();
-  await expect(output).toContainText("did not compile");
-  await expect(output).toContainText("'oops' was not declared");
+  const editor = page.getByLabel("C++ code editor");
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.type("int main() {\noops;\n}");
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(console_).toContainText("did not compile");
+  await expect(console_).toContainText("'oops' was not declared");
 
   await page.getByRole("tab", { name: /java/i }).click();
-  await page.getByRole("button", { name: /^▶ run$/i }).click();
-  await expect(output).toContainText(/class that has main\(\) first/i);
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await page.getByLabel("Your answer").fill("Eric");
+  await page.getByLabel("Your answer").press("Enter");
+  await expect(page.locator(".console")).toContainText("Muraho, Eric!");
 });
 
 test("C++ and Java say when the server has no code runner", async ({ page }) => {
@@ -163,7 +198,7 @@ test("C++ and Java say when the server has no code runner", async ({ page }) => 
   await page.goto("/playground");
   await page.getByRole("tab", { name: /java/i }).click();
   await expect(page.getByText(/not switched on for this server yet/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /^▶ run$/i })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /^run$/i })).toBeDisabled();
 });
 
 test("books: every lesson lists the official textbook, and empty units point to it", async ({ page }) => {

@@ -186,7 +186,7 @@ msgid "This quiz has no questions yet."
 msgstr "Ce quiz n'a pas encore de questions."
 
 #: apps/assessments/services.py:144
-#: apps/tutor/services.py:201
+#: apps/tutor/services.py:209
 msgid "That question is not part of this attempt."
 msgstr "Cette question ne fait pas partie de cette tentative."
 
@@ -216,7 +216,7 @@ msgid "Time is up — your attempt was submitted automatically."
 msgstr "Le temps est écoulé : votre tentative a été remise automatiquement."
 
 #: apps/assessments/services.py:142
-#: apps/tutor/services.py:199
+#: apps/tutor/services.py:207
 msgid "Unknown question."
 msgstr "Question inconnue."
 
@@ -338,7 +338,7 @@ msgid "Quiz not found."
 msgstr "Quiz introuvable."
 
 #: apps/classroom/views.py:106
-#: apps/tutor/services.py:177
+#: apps/tutor/services.py:185
 msgid "Lesson not found."
 msgstr "Leçon introuvable."
 
@@ -351,23 +351,28 @@ msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
 msgid "That student is not in this class."
 msgstr "Cet élève n'est pas dans cette classe."
 
-#: apps/coderun/views.py:34
+#: apps/coderun/views.py:29
 msgid "C++ and Java are not switched on for this server yet."
 msgstr "C++ et Java ne sont pas encore activés sur ce serveur."
 
-#: apps/coderun/views.py:45
-msgid "Your last program is still running. Wait for it to finish."
-msgstr "Votre programme précédent est encore en cours d'exécution. Attendez qu'il se termine."
+#: apps/coderun/views.py:58
+#: apps/coderun/views.py:101
+msgid "This program has already finished. Press Run to start it again."
+msgstr "Ce programme est déjà terminé. Appuyez sur Exécuter pour le relancer."
 
-#: apps/coderun/views.py:50
+#: apps/coderun/views.py:63
 msgid "Many students are running programs right now. Try again in a few seconds."
 msgstr "Beaucoup d'élèves exécutent des programmes en ce moment. Réessayez dans quelques secondes."
 
-#: apps/coderun/views.py:56
+#: apps/coderun/views.py:41
+msgid "Your last program is still running. Wait for it to finish."
+msgstr "Votre programme précédent est encore en cours d'exécution. Attendez qu'il se termine."
+
+#: apps/coderun/views.py:47
 msgid "The code runner is not answering. Try again in a minute."
 msgstr "Le serveur d'exécution du code ne répond pas. Réessayez dans une minute."
 
-#: apps/coderun/views.py:62
+#: apps/coderun/views.py:53
 msgid "The code runner could not run this program. Please tell an administrator."
 msgstr "Le serveur d'exécution du code n'a pas pu lancer ce programme. Prévenez un administrateur."
 
@@ -644,39 +649,39 @@ msgstr "Seule une école en attente de vérification, sans aucun paiement, peut 
 msgid "Not found."
 msgstr "Introuvable."
 
-#: apps/tutor/services.py:79
-msgid "Must be a list of messages."
-msgstr "Doit être une liste de messages."
-
-#: apps/tutor/services.py:92
-msgid "The history must end with a tutor reply."
-msgstr "L'historique doit se terminer par une réponse du tuteur."
-
-#: apps/tutor/services.py:168
-msgid "Unknown subject."
-msgstr "Matière inconnue."
-
-#: apps/tutor/services.py:190
-msgid "Attempt not found."
-msgstr "Tentative introuvable."
-
-#: apps/tutor/services.py:194
-msgid "The tutor is switched off during exams and timed tests. Good luck!"
-msgstr "Le tuteur est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
-
-#: apps/tutor/services.py:227
-msgid "Write a question for the tutor."
-msgstr "Écrivez une question pour le tuteur."
-
-#: apps/tutor/services.py:235
+#: apps/tutor/services.py:242
 msgid "The tutor is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use the tutor again."
 msgstr "Le tuteur est désactivé tant que vous avez un examen ou un test chronométré ouvert (« %(quiz)s »). Rendez-le pour utiliser à nouveau le tuteur."
 
-#: apps/tutor/services.py:89
+#: apps/tutor/services.py:80
+msgid "Must be a list of messages."
+msgstr "Doit être une liste de messages."
+
+#: apps/tutor/services.py:93
+msgid "The history must end with a tutor reply."
+msgstr "L'historique doit se terminer par une réponse du tuteur."
+
+#: apps/tutor/services.py:176
+msgid "Unknown subject."
+msgstr "Matière inconnue."
+
+#: apps/tutor/services.py:198
+msgid "Attempt not found."
+msgstr "Tentative introuvable."
+
+#: apps/tutor/services.py:202
+msgid "The tutor is switched off during exams and timed tests. Good luck!"
+msgstr "Le tuteur est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
+
+#: apps/tutor/services.py:235
+msgid "Write a question for the tutor."
+msgstr "Écrivez une question pour le tuteur."
+
+#: apps/tutor/services.py:90
 msgid "Messages must alternate between the student and the tutor."
 msgstr "Les messages doivent alterner entre l'élève et le tuteur."
 
-#: apps/tutor/services.py:229
+#: apps/tutor/services.py:237
 msgid "Please keep questions under %(n)s characters."
 msgstr "Veuillez limiter vos questions à %(n)s caractères."
 
