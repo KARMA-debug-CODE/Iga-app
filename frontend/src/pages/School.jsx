@@ -430,9 +430,13 @@ export function SchoolBilling() {
                           {t(`billing.paymentStatus.${p.status}`)}
                         </span>
                       </td>
-                      <td>{p.status === "succeeded" && <Link to={`/school/billing/receipt/${p.reference}`} className="with-icon">
-                          <Icon name="receipt" size={16} /> {t("billing.view")}
-                        </Link>}</td>
+                      <td>
+                        {p.status === "succeeded" && (
+                          <Link to={`/school/billing/receipt/${p.reference}`} className="with-icon">
+                            <Icon name="receipt" size={16} /> {t("billing.view")}
+                          </Link>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

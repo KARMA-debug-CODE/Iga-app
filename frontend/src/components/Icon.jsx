@@ -252,7 +252,8 @@ const ICONS = {
 /** <Icon name="play" /> — decorative by default; pass `label` when the icon is the only content.
  * `fallback` is drawn when `name` is unknown (names that come from the server, such as subject icons). */
 export function Icon({ name, fallback, size = 18, label, className = "", strokeWidth = 2, style }) {
-  const Component = ICONS[name] || ICONS[fallback];
+  // Own keys only, so a name such as "constructor" from the server falls back instead of crashing.
+  const Component = (Object.hasOwn(ICONS, name) && ICONS[name]) || (Object.hasOwn(ICONS, fallback) && ICONS[fallback]);
   if (!Component) return null;
   return (
     <Component

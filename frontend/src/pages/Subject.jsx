@@ -121,9 +121,13 @@ export default function Subject() {
                 </summary>
                 <div className="unit-body">
                   <div className="spread" style={{ marginBottom: 6 }}>
-                    {!unit.alignment_verified ? <span className="small muted line-with-icon">
+                    {!unit.alignment_verified ? (
+                      <span className="small muted line-with-icon">
                         <Icon name="info" size={14} /> <span>{t("learn.notVerified")}</span>
-                      </span> : <span />}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
                     <SaveOffline unit={{ ...unit, grade }} />
                   </div>
                   {unit.lessons.length ? (

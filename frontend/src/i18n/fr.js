@@ -88,7 +88,7 @@ export default {
   "learn.official": "Officielle",
   "learn.simulations": "Essayer au labo",
   "learn.quizzes": "S'entraîner sur cette unité",
-  "learn.xpGained": "Bravo ! +{n} XP",
+  "learn.xpGained": "Bravo ! +{n} XP",
   "learn.notVerified": "Plan provisoire — pas encore vérifié par rapport au programme officiel",
   "learn.readIn": "Lire en",
 
