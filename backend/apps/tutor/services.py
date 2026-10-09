@@ -585,7 +585,8 @@ def answer(prepared, stream=False):
 
     The exchange is logged when the answer ends, also when the student stops it half-way."""
     user = prepared.context.user
-    seconds = int(settings.SANTA_TIMEOUT_SECONDS) + 30
+    # Longer than an answer can last: the time limit, plus a last wait for a model server gone silent.
+    seconds = int(settings.SANTA_TIMEOUT_SECONDS) + llm.STREAM_READ_TIMEOUT + 15
     user_key = f"santa:user:{user.pk}"
     if not _take(user_key, seconds):
         yield {
