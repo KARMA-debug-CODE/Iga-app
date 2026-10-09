@@ -533,6 +533,14 @@ def test_retrieval_finds_the_relevant_lessons(student, gradient_lesson, biology)
     assert others[0].slug == "linear" and others[0].heading == "Gradient"
     _, french = retrieval.search(student, "membrane cellulaire", "fr")
     assert french[0].language == "fr" and french[0].title == "La cellule"
+    # A translated lesson is quoted in the reply language only, not the same section twice.
+    _, once = retrieval.search(student, "À quoi sert la membrane cellulaire ?", "fr")
+    assert [p.language for p in once] == ["fr"]
+    _, once = retrieval.search(student, "cell membrane, la membrane cellulaire", "en")
+    assert [p.language for p in once] == ["en"]
+    # A lesson with no French yet is still quoted for a French question.
+    _, english_only = retrieval.search(student, "Quel est le gradient ?", "fr")
+    assert english_only[0].slug == "linear" and english_only[0].language == "en"
     # Questions about nothing in the lessons, or about studying in general, bring up nothing.
     assert retrieval.search(student, "Who won the football match yesterday?", "en") == ([], [])
     assert retrieval.search(student, "Explain this lesson more simply", "en") == ([], [])
