@@ -431,6 +431,7 @@ export default {
   "python.stop": "Arrêter",
   "python.stopped": "Arrêté.",
   "python.pageIntro": "Écrivez et exécutez du vrai code : pages web, Python, C++, Java et SQL.",
+  "calc.pageIntro": "Une fois ouverte, elle fonctionne sans internet. Votre historique et votre mémoire restent sur cet appareil.",
 
   "offline.save": "Enregistrer hors ligne",
   "offline.saving": "Enregistrement…",

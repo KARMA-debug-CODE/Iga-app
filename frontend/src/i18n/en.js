@@ -432,6 +432,7 @@ export default {
   "python.stop": "Stop",
   "python.stopped": "Stopped.",
   "python.pageIntro": "Write and run real code: web pages, Python, C++, Java and SQL.",
+  "calc.pageIntro": "Once opened, it works without internet. Your history and memory stay on this device.",
 
   "offline.save": "Save for offline",
   "offline.saving": "Saving…",
