@@ -261,13 +261,11 @@ int main() {
 
 ### Exemple corrigé 4 : exécuter BankAccount
 
-Exécutez le programme et répondez Keza, 5000, 2000 et 3500.
+Exécutez le programme et répondez Keza, 5000, 2000 et 3500. Suivez `balance` ligne par ligne :
 
-| Ligne de `main()` | Ce qui se passe | `balance` |
-|---|---|---|
-| `BankAccount account(name, opening);` | le constructeur met 0, puis appelle `deposit(5000)` | 5000 |
-| `account.deposit(amount);` | 2000 > 0, donc le montant est ajouté | 7000 |
-| `account.withdraw(amount)` | 3500 <= 7000, donc le montant est retiré et la méthode renvoie `true` | 3500 |
+1. `BankAccount account(name, opening);` appelle le constructeur. Il met `balance` à 0, puis appelle `deposit(5000)` : `balance` vaut donc 5000.
+2. `account.deposit(amount);` ajoute 2000, car 2000 > 0. `balance` vaut maintenant 7000.
+3. `account.withdraw(amount)` retire 3500, car 3500 <= 7000, et renvoie `true`. `balance` vaut maintenant 3500.
 
 Les deux dernières lignes affichées sont `Retrait effectué.` et `Keza a 3500 FRW.`
 

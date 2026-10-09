@@ -1060,6 +1060,23 @@ tr:last-child td {
   border-radius: var(--radius-sm);
 }
 
+/* Lesson tables: tighter cells on phones, and headers that can wrap, so most fit without scrolling. */
+.prose th,
+.prose td {
+  padding: 8px 6px;
+}
+
+.prose th {
+  white-space: normal;
+}
+
+@media (min-width: 760px) {
+  .prose th,
+  .prose td {
+    padding: 9px 12px;
+  }
+}
+
 .prose blockquote {
   margin: 1em 0;
   padding: 10px 16px;

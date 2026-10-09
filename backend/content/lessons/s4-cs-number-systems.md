@@ -29,17 +29,17 @@ A **number system** is a way of writing numbers with a fixed set of digits. The 
 | Decimal | 10 | 0 to 9 |
 | Hexadecimal | 16 | 0 to 9, then A to F |
 
-In hexadecimal, the letters stand for the values ten to fifteen: A = 10, B = 11, C = 12, D = 13, E = 14 and F = 15.
+In hexadecimal (hex for short), the letters stand for the values ten to fifteen: A = 10, B = 11, C = 12, D = 13, E = 14 and F = 15.
 
 The same digits can mean different numbers in different bases, so we write the base as a small number after the digits: $11_{10}$ is eleven, but $11_2$ is three, $11_8$ is nine and $11_{16}$ is seventeen.
 
 Every number system uses **place value**. In decimal, $3\,054 = 3 \times 1000 + 0 \times 100 + 5 \times 10 + 4 \times 1$. The place values are powers of 10: $10^0 = 1$, $10^1 = 10$, $10^2 = 100$, and so on. In base $b$, the place values are powers of $b$, starting with $b^0 = 1$ on the right.
 
-| Base | Place values, from right to left |
-|---|---|
-| 2 | 1, 2, 4, 8, 16, 32, 64, 128, … |
-| 8 | 1, 8, 64, 512, 4096, … |
-| 16 | 1, 16, 256, 4096, … |
+Here are the place values, from right to left:
+
+- base 2: 1, 2, 4, 8, 16, 32, 64, 128, …
+- base 8: 1, 8, 64, 512, 4096, …
+- base 16: 1, 16, 256, 4096, …
 
 ## Converting to decimal: use the place values
 
@@ -49,11 +49,11 @@ Write the place values above the digits, multiply each digit by its place value,
 
 Convert (a) $101101_2$, (b) $157_8$ and (c) $\mathrm{1A3}_{16}$ to decimal.
 
-(a) Write the binary place values above the bits:
+(a) Write the binary place values (top row) above the bits (bottom row):
 
-| Place value | 32 | 16 | 8 | 4 | 2 | 1 |
-|---|---|---|---|---|---|---|
-| Bit | 1 | 0 | 1 | 1 | 0 | 1 |
+| 32 | 16 | 8 | 4 | 2 | 1 |
+|---|---|---|---|---|---|
+| 1 | 0 | 1 | 1 | 0 | 1 |
 
 - A bit is 0 or 1, so just add the place values above the 1s: $32 + 8 + 4 + 1 = 45$.
 - So $101101_2 = 45_{10}$.
@@ -94,7 +94,7 @@ Mount Karisimbi is 4,507 m high. Write 4,507 in hexadecimal and in octal.
 
 | Division | Quotient | Remainder |
 |---|---|---|
-| 4507 ÷ 16 | 281 | 11, written B |
+| 4507 ÷ 16 | 281 | 11 = B |
 | 281 ÷ 16 | 17 | 9 |
 | 17 ÷ 16 | 1 | 1 |
 | 1 ÷ 16 | 0 | 1 |
@@ -109,7 +109,7 @@ Mount Karisimbi is 4,507 m high. Write 4,507 in hexadecimal and in octal.
 
 Counting in binary works like the distance counter on a moto. When a digit passes its biggest value, it goes back to 0 and carries 1 to the left. In binary the biggest digit is 1, so $1 + 1 = 10_2$, and $111_2 + 1 = 1000_2$.
 
-| Decimal | Binary | Octal | Hexadecimal |
+| Decimal | Binary | Octal | Hex |
 |---|---|---|---|
 | 0 | 0000 | 0 | 0 |
 | 1 | 0001 | 1 | 1 |

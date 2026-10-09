@@ -265,13 +265,11 @@ int main() {
 
 ### Worked example 4: running BankAccount
 
-Run the program and answer Keza, 5000, 2000 and 3500.
+Run the program and answer Keza, 5000, 2000 and 3500. Follow `balance` line by line:
 
-| Line in `main()` | What happens | `balance` |
-|---|---|---|
-| `BankAccount account(name, opening);` | the constructor sets 0, then calls `deposit(5000)` | 5000 |
-| `account.deposit(amount);` | 2000 > 0, so it is added | 7000 |
-| `account.withdraw(amount)` | 3500 <= 7000, so it is taken away and the method returns `true` | 3500 |
+1. `BankAccount account(name, opening);` calls the constructor. It sets `balance` to 0, then calls `deposit(5000)`, so `balance` is 5000.
+2. `account.deposit(amount);` adds 2000, because 2000 > 0. Now `balance` is 7000.
+3. `account.withdraw(amount)` takes away 3500, because 3500 <= 7000, and returns `true`. Now `balance` is 3500.
 
 The last two lines printed are `Withdrawal done.` and `Keza has 3500 FRW.`
 

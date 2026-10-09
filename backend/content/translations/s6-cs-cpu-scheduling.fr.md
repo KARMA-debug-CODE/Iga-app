@@ -23,7 +23,7 @@ Un processus passe par cinq **états**.
 | En attente (bloqué) | il attend un événement, comme l'appui sur une touche ou la lecture d'un fichier |
 | Terminé | il a fini, et le système d'exploitation libère ses ressources |
 
-| Changement d'état | Quand il se produit |
+| Changement | Quand |
 |---|---|
 | Nouveau → Prêt | le processus est admis en mémoire |
 | Prêt → En exécution | l'ordonnanceur le choisit |
@@ -51,7 +51,12 @@ Pour comparer les algorithmes, on utilise ces temps pour chaque processus. On ga
 | **Temps de séjour** (TAT, *turnaround time*) | le temps total entre son arrivée et sa fin |
 | **Temps d'attente** (WT) | le temps passé dans la file des processus prêts, sans s'exécuter |
 
-$$\text{TAT} = \text{CT} - \text{AT} \qquad \text{WT} = \text{TAT} - \text{BT}$$
+$$
+\begin{gathered}
+\text{TAT} = \text{CT} - \text{AT} \\
+\text{WT} = \text{TAT} - \text{BT}
+\end{gathered}
+$$
 
 Une moyenne est la somme divisée par le nombre de processus ; un bon algorithme donne de petites moyennes. Un **diagramme de Gantt** est une barre qui montre quel processus utilise le processeur et à quel moment, avec les temps sous les bords des cases. Ici, les temps sont en millisecondes (ms).
 
@@ -69,13 +74,13 @@ Trois processus arrivent au temps 0 dans l'ordre P1, P2, P3, avec des temps d'ex
 ```
 
 - Les trois arrivent à 0 : le temps d'attente de chacun est donc son heure de début, soit 0, 24 et 27 ms.
-- WT moyen $= \dfrac{0 + 24 + 27}{3} = \dfrac{51}{3} = 17$ ms.
+- WT moyen $= (0 + 24 + 27) \div 3 = 51 \div 3 = 17$ ms.
 - Dans l'ordre P2, P3, P1, le diagramme donne P2 de 0 à 3, P3 de 3 à 6 et P1 de 6 à 30 : les temps d'attente sont donc 0, 3 et 6 ms.
-- WT moyen $= \dfrac{0 + 3 + 6}{3} = 3$ ms. Le même travail, mais 3 ms au lieu de 17 ms : les tâches courtes ne devraient pas faire la queue derrière les longues.
+- WT moyen $= (0 + 3 + 6) \div 3 = 3$ ms. Le même travail, mais 3 ms au lieu de 17 ms : les tâches courtes ne devraient pas faire la queue derrière les longues.
 
 Les trois exemples suivants utilisent ces quatre processus, pour que vous puissiez comparer les algorithmes.
 
-| Processus | Temps d'arrivée (ms) | Temps d'exécution (ms) |
+| Processus | Arrivée (ms) | Exécution (ms) |
 |---|---|---|
 | P1 | 0 | 7 |
 | P2 | 2 | 4 |
@@ -99,7 +104,8 @@ Les trois exemples suivants utilisent ces quatre processus, pour que vous puissi
 | P4 | 5 | 4 | 16 | 11 | 7 |
 
 - Pour P2 : TAT $= 11 - 2 = 9$ et WT $= 9 - 4 = 5$. Les autres lignes se calculent de la même façon.
-- TAT moyen $= \dfrac{7 + 9 + 8 + 11}{4} = \dfrac{35}{4} = 8{,}75$ ms. WT moyen $= \dfrac{0 + 5 + 7 + 7}{4} = \dfrac{19}{4} = 4{,}75$ ms.
+- TAT moyen $= (7 + 9 + 8 + 11) \div 4 = 35 \div 4 = 8{,}75$ ms.
+- WT moyen $= (0 + 5 + 7 + 7) \div 4 = 19 \div 4 = 4{,}75$ ms.
 
 ## Le plus court d'abord (SJF)
 
@@ -123,7 +129,8 @@ Les trois exemples suivants utilisent ces quatre processus, pour que vous puissi
 | P3 | 4 | 1 | 8 | 4 | 3 |
 | P4 | 5 | 4 | 16 | 11 | 7 |
 
-- TAT moyen $= \dfrac{32}{4} = 8$ ms. WT moyen $= \dfrac{16}{4} = 4$ ms.
+- TAT moyen $= 32 \div 4 = 8$ ms.
+- WT moyen $= 16 \div 4 = 4$ ms.
 
 ## Le tourniquet (Round Robin, RR)
 
@@ -159,19 +166,20 @@ Suivez la file des processus prêts après chaque tranche (sa tête est à gauch
 | P3 | 4 | 1 | 7 | 3 | 2 |
 | P4 | 5 | 4 | 15 | 10 | 6 |
 
-- TAT moyen $= \dfrac{36}{4} = 9$ ms. WT moyen $= \dfrac{20}{4} = 5$ ms.
+- TAT moyen $= 36 \div 4 = 9$ ms.
+- WT moyen $= 20 \div 4 = 5$ ms.
 
 Le quantum compte. S'il est plus long que tous les temps d'exécution, aucun processus n'est jamais arrêté et Round Robin devient FCFS. S'il est très court, le processeur passe une grande partie de son temps en changements de contexte.
 
 ### Exemple corrigé 5 : quel algorithme est le meilleur ?
 
-Comparez les résultats. Regardez aussi le **temps de réponse** : le temps entre l'arrivée d'un processus et le moment où il obtient le processeur pour la première fois. Avec Round Robin, les temps de réponse sont 0, 0, 2 et 4 ms. Avec FCFS et SJF, qui n'arrêtent jamais un processus, ils sont égaux aux temps d'attente.
+Comparez les résultats. Regardez aussi le **temps de réponse** : le temps entre l'arrivée d'un processus et le moment où il obtient le processeur pour la première fois. Avec Round Robin, les temps de réponse sont 0, 0, 2 et 4 ms. Avec FCFS et SJF, qui n'arrêtent jamais un processus, ils sont égaux aux temps d'attente. Voici les moyennes (RR utilise un quantum de 2 ms).
 
-| Algorithme | TAT moyen (ms) | WT moyen (ms) | Temps de réponse moyen (ms) |
+| Moyenne (ms) | FCFS | SJF | RR |
 |---|---|---|---|
-| FCFS | 8,75 | 4,75 | 4,75 |
-| SJF | 8 | 4 | 4 |
-| RR, quantum de 2 ms | 9 | 5 | 1,5 |
+| TAT | 8,75 | 8 | 9 |
+| WT | 4,75 | 4 | 5 |
+| Temps de réponse | 4,75 | 4 | 1,5 |
 
 - Ici, SJF donne les plus petits temps d'attente et de séjour moyens.
 - Round Robin donne les plus grandes moyennes, mais le plus petit temps de réponse : chaque processus démarre moins de 4 ms après son arrivée. Pour quelqu'un qui tape au clavier, une réponse rapide compte davantage.

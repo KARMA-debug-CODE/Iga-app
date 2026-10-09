@@ -24,17 +24,17 @@ Un **système de numération** est une façon d'écrire les nombres avec un ense
 | Décimal | 10 | de 0 à 9 |
 | Hexadécimal | 16 | de 0 à 9, puis de A à F |
 
-En hexadécimal, les lettres représentent les valeurs de dix à quinze : A = 10, B = 11, C = 12, D = 13, E = 14 et F = 15.
+En hexadécimal (« hexa » en abrégé), les lettres représentent les valeurs de dix à quinze : A = 10, B = 11, C = 12, D = 13, E = 14 et F = 15.
 
 Les mêmes chiffres peuvent représenter des nombres différents selon la base. On écrit donc la base en petit après les chiffres : $11_{10}$ vaut onze, mais $11_2$ vaut trois, $11_8$ vaut neuf et $11_{16}$ vaut dix-sept.
 
 Tous les systèmes de numération utilisent la **valeur de position**. En décimal, $3\,054 = 3 \times 1000 + 0 \times 100 + 5 \times 10 + 4 \times 1$. Les valeurs de position sont des puissances de 10 : $10^0 = 1$, $10^1 = 10$, $10^2 = 100$, et ainsi de suite. En base $b$, les valeurs de position sont des puissances de $b$, en commençant par $b^0 = 1$ à droite.
 
-| Base | Valeurs de position, de droite à gauche |
-|---|---|
-| 2 | 1, 2, 4, 8, 16, 32, 64, 128, … |
-| 8 | 1, 8, 64, 512, 4096, … |
-| 16 | 1, 16, 256, 4096, … |
+Voici les valeurs de position, de droite à gauche :
+
+- base 2 : 1, 2, 4, 8, 16, 32, 64, 128, …
+- base 8 : 1, 8, 64, 512, 4096, …
+- base 16 : 1, 16, 256, 4096, …
 
 ## Convertir en décimal : utilisez les valeurs de position
 
@@ -44,11 +44,11 @@ Tous les systèmes de numération utilisent la **valeur de position**. En décim
 
 Convertissez en décimal (a) $101101_2$, (b) $157_8$ et (c) $\mathrm{1A3}_{16}$.
 
-(a) Écrivez les valeurs de position binaires au-dessus des bits :
+(a) Écrivez les valeurs de position binaires (ligne du haut) au-dessus des bits (ligne du bas) :
 
-| Valeur de position | 32 | 16 | 8 | 4 | 2 | 1 |
-|---|---|---|---|---|---|---|
-| Bit | 1 | 0 | 1 | 1 | 0 | 1 |
+| 32 | 16 | 8 | 4 | 2 | 1 |
+|---|---|---|---|---|---|
+| 1 | 0 | 1 | 1 | 0 | 1 |
 
 - Un bit vaut 0 ou 1 : il suffit donc d'additionner les valeurs de position au-dessus des 1 : $32 + 8 + 4 + 1 = 45$.
 - Donc $101101_2 = 45_{10}$.
@@ -89,7 +89,7 @@ Le mont Karisimbi culmine à 4 507 m. Écrivez 4 507 en hexadécimal et en octal
 
 | Division | Quotient | Reste |
 |---|---|---|
-| 4507 ÷ 16 | 281 | 11, qui s'écrit B |
+| 4507 ÷ 16 | 281 | 11 = B |
 | 281 ÷ 16 | 17 | 9 |
 | 17 ÷ 16 | 1 | 1 |
 | 1 ÷ 16 | 0 | 1 |
@@ -104,7 +104,7 @@ Le mont Karisimbi culmine à 4 507 m. Écrivez 4 507 en hexadécimal et en octal
 
 Compter en binaire fonctionne comme le compteur kilométrique d'une moto. Quand un chiffre dépasse sa plus grande valeur, il revient à 0 et on retient 1 vers la gauche. En binaire, le plus grand chiffre est 1, donc $1 + 1 = 10_2$, et $111_2 + 1 = 1000_2$.
 
-| Décimal | Binaire | Octal | Hexadécimal |
+| Décimal | Binaire | Octal | Hexa |
 |---|---|---|---|
 | 0 | 0000 | 0 | 0 |
 | 1 | 0001 | 1 | 1 |

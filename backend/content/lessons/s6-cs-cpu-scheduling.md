@@ -27,7 +27,7 @@ A process moves through five **states**.
 | Waiting (blocked) | it waits for an event, such as a key press or a file being read |
 | Terminated | it has finished, and the operating system frees its resources |
 
-| Change of state | When it happens |
+| Change | When |
 |---|---|
 | New → Ready | the process is admitted into memory |
 | Ready → Running | the scheduler picks it |
@@ -55,7 +55,12 @@ To compare algorithms, we use these times for each process.
 | **Turnaround time** (TAT) | the total time from arrival to completion |
 | **Waiting time** (WT) | the time spent in the ready queue, not running |
 
-$$\text{TAT} = \text{CT} - \text{AT} \qquad \text{WT} = \text{TAT} - \text{BT}$$
+$$
+\begin{gathered}
+\text{TAT} = \text{CT} - \text{AT} \\
+\text{WT} = \text{TAT} - \text{BT}
+\end{gathered}
+$$
 
 An average is the sum divided by the number of processes; a good algorithm gives small averages. A **Gantt chart** is a bar showing which process uses the CPU and when, with the times under the edges of the boxes. Times here are in milliseconds (ms).
 
@@ -73,9 +78,9 @@ Three processes arrive at time 0 in the order P1, P2, P3, with burst times 24, 3
 ```
 
 - All three arrive at 0, so each waiting time is the start time: 0, 24 and 27 ms.
-- Average WT $= \dfrac{0 + 24 + 27}{3} = \dfrac{51}{3} = 17$ ms.
+- Average WT $= (0 + 24 + 27) \div 3 = 51 \div 3 = 17$ ms.
 - In the order P2, P3, P1, the chart is P2 0–3, P3 3–6 and P1 6–30, so the waiting times are 0, 3 and 6 ms.
-- Average WT $= \dfrac{0 + 3 + 6}{3} = 3$ ms. Same work, but 3 ms instead of 17 ms: short jobs should not queue behind long ones.
+- Average WT $= (0 + 3 + 6) \div 3 = 3$ ms. Same work, but 3 ms instead of 17 ms: short jobs should not queue behind long ones.
 
 The next three examples use these four processes, so that you can compare the algorithms.
 
@@ -103,7 +108,8 @@ The next three examples use these four processes, so that you can compare the al
 | P4 | 5 | 4 | 16 | 11 | 7 |
 
 - For P2: TAT $= 11 - 2 = 9$ and WT $= 9 - 4 = 5$. The other rows work the same way.
-- Average TAT $= \dfrac{7 + 9 + 8 + 11}{4} = \dfrac{35}{4} = 8.75$ ms. Average WT $= \dfrac{0 + 5 + 7 + 7}{4} = \dfrac{19}{4} = 4.75$ ms.
+- Average TAT $= (7 + 9 + 8 + 11) \div 4 = 35 \div 4 = 8.75$ ms.
+- Average WT $= (0 + 5 + 7 + 7) \div 4 = 19 \div 4 = 4.75$ ms.
 
 ## Shortest Job First (SJF)
 
@@ -127,7 +133,8 @@ The next three examples use these four processes, so that you can compare the al
 | P3 | 4 | 1 | 8 | 4 | 3 |
 | P4 | 5 | 4 | 16 | 11 | 7 |
 
-- Average TAT $= \dfrac{32}{4} = 8$ ms. Average WT $= \dfrac{16}{4} = 4$ ms.
+- Average TAT $= 32 \div 4 = 8$ ms.
+- Average WT $= 16 \div 4 = 4$ ms.
 
 ## Round Robin (RR)
 
@@ -163,19 +170,20 @@ Follow the ready queue after each slice (its front is on the left).
 | P3 | 4 | 1 | 7 | 3 | 2 |
 | P4 | 5 | 4 | 15 | 10 | 6 |
 
-- Average TAT $= \dfrac{36}{4} = 9$ ms. Average WT $= \dfrac{20}{4} = 5$ ms.
+- Average TAT $= 36 \div 4 = 9$ ms.
+- Average WT $= 20 \div 4 = 5$ ms.
 
 The quantum matters. If it is longer than every burst, no process is ever stopped and Round Robin becomes FCFS. If it is very short, the CPU spends much of its time on context switches.
 
 ### Worked example 5: which algorithm is best?
 
-Compare the results. Also look at the **response time**: the time from arrival until a process first gets the CPU. With Round Robin, the response times are 0, 0, 2 and 4 ms. With FCFS and SJF, which never stop a process, they equal the waiting times.
+Compare the results. Also look at the **response time**: the time from arrival until a process first gets the CPU. With Round Robin, the response times are 0, 0, 2 and 4 ms. With FCFS and SJF, which never stop a process, they equal the waiting times. Here are the averages (RR uses a quantum of 2 ms).
 
-| Algorithm | Average TAT (ms) | Average WT (ms) | Average response time (ms) |
+| Average (ms) | FCFS | SJF | RR |
 |---|---|---|---|
-| FCFS | 8.75 | 4.75 | 4.75 |
-| SJF | 8 | 4 | 4 |
-| RR, quantum 2 ms | 9 | 5 | 1.5 |
+| TAT | 8.75 | 8 | 9 |
+| WT | 4.75 | 4 | 5 |
+| Response time | 4.75 | 4 | 1.5 |
 
 - SJF has the smallest average waiting and turnaround times here.
 - Round Robin has the largest averages, but the smallest response time: every process starts within 4 ms of arriving. For someone typing, a quick response matters more.
