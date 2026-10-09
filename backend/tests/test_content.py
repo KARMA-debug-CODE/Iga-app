@@ -26,7 +26,7 @@ def test_shipped_content_loads_and_is_idempotent():
         Quiz.objects.count(),
         Question.objects.count(),
     )
-    assert Subject.objects.count() == 15
+    assert Subject.objects.count() == 16
     # Every grade has units in the core subjects.
     for code in ("mathematics", "physics", "chemistry", "biology", "ict", "english"):
         grades = set(Unit.objects.filter(subject__code=code).values_list("grade", flat=True))
@@ -148,3 +148,28 @@ def test_reloading_content_keeps_admin_status_changes():
     lesson.refresh_from_db()
     quiz.refresh_from_db()
     assert lesson.status == "archived" and quiz.status == "archived"
+
+
+def test_ict_and_computer_science_are_two_subjects():
+    load_all(log=lambda *_: None)
+    ict, cs = Subject.objects.get(code="ict"), Subject.objects.get(code="computer-science")
+    assert (ict.name, ict.name_fr, ict.offered_o_level, ict.offered_a_level) == ("ICT", "TIC", True, True)
+    assert (cs.name, cs.name_fr, cs.offered_o_level, cs.offered_a_level) == ("Computer Science", "Informatique", False, True)
+    assert cs.icon == "cpu" and cs.category == "computer-science"
+    assert list(Subject.objects.values_list("code", flat=True)).index("computer-science") == 5  # right after ICT
+    assert set(cs.units.values_list("grade", flat=True)) == {"S4", "S5", "S6"}
+    assert cs.units.filter(grade="S4").count() == 17 and not cs.units.filter(title_fr="").exists()
+    # The ICT lessons sit in the matching ICT units; Python is ICT S4, not Computer Science.
+    placed = {
+        lesson.slug: (lesson.unit.subject.code, lesson.unit.grade, lesson.unit.title)
+        for lesson in Lesson.objects.filter(unit__subject__code__in=["ict", "computer-science"]).select_related("unit__subject")
+    }
+    assert placed == {
+        "s1-ict-first-web-page": ("ict", "S1", "Your first web page: HTML"),
+        "s2-ict-css-basics": ("ict", "S2", "Styling web pages with CSS"),
+        "s3-ict-javascript-intro": ("ict", "S3", "Algorithms and programming: JavaScript"),
+        "s4-ict-python-basics": ("ict", "S4", "Python programming I"),
+    }
+    for quiz in Quiz.objects.filter(subject=ict):
+        assert quiz.unit.lessons.exists(), quiz.title  # each practice quiz sits with its lesson
+    assert not Unit.objects.filter(alignment_verified=True).exists()

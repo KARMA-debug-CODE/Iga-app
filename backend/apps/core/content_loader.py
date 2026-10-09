@@ -73,13 +73,18 @@ def load_subjects(path):
     return len(data)
 
 
-def load_units(path):
-    """units.json, plus French titles from units.fr.json next to it (same structure) when present."""
+def load_units(path, log=None):
+    """units.json, plus French titles from units.fr.json next to it (same structure) when present.
+
+    Units are matched by (subject, grade, number). A unit of a listed subject that is no longer in the file
+    is removed when nothing uses it; one that still holds lessons, questions, quizzes or books is kept and
+    reported, so an editor can move them first."""
     path = Path(path)
     data = json.loads(path.read_text(encoding="utf-8"))
     french_path = path.with_name(path.stem + ".fr.json")
     french = json.loads(french_path.read_text(encoding="utf-8")) if french_path.exists() else {}
     count = 0
+    listed = set()
     for code, grades in data.items():
         if code.startswith("_"):
             continue
@@ -92,10 +97,18 @@ def load_units(path):
                 raise ContentError(f"units.fr.json: {code} {grade} has {len(titles_fr)} titles, units.json has {len(titles)}")
             for number, title in enumerate(titles, start=1):
                 title_fr = titles_fr[number - 1] if titles_fr else ""
-                Unit.objects.update_or_create(
+                unit, _ = Unit.objects.update_or_create(
                     subject=subject, grade=grade, number=number, defaults={"title": title, "title_fr": title_fr}
                 )
+                listed.add(unit.pk)
                 count += 1
+    stale = Unit.objects.filter(subject__code__in=[c for c in data if not c.startswith("_")]).exclude(pk__in=listed)
+    for unit in stale.select_related("subject"):
+        if unit.lessons.exists() or unit.questions.exists() or unit.quizzes.exists() or unit.resources.exists():
+            if log:
+                log(f"Kept {unit} (not in units.json, but it still has lessons, questions or books)")
+        else:
+            unit.delete()
     return count
 
 
@@ -377,7 +390,7 @@ def import_quiz_file(path, status=ContentStatus.PUBLISHED):
 def load_all(content_dir=DEFAULT_CONTENT_DIR, log=print):
     content_dir = Path(content_dir)
     log(f"Subjects:     {load_subjects(content_dir / 'subjects.json')}")
-    log(f"Units:        {load_units(content_dir / 'units.json')}")
+    log(f"Units:        {load_units(content_dir / 'units.json', log)}")
     log(f"Books:        {load_books(content_dir / 'books.json')}")
     log(f"Simulations:  {load_simulations(content_dir / 'simulations.json')}")
     log(f"Lessons:      {load_lessons(content_dir / 'lessons')}")

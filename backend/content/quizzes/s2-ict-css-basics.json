@@ -1,6 +1,6 @@
 {
   "title": "CSS basics — practice",
-  "subject": "ict", "grade": "S2", "unit": 3,
+  "subject": "ict", "grade": "S2", "unit": 5,
   "kind": "practice", "feedback_mode": "immediate",
   "questions": [
     {"type": "mcq", "difficulty": 1, "prompt": "Which selector targets every element with `class=\"card\"`?",

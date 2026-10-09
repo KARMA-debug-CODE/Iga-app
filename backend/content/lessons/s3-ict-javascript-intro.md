@@ -2,7 +2,7 @@
 slug: s3-ict-javascript-intro
 subject: ict
 grade: S3
-unit: 2
+unit: 4
 order: 1
 title: "JavaScript: make your page interactive"
 summary: Variables, data types, decisions, functions, loops and events — write your first JavaScript program that reacts to a button click.
