@@ -411,14 +411,36 @@ def _run_tool(call):
     return expression, calculator.calculate(expression)
 
 
+def _shrink(prepared):
+    """Make the request smaller (no history, only the best passage). False when there is nothing to drop."""
+    if not prepared.history and len(prepared.own) + len(prepared.others) <= 1:
+        return False
+    prepared.history = []
+    prepared.own, prepared.others = prepared.own[:1], [] if prepared.own else prepared.others[:1]
+    prepared.prompt = compose(prepared.context, prepared.message, prepared.own, prepared.others)
+    return True
+
+
 def _from_model(prepared, stream, deadline, answer):
+    """Ask the model. When the question with its context doesn't fit one of the model server's slots (a
+    model whose words are cut into more tokens than expected), ask once more with less context."""
+    try:
+        yield from _ask_model(prepared, stream, deadline, answer, tools=True)
+    except llm.TooLong:
+        if answer.text or answer.tools or not _shrink(prepared):
+            raise
+        log.info("Santa's question did not fit a model slot; asking again with less context")
+        yield from _ask_model(prepared, stream, deadline, answer, tools=False)
+
+
+def _ask_model(prepared, stream, deadline, answer, tools):
     """Ask the model, letting it use the calculator up to MAX_TOOL_ROUNDS times."""
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         *prepared.history,
         {"role": "user", "content": prepared.prompt},
     ]
-    tools = [calculator.TOOL]
+    tools = [calculator.TOOL] if tools else None
     for round_number in range(MAX_TOOL_ROUNDS + 1):
         payload = {
             "model": settings.SANTA_MODEL_NAME,
@@ -588,6 +610,7 @@ def answer(prepared, stream=False):
             slot = _take_model_slot(seconds)
             if slot is None:
                 fallback = "busy"
+        passages = prepared.own, prepared.others  # all of them, for an answer from the lessons
         if fallback is None:
             try:
                 yield from _from_model(prepared, stream, deadline, result)
@@ -609,6 +632,7 @@ def answer(prepared, stream=False):
                         )
         sources = prepared.sources
         if fallback:
+            prepared.own, prepared.others = passages
             passages = _fallback_passages(prepared)
             sources = retrieval.sources(passages)
             result = _Answer(finish=f"fallback:{fallback}")

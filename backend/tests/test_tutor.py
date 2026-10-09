@@ -34,7 +34,7 @@ class FakeSanta(BaseHTTPRequestHandler):
     garbage = False
     delay = 0
     cut_after = None  # stream: drop the connection after this many pieces of text
-    too_long = False  # answer as llama-server does when a request doesn't fit a slot
+    too_long = 0  # refuse this many requests, as llama-server does when a request doesn't fit a slot
     shape = None  # valid JSON that isn't an answer: sent as the reply, or as a streamed chunk
 
     def log_message(self, *args):
@@ -61,6 +61,7 @@ class FakeSanta(BaseHTTPRequestHandler):
         if self.headers.get("Authorization") != f"Bearer {KEY}":
             return self._json(401, {"error": {"code": 401, "message": "Invalid API Key"}})
         if FakeSanta.too_long:
+            FakeSanta.too_long -= 1
             message = "request (5120 tokens) exceeds the available context size (4096 tokens), try increasing it"
             return self._json(400, {"error": {"code": 400, "message": message, "type": "exceed_context_size_error"}})
         if FakeSanta.reject_tools and body.get("tools"):
@@ -145,7 +146,7 @@ def santa(settings):
     FakeSanta.calls, FakeSanta.script = [], []
     FakeSanta.loading = FakeSanta.reject_tools = FakeSanta.garbage = False
     FakeSanta.delay, FakeSanta.cut_after = 0, None
-    FakeSanta.too_long, FakeSanta.shape = False, None
+    FakeSanta.too_long, FakeSanta.shape = 0, None
     settings.SANTA_URL = f"http://127.0.0.1:{server.server_address[1]}"
     settings.SANTA_API_KEY = KEY
     settings.SANTA_MODEL_NAME = "santa"
@@ -361,11 +362,27 @@ def test_a_reply_of_the_wrong_shape_answers_from_the_lessons(client_for, student
     assert TutorExchange.objects.get().stop_reason == "fallback:unavailable"
 
 
-def test_a_question_too_long_for_the_model_is_not_asked_again(client_for, student, biology, santa):
-    santa.too_long = True
-    response = ask(client_for(student), message="cell membrane")
-    assert len(santa.calls) == 1  # not mistaken for a server that refuses the calculator
-    assert response.data["fallback"] == "too_long" and "too long for Santa" in response.data["reply"]
+def test_a_question_too_long_for_the_model_is_asked_again_with_less(client_for, student, gradient_lesson, biology, santa):
+    santa.too_long = 1
+    santa.script = [{"content": "The membrane controls what goes in and out."}]
+    history = [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hello! What shall we study?"}]
+    response = ask(client_for(student), message="cell membrane gradient", history=history)
+    assert response.data["reply"] == "The membrane controls what goes in and out."
+    first, second = (c["body"] for c in santa.calls)
+    assert "tools" in first and len(first["messages"]) == 4
+    # Not mistaken for a server that refuses the calculator: no history, one passage and no tools.
+    assert "tools" not in second and [m["role"] for m in second["messages"]] == ["system", "user"]
+    assert second["messages"][1]["content"].count("\n[") == 1
+    assert len(response.data["sources"]) == 1
+
+
+def test_a_question_that_never_fits_answers_from_the_lessons(client_for, student, gradient_lesson, santa):
+    santa.too_long = 5
+    response = ask(client_for(student), message="linear graphs: gradient and intercept")
+    assert len(santa.calls) == 2
+    reply = response.data["reply"]
+    assert response.data["fallback"] == "too_long" and "too long for Santa" in reply
+    assert "rise over run" in reply and "crosses the y-axis" in reply  # all it found, not just what was sent last
 
 
 def test_long_questions_leave_less_room_for_lesson_passages(student, unit):
