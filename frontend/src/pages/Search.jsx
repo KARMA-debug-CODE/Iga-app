@@ -29,10 +29,9 @@ export default function Search() {
                   <h2>{t("learn.subjects")}</h2>
                   <ul className="list">
                     {r.subjects.map((s) => (
-                      <li key={s.code}>
-                        <Link to={`/learn/${s.code}`} className="with-icon">
-                          <SubjectIcon name={s.icon} size={18} /> {s.name}
-                        </Link>
+                      <li key={s.code} className="line-with-icon">
+                        <SubjectIcon name={s.icon} size={18} />
+                        <Link to={`/learn/${s.code}`}>{s.name}</Link>
                       </li>
                     ))}
                   </ul>
@@ -45,14 +44,15 @@ export default function Search() {
                   </h2>
                   <ul className="list">
                     {r.lessons.map((l) => (
-                      <li key={l.slug}>
-                        <Link to={`/lessons/${l.slug}`} className="with-icon">
-                          <SubjectIcon name={l.icon} size={18} /> {l.title}
-                        </Link>{" "}
-                        <span className="small muted">
-                          · {l.subject} {l.grade}
-                        </span>{" "}
-                        {l.locked && <LockBadge />}
+                      <li key={l.slug} className="line-with-icon">
+                        <SubjectIcon name={l.icon} size={18} />
+                        <span>
+                          <Link to={`/lessons/${l.slug}`}>{l.title}</Link>{" "}
+                          <span className="small muted">
+                            · {l.subject} {l.grade}
+                          </span>{" "}
+                          {l.locked && <LockBadge />}
+                        </span>
                       </li>
                     ))}
                   </ul>
