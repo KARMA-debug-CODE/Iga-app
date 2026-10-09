@@ -1,7 +1,6 @@
-import logging
+import json
 
-import anthropic
-from django.utils.translation import gettext as _
+from django.http import StreamingHttpResponse
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,8 +8,6 @@ from rest_framework.views import APIView
 from apps.schools import access
 
 from . import services
-
-log = logging.getLogger(__name__)
 
 
 class AskSerializer(serializers.Serializer):
@@ -23,60 +20,78 @@ class AskSerializer(serializers.Serializer):
     subject = serializers.SlugField(required=False, allow_blank=True)
 
 
+def _prepare(request):
+    """Check access and the question (403, 400 or 404 answers come from here, before any answering)."""
+    access.require(request.user)  # Santa is part of the school subscription
+    data = AskSerializer(data=request.data)
+    data.is_valid(raise_exception=True)
+    v = data.validated_data
+    return services.prepare(
+        request.user,
+        v["message"],
+        history=v.get("history"),
+        lesson_slug=v.get("lesson") or None,
+        attempt_id=v.get("attempt"),
+        question_id=v.get("question"),
+        lang=v.get("lang"),
+        subject_code=v.get("subject") or None,
+    )
+
+
 class TutorStatusView(APIView):
     def get(self, request):
-        premium = access.has_premium(request.user)
-        return Response(
-            {
-                "enabled": services.tutor_enabled() and premium,
-                # Set when the tutor exists but this account's school hasn't subscribed.
-                "reason": "" if premium or not services.tutor_enabled() else "subscription_required",
-            }
-        )
+        return Response(services.status(request.user))
 
 
 class TutorAskView(APIView):
+    """Santa's whole answer as JSON: {reply, sources, fallback, tools}."""
+
     throttle_scope = "tutor"
 
     def post(self, request):
-        if not services.tutor_enabled():
-            return Response(
-                {"detail": _("The AI tutor is not switched on for this school yet.")}, status=status.HTTP_503_SERVICE_UNAVAILABLE
-            )
-        access.require(request.user)  # the tutor is part of the school subscription
-        data = AskSerializer(data=request.data)
-        data.is_valid(raise_exception=True)
-        v = data.validated_data
-        try:
-            reply = services.ask(
-                request.user,
-                v["message"],
-                history=v.get("history"),
-                lesson_slug=v.get("lesson") or None,
-                attempt_id=v.get("attempt"),
-                question_id=v.get("question"),
-                lang=v.get("lang"),
-                subject_code=v.get("subject") or None,
-            )
-        except anthropic.RateLimitError:
-            return Response(
-                {"detail": _("The tutor is very busy right now. Try again in a minute.")},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-        except (anthropic.AuthenticationError, anthropic.PermissionDeniedError):
-            log.exception("Tutor credentials rejected by the Claude API")
-            return Response(
-                {"detail": _("The AI tutor is not set up correctly. Please tell an administrator.")},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-        except anthropic.APIConnectionError:
-            return Response(
-                {"detail": _("Couldn't reach the tutor. Check your connection and try again.")},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-        except anthropic.APIStatusError as exc:
-            log.warning("Tutor request failed: %s (request id %s)", exc.status_code, getattr(exc, "request_id", None))
-            return Response(
-                {"detail": _("The tutor couldn't answer just now. Please try again.")}, status=status.HTTP_502_BAD_GATEWAY
-            )
-        return Response({"reply": reply})
+        prepared = _prepare(request)
+        for event in services.answer(prepared, stream=False):
+            if event["type"] == "error":
+                return Response({"detail": event["detail"], "code": event["code"]}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            if event["type"] == "done":
+                return Response({key: event[key] for key in ("reply", "sources", "fallback", "tools")})
+        return Response(status=status.HTTP_502_BAD_GATEWAY)
+
+
+class _EventStream:
+    """Server-Sent Events from Santa's answer events. Closing it (the student pressed Stop, or the response
+    ended) closes the answer, which logs it and closes the connection to the model server."""
+
+    def __init__(self, events):
+        self.events = events
+
+    def __iter__(self):
+        for event in self.events:
+            if event["type"] == "ping":
+                yield ": ping\n\n"
+            else:
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+    def close(self):
+        self.events.close()
+
+
+class TutorStreamView(APIView):
+    """Santa's answer as it is written, as Server-Sent Events (text/event-stream) over this POST:
+    `data: {"type": "start" | "delta" | "tool" | "done" | "error", ...}` lines, and ": ping" comments."""
+
+    throttle_scope = "tutor"
+
+    def perform_content_negotiation(self, request, force=False):
+        # Browsers ask for text/event-stream; errors before the stream starts are still sent as JSON.
+        return super().perform_content_negotiation(request, force=True)
+
+    def post(self, request):
+        prepared = _prepare(request)
+        response = StreamingHttpResponse(
+            _EventStream(services.answer(prepared, stream=True)), content_type="text/event-stream; charset=utf-8"
+        )
+        response["Cache-Control"] = "no-cache, no-store"
+        # nginx: pass each piece on at once instead of buffering the answer.
+        response["X-Accel-Buffering"] = "no"
+        return response

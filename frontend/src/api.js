@@ -105,14 +105,7 @@ export async function api(path, { method = "GET", body, params, retry = true, si
   }
 
   if (res.status === 401 && retry && !NO_REFRESH.has(path)) {
-    try {
-      await refreshSession();
-    } catch (err) {
-      // Only a refusal from the server means the session is over; a network blip or 5xx doesn't.
-      if (!(err instanceof ApiError) || ![401, 403].includes(err.status)) throw err;
-      onSessionExpired();
-      throw new ApiError(401, { detail: translateNow("errors.sessionExpired") });
-    }
+    await refreshAfter401();
     return api(path, { method, body, params, retry: false, signal });
   }
 
@@ -120,6 +113,66 @@ export async function api(path, { method = "GET", body, params, retry = true, si
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(res.status, data);
   return data;
+}
+
+// The access token has expired: refresh the session, or end it when the server refuses.
+async function refreshAfter401() {
+  try {
+    await refreshSession();
+  } catch (err) {
+    // Only a refusal from the server means the session is over; a network blip or 5xx doesn't.
+    if (!(err instanceof ApiError) || ![401, 403].includes(err.status)) throw err;
+    onSessionExpired();
+    throw new ApiError(401, { detail: translateNow("errors.sessionExpired") });
+  }
+}
+
+/**
+ * A POST whose answer is read while it arrives (Server-Sent Events). Resolves with the Response once the
+ * server starts answering; refusals before that (403, 429, ...) are thrown as ApiError, like api().
+ */
+export async function apiStream(path, { body, signal, retry = true } = {}) {
+  const headers = { "Accept-Language": currentLanguage(), Accept: "text/event-stream", "Content-Type": "application/json" };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, { method: "POST", headers, credentials: "include", signal, body: JSON.stringify(body) });
+  } catch (err) {
+    if (err?.name === "AbortError") throw err;
+    throw new NetworkError();
+  }
+  if (res.status === 401 && retry) {
+    await refreshAfter401();
+    return apiStream(path, { body, signal, retry: false });
+  }
+  if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+  return res;
+}
+
+/** Calls onEvent(data) for each `data: {json}` event of a Server-Sent Events response; ":" lines are pings. */
+export async function readEvents(response, onEvent) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  const flush = (block) => {
+    const data = block
+      .split("\n")
+      .filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trimStart())
+      .join("\n");
+    if (data) onEvent(JSON.parse(data));
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value, { stream: !done }).replace(/\r\n?/g, "\n");
+    let end;
+    while ((end = buffer.indexOf("\n\n")) >= 0) {
+      flush(buffer.slice(0, end));
+      buffer = buffer.slice(end + 2);
+    }
+    if (done) break;
+  }
+  flush(buffer);
 }
 
 // DRF paginated responses have {results}; plain lists don't.

@@ -11,7 +11,7 @@ Iga is paid for by schools, not by students. A school administrator pays one fla
 | Browsing subjects, units, lesson titles and summaries | The full text of premium lessons (and their translations) |
 | Lessons and quizzes marked free (one starter lesson and quiz per subject) | Premium quizzes, and the explanations and marking guides in their results |
 | Material written by teachers in the app | Past papers: interactive versions, PDF and marking-guide links |
-| Labs and simulations, the code and Python playgrounds | The AI tutor |
+| Labs and simulations, the code and Python playgrounds | Santa, the AI tutor |
 | Classes, assignments of free material, marking, study groups, leaderboards, parent reports | Saving premium units for offline use |
 
 Content files decide what is free: `access: free` in a lesson's front matter, `"access": "free"` in a quiz file. Everything else from the library is premium. A teacher's own lessons and quizzes are free, but a quiz that reuses library questions is premium, so library material can't be repackaged.

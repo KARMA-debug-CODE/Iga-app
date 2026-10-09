@@ -23,7 +23,7 @@
 | Scalable cloud deployment | In progress | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
 | Testing & QA | Done | 331 API tests (SQLite + PostgreSQL), unit tests, 48 E2E runs (25 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | Done | Linked by a one-time code from the student; read-only progress report |
-| AI tutor | Done | Claude-powered, in lessons and quizzes and on an Ask AI page for any subject; off while an exam is open, never reveals answers early; needs an API key and a usage budget |
+| Santa (AI tutor) | Done, needs testing by teachers | Santa, Iga's own tutor: an open model on the school's server (llama.cpp), no outside AI service. In lessons and quizzes and on the Santa page for any subject; answers stream, quote and link Iga's lessons, use a calculator; off while an exam is open, never reveals answers early; answers from the lessons when the model is not installed. Far less capable than large cloud models: needs testing by teachers in English and French |
 | Offline use | In progress | Whole units can be saved for offline reading and labs; quizzes still need a connection |
 
 ## Before a pilot (next 4–8 weeks)
@@ -50,7 +50,7 @@
 
 - **Offline quizzes:** take practice quizzes offline and sync answers later (units can already be saved for reading)
 - **Low-bandwidth modes:** text-only lessons; SMS/USSD revision quizzes for feature phones
-- **AI tutor, next steps:** teacher view of tutor conversations for their class, and per-school usage budgets
+- **Santa, next steps:** a teacher view of Santa conversations for their class, a set of S1-S6 test questions in English and French to compare models, and a queue when more students ask at once than the server can answer
 - **Quizzes in French:** a translation model for questions and options
 - **Adaptive practice** that picks questions from weak units (using the unit tags already on every question)
 - Native Android app (wrapping the PWA) if app-store distribution matters for schools
