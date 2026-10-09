@@ -2,48 +2,82 @@ import { expect, test } from "@playwright/test";
 
 import { login, logout } from "./helpers";
 
-test("AI tutor answers questions about a lesson", async ({ page }) => {
-  // The E2E server has no Anthropic key, so the tutor endpoints are mocked here;
-  // the backend side is covered by tests/test_tutor.py.
-  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: { enabled: true } }));
+// Santa's model is not running in these tests, so its endpoints are mocked here (a streamed answer is a
+// text/event-stream body); the server side is covered by backend/tests/test_tutor.py.
+const READY = { enabled: true, reason: "", state: "ready", exam: null };
+
+function santaStream(reply, extra = {}) {
+  const pieces = reply.match(/[\s\S]{1,12}/g) || [];
+  const events = [
+    { type: "start" },
+    ...pieces.map((text) => ({ type: "delta", text })),
+    { type: "done", reply, sources: [], fallback: null, tools: [], ...extra },
+  ];
+  return {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream; charset=utf-8" },
+    body: events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+  };
+}
+
+test("Santa answers questions about a lesson, with its sources", async ({ page }) => {
+  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: READY }));
   let asked = null;
-  await page.route("**/api/tutor/ask/", async (route) => {
+  await page.route("**/api/tutor/stream/", async (route) => {
     asked = route.request().postDataJSON();
-    await route.fulfill({ json: { reply: "The **gradient** is the number in front of $x$: here it is $3$." } });
+    await route.fulfill(
+      santaStream("The **gradient** is the number in front of $x$: here it is $3$.", {
+        sources: [
+          {
+            slug: "s2-maths-linear-graphs",
+            title: "Straight-line graphs",
+            section: "Gradient",
+            url: "/lessons/s2-maths-linear-graphs",
+          },
+        ],
+        tools: [{ expression: "3 * 2 + 2", result: "8" }],
+      }),
+    );
   });
 
   await login(page, "aline");
   await page.goto("/lessons/s2-maths-linear-graphs");
-  await page.getByRole("button", { name: /ask the ai tutor/i }).click();
-  const panel = page.getByRole("region", { name: /tutor/i });
+  await page.getByRole("button", { name: /^ask santa$/i }).click();
+  const panel = page.getByRole("region", { name: /santa/i });
+  await expect(panel.getByText(/runs on your school's server and can make mistakes/i)).toBeVisible();
+  await expect(panel.getByRole("textbox")).toBeFocused();
   await panel.getByRole("textbox").fill("What is the gradient of y = 3x + 2?");
   await panel.getByRole("button", { name: /^send$/i }).click();
-  await expect(panel.getByText(/number in front of/)).toBeVisible();
+  await expect(panel.locator(".santa-answer").getByText(/number in front of/)).toBeVisible();
   await expect(panel.locator(".katex").first()).toBeVisible();
+  await expect(panel.getByText("Calculator: 3 * 2 + 2 = 8")).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Straight-line graphs" })).toHaveAttribute("href", "/lessons/s2-maths-linear-graphs");
+  await expect(page.getByRole("status").filter({ hasText: /santa answered/i })).toHaveCount(1);
   expect(asked.lesson).toBeTruthy();
   expect(asked.message).toContain("gradient");
 });
 
-test("Ask AI page: choose a subject, ask, keep the chat for the tab, start again", async ({ page }) => {
-  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: { enabled: true, reason: "" } }));
+test("Santa page: choose a subject, ask, keep the chat for the tab, start again", async ({ page }) => {
+  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: READY }));
   const asked = [];
-  await page.route("**/api/tutor/ask/", async (route) => {
+  await page.route("**/api/tutor/stream/", async (route) => {
     asked.push(route.request().postDataJSON());
-    await route.fulfill({ json: { reply: "Photosynthesis makes **glucose**: $6CO_2 + 6H_2O \\to C_6H_{12}O_6 + 6O_2$" } });
+    await route.fulfill(santaStream("Photosynthesis makes **glucose**: $6CO_2 + 6H_2O \\to C_6H_{12}O_6 + 6O_2$"));
   });
 
   await login(page, "aline");
   await page.goto("/ask");
-  await expect(page.getByRole("heading", { name: /ask ai/i })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /^santa$/i })).toBeVisible();
   await page.getByLabel(/^subject$/i).selectOption("biology");
   await page.getByRole("button", { name: /explain a topic to me/i }).click();
-  await expect(page.getByText(/makes glucose/i)).toBeVisible();
+  await expect(page.locator(".santa-answer").getByText(/makes glucose/i)).toBeVisible();
   await expect(page.locator(".ask .katex").first()).toBeVisible();
   expect(asked[0]).toMatchObject({ subject: "biology", history: [] });
 
   await page.getByLabel(/type your question/i).fill("And where does it happen?");
   await page.getByLabel(/type your question/i).press("Enter");
   await expect(page.locator(".ask .bubble.mine")).toHaveCount(2);
+  await expect(page.locator(".ask .santa-answer")).toHaveCount(2);
   expect(asked[1].history.map((m) => m.role)).toEqual(["user", "assistant"]);
 
   await page.reload();
@@ -52,24 +86,73 @@ test("Ask AI page: choose a subject, ask, keep the chat for the tab, start again
   await expect(page.locator(".ask .bubble")).toHaveCount(0);
 });
 
-test("logging out in one tab ends the session and the Ask AI chat in the others", async ({ page, context }) => {
-  await context.route("**/api/tutor/status/", (route) => route.fulfill({ json: { enabled: true, reason: "" } }));
-  await context.route("**/api/tutor/ask/", (route) => route.fulfill({ json: { reply: "A cell is the basic unit of life." } }));
+test("Santa page: waking up, answers from the lessons, and Stop gives the question back", async ({ page }) => {
+  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: { ...READY, state: "loading" } }));
+  let slow = false;
+  await page.route("**/api/tutor/stream/", async (route) => {
+    if (slow) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      return route.fulfill(santaStream("Too late.")).catch(() => {});
+    }
+    await route.fulfill(
+      santaStream("*Santa is still waking up.* Here is what your lessons say:\n\n> A cell is the basic unit of life.", {
+        fallback: "loading",
+        sources: [{ slug: "s1-biology-the-cell", title: "The cell, the unit of life", section: "", url: "/lessons/s1-biology-the-cell" }],
+      }),
+    );
+  });
+
+  await login(page, "aline");
+  await page.goto("/ask");
+  await expect(page.getByText(/santa is waking up/i)).toBeVisible();
+  const box = page.getByLabel(/type your question/i);
+  await box.fill("What is a cell?");
+  await box.press("Enter");
+  await expect(page.locator(".santa-answer").getByText(/basic unit of life/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "The cell, the unit of life" })).toBeVisible();
+
+  slow = true;
+  await box.fill("And a tissue?");
+  await page.getByRole("button", { name: /^send$/i }).click();
+  await expect(page.locator(".santa-typing")).toContainText(/santa is thinking/i);
+  const stop = page.getByRole("button", { name: /^stop$/i });
+  await expect(stop).toBeFocused();
+  await stop.click();
+  await expect(box).toHaveValue("And a tissue?");
+  await expect(page.locator(".ask .bubble.mine")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: /^send$/i })).toBeVisible();
+});
+
+test("Santa page is switched off while an exam is open", async ({ page }) => {
+  await page.route("**/api/tutor/status/", (route) =>
+    route.fulfill({ json: { ...READY, state: "exam", exam: { attempt: 12345, quiz: "Linear graphs test" } } }),
+  );
+  await login(page, "aline");
+  await page.goto("/ask");
+  await expect(page.getByText(/santa is off during your exam/i)).toBeVisible();
+  await expect(page.getByText(/Linear graphs test/)).toBeVisible();
+  await expect(page.getByRole("link", { name: /go to the open exam/i })).toHaveAttribute("href", "/attempts/12345");
+  await expect(page.getByLabel(/type your question/i)).toHaveCount(0);
+});
+
+test("logging out in one tab ends the session and the Santa chat in the others", async ({ page, context }) => {
+  await context.route("**/api/tutor/status/", (route) => route.fulfill({ json: READY }));
+  await context.route("**/api/tutor/stream/", (route) => route.fulfill(santaStream("A cell is the basic unit of life.")));
   await login(page, "aline");
   const other = await context.newPage();
   await other.goto("/ask");
   await other.getByLabel(/type your question/i).fill("What is a cell?");
   await other.getByLabel(/type your question/i).press("Enter");
-  await expect(other.getByText(/basic unit of life/)).toBeVisible();
+  await expect(other.locator(".santa-answer").getByText(/basic unit of life/)).toBeVisible();
 
   await logout(page);
   await expect(other).toHaveURL(/\/login/);
   expect(await other.evaluate(() => Object.keys(sessionStorage).filter((k) => k.startsWith("iga.ask.")))).toEqual([]);
 });
 
-test("Ask AI page explains when the student's school hasn't subscribed", async ({ page }) => {
+test("Santa page explains when the student's school hasn't subscribed", async ({ page }) => {
   await page.route("**/api/tutor/status/", (route) =>
-    route.fulfill({ json: { enabled: false, reason: "subscription_required" } }),
+    route.fulfill({ json: { enabled: false, reason: "subscription_required", state: "", exam: null } }),
   );
   await login(page, "samuel");
   await page.goto("/ask");

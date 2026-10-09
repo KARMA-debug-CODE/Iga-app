@@ -1510,7 +1510,7 @@ tr:last-child td {
   display: inline-block;
 }
 
-/* AI tutor */
+/* Santa in lessons and quizzes (more in components/Santa.css) */
 
 .tutor {
   border-left: 5px solid var(--blue);
@@ -1525,7 +1525,7 @@ tr:last-child td {
   font-size: 0.98rem;
 }
 
-/* Ask AI page */
+/* The Santa page */
 
 .ask {
   display: flex;
