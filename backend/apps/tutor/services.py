@@ -47,6 +47,10 @@ HISTORY_MESSAGE_CHARS = 1500
 QUESTION_CHARS = 2500
 PASSAGE_CHARS = 2800
 OPEN_LESSON_CHARS = 2000
+# The history and the student's turn together (about 2,800 tokens at 3 characters a token, which French
+# and maths need): lesson passages get less room, and old turns are dropped, when a question is long.
+TURN_CHARS = 8400
+MIN_PASSAGE_CHARS = 800
 MAX_TOOL_ROUNDS = 3
 FALLBACK_PASSAGES = 3
 FALLBACK_EXCERPT_CHARS = 700
@@ -94,7 +98,7 @@ def clean_history(history):
     if not isinstance(history, list):
         raise ValidationError({"history": _("Must be a list of messages.")})
     history = history[-MAX_HISTORY_MESSAGES:]
-    if history and history[0].get("role") != "user":
+    if history and not (isinstance(history[0], dict) and history[0].get("role") == "user"):
         history = history[1:]
     cleaned = []
     for i, item in enumerate(history):
@@ -313,14 +317,19 @@ def prepare(user, message, history=None, lesson_slug=None, attempt_id=None, ques
     if context.question is not None:
         query += "\n" + context.question.prompt
     subject = context.subject or (context.attempt.quiz.subject if context.attempt else None)
+    used = sum(len(m["content"]) for m in history) + len(context.text) + len(message)
+    while history and used > TURN_CHARS - MIN_PASSAGE_CHARS:
+        used -= len(history[0]["content"]) + len(history[1]["content"])
+        history = history[2:]
+    budget = max(MIN_PASSAGE_CHARS, min(PASSAGE_CHARS, TURN_CHARS - used))
     own, others = retrieval.search(
         user,
         query,
         context.language,
         lesson=context.lesson,
         subject_id=subject.pk if subject else None,
-        budget=PASSAGE_CHARS,
-        lesson_budget=OPEN_LESSON_CHARS,
+        budget=budget,
+        lesson_budget=min(OPEN_LESSON_CHARS, budget),
     )
     return Prepared(context, message, history, compose(context, message, own, others), own, others)
 
@@ -390,9 +399,11 @@ def _round(payload, stream, deadline, answer):
 def _run_tool(call):
     try:
         arguments = json.loads(call["arguments"] or "{}")
-        expression = str(arguments.get("expression", "")) if isinstance(arguments, dict) else ""
     except ValueError:
-        expression = ""
+        arguments = call["arguments"]  # a small model may send the bare expression
+    if isinstance(arguments, dict):
+        arguments = arguments.get("expression", "")
+    expression = str(arguments if isinstance(arguments, (str, int, float)) else "").strip()
     if call["name"] != "calculate":
         return expression, "error: unknown tool"
     if not expression:
@@ -484,6 +495,8 @@ def _fallback_note(reason):
         return _("Santa is still waking up. Ask again in a minute for a full answer.")
     if reason == "busy":
         return _("Santa is helping many students right now. Ask again in a minute for a full answer.")
+    if reason == "too_long":
+        return _("This is too long for Santa. Ask a shorter question, or start a new chat.")
     return _("Santa can't answer just now. Try again in a minute.")
 
 
@@ -578,12 +591,18 @@ def answer(prepared, stream=False):
         if fallback is None:
             try:
                 yield from _from_model(prepared, stream, deadline, result)
-            except llm.SantaError as exc:
-                log.warning("Santa's model could not answer (%s): %s", exc.code, exc)
-                if not result.text.strip():
-                    fallback = {"not_installed": "not_installed", "loading": "loading"}.get(exc.code, "unavailable")
+            except Exception as exc:  # noqa: BLE001 - whatever went wrong, the student still gets an answer
+                code = exc.code if isinstance(exc, llm.SantaError) else "bug"
+                if code == "bug":
+                    log.exception("Santa's answer failed")
                 else:
-                    result.finish = f"error:{exc.code}"
+                    log.warning("Santa's model could not answer (%s): %s", code, exc)
+                if not result.text.strip():
+                    fallback = {"not_installed": "not_installed", "loading": "loading", "too_long": "too_long"}.get(
+                        code, "unavailable"
+                    )
+                else:
+                    result.finish = f"error:{code}"
                     with translation.override(prepared.context.language):
                         yield from result.emit(
                             "\n\n*" + _("(Santa stopped before finishing. Ask again, or check your lessons.)") + "*"
@@ -635,9 +654,13 @@ def _log(prepared, result, fallback):
 def ask(user, message, **kwargs):
     """Santa's whole answer at once: {"reply", "sources", "fallback", "tools"} (or {"error", "detail"})."""
     prepared = prepare(user, message, **kwargs)
-    for event in answer(prepared, stream=False):
-        if event["type"] == "error":
-            return {"error": event["code"], "detail": event["detail"]}
-        if event["type"] == "done":
-            return {key: event[key] for key in ("reply", "sources", "fallback", "tools")}
+    events = answer(prepared, stream=False)
+    try:
+        for event in events:
+            if event["type"] == "error":
+                return {"error": event["code"], "detail": event["detail"]}
+            if event["type"] == "done":
+                return {key: event[key] for key in ("reply", "sources", "fallback", "tools")}
+    finally:
+        events.close()  # frees this student's turn and the model slot now
     return {"error": "no_answer", "detail": ""}

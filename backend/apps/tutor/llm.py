@@ -55,6 +55,12 @@ class ToolsRejected(BadReply):
     """The server refused a request that offered tools (its chat template may not support them)."""
 
 
+class TooLong(BadReply):
+    """The question with its context is longer than one of the model server's slots can hold."""
+
+    code = "too_long"
+
+
 @dataclass
 class Reply:
     """One answer from the model: its text, any tool calls, why it stopped, and token counts."""
@@ -118,17 +124,22 @@ def health(timeout=3):
     return state
 
 
-def _error_message(exc):
+def _error_details(exc):
+    """(message, type) from llama-server's {"error": {"code", "message", "type"}} body."""
     try:
         body = json.loads(exc.read(65536).decode("utf-8", "replace"))
         error = body.get("error") if isinstance(body, dict) else None
-        return str(error.get("message", "") if isinstance(error, dict) else error or "")
+        if isinstance(error, dict):
+            return str(error.get("message", "")), str(error.get("type", ""))
+        return str(error or ""), ""
     except (ValueError, OSError, AttributeError):
-        return ""
+        return "", ""
 
 
 def _http_error(exc, offered_tools):
-    message = _error_message(exc)
+    message, kind = _error_details(exc)
+    if kind == "exceed_context_size_error" or "context size" in message.lower():
+        return TooLong(f"HTTP {exc.code}: {message}")
     if exc.code == 503:
         if "loading" in message.lower():
             remember_health("loading")
@@ -162,6 +173,19 @@ def _open(payload, timeout):
         raise Unreachable(str(exc)) from exc
 
 
+# A reply that is valid JSON but not shaped like an answer (another service at SANTA_URL, a proxy's error
+# page) raises one of these while it is read; they all mean BadReply.
+SHAPE_ERRORS = (AttributeError, IndexError, KeyError, TypeError, ValueError)
+
+
+def _text(value):
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise TypeError(f"text expected, got {type(value).__name__}")
+    return value
+
+
 def _usage(reply, data):
     usage = data.get("usage") or {}
     reply.prompt_tokens += int(usage.get("prompt_tokens") or 0)
@@ -175,8 +199,8 @@ def _tool_calls(raw):
         arguments = function.get("arguments") or ""
         calls.append(
             {
-                "id": call.get("id") or f"call_{i}",
-                "name": function.get("name") or "",
+                "id": _text(call.get("id")) or f"call_{i}",
+                "name": _text(function.get("name")),
                 "arguments": arguments if isinstance(arguments, str) else json.dumps(arguments),
             }
         )
@@ -196,14 +220,17 @@ def chat(payload, deadline):
         raise BadReply(str(exc)) from exc
     if not isinstance(data, dict) or data.get("error") or not data.get("choices"):
         raise BadReply(f"unexpected reply: {str(data)[:200]}")
-    choice = data["choices"][0]
-    message = choice.get("message") or {}
-    reply = Reply(
-        content=message.get("content") or "",
-        tool_calls=_tool_calls(message.get("tool_calls")),
-        finish_reason=choice.get("finish_reason") or "",
-    )
-    _usage(reply, data)
+    try:
+        choice = data["choices"][0]
+        message = choice.get("message") or {}
+        reply = Reply(
+            content=_text(message.get("content")),
+            tool_calls=_tool_calls(message.get("tool_calls")),
+            finish_reason=_text(choice.get("finish_reason")),
+        )
+        _usage(reply, data)
+    except SHAPE_ERRORS as exc:
+        raise BadReply(f"unexpected reply: {str(data)[:200]}") from exc
     remember_health("ready")
     return reply
 
@@ -253,23 +280,39 @@ def chat_stream(payload, deadline):
                 raise BadReply(f"unexpected chunk: {data[:200]}")
             if chunk.get("error"):
                 raise BadReply(f"error during the answer: {str(chunk['error'])[:200]}")
-            _usage(reply, chunk)
-            for choice in chunk.get("choices") or []:
-                delta = choice.get("delta") or {}
-                text = delta.get("content")
-                if text:
-                    reply.content += text
-                    yield text
-                for piece in delta.get("tool_calls") or []:
-                    call = calls.setdefault(piece.get("index", len(calls)), {"id": "", "function": {"name": "", "arguments": ""}})
-                    call["id"] = piece.get("id") or call["id"]
-                    function = piece.get("function") or {}
-                    call["function"]["name"] += function.get("name") or ""
-                    call["function"]["arguments"] += function.get("arguments") or ""
-                if choice.get("finish_reason"):
-                    reply.finish_reason = choice["finish_reason"]
+            try:
+                text = _read_chunk(chunk, reply, calls)
+            except SHAPE_ERRORS as exc:
+                raise BadReply(f"unexpected chunk: {data[:200]}") from exc
+            if text:
+                reply.content += text
+                yield text
     finally:
         response.close()  # also tells llama-server to stop writing if the student pressed Stop
-    reply.tool_calls = _tool_calls([calls[i] for i in sorted(calls)])
+    try:
+        reply.tool_calls = _tool_calls([calls[i] for i in sorted(calls)])
+    except SHAPE_ERRORS as exc:
+        raise BadReply("unexpected tool calls") from exc
     remember_health("ready")
     return reply
+
+
+def _read_chunk(chunk, reply, calls):
+    """One streamed chunk: notes its token counts, tool-call pieces and finish reason, and returns its text."""
+    _usage(reply, chunk)
+    text = ""
+    for choice in chunk.get("choices") or []:
+        delta = choice.get("delta") or {}
+        text += _text(delta.get("content"))
+        for piece in delta.get("tool_calls") or []:
+            index = piece.get("index", len(calls))
+            if not isinstance(index, int):
+                raise TypeError("a tool call's index must be a number")
+            call = calls.setdefault(index, {"id": "", "function": {"name": "", "arguments": ""}})
+            call["id"] = _text(piece.get("id")) or call["id"]
+            function = piece.get("function") or {}
+            call["function"]["name"] += _text(function.get("name"))
+            call["function"]["arguments"] += _text(function.get("arguments"))
+        if choice.get("finish_reason"):
+            reply.finish_reason = _text(choice["finish_reason"])
+    return text

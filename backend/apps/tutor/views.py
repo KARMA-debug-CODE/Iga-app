@@ -50,11 +50,15 @@ class TutorAskView(APIView):
 
     def post(self, request):
         prepared = _prepare(request)
-        for event in services.answer(prepared, stream=False):
-            if event["type"] == "error":
-                return Response({"detail": event["detail"], "code": event["code"]}, status=status.HTTP_429_TOO_MANY_REQUESTS)
-            if event["type"] == "done":
-                return Response({key: event[key] for key in ("reply", "sources", "fallback", "tools")})
+        events = services.answer(prepared, stream=False)
+        try:
+            for event in events:
+                if event["type"] == "error":
+                    return Response({"detail": event["detail"], "code": event["code"]}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+                if event["type"] == "done":
+                    return Response({key: event[key] for key in ("reply", "sources", "fallback", "tools")})
+        finally:
+            events.close()  # frees this student's turn and the model slot now
         return Response(status=status.HTTP_502_BAD_GATEWAY)
 
 

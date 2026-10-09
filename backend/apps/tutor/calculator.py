@@ -80,13 +80,31 @@ def _factorial(x):
     return Fraction(math.factorial(n))
 
 
+def _huge_float(x):
+    """A float this large is already a whole number, and its last digits are not exact."""
+    return isinstance(x, float) and abs(x) >= 2**53
+
+
 def _round(x, digits=None):
-    if digits is None:
-        return Fraction(round(x))
-    places = _integer(digits, "round")
+    """Round as taught at school: a half goes away from zero (2.5 is 3, -2.5 is -3, 0.125 to 2 places is 0.13)."""
+    places = 0 if digits is None else _integer(digits, "round")
     if not -20 <= places <= 20:
         raise CalcError("round to at most 20 decimal places")
-    return round(x, places) if isinstance(x, Fraction) else round(x, places)
+    if _huge_float(x) and places >= 0:
+        return x
+    # A float is rounded as the decimal it is written as (2.675, not 2.67499999...).
+    exact = x if isinstance(x, Fraction) else Fraction(repr(x))
+    scale = Fraction(10) ** places
+    whole = math.floor(abs(exact) * scale + Fraction(1, 2))
+    return (whole if exact >= 0 else -whole) / scale
+
+
+def _floor(x):
+    return x if _huge_float(x) else Fraction(math.floor(x))
+
+
+def _ceil(x):
+    return x if _huge_float(x) else Fraction(math.ceil(x))
 
 
 def _whole(fn, name):
@@ -120,8 +138,8 @@ FUNCTIONS = {
     "exp": (lambda x: math.exp(_real(x)), (1,)),
     "abs": (abs, (1,)),
     "round": (_round, (1, 2)),
-    "floor": (lambda x: Fraction(math.floor(x)), (1,)),
-    "ceil": (lambda x: Fraction(math.ceil(x)), (1,)),
+    "floor": (_floor, (1,)),
+    "ceil": (_ceil, (1,)),
     "factorial": (_factorial, (1,)),
     "gcd": (_whole(math.gcd, "gcd"), (2,)),
     "lcm": (_whole(math.lcm, "lcm"), (2,)),
@@ -129,10 +147,15 @@ FUNCTIONS = {
 }
 
 
+def _bits(value):
+    """The size of a fraction's numerator or denominator, whichever is bigger."""
+    return max(value.numerator.bit_length(), value.denominator.bit_length())
+
+
 def _check(value):
     """Keep results small enough to work with, and real."""
     if isinstance(value, Fraction):
-        if max(value.numerator.bit_length(), value.denominator.bit_length()) > MAX_BITS:
+        if _bits(value) > MAX_BITS:
             raise CalcError("the numbers get too large")
         return value
     if isinstance(value, complex) or math.isnan(value):
@@ -161,8 +184,7 @@ def _power(base, exponent):
         if isinstance(base, Fraction):
             if base == 0 and n < 0:
                 raise CalcError("you can't divide by zero")
-            size = max(base.numerator.bit_length(), base.denominator.bit_length()) * abs(n)
-            if size <= MAX_BITS:
+            if _bits(base) * abs(n) <= MAX_BITS:
                 return base**n
         try:
             return math.pow(_real(base), n)
@@ -176,10 +198,18 @@ def _power(base, exponent):
         result = math.pow(_real(base), _real(exponent))
     except OverflowError as exc:
         raise CalcError("the numbers get too large") from exc
-    # 16 ** 0.5 is exactly 4: keep exact answers exact when they check out.
-    if isinstance(base, Fraction) and isinstance(exponent, Fraction) and result.is_integer() and abs(result) < 2**53:
+    # 16 ** 0.5 is exactly 4: keep exact answers exact when they check out, and when checking is cheap
+    # (0.5 ** (1000000000001/2) is 0.0 in floating point, but the check would need 2 ** 1000000000001).
+    if (
+        isinstance(base, Fraction)
+        and isinstance(exponent, Fraction)
+        and result.is_integer()
+        and abs(result) < 2**53
+        and exponent.denominator <= 64
+        and _bits(base) * abs(exponent.numerator) <= MAX_BITS
+    ):
         whole = int(result)
-        if exponent.denominator <= 64 and Fraction(whole) ** exponent.denominator == base**exponent.numerator:
+        if Fraction(whole) ** exponent.denominator == base**exponent.numerator:
             return Fraction(whole)
     return result
 
