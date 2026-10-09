@@ -21,6 +21,8 @@ import { useI18n } from "../i18n";
 
 const STARTERS = ["ask.s.explain", "ask.s.steps", "ask.s.quiz", "ask.s.plan", "ask.s.summary", "ask.s.remember"];
 
+const coarsePointer = () => typeof window !== "undefined" && Boolean(window.matchMedia?.("(pointer: coarse)").matches);
+
 // The conversation lasts for this browser tab, per student; logging out clears it (offline.js).
 const storageKey = (user) => `iga.ask.${user.id}`;
 
@@ -162,7 +164,9 @@ export default function Ask() {
             onChange={setInput}
             multiline
             inputRef={box}
-            placeholder={t("ask.placeholder")}
+            label={t("ask.placeholder")}
+            // The Enter / Shift+Enter hint means nothing on a touch screen, and doesn't fit a phone's box.
+            placeholder={coarsePointer() ? t("tutor.placeholder") : t("ask.placeholder")}
           />
         </div>
       </section>

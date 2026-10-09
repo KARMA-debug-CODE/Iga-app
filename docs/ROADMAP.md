@@ -23,7 +23,7 @@
 | Scalable cloud deployment | 🟡 | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
 | Testing & QA | 🟢 | 331 API tests (SQLite + PostgreSQL), unit tests, 48 E2E runs (25 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | 🟢 | Linked by a one-time code from the student; read-only progress report |
-| Santa (AI tutor) | 🟢 | Santa, Iga's own tutor: an open model on the school's server (llama.cpp), no outside AI service. In lessons and quizzes and on the Santa page for any subject; answers stream, quote and link Iga's lessons, use a calculator; off while an exam is open, never reveals answers early; answers from the lessons when the model is not installed. Far less capable than large cloud models: needs testing by teachers in English and French |
+| Santa (AI tutor) | Done | Santa, Iga's own tutor: an open model on the school's server (llama.cpp), no outside AI service. In lessons and quizzes and on the Santa page for any subject; answers stream, quote and link Iga's lessons, use a calculator; off while an exam is open, never reveals answers early; answers from the lessons when the model is not installed. Far less capable than large cloud models: needs testing by teachers in English and French |
 | Offline use | 🟡 | Whole units can be saved for offline reading and labs; quizzes still need a connection |
 
 ## Before a pilot (next 4–8 weeks)
