@@ -205,7 +205,11 @@ export function point(state, domain) {
 /** "exp": start typing the exponent of a number in scientific notation (2 exp 3 = 2000). */
 export function expEntry(state, domain) {
   if (!domain.appendExp || state.error) return state;
-  return startEntry(state, domain, (entry) => domain.appendExp(entry));
+  // After a result, the exponent goes on the number shown (6 exp gives 6.e+0), as in Windows.
+  // After an operator the display is only a partial result, so a new number starts.
+  const onResult = state.entry === null && (state.done || lastOf(state.items)?.k !== "op");
+  const shown = onResult ? domain.entryOf?.(state.value) : null;
+  return startEntry(state, domain, (entry) => domain.appendExp(shown ?? entry));
 }
 
 /** Replace the number being typed (paste). */

@@ -222,6 +222,15 @@ describe("Scientific mode", () => {
       expect(shows(s)).toBe("2,000");
       expect(deg("2.5 exp 3 neg equals")).toBe("0.0025");
       expect(shows(sci("2 exp"))).toBe("2.e+0");
+      // After a result the exponent goes on the number shown.
+      s = sci("5 add 1 equals exp 2");
+      expect(shows(s)).toBe("6.e+2");
+      expect(shows(keys("equals", s))).toBe("601"); // "=" repeats the last "+ 1"
+      expect(shows(sci("1 div 3 equals exp"))).toBe("0.e+0");
+      expect(shows(sci("9 sqrt exp 1"))).toBe("3.e+1");
+      // After an operator, exp starts a new number.
+      expect(shows(sci("5 add exp 2"))).toBe("0.e+2");
+      expect(deg("5 add 2 exp 1 equals")).toBe("25");
     });
 
     it("switches to exponent form with F-E", () => {

@@ -47,6 +47,11 @@ export function decimalEntry(maxDigits) {
       const next = entry.slice(0, -1);
       return next === "" || next === "-" ? "0" : next;
     },
+    /** A value as typed text ("6", "-2.5"), or null when it has too many digits to type. */
+    entryOf(v) {
+      const text = v.toFixed();
+      return countDigits(text) <= maxDigits ? text : null;
+    },
     parse(entry) {
       let s = entry;
       if (/e[+-]$/.test(s)) s += "0";
