@@ -1,0 +1,32 @@
+{
+  "access": "free",
+  "title": "Number systems — practice",
+  "subject": "computer-science", "grade": "S4", "unit": 5,
+  "kind": "practice", "feedback_mode": "immediate",
+  "questions": [
+    {"type": "mcq", "difficulty": 1, "prompt": "Why do computers store numbers and text in binary?",
+     "choices": [{"text": "Their tiny switches have only two states, off and on, which are easy to tell apart", "correct": true}, {"text": "Binary numbers are shorter than decimal numbers"}, {"text": "Binary uses more digits than decimal"}, {"text": "Computers cannot add numbers written with ten digits"}],
+     "explanation": "A computer is built from transistors, switches that are either off or on. Two states are easy to tell apart even when the voltage is weak or noisy. Binary numbers are in fact **longer** than decimal ones: 156 is $10011100_2$."},
+    {"type": "numeric", "difficulty": 1, "prompt": "Convert $1100101_2$ to decimal.", "answer": 101,
+     "explanation": "The place values of the 7 bits are 64, 32, 16, 8, 4, 2 and 1. Add the place values above the 1s: $64 + 32 + 4 + 1 = 101$."},
+    {"type": "short", "difficulty": 2, "prompt": "Convert 75 to binary. Type only the bits, for example 1010.", "accepted": ["1001011", "01001011", "1001011_2", "1001011₂", "0100 1011", "100 1011"],
+     "explanation": "Repeated division by 2 gives the remainders 1, 1, 0, 1, 0, 0, 1 ($75 \\div 2 = 37$ r 1, $37 \\div 2 = 18$ r 1, $18 \\div 2 = 9$ r 0, $9 \\div 2 = 4$ r 1, $4 \\div 2 = 2$ r 0, $2 \\div 2 = 1$ r 0, $1 \\div 2 = 0$ r 1). Read from the bottom up: $1001011_2$. Check: $64 + 8 + 2 + 1 = 75$."},
+    {"type": "short", "difficulty": 2, "prompt": "Write 250 in hexadecimal.", "accepted": ["FA", "0xFA", "FA_16", "FA₁₆", "FA16"],
+     "explanation": "$250 \\div 16 = 15$ remainder 10, and $15 \\div 16 = 0$ remainder 15. From the bottom up, 15 is F and 10 is A, so $250 = \\mathrm{FA}_{16}$. Check: $15 \\times 16 + 10 = 250$."},
+    {"type": "numeric", "difficulty": 2, "prompt": "Convert $\\mathrm{2F}_{16}$ to decimal.", "answer": 47,
+     "explanation": "The place values are 16 and 1, and F means 15: $2 \\times 16 + 15 \\times 1 = 32 + 15 = 47$."},
+    {"type": "mcq", "difficulty": 2, "prompt": "What is $11010110_2$ in octal?",
+     "choices": [{"text": "$326_8$", "correct": true}, {"text": "$652_8$"}, {"text": "$214_8$"}, {"text": "$\\mathrm{D6}_8$"}],
+     "explanation": "Group the bits in 3s **from the right**: 11 | 010 | 110, then add a 0 on the left: 011 | 010 | 110 = 3 | 2 | 6. So the answer is $326_8$. Grouping from the left gives 110 | 101 | 10 = 6 | 5 | 2, which is wrong. 214 is the decimal value, and D6 is the hexadecimal value; D is not an octal digit."},
+    {"type": "multi", "difficulty": 2, "prompt": "Which of these can be octal numbers? Select **all** that apply.",
+     "choices": [{"text": "725", "correct": true}, {"text": "1080"}, {"text": "17", "correct": true}, {"text": "6400", "correct": true}, {"text": "389"}],
+     "explanation": "Octal uses only the digits 0 to 7. 1080 contains an 8 and 389 contains an 8 and a 9, so they cannot be octal numbers."},
+    {"type": "numeric", "difficulty": 2, "prompt": "A teacher in Rubavu wants to give each of the 45 students in her class a different binary code. What is the smallest number of bits each code needs?", "answer": 6,
+     "explanation": "5 bits give $2^5 = 32$ codes, which is not enough for 45 students. 6 bits give $2^6 = 64$ codes, which is enough."},
+    {"type": "true_false", "difficulty": 1, "prompt": "With 8 bits (one byte), the largest number you can write is 256.", "answer": false,
+     "explanation": "8 bits give $2^8 = 256$ different numbers, but they start at 0, so the largest is $2^8 - 1 = 255 = 11111111_2 = \\mathrm{FF}_{16}$."},
+    {"type": "mcq", "difficulty": 3, "prompt": "You are counting in binary. Which number comes just after $10111_2$?",
+     "choices": [{"text": "$10112$"}, {"text": "$11000_2$", "correct": true}, {"text": "$10110_2$"}, {"text": "$11111_2$"}],
+     "explanation": "Adding 1 to the last bit gives $1 + 1 = 10_2$: write 0 and carry 1. The carry goes through all three 1s on the right, so $10111_2 + 1 = 11000_2$. Check: $23 + 1 = 24 = 16 + 8$. 10112 is not binary, because 2 is not a binary digit."}
+  ]
+}

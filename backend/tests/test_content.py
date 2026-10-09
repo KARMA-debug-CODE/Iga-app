@@ -169,7 +169,14 @@ def test_ict_and_computer_science_are_two_subjects():
         "s2-ict-css-basics": ("ict", "S2", "Styling web pages with CSS"),
         "s3-ict-javascript-intro": ("ict", "S3", "Algorithms and programming: JavaScript"),
         "s4-ict-python-basics": ("ict", "S4", "Python programming I"),
+        "s4-cs-number-systems": ("computer-science", "S4", "Number systems"),
+        "s5-cs-cpp-classes-objects": ("computer-science", "S5", "Object-oriented programming in C++"),
+        "s6-cs-cpu-scheduling": ("computer-science", "S6", "Process management and scheduling algorithms"),
     }
-    for quiz in Quiz.objects.filter(subject=ict):
+    for quiz in Quiz.objects.filter(subject__in=[ict, cs]):
         assert quiz.unit.lessons.exists(), quiz.title  # each practice quiz sits with its lesson
+    assert Quiz.objects.filter(subject=cs).count() == 3
+    # Its starter lesson and quiz are free (one per subject, see CONTENT_GUIDE.md).
+    assert list(Lesson.objects.filter(unit__subject=cs, is_free=True).values_list("slug", flat=True)) == ["s4-cs-number-systems"]
+    assert Quiz.objects.filter(subject=cs, is_free=True).count() == 1
     assert not Unit.objects.filter(alignment_verified=True).exists()
