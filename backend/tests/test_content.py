@@ -179,4 +179,6 @@ def test_ict_and_computer_science_are_two_subjects():
     # Its starter lesson and quiz are free (one per subject, see CONTENT_GUIDE.md).
     assert list(Lesson.objects.filter(unit__subject=cs, is_free=True).values_list("slug", flat=True)) == ["s4-cs-number-systems"]
     assert Quiz.objects.filter(subject=cs, is_free=True).count() == 1
+    for lesson in Lesson.objects.filter(unit__subject=cs):
+        assert lesson.translations.filter(language="fr").exists(), lesson.slug
     assert not Unit.objects.filter(alignment_verified=True).exists()
