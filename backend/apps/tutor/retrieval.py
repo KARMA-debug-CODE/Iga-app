@@ -3,8 +3,9 @@
 Every published lesson (in English, and in French where it has been translated) is cut into passages at its
 headings and ranked with BM25, the classic search-engine formula: words that are rare across the lessons
 count more, and short passages are not drowned out by long ones. Passages from the student's grade, the
-chosen subject and the open lesson rank higher. The index lives in each server process's memory; it is
-built on first use and again after a lesson changes (a signal changes a version kept in the shared cache).
+chosen subject and the open lesson rank higher; lessons for students two or more years ahead rank lower.
+The index lives in each server process's memory; it is built on first use and again after a lesson changes
+(a signal changes a version kept in the shared cache).
 """
 
 import logging
@@ -275,6 +276,12 @@ def _readable_lessons(user):
     return set(lessons.values_list("id", flat=True))
 
 
+def _level(grade):
+    """3 for "S3"; None for anything else."""
+    match = re.fullmatch(r"S([1-6])", grade or "")
+    return int(match.group(1)) if match else None
+
+
 def _fill(candidates, budget, per_lesson):
     """Take passages in order until the budget (in characters) is used, at most `per_lesson` from one lesson."""
     chosen, used, taken = [], 0, Counter()
@@ -311,6 +318,7 @@ def search(user, query, language, *, lesson=None, subject_id=None, budget=2800, 
         return own, []
     readable = _readable_lessons(user)
     grade = getattr(user, "grade", "") or ""
+    level = _level(grade)
     weighted = []
     for i, score in index.scores(terms).items():
         passage = index.passages[i]
@@ -321,6 +329,8 @@ def search(user, query, language, *, lesson=None, subject_id=None, budget=2800, 
             weight *= 0.8
         if grade and passage.grade == grade:
             weight *= 1.25
+        elif level and (_level(passage.grade) or 0) > level + 1:
+            weight *= 0.6  # written for students two or more years ahead
         if subject_id and passage.subject_id == subject_id:
             weight *= 1.5
         weighted.append((score * weight, i))

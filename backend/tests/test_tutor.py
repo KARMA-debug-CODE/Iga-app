@@ -456,6 +456,15 @@ def test_retrieval_finds_the_relevant_lessons(student, gradient_lesson, biology)
     assert retrieval.search(student, "Explain this lesson more simply", "en") == ([], [])
 
 
+def test_lessons_for_much_older_students_rank_lower(student, subject):
+    body = "## Respiration\n\nCells release energy from glucose by respiration."
+    for grade in ("S1", "S6"):  # on equal scores the later one would come first
+        unit = Unit.objects.create(subject=subject, grade=grade, number=1, title="Energy")
+        Lesson.objects.create(unit=unit, slug=f"energy-{grade}", title="Energy", status="published", body=body)
+    _, others = retrieval.search(student, "How do cells release energy?", "en")  # the student is in S2
+    assert [p.slug for p in others] == ["energy-S1", "energy-S6"]
+
+
 def test_the_open_lesson_comes_first_in_reading_order(student, gradient_lesson, biology):
     own, others = retrieval.search(student, "Where does the line cross the y-axis?", "en", lesson=gradient_lesson)
     assert [p.heading for p in own] == ["Gradient", "The y-intercept"]
