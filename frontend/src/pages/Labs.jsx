@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import SubjectOptions from "../components/SubjectOptions";
 import { GradeChips, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -15,11 +16,7 @@ export function SubjectSelect({ value, onChange, label }) {
       {label || t("practice.subject")}
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{t("practice.all")}</option>
-        {(meta.data?.subjects || []).map((s) => (
-          <option key={s.code} value={s.code}>
-            {s.icon} {s.name}
-          </option>
-        ))}
+        <SubjectOptions subjects={meta.data?.subjects || []} />
       </select>
     </label>
   );

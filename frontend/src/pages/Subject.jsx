@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
 import BookList, { officialTextbooks } from "../components/Books";
+import { SubjectIcon } from "../components/Icon";
 import { LockBadge } from "../components/Locked";
 import { GradeChips, Loader, Progress } from "../components/ui";
 import { results } from "../api";
@@ -74,7 +75,7 @@ export default function Subject() {
           </div>
           <div className="page-header row" style={{ flexWrap: "nowrap" }}>
             <div className="icon-tile" style={{ background: `${subject.color}22`, width: 56, height: 56, fontSize: "1.8rem" }} aria-hidden>
-              {subject.icon}
+              <SubjectIcon code={subject.code} size={28} />
             </div>
             <div>
               <h1 style={{ margin: 0 }}>{subject.display_name}</h1>

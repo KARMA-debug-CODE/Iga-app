@@ -36,6 +36,10 @@ msgstr "Ce compte n'est pas actif."
 msgid "Unknown grade."
 msgstr "Niveau inconnu."
 
+#: apps/accounts/serializers.py:104
+msgid "Only students in S4–S6 choose a combination."
+msgstr "Seuls les élèves de S4–S6 choisissent une combinaison."
+
 #: apps/accounts/serializers.py:103
 #: apps/accounts/serializers.py:209
 msgid "An account with this email already exists."

@@ -5,6 +5,7 @@ import { api, results } from "../api";
 import { useAuth } from "../auth";
 import { LockedNotice } from "../components/Locked";
 import Markdown from "../components/Markdown";
+import SubjectOptions from "../components/SubjectOptions";
 import { useTutorStatus } from "../components/TutorPanel";
 import { ErrorMessage, Spinner } from "../components/ui";
 import { useApi } from "../hooks";
@@ -134,12 +135,7 @@ export default function Ask() {
             </label>
             <select id="ask-subject" value={subject} onChange={(e) => setSubject(e.target.value)} disabled={busy}>
               <option value="">{t("ask.anySubject")}</option>
-              {subjectList.map((s) => (
-                <option key={s.code} value={s.code}>
-                  {s.icon ? `${s.icon} ` : ""}
-                  {s.display_name || s.name}
-                </option>
-              ))}
+              <SubjectOptions subjects={subjectList} grade={user.grade} />
             </select>
           </div>
           {messages.length > 0 && (

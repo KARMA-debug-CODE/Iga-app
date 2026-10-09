@@ -2,6 +2,8 @@ import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import { groupTitle, subjectGroups } from "../combinations";
+import { SubjectIcon } from "../components/Icon";
 import { AccessBanner } from "../components/Locked";
 import { Empty, Loader, Progress, scoreClass } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
@@ -17,7 +19,7 @@ export function SubjectCard({ subject, grade }) {
     <Link to={`/learn/${subject.code}?grade=${grade || ""}`} className="card card-link subject-card" style={{ "--subject": subject.color }}>
       <div className="row" style={{ flexWrap: "nowrap" }}>
         <div className="icon-tile" aria-hidden>
-          {subject.icon}
+          <SubjectIcon code={subject.code} />
         </div>
         <div style={{ minWidth: 0 }}>
           <strong className="truncate" style={{ display: "block" }}>
@@ -37,6 +39,28 @@ export function SubjectCard({ subject, grade }) {
       )}
     </Link>
   );
+}
+
+/** Subject cards for `grade`. An A-level student's combination comes first, under its own heading. */
+export function SubjectGrid({ subjects, grade, headingLevel = 3 }) {
+  const { user } = useAuth();
+  const { t } = useI18n();
+  const grid = (list) => (
+    <div className="grid">
+      {list.map((s) => (
+        <SubjectCard key={s.code} subject={s} grade={grade} />
+      ))}
+    </div>
+  );
+  const groups = subjectGroups(subjects, user, grade);
+  if (!groups) return grid(subjects);
+  const Heading = `h${headingLevel}`;
+  return groups.map((group) => (
+    <section key={group.key} className="subject-group">
+      <Heading>{groupTitle(t, group, user)}</Heading>
+      {grid(group.subjects)}
+    </section>
+  ));
 }
 
 function AssignmentItem({ assignment }) {
@@ -196,15 +220,7 @@ function StudentDashboard({ data, user }) {
           </h2>
           <Link to="/learn">{t("learn.subjects")} →</Link>
         </div>
-        <Loader state={subjects}>
-          {(list) => (
-            <div className="grid">
-              {list.map((s) => (
-                <SubjectCard key={s.code} subject={s} grade={user.grade} />
-              ))}
-            </div>
-          )}
-        </Loader>
+        <Loader state={subjects}>{(list) => <SubjectGrid subjects={list} grade={user.grade} />}</Loader>
       </section>
     </>
   );

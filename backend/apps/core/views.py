@@ -87,7 +87,10 @@ def _continue_learning(user, lang="en"):
         unit = last.lesson.unit
         candidate = lessons.filter(unit__subject=unit.subject, unit__grade=unit.grade).order_by("unit__number", "order").first()
     if candidate is None and user.grade:
-        candidate = lessons.filter(unit__grade=user.grade).order_by("unit__subject__order", "unit__number", "order").first()
+        in_grade = lessons.filter(unit__grade=user.grade).order_by("unit__subject__order", "unit__number", "order")
+        if user.combination_subjects:  # an A-level student starts with a subject of their combination
+            candidate = in_grade.filter(unit__subject__code__in=user.combination_subjects).first()
+        candidate = candidate or in_grade.first()
     if candidate is None and not user.grade:
         candidate = lessons.order_by("unit__grade", "unit__subject__order", "unit__number", "order").first()
     if candidate is None:

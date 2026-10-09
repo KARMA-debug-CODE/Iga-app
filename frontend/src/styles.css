@@ -946,6 +946,17 @@ tr:last-child td {
   background: color-mix(in srgb, var(--subject, var(--blue)) 16%, transparent);
 }
 
+/* An A-level student's subjects: their combination first, then the others. */
+.subject-group + .subject-group {
+  margin-top: 22px;
+}
+
+.subject-group > h2,
+.subject-group > h3 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+}
+
 .stat {
   display: grid;
   gap: 2px;
