@@ -386,6 +386,7 @@ export function SantaForm({ id, chat, value, onChange, multiline = false, inputR
                 // Stopping turns this button back into Send before the click ends: don't let it submit.
                 e.preventDefault();
                 chat.stop();
+                inputRef?.current?.focus(); // ready for the next question
               }
             : undefined
         }
