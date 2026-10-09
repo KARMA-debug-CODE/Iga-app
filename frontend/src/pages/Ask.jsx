@@ -60,11 +60,11 @@ export default function Ask() {
 
   const header = (
     <div className="page-header santa-header">
-      <SantaMark size={44} />
-      <div>
-        <h1>{t("ask.title")}</h1>
-        <p>{t("ask.intro")}</p>
-      </div>
+      <h1>
+        <SantaMark size={36} />
+        {t("ask.title")}
+      </h1>
+      <p>{t("ask.intro")}</p>
     </div>
   );
 

@@ -16,20 +16,7 @@
   fill: var(--yellow);
 }
 
-.santa-header {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.santa-header h1 {
-  margin: 0;
-}
-
-.santa-header p {
-  margin: 2px 0 0;
-}
-
+.santa-header h1,
 .santa-title,
 .santa-open {
   display: inline-flex;
@@ -37,8 +24,20 @@
   gap: 8px;
 }
 
+.santa-header h1 {
+  gap: 10px;
+}
+
 .santa-note {
   margin: 4px 0 10px;
+}
+
+/* Long starter questions wrap on a phone instead of running off the side. */
+.ask-empty .chip,
+.tutor .chip {
+  white-space: normal;
+  max-width: 100%;
+  text-align: center;
 }
 
 .santa-log .bubble.mine {
@@ -150,18 +149,17 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  font-size: 0.9rem;
 }
 
 .santa-sources a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-weight: 600;
 }
 
 .santa-sources a .icon {
-  flex: none;
+  margin-right: 6px;
+  vertical-align: -2px;
 }
 
 .santa-form .btn {

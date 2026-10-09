@@ -287,7 +287,7 @@ function Answer({ message }) {
                 <li key={source.slug}>
                   <Link to={source.url || `/lessons/${source.slug}`}>
                     <Icon name="book" size={14} />
-                    <span>{source.title}</span>
+                    {source.title}
                   </Link>
                   {source.section && <span className="small muted"> · {source.section}</span>}
                 </li>
