@@ -1,6 +1,6 @@
 {
   "title": "Programming in Python — practice",
-  "subject": "ict", "grade": "S4", "unit": 3,
+  "subject": "ict", "grade": "S4", "unit": 4,
   "kind": "practice", "feedback_mode": "immediate",
   "questions": [
     {"type": "mcq", "difficulty": 1, "prompt": "What does `print(7 / 2)` display?",

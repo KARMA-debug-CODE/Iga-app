@@ -57,3 +57,45 @@ test("the menu can be hidden for more room, and stays hidden", async ({ page }) 
   await page.getByRole("button", { name: /show the menu/i }).click();
   await expect(learn).toBeVisible();
 });
+
+test("an A-level student's combination comes first in their subject lists", async ({ page }) => {
+  await login(page, "aline");
+  const group = (name) => page.locator(".subject-group", { has: page.getByRole("heading", { name }) });
+
+  // S5 with MCE (Mathematics, Computer Science, Economics).
+  await page.goto("/profile");
+  await expect(page.getByLabel("Combination")).toBeHidden(); // only S4–S6 choose one
+  await page.getByLabel("Grade").selectOption("S5");
+  await page.getByLabel("Combination").selectOption("MCE");
+  await expect(page.getByLabel("Combination").locator("option:checked")).toHaveText("MCE – Mathematics, Computer Science, Economics");
+  await page.getByRole("button", { name: /^save$/i }).click();
+  await expect(page.getByRole("status")).toContainText("now follows S5");
+
+  // The dashboard lists the combination first, then everything else (ICT included).
+  await page.goto("/");
+  const mine = group("Your combination (MCE)");
+  await expect(mine.getByRole("link")).toHaveCount(3);
+  for (const name of ["Mathematics", "Computer Science", "Economics"]) await expect(mine.getByRole("link", { name })).toBeVisible();
+  await expect(group("Other subjects").getByRole("link", { name: /^ICT/ })).toBeVisible();
+  await expect(group("Other subjects").getByRole("link", { name: /^Physics/ })).toBeVisible();
+
+  // The Learn page too, but not for an O-level grade.
+  await page.goto("/learn?grade=S6");
+  await expect(group("Your combination (MCE)").getByRole("link", { name: /Computer Science/ })).toBeVisible();
+  await page.goto("/learn?grade=S2");
+  await expect(page.getByRole("link", { name: /^ICT/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your combination (MCE)" })).toBeHidden();
+
+  // Back to S2 (the other tests use this student): the combination goes with A-level.
+  await page.goto("/profile");
+  await page.getByLabel("Grade").selectOption("S2");
+  await expect(page.getByLabel("Combination")).toBeHidden();
+  await page.getByRole("button", { name: /^save$/i }).click();
+  await expect(page.getByRole("status")).toContainText("now follows S2");
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /Your subjects · S2/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Your combination/ })).toBeHidden();
+  await page.goto("/profile");
+  await page.getByLabel("Grade").selectOption("S4");
+  await expect(page.getByLabel("Combination")).toHaveValue("");
+});

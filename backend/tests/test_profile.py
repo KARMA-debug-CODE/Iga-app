@@ -4,7 +4,7 @@ them; avatars are chosen from fixed options."""
 import pytest
 
 from apps.classroom.models import Assignment, Classroom, Enrollment
-from apps.curriculum.models import Lesson, LessonProgress, Unit
+from apps.curriculum.models import Lesson, LessonProgress, Subject, Unit
 
 from .conftest import make_user
 
@@ -88,3 +88,47 @@ def test_other_students_see_avatars_in_the_leaderboard(client_for, student):
     friend = make_user("friend", grade="S2")
     entries = client_for(friend).get("/api/leaderboard/", {"period": "all"}).data["entries"]
     assert [(e["name"], e["avatar"]) for e in entries] == [(student.short_name, {"skin": 1})]
+
+
+def test_a_level_students_choose_a_combination(client_for, student):
+    client = client_for(student)
+    # In S1–S3 there is no combination: one sent with the profile is ignored.
+    ignored = client.patch("/api/auth/me/", {"combination": "MCE"}, format="json")
+    assert ignored.status_code == 200 and (ignored.data["combination"], ignored.data["combination_subjects"]) == ("", [])
+
+    chosen = client.patch("/api/auth/me/", {"grade": "S5", "combination": "MCE"}, format="json")
+    assert chosen.data["combination"] == "MCE"
+    assert chosen.data["combination_subjects"] == ["mathematics", "computer-science", "economics"]
+    assert client.get("/api/auth/me/").data["combination_subjects"] == ["mathematics", "computer-science", "economics"]
+    assert client.patch("/api/auth/me/", {"combination": "MEC"}, format="json").status_code == 400
+    assert client.patch("/api/auth/me/", {"grade": "S6"}, format="json").data["combination"] == "MCE"  # stays in A-level
+
+    # Back to O-level: the combination goes.
+    back = client.patch("/api/auth/me/", {"grade": "S2", "combination": "MCE"}, format="json")
+    assert (back.data["grade"], back.data["combination"], back.data["combination_subjects"]) == ("S2", "", [])
+    student.refresh_from_db()
+    assert student.combination == ""
+
+    client.patch("/api/auth/me/", {"grade": "S4", "combination": "PCB"}, format="json")
+    assert client.patch("/api/auth/me/", {"combination": ""}, format="json").data["combination_subjects"] == []
+
+
+def test_only_students_choose_a_combination(client_for, teacher):
+    refused = client_for(teacher).patch("/api/auth/me/", {"combination": "MPC"}, format="json", HTTP_ACCEPT_LANGUAGE="fr")
+    assert refused.status_code == 400
+    assert "Seuls les élèves de S4–S6 choisissent une combinaison." in str(refused.data["combination"])
+    teacher.combination = "MPC"  # set some other way (the admin): it still means nothing for a teacher
+    assert teacher.combination_subjects == []
+
+
+def test_continue_learning_starts_with_the_combination(client_for, student):
+    physics = Subject.objects.create(code="physics", name="Physics", order=1)
+    cs = Subject.objects.create(code="computer-science", name="Computer Science", order=5)
+    for subject in (physics, cs):
+        unit = Unit.objects.create(subject=subject, grade="S5", number=1, title=subject.name)
+        Lesson.objects.create(unit=unit, slug=f"s5-{subject.code}", title=subject.name, status="published", is_free=True)
+    client = client_for(student)
+    client.patch("/api/auth/me/", {"grade": "S5"}, format="json")
+    assert client.get("/api/dashboard/").data["continue_learning"]["slug"] == "s5-physics"
+    client.patch("/api/auth/me/", {"combination": "MCE"}, format="json")
+    assert client.get("/api/dashboard/").data["continue_learning"]["slug"] == "s5-computer-science"

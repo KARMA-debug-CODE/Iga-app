@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { A_LEVEL, COMBINATIONS } from "../combinations";
 import Avatar from "../components/Avatar";
 import AvatarBuilder from "../components/AvatarBuilder";
 import { BadgeIcon, Icon } from "../components/Icon";
@@ -322,6 +323,7 @@ function ProfileHeader({ onEditAvatar }) {
         <div className="profile-hero-tags">
           <span className="pill pill-blue">{role}</span>
           {user.role === "student" && user.grade && <span className="pill">{user.grade}</span>}
+          {user.combination_subjects?.length > 0 && <span className="pill">{user.combination}</span>}
           {user.school && <span className="pill">{user.school.name}</span>}
         </div>
       </div>
@@ -359,11 +361,13 @@ function Details() {
     first_name: user.first_name,
     last_name: user.last_name,
     grade: user.grade,
+    combination: user.combination || "",
     preferred_language: user.preferred_language,
   }));
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
   const gradeChanges = user.role === "student" && form.grade !== user.grade;
+  const aLevel = user.role === "student" && A_LEVEL.includes(form.grade);
 
   useEffect(() => setForm((f) => ({ ...f, preferred_language: lang })), [lang]);
 
@@ -374,6 +378,7 @@ function Details() {
     try {
       const updated = await api("/auth/me/", { method: "PATCH", body: form });
       setUser(updated);
+      setForm((f) => ({ ...f, combination: updated.combination }));
       setLang(updated.preferred_language);
       if (updated.left_classes !== undefined) {
         setNotice(
@@ -433,6 +438,27 @@ function Details() {
           </select>
         </label>
       </div>
+      {aLevel && (
+        <label>
+          <span id="combination-label">{t("profile.combination")}</span>
+          <select
+            value={form.combination}
+            onChange={(e) => setForm({ ...form, combination: e.target.value })}
+            aria-labelledby="combination-label"
+            aria-describedby="combination-help"
+          >
+            <option value="">{t("profile.combinationNone")}</option>
+            {COMBINATIONS.map((code) => (
+              <option key={code} value={code}>
+                {t(`combination.${code}`)}
+              </option>
+            ))}
+          </select>
+          <span id="combination-help" className="small muted" style={{ fontWeight: 400 }}>
+            {t("profile.combinationHelp")}
+          </span>
+        </label>
+      )}
       {gradeChanges && (
         <p className="alert alert-info small" role="note">
           <Icon name="info" /> {t("profile.gradeChangeHelp", { grade: form.grade })}

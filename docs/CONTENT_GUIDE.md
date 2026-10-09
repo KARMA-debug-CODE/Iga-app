@@ -21,6 +21,10 @@ Both commands are **idempotent**: running them again updates existing items, mat
 
 After checking a unit against the official REB syllabus, tick **alignment verified** in the Django admin (and fill in *syllabus reference* and *key unit competence*). The "draft outline" notice then disappears for that unit.
 
+Units are matched by `(subject, grade, number)`, so giving a unit another number renames the unit that had that number. A unit removed from `units.json` is deleted by the next `load_curriculum` when nothing is in it; a unit that still holds lessons, questions, quizzes or teachers' material is kept, and the command lists it so you can move that content first.
+
+ICT and Computer Science are two subjects, as in REB's curriculum: `ict` for every student (S1–S6) and `computer-science` for A-level students in the MCE and MPC combinations (S4–S6). The migration `curriculum/0007_computer_science` moved the units of the old combined subject, with everything in them, to their new places; run `load_curriculum` after it. A-level students can set their combination in their profile, and its three principal subjects then come first in their subject lists: the combinations and their subjects are `COMBINATIONS` in `apps/core/constants.py` (with the names in the frontend dictionaries, `combination.MCE`…).
+
 ## Lessons: `content/lessons/<slug>.md`
 
 ```markdown

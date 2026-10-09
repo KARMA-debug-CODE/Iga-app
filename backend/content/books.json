@@ -800,15 +800,15 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "Computer Science Senior 4 Student's Book",
+      "title": "ICT for General Education Senior 4 Student's Book",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
-      "url": "https://elearning.reb.rw/pluginfile.php/85742/mod_resource/content/1/Computer%20Science%20S4%20SB.pdf",
-      "format": "pdf",
+      "url": "https://elearning.reb.rw/mod/resource/view.php?id=1870",
+      "format": "page",
       "licence": "© REB, free to read",
-      "description": "Official REB Computer Science student's book for S4 (pre-2026 edition), for combinations that include Computer Science, such as MCE and MPC.",
-      "description_fr": "Manuel officiel de l'élève du REB en informatique (Computer Science) pour la S4, édition antérieure à 2026, destiné aux combinaisons avec informatique (MCE, MPC…).",
-      "source": "books-research.json reb.books (ict, S4): WebSearch returned this exact URL titled 'Computer Science Senior Four Student's Book'. Not opened."
+      "description": "Opens the REB page for 'ICT for General Education, Senior 4' (2022 experimental edition, for combinations without Computer Science); open the file shown there. Its units differ from the newer 2026–2027 units listed here.",
+      "description_fr": "Ouvre la page du REB pour « ICT for General Education, Senior 4 » (édition expérimentale 2022, pour les combinaisons sans informatique) ; ouvrez le fichier qui s'y trouve. Ses unités diffèrent des unités plus récentes (2026–2027) proposées ici.",
+      "source": "ict-cs.json books (ict, S4): WebSearch snippet shows the cover 'Experimental version ICT FOR GENERAL EDUCATION Senior 4 STUDENT BOOK', (c) 2022 REB, and a foreword saying it is 'for non-computer science options'. Not opened (elearning.reb.rw blocked). No URL was found for the revised 2026-2027 S4 ICT Student's Book. The Computer Science S4 book this entry used to point to is now reb-computer-science-s4."
     },
     {
       "id": "reb-ict-s5",
@@ -836,15 +836,33 @@
       ],
       "kind": "textbook",
       "official": true,
-      "title": "ICT for General Education Senior 6 Student's Book",
+      "title": "ICT Senior 6 Student's Book (2026–2027)",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/mod/folder/view.php?id=17486",
+      "format": "page",
+      "licence": "© REB, free to read",
+      "description": "Opens REB's folder of revised 2026 Senior 6 books; choose 'S6 ICT SB 2026-2027' for the ICT Student's Book (2026–2027 edition).",
+      "description_fr": "Ouvre le dossier du REB contenant les manuels révisés 2026 de S6 ; choisissez « S6 ICT SB 2026-2027 » pour obtenir le livre de l'élève de TIC (édition 2026–2027).",
+      "source": "ict-cs.json books (ict, S6): the S6 2026 folder https://elearning.reb.rw/mod/folder/view.php?id=17486 lists 'S6 ICT SB 2026-2027.pdf' (seen in search); no direct URL for the Student's Book was seen. REB's 2026-2027 S6 ICT Teacher's Guide (Unit 1 Google Form, Unit 2 Website Development with AI) matches Iga's S6 units. Not opened (elearning.reb.rw blocked)."
+    },
+    {
+      "id": "reb-ict-s6-2022",
+      "subject": "ict",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "ICT for General Education Senior 6 Student's Book (2022)",
       "publisher": "Rwanda Basic Education Board (REB)",
       "language": "en",
       "url": "https://elearning.reb.rw/pluginfile.php/84648/mod_resource/content/1/ICT%20S6%20SB.pdf",
       "format": "pdf",
       "licence": "© REB, free to read",
-      "description": "Official REB student's book for S6 general-education ICT (experimental, pre-2026 edition). REB has also released a revised 2026–2027 edition.",
-      "description_fr": "Manuel officiel de l'élève du REB en TIC pour l'enseignement général, S6 (version expérimentale antérieure à 2026). Une édition révisée 2026–2027 existe aussi.",
-      "source": "books-research.json reb.books (ict, S6): WebSearch returned this exact URL titled 'Experimental version ICT FOR GENERAL EDUCATION Senior 6 STUDENT BOOK'. Not opened."
+      "description": "REB's earlier, experimental ICT book for S6 (2022), for classes still on the old combinations: database design and SQL. The link downloads the PDF.",
+      "description_fr": "Le manuel de TIC précédent du REB pour la S6 (version expérimentale 2022), pour les classes encore sur les anciennes combinaisons : conception de bases de données et SQL. Le lien télécharge le PDF.",
+      "source": "books-research.json reb.books (ict, S6): WebSearch returned this exact URL titled 'Experimental version ICT FOR GENERAL EDUCATION Senior 6 STUDENT BOOK'. Not opened. Kept as an earlier edition; the official S6 entry now points to the 2026-2027 books."
     },
     {
       "id": "open-cs-unplugged",
@@ -963,9 +981,103 @@
       "source": "https://raw.githubusercontent.com/swcarpentry/sql-novice-survey/main/README.md ('rendered version of this material' link, verbatim; README: instructional material CC BY 4.0). Re-fetched by checker."
     },
     {
-      "id": "open-think-java-2e",
-      "subject": "ict",
+      "id": "reb-computer-science-s4",
+      "subject": "computer-science",
       "grades": [
+        "S4"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Computer Science Senior 4 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85742/mod_resource/content/1/Computer%20Science%20S4%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Computer Science student's book for S4 (2020), for the MCE and MPC combinations. The link downloads the PDF.",
+      "description_fr": "Manuel officiel de l'élève du REB en informatique pour la S4 (2020), pour les combinaisons MCE et MPC. Le lien télécharge le PDF.",
+      "source": "ict-cs.json books (computer-science, S4): this URL was seen in WebSearch (title 'Computer Science Senior Four Student's Book') and in books-research.json. Not opened (elearning.reb.rw blocked). A third-party mirror with the same title page ('(c) 2020 Rwanda Education Board') and the 17-unit contents was checked; Iga must not link to it. Fallback upload: https://elearning.reb.rw/pluginfile.php/10826/mod_resource/content/1/Computer%20Science%20S4%20SB.pdf"
+    },
+    {
+      "id": "reb-computer-science-s5",
+      "subject": "computer-science",
+      "grades": [
+        "S5"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Computer Science Senior 5 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/85872/mod_resource/content/1/FINAL%20COMPUTER%20SCIENCE%20S5%20WITH%20STAMP.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Computer Science student's book for S5 (2022 edition), for the MCE and MPC combinations. The link downloads the PDF.",
+      "description_fr": "Manuel officiel de l'élève du REB en informatique pour la S5 (édition 2022), pour les combinaisons MCE et MPC. Le lien télécharge le PDF.",
+      "source": "ict-cs.json books (computer-science, S5): seen in WebSearch (title 'COMPUTER SCIENCE S5 STUDENT'S BOOK', snippets show (c) 2022 and Units 1-9) and verbatim in raw.githubusercontent.com/Mugsh044/Yvens/HEAD/mcecourses5.html (MCE 'Computer Science' card). Not opened. Iga's S5 units come from the 2019 edition (12 units); the 2022 edition matches Units 1-9, Units 10-12 (Java) were not visible. 2019 edition: https://elearning.reb.rw/pluginfile.php/11384/mod_resource/content/1/Computer%20Science%20S5%20SB.pdf"
+    },
+    {
+      "id": "reb-computer-science-s6",
+      "subject": "computer-science",
+      "grades": [
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": true,
+      "title": "Computer Science Senior 6 Student's Book",
+      "publisher": "Rwanda Basic Education Board (REB)",
+      "language": "en",
+      "url": "https://elearning.reb.rw/pluginfile.php/87372/mod_resource/content/1/Computer%20Science%20S6%20SB.pdf",
+      "format": "pdf",
+      "licence": "© REB, free to read",
+      "description": "Official REB Computer Science student's book for S6 (2019), for the MCE and MPC combinations. The link downloads the PDF.",
+      "description_fr": "Manuel officiel de l'élève du REB en informatique pour la S6 (2019), pour les combinaisons MCE et MPC. Le lien télécharge le PDF.",
+      "source": "ict-cs.json books (computer-science, S6): verbatim in raw.githubusercontent.com/Mugsh044/Yvens/HEAD/mcecourses6.html (MCE 'Computer Science' card). Not opened. A mirror of the 2019 book (652 pages, 14 units) was checked; Iga must not link to it. More stable REB page if this file moves: https://elearning.reb.rw/mod/resource/view.php?id=3798"
+    },
+    {
+      "id": "open-cs-field-guide-cs",
+      "subject": "computer-science",
+      "grades": [
+        "S4",
+        "S5",
+        "S6"
+      ],
+      "kind": "textbook",
+      "official": false,
+      "title": "Computer Science Field Guide",
+      "publisher": "University of Canterbury CS Education Research Group",
+      "language": "en",
+      "url": "https://csfieldguide.org.nz/",
+      "format": "web",
+      "licence": "CC BY-SA 4.0",
+      "description": "Free interactive online book for secondary students: algorithms, data representation, networks, encryption, AI and more. From the University of Canterbury (NZ).",
+      "description_fr": "Livre en ligne interactif et gratuit pour les élèves du secondaire : algorithmes, représentation des données, réseaux, chiffrement, IA, etc. En anglais.",
+      "source": "https://raw.githubusercontent.com/uccser/cs-field-guide/master/README.md ('Production website' link, verbatim; licence section: content CC BY-SA 4.0). Re-fetched by checker. Also listed for Computer Science."
+    },
+    {
+      "id": "open-swc-databases-and-sql-cs",
+      "subject": "computer-science",
+      "grades": [
+        "S5",
+        "S6"
+      ],
+      "kind": "link",
+      "official": false,
+      "title": "Databases and SQL",
+      "publisher": "The Carpentries (Software Carpentry)",
+      "language": "en",
+      "url": "https://swcarpentry.github.io/sql-novice-survey/",
+      "format": "web",
+      "licence": "CC BY 4.0",
+      "description": "Short free online lesson on databases and SQL with SQLite: selecting, sorting, filtering, joining and changing data. From Software Carpentry.",
+      "description_fr": "Courte leçon en ligne gratuite sur les bases de données et SQL avec SQLite : sélectionner, trier, filtrer, faire des jointures et modifier des données. En anglais.",
+      "source": "https://raw.githubusercontent.com/swcarpentry/sql-novice-survey/main/README.md ('rendered version of this material' link, verbatim; README: instructional material CC BY 4.0). Re-fetched by checker. Also listed for Computer Science."
+    },
+    {
+      "id": "open-think-java-2e",
+      "subject": "computer-science",
+      "grades": [
+        "S5",
         "S6"
       ],
       "kind": "textbook",
@@ -978,7 +1090,7 @@
       "licence": "CC BY-NC-SA 4.0",
       "description": "Free PDF of Think Java (2nd edition) by Allen Downey and Chris Mayfield: a beginner's introduction to programming in Java and object-oriented design.",
       "description_fr": "PDF gratuit de Think Java (2e édition), d'Allen Downey et Chris Mayfield : initiation à la programmation en Java et à la conception orientée objet. En anglais.",
-      "source": "https://raw.githubusercontent.com/ChrisMayfield/ThinkJava2/master/README.md ('Free PDF: Download from GitHub ... (canonical)' link, verbatim; licence CC BY-NC-SA 4.0). Underlying file https://raw.githubusercontent.com/ChrisMayfield/ThinkJava2/master/thinkjava2.pdf: curl -sI HTTP 200, 1,957,646 bytes (re-checked by checker)."
+      "source": "https://raw.githubusercontent.com/ChrisMayfield/ThinkJava2/master/README.md ('Free PDF: Download from GitHub ... (canonical)' link, verbatim; licence CC BY-NC-SA 4.0). Underlying file https://raw.githubusercontent.com/ChrisMayfield/ThinkJava2/master/thinkjava2.pdf: curl -sI HTTP 200, 1,957,646 bytes (re-checked by checker). Java is taught in Computer Science (S5-S6), not in ICT."
     },
     {
       "id": "reb-english-s1",

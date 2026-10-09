@@ -11,7 +11,8 @@ class Subject(models.Model):
         MATHEMATICS = "mathematics", "Mathematics"
         LANGUAGES = "languages", "Languages"
         HUMANITIES = "humanities", "Humanities & Social Sciences"
-        ICT = "ict", "ICT & Computer Science"
+        ICT = "ict", "ICT"
+        COMPUTER_SCIENCE = "computer-science", "Computer Science"
         OTHER = "other", "Other"
 
     code = models.SlugField(max_length=40, unique=True)
