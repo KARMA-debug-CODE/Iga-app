@@ -1858,6 +1858,8 @@ tr:last-child td {
 }
 
 .locked-icon {
+  /* Without this the text beside it squeezes the box, and the icon (max-width: 100%) shrinks with it. */
+  flex: none;
   line-height: 1;
   color: var(--text-soft);
 }
