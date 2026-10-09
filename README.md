@@ -5,7 +5,7 @@
 - **Lessons** that follow the competence-based curriculum, with maths rendering, worked examples and live code editors (HTML/JS and Python)
 - **Virtual labs**: our own offline simulations plus PhET and GeoGebra
 - **Practice quizzes** with instant feedback, and **past papers** in timed exam mode
-- **An AI study tutor** (Claude) that explains lessons and gives hints without handing out answers, plus an **Ask AI** page for questions on any subject
+- **Santa, Iga's own AI tutor**, which runs on the school's own server (no outside AI service): it explains ideas from Iga's lessons and links them, gives hints without handing out answers, checks arithmetic with a calculator, and has its own page for questions on any subject
 - **Books on every lesson and unit**: the official REB student's book for that subject and grade, plus free open textbooks
 - **Classes** where teachers set work, mark written answers, analyse results and track progress
 - **Parent access** so a guardian can follow a child's progress
@@ -25,7 +25,7 @@ It is mobile-first, installable as an app (PWA), works in **English and French**
 | **Curriculum** | 15 subjects (all core O- and A-level subjects), a 352-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, all 39 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
 | **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
 | **Coding** | Code playground with HTML/CSS/JS, real Python (Pyodide) and SQL (SQLite via sql.js), all in the browser, self-hosted and working offline; plus **C++ and Java**, compiled and run on Iga's own sandboxed code runner. A real code editor (automatic indentation, colours, line numbers) and a terminal-style console: when a program asks for input (`input()`, `cin`, `Scanner`), the question appears and it waits for the student's answer. Python and web code also run inside lessons |
-| **AI tutor** | Lesson and question help from Claude, and an **Ask AI** page (pick a subject, or ask about anything you study), with context the server controls: switched off everywhere while a student has an exam or timed test running, never shown answers before the student may see them, rate-limited, and off unless `ANTHROPIC_API_KEY` is set |
+| **Santa (AI tutor)** | Iga's own learning assistant: an open model (Gemma 4 E4B by default) running with llama.cpp on the school's server, so questions never leave it. In lessons, quizzes and on the **Santa** page (pick a subject, or ask about anything you study). Answers appear as they are written, are grounded in passages from Iga's own lessons (linked under each answer), use a calculator for arithmetic, and come in English or French. The server controls the context: Santa is switched off everywhere while a student has an exam or timed test running, never sees answers before the student may, and is rate-limited. Without its model (not installed, or still starting) Santa answers with the best matching lesson passages. See [Santa](#santa-igas-own-ai-tutor) |
 | **Books** | Every lesson lists the official REB student's book for its subject and grade (with the unit to look for) and free open textbooks (OpenStax, Standard Ebooks, CS Field Guide, Think Java…); units without an Iga lesson point to the textbook. Books are links, kept in `content/books.json`; `check_book_links` finds links that have moved |
 | **Offline** | Save a unit for offline use (lessons, maths fonts, built-in labs); the app opens without a connection for a student who logged in before, and logging out clears the saved pages on shared computers |
 | **Assessment** | 6 question types (MCQ, multi-select, true/false, numeric with tolerance, short answer, essay); practice and exam modes; server-enforced time limits; per-attempt shuffling; answers never sent before submit; partial credit; teacher marking queue; explanations and marking guides |
@@ -96,7 +96,56 @@ docker compose exec backend python manage.py seed_demo --force   # optional demo
 # open http://localhost:8080
 ```
 
-This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, and Iga's code runner for C++ and Java (built from the official GCC and OpenJDK images, so the first build downloads about 700 MB once; it needs no special Docker permissions). To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env` (the playground then says they are off) and start only the other services: `docker compose up --build db redis backend scheduler web`. For a real deployment, set a random `CODE_RUNNER_TOKEN` in `.env`. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
+This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, Iga's code runner for C++ and Java (built from the official GCC and OpenJDK images, so the first build downloads about 700 MB once; it needs no special Docker permissions), and Santa's model server (its first start downloads the model once, about 4.5 GB: see [Santa](#santa-igas-own-ai-tutor)). To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env` (the playground then says they are off) and start only the other services: `docker compose up --build db redis backend scheduler web santa`. For a real deployment, set a random `CODE_RUNNER_TOKEN` and `SANTA_API_KEY` in `.env`. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
+
+## Santa, Iga's own AI tutor
+
+Santa is Iga's learning assistant. Its "brain" is an open language model that runs on the school's (or Iga's) own server with [llama.cpp](https://github.com/ggml-org/llama.cpp): no outside AI service is called and no question leaves the server. In `docker-compose.yml` it is the `santa` service (`ghcr.io/ggml-org/llama.cpp:server-b11151`, the CPU build for amd64 and arm64), reachable only by Django on an internal network and protected by `SANTA_API_KEY`.
+
+**How it answers.** For each question Django:
+
+1. checks that the student may use Santa (school subscription, no exam or timed test open, rate limit) and gathers what Santa may see: the open lesson, or the quiz question (and its answer only once the student may see it), or the subject chosen on the Santa page;
+2. finds the best matching passages in Iga's own lessons, in English and French (BM25 ranking over lesson sections, preferring the open lesson, the student's grade and subject, and only lessons the student may read), and links them under the answer;
+3. sends a short, fixed set of instructions (so llama.cpp can reuse its prompt cache) and the question with its context to the model, which may call a `calculate` tool (a safe calculator, never `eval`) up to 3 times, and streams the answer to the student as it is written.
+
+If the model is not installed, still starting or not answering, Santa still helps: it answers with the best matching lesson passages and says so. Every question and answer is logged (`TutorExchange`, in the Django admin) for safeguarding review.
+
+**Hardware.** The default model, Google's Gemma 4 E4B (`google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0`, Apache-2.0), is about 4.5 GB and uses about 5-6 GB of RAM: a server with **16 GB of RAM** and 4-8 CPU cores is recommended. On such a CPU it should write roughly 8-12 tokens (pieces of words) a second, so a full answer takes 20-60 seconds (an estimate; measure yours, below). It answers 4 students at once (`-np 4`); others get a lesson-passage answer and are asked to try again in a minute. For an **8 GB server**, use the smaller Gemma 4 E2B (about 2.9 GB):
+
+```bash
+# in .env
+SANTA_MODEL=google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0
+SANTA_MEMORY_LIMIT=5g
+SANTA_THREADS=4          # the number of physical CPU cores
+```
+
+**First start.** `docker compose up` starts the `santa` service, which downloads the model from Hugging Face once into the `santa-models` volume (about 4.5 GB; follow it with `docker compose logs -f santa`). Until it is ready, the app says "Santa is waking up" and answers from the lessons. To download from an internal mirror instead, set `MODEL_ENDPOINT` on the service; `HF_TOKEN` is only needed for gated or private models.
+
+**Fully offline.** Once the model is downloaded, set `SANTA_OFFLINE=true` in `.env` (llama.cpp's `--offline`: it uses only the cached model and never goes online), and if you like remove the `santa-download` network from the service so it has no route to the internet at all. Alternatively, point it at the file itself: replace `-hf <model>` in the command with `-m /models/<path to the .gguf file>` (find it with `docker compose exec santa find /models -name "*.gguf"`). To install a school with no internet, download on another machine and copy the `santa-models` volume.
+
+**Switching models.** Set `SANTA_MODEL` to another GGUF model as `<Hugging Face repo>:<quant>` and restart the service; Django needs no change (the model is always called `santa`). Options from our research, all Apache-2.0: Gemma 4 E2B (smaller, same format), IBM Granite 4.2 3B (`ibm-granite/granite-4.2-3b-GGUF:Q4_K_M`, about 2.3 GB, strong at maths) and, with a GPU or 32 GB of RAM, Gemma 4 26B-A4B (`google/gemma-4-26B-A4B-it-qat-q4_0-gguf:Q4_0`, about 14 GB). Test French answers with your teachers before switching. Check a model's licence before using it.
+
+**GPU.** With an NVIDIA GPU, add a `docker-compose.override.yml`:
+
+```yaml
+services:
+  santa:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda-b11151
+    environment:
+      LLAMA_ARG_N_GPU_LAYERS: all
+    deploy:
+      resources:
+        reservations:
+          devices: [{ driver: nvidia, count: all, capabilities: [gpu] }]
+```
+
+(`server-vulkan-b11151` works with other GPUs.) Answers then come many times faster, and bigger models become practical.
+
+**Measuring speed.** `docker run --rm -v <project>_santa-models:/models ghcr.io/ggml-org/llama.cpp:full-b11151 --bench -m /models/<path to the .gguf file> -p 512 -n 128 -t 4` (`docker volume ls` shows the volume's full name).
+
+**Settings** (backend environment; defaults in brackets): `SANTA_URL` (`http://santa:8080` in Compose; empty = no model, answers from the lessons only), `SANTA_API_KEY` (shared with the model server's `LLAMA_API_KEY`), `SANTA_MODEL_NAME` (`santa`), `SANTA_MAX_TOKENS` (600), `SANTA_TEMPERATURE` (0.6), `SANTA_TIMEOUT_SECONDS` (150, calculator rounds included), `SANTA_PARALLEL` (4, match `-np`), `THROTTLE_TUTOR` (30/hour per student). In development, leave `SANTA_URL` empty, or run a model server as shown in [`backend/.env.example`](backend/.env.example).
+
+**Honest limits.** A 2-4 billion parameter model on a school server is far less capable than the large AI models in the cloud. Santa can be wrong, sound sure when it is not, misread a question, or slip in long multi-step maths (the calculator checks arithmetic, not reasoning). Grounding in Iga's lessons helps, but only for topics the lessons cover. The app tells students that Santa can make mistakes and to check important answers in their lessons or with their teacher. Before a pilot, have teachers try about 50 typical S1-S6 questions in English and French, and review the logged exchanges now and then.
 
 ## Repository layout
 
@@ -109,7 +158,7 @@ backend/                 Django + Django REST Framework API
   apps/classroom         classes, enrolment, CSV roster import, assignments, reports
   apps/community         study groups, chat, notes, reports
   apps/gamification      XP ledger, streaks, badges, leaderboards
-  apps/tutor             AI study tutor and Ask AI page (Claude API)
+  apps/tutor             Santa, the AI tutor: what it may see, lesson search, calculator, model server client
   apps/coderun           C++ and Java runs for the code playground (sent to the code runner)
   apps/schools           schools, memberships, subscriptions, payments, access rule
   apps/core              shared constants, permissions, audit log, dashboard, admin API, content loader
@@ -122,7 +171,7 @@ frontend/                React 19 + Vite single-page app (PWA)
   src/i18n               en / fr interface strings
   tests/e2e              Playwright journeys
 docs/                    architecture, content guide, roadmap
-docker-compose.yml       PostgreSQL + Redis + backend + nginx + code runner
+docker-compose.yml       PostgreSQL + Redis + backend + nginx + code runner + Santa's model server
 ```
 
 ## Documentation

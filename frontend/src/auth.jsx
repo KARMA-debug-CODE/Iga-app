@@ -73,7 +73,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Logging out (or someone else logging in) in another tab ends this tab's session too, so a shared
-  // computer never keeps showing the previous student's pages or Ask AI chats.
+  // computer never keeps showing the previous student's pages or Santa chats.
   const userId = user?.id;
   useEffect(() => {
     if (!userId) return undefined;
