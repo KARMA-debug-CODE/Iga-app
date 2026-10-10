@@ -94,9 +94,9 @@ function drawGraph(canvas, { w, h, view, plots, point, lang }) {
   const b = P.bounds(view, w, h);
   const X = (x) => P.toPx(view, w, x);
   const Y = (y) => P.toPy(view, h, y);
-  // About one grid line every 90 pixels; minor lines split each step in 4 (steps of 2) or 5.
-  const stepX = P.niceStep(b.xmax - b.xmin, w / 90);
-  const stepY = P.niceStep(b.ymax - b.ymin, h / 90);
+  // About one grid line every 64 pixels; minor lines split each step in 4 (steps of 2) or 5.
+  const stepX = P.niceStep(b.xmax - b.xmin, w / 64);
+  const stepY = P.niceStep(b.ymax - b.ymin, h / 64);
   const minor = (step) => step / (Math.round(step / 10 ** Math.floor(Math.log10(step))) === 2 ? 4 : 5);
 
   function grid(sx, sy, stroke) {
@@ -133,38 +133,6 @@ function drawGraph(canvas, { w, h, view, plots, point, lang }) {
   }
   ctx.stroke();
 
-  // Numbers along the axes; they stay at the edge when an axis is off the canvas.
-  ctx.font = `12px ${css.fontFamily}`;
-  ctx.fillStyle = colour("--calc-graph-label");
-  ctx.textBaseline = "top";
-  ctx.textAlign = "center";
-  let labelY = ay + 4;
-  if (labelY > h - 18) labelY = Math.min(ay, h) - 18;
-  labelY = clamp(labelY, 2, h - 16);
-  for (const x of P.ticks(b.xmin, b.xmax, stepX)) {
-    const px = X(x);
-    if (x === 0 || px < 14 || px > w - 14) continue;
-    ctx.fillText(P.tickLabel(x, stepX, lang), px, labelY);
-  }
-  ctx.textAlign = "left";
-  ctx.textBaseline = "middle";
-  const yLabel = (text, py) => {
-    const tw = ctx.measureText(text).width;
-    let tx = ax - 6 - tw;
-    if (tx < 4) tx = Math.max(4, ax + 6);
-    if (tx + tw > w - 4) tx = w - 4 - tw;
-    ctx.fillText(text, tx, py);
-  };
-  for (const y of P.ticks(b.ymin, b.ymax, stepY)) {
-    const py = Y(y);
-    if (y === 0 || py < 10 || py > h - 10) continue;
-    yLabel(P.tickLabel(y, stepY, lang), py);
-  }
-  if (ax > 0 && ax < w && ay > 0 && ay < h - 16) {
-    ctx.textBaseline = "top";
-    yLabel("0", ay + 4);
-  }
-
   // The curves, one path per function. Points far off the canvas are pulled in so
   // the line still runs off the edge in the right direction.
   ctx.lineWidth = 2.5;
@@ -190,6 +158,46 @@ function drawGraph(canvas, { w, h, view, plots, point, lang }) {
       ctx.arc(X(segment[0][0]), Y(segment[0][1]), 1.5, 0, 2 * Math.PI);
       ctx.fill();
     }
+  }
+
+  // Numbers along the axes, over the curves with a rim of background so they stay readable.
+  // They stay at the edge when an axis is off the canvas.
+  ctx.font = `12px ${css.fontFamily}`;
+  ctx.fillStyle = colour("--calc-graph-label");
+  ctx.strokeStyle = colour("--calc-graph-bg");
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  const text = (label, x, y) => {
+    ctx.strokeText(label, x, y);
+    ctx.fillText(label, x, y);
+  };
+  ctx.textBaseline = "top";
+  ctx.textAlign = "center";
+  let labelY = ay + 4;
+  if (labelY > h - 18) labelY = Math.min(ay, h) - 18;
+  labelY = clamp(labelY, 2, h - 16);
+  for (const x of P.ticks(b.xmin, b.xmax, stepX)) {
+    const px = X(x);
+    if (x === 0 || px < 14 || px > w - 14) continue;
+    text(P.tickLabel(x, stepX, lang), px, labelY);
+  }
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  const yLabel = (label, py) => {
+    const tw = ctx.measureText(label).width;
+    let tx = ax - 6 - tw;
+    if (tx < 4) tx = Math.max(4, ax + 6);
+    if (tx + tw > w - 4) tx = w - 4 - tw;
+    text(label, tx, py);
+  };
+  for (const y of P.ticks(b.ymin, b.ymax, stepY)) {
+    const py = Y(y);
+    if (y === 0 || py < 10 || py > h - 10) continue;
+    yLabel(P.tickLabel(y, stepY, lang), py);
+  }
+  if (ax > 0 && ax < w && ay > 0 && ay < h - 16) {
+    ctx.textBaseline = "top";
+    yLabel("0", ay + 4);
   }
 
   if (point) {

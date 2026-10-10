@@ -12,7 +12,7 @@ import { load, store } from "./storage.js";
 
 const ENTRY = decimalEntry(16);
 const KEYS = ["ce", "back", "7", "8", "9", "4", "5", "6", "1", "2", "3", "neg", "0", "point"];
-const ABOUT_DIGITS = 6;
+const ABOUT_DIGITS = 6; // significant digits under "About equal to": 1,660,030 in, not 1.66003e+6
 
 function fill(text, vars) {
   return text.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
@@ -71,7 +71,8 @@ export default function ConverterMode({ category, t, lang, keysRef }) {
   if (value !== null && result) {
     for (const unit of alsoUnits(category, units.from, units.to)) {
       try {
-        about.push(`${formatDecimal(convert(category, units[active], unit, value), { lang, digits: ABOUT_DIGITS })} ${symbol(unit)}`);
+        const rounded = convert(category, units[active], unit, value).toSignificantDigits(ABOUT_DIGITS);
+        about.push(`${formatDecimal(rounded, { lang })} ${symbol(unit)}`);
       } catch {
         // Too large in that unit: leave it out.
       }

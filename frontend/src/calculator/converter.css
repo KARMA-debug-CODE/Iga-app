@@ -45,6 +45,13 @@
   font-weight: 600;
 }
 
+/* The box being typed in: an accent line underneath, like a Windows text box, rather than a frame. */
+.calc .calc-conv-value:focus-visible {
+  outline: none;
+  background: var(--calc-hover);
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+
 .calc-conv-value[aria-invalid="true"] {
   color: var(--danger);
 }
@@ -76,6 +83,8 @@
   font-size: 0.95rem;
   text-overflow: ellipsis;
   appearance: none;
+  /* As wide as the unit shown, so the chevron sits right after it (where browsers allow). */
+  field-sizing: content;
   cursor: pointer;
 }
 
