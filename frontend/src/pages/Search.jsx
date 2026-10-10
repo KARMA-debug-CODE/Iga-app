@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
 
+import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge } from "../components/Locked";
 import { Empty, Loader } from "../components/ui";
 import { useApi } from "../hooks";
@@ -20,7 +21,7 @@ export default function Search() {
       <Loader state={state}>
         {(r) => {
           const total = r.lessons.length + r.simulations.length + r.quizzes.length + r.subjects.length;
-          if (!total) return <Empty icon="🔎">{t("search.none", { q })}</Empty>;
+          if (!total) return <Empty icon="search">{t("search.none", { q })}</Empty>;
           return (
             <div className="stack">
               {r.subjects.length > 0 && (
@@ -28,10 +29,9 @@ export default function Search() {
                   <h2>{t("learn.subjects")}</h2>
                   <ul className="list">
                     {r.subjects.map((s) => (
-                      <li key={s.code}>
-                        <Link to={`/learn/${s.code}`}>
-                          {s.icon} {s.name}
-                        </Link>
+                      <li key={s.code} className="line-with-icon">
+                        <SubjectIcon name={s.icon} size={18} />
+                        <Link to={`/learn/${s.code}`}>{s.name}</Link>
                       </li>
                     ))}
                   </ul>
@@ -39,17 +39,20 @@ export default function Search() {
               )}
               {r.lessons.length > 0 && (
                 <div className="card">
-                  <h2>📖 {t("nav.learn")}</h2>
+                  <h2 className="title-with-icon">
+                    <Icon name="learn" /> {t("nav.learn")}
+                  </h2>
                   <ul className="list">
                     {r.lessons.map((l) => (
-                      <li key={l.slug}>
-                        <Link to={`/lessons/${l.slug}`}>
-                          {l.icon} {l.title}
-                        </Link>{" "}
-                        <span className="small muted">
-                          · {l.subject} {l.grade}
-                        </span>{" "}
-                        {l.locked && <LockBadge />}
+                      <li key={l.slug} className="line-with-icon">
+                        <SubjectIcon name={l.icon} size={18} />
+                        <span>
+                          <Link to={`/lessons/${l.slug}`}>{l.title}</Link>{" "}
+                          <span className="small muted">
+                            · {l.subject} {l.grade}
+                          </span>{" "}
+                          {l.locked && <LockBadge />}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -57,7 +60,9 @@ export default function Search() {
               )}
               {r.simulations.length > 0 && (
                 <div className="card">
-                  <h2>🔬 {t("nav.labs")}</h2>
+                  <h2 className="title-with-icon">
+                    <Icon name="labs" /> {t("nav.labs")}
+                  </h2>
                   <ul className="list">
                     {r.simulations.map((s) => (
                       <li key={s.slug}>
@@ -69,7 +74,9 @@ export default function Search() {
               )}
               {r.quizzes.length > 0 && (
                 <div className="card">
-                  <h2>📝 {t("nav.practice")}</h2>
+                  <h2 className="title-with-icon">
+                    <Icon name="practice" /> {t("nav.practice")}
+                  </h2>
                   <ul className="list">
                     {r.quizzes.map((q2) => (
                       <li key={q2.id}>

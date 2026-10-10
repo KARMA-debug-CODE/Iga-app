@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Icon } from "../components/Icon";
 import { useI18n } from "../i18n";
 import { drawAxes, makeView, palette, Slider, useCanvas } from "./canvas";
 import { GRAVITY, niceStep, positionAt, projectile, round } from "./physics";
@@ -116,7 +117,7 @@ export default function Projectile() {
       </div>
       <div className="row">
         <button className="btn btn-success" onClick={launch} disabled={!!flying}>
-          🚀 {t("sim.projectile.launch")}
+          <Icon name="rocket" size={16} /> {t("sim.projectile.launch")}
         </button>
         <button className="btn btn-secondary" onClick={() => setTrails([])} disabled={!trails.length}>
           {t("sim.projectile.clear")}

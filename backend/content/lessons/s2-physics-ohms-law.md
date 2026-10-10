@@ -30,7 +30,7 @@ A torch bulb carries a current of 0.5 A for 2 minutes. How much charge passes th
 1. Write what you know: $I = 0.5$ A and $t = 2$ minutes.
 2. Change the time to seconds: $t = 2 \times 60 = 120$ s.
 3. Use $Q = It$: $Q = 0.5 \times 120 = 60$ C.
-4. Check: $\dfrac{60\ \text{C}}{120\ \text{s}} = 0.5$ A, which is the current we started with ✓.
+4. Check: $\dfrac{60\ \text{C}}{120\ \text{s}} = 0.5$ A, which is the current we started with.
 
 ## Voltage: energy for each coulomb
 
@@ -94,13 +94,13 @@ A family in Nyagatare district has a solar home system with a 12 V battery.
 
 1. We want $R$, so use $R = \dfrac{V}{I}$.
 2. $R = \dfrac{12}{0.5} = 24\ \Omega$.
-3. Check: $V = IR = 0.5 \times 24 = 12$ V ✓.
+3. Check: $V = IR = 0.5 \times 24 = 12$ V. Correct.
 
 (b) A 48 Ω resistor is connected to the same battery. What current flows?
 
 1. We want $I$, so use $I = \dfrac{V}{R}$.
 2. $I = \dfrac{12}{48} = 0.25$ A.
-3. Check: $0.25 \times 48 = 12$ V ✓. Twice the resistance gives half the current.
+3. Check: $0.25 \times 48 = 12$ V. Correct. Twice the resistance gives half the current.
 
 ## Small and large units: mA and kΩ
 
@@ -124,7 +124,7 @@ A 9 V battery is connected to a 2.2 kΩ resistor. Find the current in mA.
 1. Change the resistance to ohms: $2.2\ \text{k}\Omega = 2.2 \times 1000 = 2200\ \Omega$.
 2. Use $I = \dfrac{V}{R}$: $I = \dfrac{9}{2200} \approx 0.0041$ A.
 3. Change to mA: $0.0041 \times 1000 = 4.1$ mA.
-4. Check: $V = IR = 0.0041 \times 2200 \approx 9$ V ✓.
+4. Check: $V = IR = 0.0041 \times 2200 \approx 9$ V. Correct.
 
 If you forget step 1, you get $\dfrac{9}{2.2} \approx 4.1$ A. That is 1000 times too big!
 
@@ -155,7 +155,7 @@ A student in Huye tests a resistor and gets these readings. Is it ohmic, and wha
 ```
 
 4. The **gradient** (steepness) of the line is the rise ÷ the run: how much $V$ goes up, divided by how much $I$ goes across. Here it is $\dfrac{6.0 - 0}{0.40 - 0} = 15\ \Omega$. On a graph of $V$ against $I$, the gradient equals the resistance.
-5. Check: doubling $V$ from 3.0 V to 6.0 V doubled $I$ from 0.20 A to 0.40 A, as Ohm's law says ✓.
+5. Check: doubling $V$ from 3.0 V to 6.0 V doubled $I$ from 0.20 A to 0.40 A, as Ohm's law says.
 
 ## A lamp does not obey Ohm's law
 
@@ -172,7 +172,7 @@ A student measures the voltage across a small torch lamp and the current through
 1. Work out $R = \dfrac{V}{I}$ for each column: $\dfrac{1}{0.10} = 10\ \Omega$, $\dfrac{2}{0.16} = 12.5\ \Omega$, $\dfrac{4}{0.24} \approx 16.7\ \Omega$ and $\dfrac{6}{0.30} = 20\ \Omega$.
 2. The resistance **rises** as the voltage rises. The filament gets hotter, and a hotter metal has a higher resistance.
 3. So the lamp is **non-ohmic**. On a graph of $V$ against $I$, its points lie on a **curve** that gets steeper, not on a straight line.
-4. Check: from 2 V to 4 V the voltage doubles, but the current only goes from 0.16 A to 0.24 A. It does not double ✓.
+4. Check: from 2 V to 4 V the voltage doubles, but the current only goes from 0.16 A to 0.24 A. It does not double.
 
 Ohm's law needs a constant temperature. The lamp breaks this condition, and that is why it does not obey the law.
 
@@ -210,7 +210,7 @@ A 4 Ω resistor and a 6 Ω resistor are connected in series to a 12 V battery, a
 2. Current: $I = \dfrac{V}{R} = \dfrac{12}{10} = 1.2$ A. This current flows through both resistors.
 3. Voltage across the 4 Ω resistor: $V_1 = IR_1 = 1.2 \times 4 = 4.8$ V.
 4. Voltage across the 6 Ω resistor: $V_2 = IR_2 = 1.2 \times 6 = 7.2$ V.
-5. Check: $4.8 + 7.2 = 12$ V, the battery voltage ✓.
+5. Check: $4.8 + 7.2 = 12$ V, the battery voltage. Correct.
 
 Build this circuit yourself in the PhET kit. Add an ammeter and a voltmeter and check the numbers.
 

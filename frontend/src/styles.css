@@ -849,9 +849,9 @@ input[type="range"] {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 1.4rem;
   flex: none;
   background: var(--surface-2);
+  color: var(--primary);
 }
 
 .truncate {
@@ -942,8 +942,22 @@ tr:last-child td {
   border-top: 5px solid var(--subject, var(--blue));
 }
 
-.subject-card .icon-tile {
+.subject-card .icon-tile,
+.icon-tile.subject-tile {
   background: color-mix(in srgb, var(--subject, var(--blue)) 16%, transparent);
+  /* Mixed with the text colour so light subject colours (yellow) stay readable in both themes. */
+  color: color-mix(in srgb, var(--subject, var(--blue)) 70%, var(--text));
+}
+
+/* An A-level student's subjects: their combination first, then the others. */
+.subject-group + .subject-group {
+  margin-top: 22px;
+}
+
+.subject-group > h2,
+.subject-group > h3 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
 }
 
 .stat {
@@ -1047,6 +1061,23 @@ tr:last-child td {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+}
+
+/* Lesson tables: tighter cells on phones, and headers that can wrap, so most fit without scrolling. */
+.prose th,
+.prose td {
+  padding: 8px 6px;
+}
+
+.prose th {
+  white-space: normal;
+}
+
+@media (min-width: 760px) {
+  .prose th,
+  .prose td {
+    padding: 9px 12px;
+  }
 }
 
 .prose blockquote {
@@ -1340,6 +1371,14 @@ tr:last-child td {
   background: var(--surface-2);
 }
 
+.feedback.good .with-icon .icon {
+  color: var(--success);
+}
+
+.feedback.bad .with-icon .icon {
+  color: var(--danger);
+}
+
 .score-ring {
   --pct: 0;
   width: 140px;
@@ -1510,7 +1549,7 @@ tr:last-child td {
   display: inline-block;
 }
 
-/* AI tutor */
+/* Santa in lessons and quizzes (more in components/Santa.css) */
 
 .tutor {
   border-left: 5px solid var(--blue);
@@ -1525,7 +1564,7 @@ tr:last-child td {
   font-size: 0.98rem;
 }
 
-/* Ask AI page */
+/* The Santa page */
 
 .ask {
   display: flex;
@@ -1847,8 +1886,10 @@ tr:last-child td {
 }
 
 .locked-icon {
-  font-size: 1.6rem;
+  /* Without this the text beside it squeezes the box, and the icon (max-width: 100%) shrinks with it. */
+  flex: none;
   line-height: 1;
+  color: var(--text-soft);
 }
 
 .access-banner {
@@ -2284,6 +2325,24 @@ tr:last-child td {
 .title-with-icon .icon {
   flex: none;
   color: var(--primary);
+}
+
+/* A short piece of text that starts with a line icon (a pill, a timer, a meta line). */
+.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A note or error line that starts with a line icon and may wrap. */
+.line-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.line-with-icon .icon {
+  margin-top: 0.15em;
 }
 
 .moved-pill {

@@ -32,13 +32,19 @@
     "S5": ["DNA and genetics", "Evolution and natural selection", "Photosynthesis", "Cellular respiration", "Immunity"],
     "S6": ["Gene expression and biotechnology", "Populations and ecology", "Nervous coordination", "Hormonal control", "Applied biology and public health"]
   },
+  "_ict_and_computer_science": "ICT and Computer Science are two subjects, as in Rwanda's curriculum. ict is for every student (S1–S6). Its S4–S6 units follow REB's revised 2026–2027 ICT books, seen only through their contents pages in search results: S4 'Cascading Style Sheets (CSS)' is inferred, more units may follow, and the S6 book's units 4–5 are unknown ('Smart robots' is its unit 6). Its S1–S3 units are a proposal NOT checked against the official books (HTML, CSS and JavaScript are Iga's own lessons). computer-science is the A-level principal subject of the MCE and MPC combinations (S4–S6), with the units of REB's Computer Science Student's Books (S4 2020, S5 2019, S6 2019). REB has published no 2026 Computer Science syllabus or book: under the new A-level pathways it may end once the last MCE and MPC classes finish S6, so check with REB or NESA. Like every other unit, they load with alignment_verified=false until a teacher reviews them.",
   "ict": {
-    "S1": ["Computer systems: hardware and software", "Operating systems and file management", "Word processing", "Internet safety and digital citizenship", "Your first web page: HTML"],
-    "S2": ["Spreadsheets", "Presentations", "Styling web pages with CSS", "Introduction to algorithms", "Computer networks"],
-    "S3": ["Introduction to databases", "Programming with JavaScript", "Problem solving with flowcharts", "Multimedia", "ICT and society"],
-    "S4": ["Computer architecture", "Number systems and data representation", "Programming in Python", "Web development in depth", "Networking fundamentals"],
-    "S5": ["Data structures", "Object-oriented programming", "Databases and SQL", "Operating systems", "Web programming with JavaScript"],
-    "S6": ["Algorithms and complexity", "Software engineering", "Dynamic web applications", "Computer security", "Capstone project"]
+    "S1": ["Introduction to ICT: data, information and communication", "Computer systems: hardware and software", "Using a computer: navigation and file management", "Safe and responsible use of computers and the Internet", "Word processing basics", "Your first web page: HTML"],
+    "S2": ["Data protection", "Spreadsheet basics", "Presentation software", "The Internet and email", "Styling web pages with CSS"],
+    "S3": ["Application and utility software installation", "Table of contents and mail merge", "Introduction to databases", "Algorithms and programming: JavaScript", "Computer networks and the Internet"],
+    "S4": ["Google Docs", "Digital logic fundamentals", "Programming algorithms", "Python programming I", "HTML-based web development", "Cascading Style Sheets (CSS)", "Database design"],
+    "S5": ["Google Sheets", "Database queries (SQL)", "Python programming II", "Machine learning", "Web database connectivity", "Computer networking"],
+    "S6": ["Google Forms", "Website development with AI", "Artificial intelligence: fuzzy logic and chatbots", "Smart robots"]
+  },
+  "computer-science": {
+    "S4": ["Computer fundamentals", "Computer architecture and assembly", "Safe and ethical use of computers", "Computer software installation", "Number systems", "Boolean algebra and logic gates", "Introduction to computer algorithms", "Control structures and one-dimensional arrays", "Introduction to computer programming", "Introduction to C++ programming", "Operators and expressions in C++", "Control statements in C++", "Functions in C++", "Arrays in C++", "Introduction to operating systems", "HTML-based web development", "Cascading Style Sheets (CSS)"],
+    "S5": ["Fundamentals of laptops and portable devices", "Complex data structures and algorithms", "Introduction to computer networks", "Introduction to databases", "Database design", "Pointers and structures in C++", "Object-oriented programming in C++", "Introduction to Visual Basic", "Visual Basic: variables, operators, expressions and control structures", "Introduction to Java", "Object-oriented programming in Java", "Input/output in Java"],
+    "S6": ["Computer security", "LAN architecture, network protocols and models", "Networking project", "SQL and database project", "Arrays, functions and procedures in Visual Basic", "Visual Basic project", "Process management and scheduling algorithms", "File management", "Memory management", "Collections in Java", "Java enterprise web applications", "Introduction to computer graphics", "Multimedia", "File handling in C++"]
   },
   "english": {
     "S1": ["Parts of speech", "Reading for understanding", "Descriptive writing", "Introducing yourself and others"],

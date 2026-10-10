@@ -6,7 +6,7 @@ import { useI18n } from "../i18n";
 export default function NotFound() {
   const { t } = useI18n();
   return (
-    <Empty icon="🧭">
+    <Empty icon="compass">
       {t("common.notFound")} · <Link to="/">{t("common.goHome")}</Link>
     </Empty>
   );

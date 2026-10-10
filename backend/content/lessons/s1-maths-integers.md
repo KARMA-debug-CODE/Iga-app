@@ -35,7 +35,7 @@ A **number line** is a straight line with the integers marked at equal steps. Ze
 
 ```
  -5  -4  -3  -2  -1   0   1   2   3   4   5
-──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──▶
+──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──►
 ```
 
 The arrow shows that the numbers keep getting bigger to the right. Here is the golden rule: **the further right, the bigger the number. The further left, the smaller the number.**
@@ -59,7 +59,7 @@ A weather station on a mountain recorded these morning temperatures, in °C: $2,
 4. Last come the positive numbers: $2 < 4$.
 5. The order is $-5,\ -1,\ 0,\ 2,\ 4$.
 
-Check: on the number line, each number in the list is to the right of the one before it ✓.
+Check: on the number line, each number in the list is to the right of the one before it. Correct.
 
 ## Opposites and absolute value
 
@@ -104,12 +104,12 @@ Think of the number line as a road, and imagine you walk along it. Always start 
 
 ```text
  -5  -4  -3  -2  -1   0   1   2   3   4   5
-──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──▶
+──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──►
           └─1─┴─2─┴─3─┴─4─┴─5─┘
         start                end
 ```
 
-So $-3 + 5 = 2$. Check: if you owe 3,000 FRW and then receive 5,000 FRW, you can pay the debt and keep 2,000 FRW ✓.
+So $-3 + 5 = 2$. Check: if you owe 3,000 FRW and then receive 5,000 FRW, you can pay the debt and keep 2,000 FRW. Correct.
 
 **(b)** Work out $4 - 7$.
 
@@ -119,12 +119,12 @@ So $-3 + 5 = 2$. Check: if you owe 3,000 FRW and then receive 5,000 FRW, you can
 
 ```text
  -5  -4  -3  -2  -1   0   1   2   3   4   5
-──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──▶
+──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──►
           └─7─┴─6─┴─5─┴─4─┴─3─┴─2─┴─1─┘
          end                        start
 ```
 
-So $4 - 7 = -3$. Check: if the temperature is $4\,^{\circ}\text{C}$ and it falls by 7 degrees, it becomes $-3\,^{\circ}\text{C}$ ✓.
+So $4 - 7 = -3$. Check: if the temperature is $4\,^{\circ}\text{C}$ and it falls by 7 degrees, it becomes $-3\,^{\circ}\text{C}$. Correct.
 
 With bigger numbers, use zero as a resting point. For $-20 + 50$, walk 20 steps right to reach 0. You still have 30 steps to walk, so the answer is $30$.
 
@@ -153,7 +153,7 @@ Work out (a) $7 + (-3)$, (b) $-2 - (+5)$ and (c) $-4 - (-9)$.
 
 **(c)** The signs $-$ and $-$ are the same, so they become $+$. Now $-4 - (-9) = -4 + 9$. Start at $-4$ and walk 9 steps right. After 4 steps you reach 0, and 5 more steps take you to $5$. The answer is $5$.
 
-Check (c): a subtraction such as $-4 - (-9)$ also tells you how far it is from the second number to the first. On the number line, from $-9$ to $-4$ is 5 steps to the right, so $-4 - (-9) = 5$ ✓.
+Check (c): a subtraction such as $-4 - (-9)$ also tells you how far it is from the second number to the first. On the number line, from $-9$ to $-4$ is 5 steps to the right, so $-4 - (-9) = 5$. Correct.
 
 ## Multiplying and dividing
 
@@ -187,11 +187,11 @@ Work in two steps. First, work out the number without the signs. Then decide the
 
 ### Worked example 4: multiplying and dividing
 
-**(a)** $(-6) \times (-4)$. Without the signs, $6 \times 4 = 24$. The signs are the same, so the answer is positive: $24$. Check: $24 \div (-4) = -6$ ✓.
+**(a)** $(-6) \times (-4)$. Without the signs, $6 \times 4 = 24$. The signs are the same, so the answer is positive: $24$. Check: $24 \div (-4) = -6$. Correct.
 
-**(b)** $(-36) \div (-4)$. Without the signs, $36 \div 4 = 9$. The signs are the same, so the answer is positive: $9$. Check: $(-4) \times 9 = -36$ ✓.
+**(b)** $(-36) \div (-4)$. Without the signs, $36 \div 4 = 9$. The signs are the same, so the answer is positive: $9$. Check: $(-4) \times 9 = -36$. Correct.
 
-**(c)** $45 \div (-9)$. Without the signs, $45 \div 9 = 5$. The signs are different, so the answer is negative: $-5$. Check: $(-9) \times (-5) = 45$ ✓.
+**(c)** $45 \div (-9)$. Without the signs, $45 \div 9 = 5$. The signs are different, so the answer is negative: $-5$. Check: $(-9) \times (-5) = 45$. Correct.
 
 ## Order of operations with negatives
 
@@ -212,7 +212,7 @@ Some books call this order BODMAS. Negative numbers follow the same order.
 2. Multiply first: $4 \times (-2) = -8$.
 3. Then add: $-3 + (-8) = -3 - 8 = -11$.
 
-Check with money: four debts of 2 make a debt of 8. Owing 3 and then 8 more means owing 11 ✓.
+Check with money: four debts of 2 make a debt of 8. Owing 3 and then 8 more means owing 11. Correct.
 
 **(b)** Work out $(-3 + 4) \times (-2)$.
 
@@ -235,14 +235,14 @@ To solve a word problem, first write it as a calculation with integers. Then wor
 2. Walk 1,500 steps right to reach 0. That leaves $4\,000 - 1\,500 = 2\,500$ steps.
 3. Aline has 2,500 FRW left.
 
-Check: 2,500 FRW kept plus 1,500 FRW paid back make 4,000 FRW ✓.
+Check: 2,500 FRW kept plus 1,500 FRW paid back make 4,000 FRW. Correct.
 
 **(b) A diver comes up.** A diver in Lake Kivu is at $-10$ m. She rises 4 m. Where is she now?
 
 1. Rising means moving up, so we add: $-10 + 4 = -6$.
 2. She is at $-6$ m, which is 6 m below the surface.
 
-Check: $-6$ is higher than $-10$, and the gap between them is $10 - 6 = 4$ m ✓.
+Check: $-6$ is higher than $-10$, and the gap between them is $10 - 6 = 4$ m. Correct.
 
 **(c) A cold morning on Mount Karisimbi.** At 6 am the temperature was $-3\,^{\circ}\text{C}$. At noon it was $8\,^{\circ}\text{C}$. By how many degrees did it rise?
 
@@ -250,7 +250,7 @@ Check: $-6$ is higher than $-10$, and the gap between them is $10 - 6 = 4$ m ✓
 2. The two minus signs are the same, so they make $+$: $8 + 3 = 11$.
 3. The temperature rose by $11\,^{\circ}\text{C}$.
 
-Check: from $-3$ up to 0 is 3 degrees, and from 0 up to 8 is 8 degrees. $3 + 8 = 11$ ✓.
+Check: from $-3$ up to 0 is 3 degrees, and from 0 up to 8 is 8 degrees. $3 + 8 = 11$. Correct.
 
 ## Common mistakes
 

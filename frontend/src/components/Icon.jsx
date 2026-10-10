@@ -6,6 +6,7 @@ import {
   ArrowUpDown,
   Atom,
   Award,
+  Backpack,
   Beaker,
   Binary,
   Book,
@@ -23,12 +24,14 @@ import {
   ChevronDown,
   ChevronRight,
   CircleCheck,
+  CircleDot,
   CircleHelp,
   CircleX,
   ClipboardCheck,
   Clock,
   Code2,
   Coins,
+  Compass,
   Copy,
   Cpu,
   CreditCard,
@@ -39,7 +42,6 @@ import {
   Drama,
   ExternalLink,
   Eye,
-  EyeOff,
   FileCheck,
   FileText,
   Flag,
@@ -89,6 +91,7 @@ import {
   Plus,
   Presentation,
   Printer,
+  Receipt,
   RefreshCw,
   Rocket,
   RotateCcw,
@@ -109,6 +112,7 @@ import {
   SquareDashed,
   Star,
   Sun,
+  Table,
   Target,
   Terminal,
   Thermometer,
@@ -153,10 +157,9 @@ const ICONS = {
   area: SquareDashed,
   gauge: Gauge,
   angle: TriangleRight,
-  // Calculator: graph zoom, hidden functions and the converter's swap button.
+  // Calculator: graph zoom and the converter's swap button.
   zoomIn: ZoomIn,
   zoomOut: ZoomOut,
-  eyeOff: EyeOff,
   swap: ArrowUpDown,
   teach: Presentation,
   marking: CheckCheck,
@@ -267,43 +270,18 @@ const ICONS = {
   scroll: ScrollText,
   leaf: Leaf,
   scale: Scale,
+  backpack: Backpack,
+  compass: Compass,
+  receipt: Receipt,
+  table: Table,
+  partial: CircleDot,
 };
 
-// Subject codes -> icons (the subject list in backend/content/subjects.json).
-const SUBJECT_ICONS = {
-  mathematics: "sigma",
-  physics: "atom",
-  chemistry: "flask",
-  biology: "dna",
-  ict: "monitor",
-  "computer-science": "cpu",
-  english: "bookA",
-  kinyarwanda: "messages",
-  kiswahili: "messages",
-  french: "languages",
-  history: "landmark",
-  geography: "globe",
-  economics: "coins",
-  entrepreneurship: "briefcase",
-  literature: "scroll",
-  "general-studies": "idea",
-};
-
-// Badge codes -> icons (apps/gamification/services.py).
-const BADGE_ICONS = {
-  "first-lesson": "footprints",
-  bookworm: "book",
-  "quiz-whiz": "target",
-  "exam-ready": "fileCheck",
-  "lab-explorer": "microscope",
-  "team-player": "handshake",
-  "streak-3": "flame",
-  "streak-7": "zap",
-};
-
-/** <Icon name="play" /> — decorative by default; pass `label` when the icon is the only content. */
-export function Icon({ name, size = 18, label, className = "", strokeWidth = 2, style }) {
-  const Component = ICONS[name];
+/** <Icon name="play" /> — decorative by default; pass `label` when the icon is the only content.
+ * `fallback` is drawn when `name` is unknown (names that come from the server, such as subject icons). */
+export function Icon({ name, fallback, size = 18, label, className = "", strokeWidth = 2, style }) {
+  // Own keys only, so a name such as "constructor" from the server falls back instead of crashing.
+  const Component = (Object.hasOwn(ICONS, name) && ICONS[name]) || (Object.hasOwn(ICONS, fallback) && ICONS[fallback]);
   if (!Component) return null;
   return (
     <Component
@@ -319,10 +297,12 @@ export function Icon({ name, size = 18, label, className = "", strokeWidth = 2, 
   );
 }
 
-export function SubjectIcon({ code, size = 22, ...rest }) {
-  return <Icon name={SUBJECT_ICONS[code] || "book"} size={size} {...rest} />;
+/** A subject's icon: the server sends its name (content/subjects.json). */
+export function SubjectIcon({ name, size = 22, ...rest }) {
+  return <Icon name={name} fallback="book" size={size} {...rest} />;
 }
 
-export function BadgeIcon({ code, size = 28, ...rest }) {
-  return <Icon name={BADGE_ICONS[code] || "award"} size={size} {...rest} />;
+/** A badge's icon: the server sends its name (BADGES in apps/gamification/services.py). */
+export function BadgeIcon({ name, size = 28, ...rest }) {
+  return <Icon name={name} fallback="award" size={size} {...rest} />;
 }

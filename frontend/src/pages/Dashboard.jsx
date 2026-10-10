@@ -2,6 +2,8 @@ import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import { groupTitle, subjectGroups } from "../combinations";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { AccessBanner } from "../components/Locked";
 import { Empty, Loader, Progress, scoreClass } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
@@ -16,8 +18,8 @@ export function SubjectCard({ subject, grade }) {
   return (
     <Link to={`/learn/${subject.code}?grade=${grade || ""}`} className="card card-link subject-card" style={{ "--subject": subject.color }}>
       <div className="row" style={{ flexWrap: "nowrap" }}>
-        <div className="icon-tile" aria-hidden>
-          {subject.icon}
+        <div className="icon-tile">
+          <SubjectIcon name={subject.icon} />
         </div>
         <div style={{ minWidth: 0 }}>
           <strong className="truncate" style={{ display: "block" }}>
@@ -39,6 +41,28 @@ export function SubjectCard({ subject, grade }) {
   );
 }
 
+/** Subject cards for `grade`. An A-level student's combination comes first, under its own heading. */
+export function SubjectGrid({ subjects, grade, headingLevel = 3 }) {
+  const { user } = useAuth();
+  const { t } = useI18n();
+  const grid = (list) => (
+    <div className="grid">
+      {list.map((s) => (
+        <SubjectCard key={s.code} subject={s} grade={grade} />
+      ))}
+    </div>
+  );
+  const groups = subjectGroups(subjects, user, grade);
+  if (!groups) return grid(subjects);
+  const Heading = `h${headingLevel}`;
+  return groups.map((group) => (
+    <section key={group.key} className="subject-group">
+      <Heading>{groupTitle(t, group, user)}</Heading>
+      {grid(group.subjects)}
+    </section>
+  ));
+}
+
 function AssignmentItem({ assignment }) {
   const { t, lang } = useI18n();
   const href = assignment.quiz
@@ -46,12 +70,12 @@ function AssignmentItem({ assignment }) {
     : assignment.lesson_slug
       ? `/lessons/${assignment.lesson_slug}`
       : `/labs/${assignment.simulation_slug}`;
-  const icon = { quiz: "📝", lesson: "📖", simulation: "🔬" }[assignment.kind] || "📌";
+  const icon = { quiz: "practice", lesson: "learn", simulation: "labs" }[assignment.kind] || "bookmark";
   return (
     <li>
       <Link className="list-link" to={href}>
-        <div className="icon-tile" aria-hidden>
-          {icon}
+        <div className="icon-tile">
+          <Icon name={icon} size={22} />
         </div>
         <div className="grow">
           <strong className="truncate" style={{ display: "block" }}>
@@ -80,7 +104,9 @@ function StudentDashboard({ data, user }) {
         <div className="card">
           <div className="spread">
             <strong>{t("dash.level", { level: data.level.level })}</strong>
-            <span className="pill pill-warn">🔥 {t("dash.streak", { n: data.streak_days })}</span>
+            <span className="pill pill-warn">
+              <Icon name="flame" size={14} /> {t("dash.streak", { n: data.streak_days })}
+            </span>
           </div>
           <div style={{ margin: "12px 0 6px" }}>
             <Progress value={data.level.current} max={data.level.needed} label="XP" />
@@ -106,8 +132,8 @@ function StudentDashboard({ data, user }) {
           <Link to={`/lessons/${data.continue_learning.slug}`} className="card card-link" style={{ borderLeft: "6px solid var(--yellow)" }}>
             <span className="small muted">{t("dash.continue")}</span>
             <div className="row" style={{ marginTop: 8, flexWrap: "nowrap" }}>
-              <div className="icon-tile" aria-hidden>
-                {data.continue_learning.icon}
+              <div className="icon-tile">
+                <SubjectIcon name={data.continue_learning.icon} />
               </div>
               <div style={{ minWidth: 0 }}>
                 <strong style={{ display: "block" }}>{data.continue_learning.title}</strong>
@@ -130,8 +156,8 @@ function StudentDashboard({ data, user }) {
       {/* Phones have no side menu, so the study tools are linked from here too. */}
       <div className="grid-2 section study-tools">
         <Link to="/ask" className="card card-link row" style={{ flexWrap: "nowrap" }}>
-          <div className="icon-tile" aria-hidden>
-            🤖
+          <div className="icon-tile">
+            <Icon name="santa" size={22} />
           </div>
           <div style={{ minWidth: 0 }}>
             <strong style={{ display: "block" }}>{t("nav.ask")}</strong>
@@ -139,8 +165,8 @@ function StudentDashboard({ data, user }) {
           </div>
         </Link>
         <Link to="/playground" className="card card-link row" style={{ flexWrap: "nowrap" }}>
-          <div className="icon-tile" aria-hidden>
-            💻
+          <div className="icon-tile">
+            <Icon name="playground" size={22} />
           </div>
           <div style={{ minWidth: 0 }}>
             <strong style={{ display: "block" }}>{t("nav.playground")}</strong>
@@ -174,8 +200,8 @@ function StudentDashboard({ data, user }) {
               {data.recent_attempts.map((a) => (
                 <li key={a.id}>
                   <Link className="list-link" to={`/attempts/${a.id}`}>
-                    <div className="icon-tile" aria-hidden>
-                      {a.subject_icon}
+                    <div className="icon-tile">
+                      <SubjectIcon name={a.subject_icon} />
                     </div>
                     <div className="grow truncate">{a.quiz_title}</div>
                     <span className={scoreClass(a.percentage)}>{a.percentage != null ? `${a.percentage}%` : "…"}</span>
@@ -196,15 +222,7 @@ function StudentDashboard({ data, user }) {
           </h2>
           <Link to="/learn">{t("learn.subjects")} →</Link>
         </div>
-        <Loader state={subjects}>
-          {(list) => (
-            <div className="grid">
-              {list.map((s) => (
-                <SubjectCard key={s.code} subject={s} grade={user.grade} />
-              ))}
-            </div>
-          )}
-        </Loader>
+        <Loader state={subjects}>{(list) => <SubjectGrid subjects={list} grade={user.grade} />}</Loader>
       </section>
     </>
   );
@@ -240,7 +258,9 @@ function TeacherDashboard({ data }) {
               {teacher.classes.map((c) => (
                 <li key={c.id}>
                   <Link className="list-link" to={`/classes/${c.id}`}>
-                    <div className="icon-tile">🏫</div>
+                    <div className="icon-tile">
+                      <Icon name="classes" size={22} />
+                    </div>
                     <div className="grow">
                       <strong>{c.name}</strong>
                       <div className="small muted">
@@ -253,7 +273,7 @@ function TeacherDashboard({ data }) {
               ))}
             </ul>
           ) : (
-            <Empty icon="🏫">{t("classes.empty")}</Empty>
+            <Empty icon="classes">{t("classes.empty")}</Empty>
           )}
         </div>
         <div className="card">

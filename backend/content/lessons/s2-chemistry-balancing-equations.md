@@ -46,7 +46,7 @@ $$6\text{CO}_2 + 6\text{H}_2\text{O} \rightarrow \text{C}_6\text{H}_{12}\text{O}
 - Left: C $6 \times 1 = 6$; H $6 \times 2 = 12$; O $(6 \times 2) + (6 \times 1) = 18$.
 - Right: C 6; H 12; O $6 + (6 \times 2) = 18$.
 
-Every element matches, so this equation is balanced ✓
+Every element matches, so this equation is balanced.
 
 ## Word equation → symbol equation
 
@@ -86,7 +86,7 @@ $$2\text{H}_2 + \text{O}_2 \rightarrow 2\text{H}_2\text{O}$$
 | H | 2 | 2 | 4 | 4 |
 | O | 2 | 1 | 2 | 2 |
 
-Check: H 4 = 4, O 2 = 2 ✓
+Check: H 4 = 4, O 2 = 2. Balanced.
 
 ### Worked example 2: burning methane from Lake Kivu
 
@@ -107,7 +107,7 @@ $$\text{CH}_4 + 2\text{O}_2 \rightarrow \text{CO}_2 + 2\text{H}_2\text{O}$$
 | H | 4 | 2 | 4 | 4 |
 | O | 2 | 3 | 4 | 4 |
 
-Check: C 1 = 1, H 4 = 4, O 4 = 4 ✓. You will use this methane again in the lesson on the mole concept.
+Check: C 1 = 1, H 4 = 4, O 4 = 4. Balanced. You will use this methane again in the lesson on the mole concept.
 
 ### Worked example 3: aluminium and oxygen (the LCM trick)
 
@@ -129,7 +129,7 @@ $$4\text{Al} + 3\text{O}_2 \rightarrow 2\text{Al}_2\text{O}_3$$
 | Al | 1 | 2 | 4 | 4 |
 | O | 2 | 3 | 6 | 6 |
 
-Check: Al 4 = 4, O 6 = 6 ✓
+Check: Al 4 = 4, O 6 = 6. Balanced.
 
 ### Worked example 4: cooking gas
 
@@ -150,7 +150,7 @@ $$\text{C}_3\text{H}_8 + 5\text{O}_2 \rightarrow 3\text{CO}_2 + 4\text{H}_2\text
 | H | 8 | 2 | 8 | 8 |
 | O | 2 | 3 | 10 | 10 |
 
-Check: C 3 = 3, H 8 = 8, O 10 = 10 ✓
+Check: C 3 = 3, H 8 = 8, O 10 = 10. Balanced.
 
 ## Equations with brackets and groups
 
@@ -181,7 +181,7 @@ $$\text{Ca(OH)}_2 + 2\text{HCl} \rightarrow \text{CaCl}_2 + 2\text{H}_2\text{O}$
 | H | 3 | 2 | 4 | 4 |
 | O | 2 | 1 | 2 | 2 |
 
-Check: every row matches ✓. Here the OH group does not stay together (its atoms end up in water), so we count O and H separately.
+Check: every row matches. Here the OH group does not stay together (its atoms end up in water), so we count O and H separately.
 
 ### Worked example 6: sodium hydroxide and sulfuric acid
 
@@ -205,7 +205,7 @@ $$2\text{NaOH} + \text{H}_2\text{SO}_4 \rightarrow \text{Na}_2\text{SO}_4 + 2\te
 | H | 3 | 2 | 4 | 4 |
 | O outside SO₄ | 1 | 1 | 2 | 2 |
 
-Check with every atom counted: O on the left is $2 + 4 = 6$ and on the right $4 + 2 = 6$; Na 2 = 2, S 1 = 1, H 4 = 4 ✓
+Check with every atom counted: O on the left is $2 + 4 = 6$ and on the right $4 + 2 = 6$; Na 2 = 2, S 1 = 1, H 4 = 4. Balanced.
 
 ## State symbols
 

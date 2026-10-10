@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { api } from "../api";
+import { Icon, SubjectIcon } from "../components/Icon";
 import Markdown from "../components/Markdown";
 import TutorPanel from "../components/TutorPanel";
 import { LockedNotice } from "../components/Locked";
@@ -55,8 +56,8 @@ function Timer({ deadline, offset, onExpire }) {
     }
   }, [left, onExpire]);
   return (
-    <span className={`timer ${left < 60000 ? "low" : ""}`} role="timer" aria-label={t("quiz.timeLeft")}>
-      ⏱ {formatClock(left)}
+    <span className={`timer with-icon ${left < 60000 ? "low" : ""}`} role="timer" aria-label={t("quiz.timeLeft")}>
+      <Icon name="timer" size={16} /> {formatClock(left)}
     </span>
   );
 }
@@ -149,11 +150,11 @@ function SolutionPanel({ question, answer }) {
   if (!s) return null;
   const v = verdict(question);
   const cls = v === "right" ? "good" : v === "wrong" ? "bad" : "neutral";
-  const heading = {
-    right: `✅ ${t("quiz.correct")}`,
-    wrong: `❌ ${t("quiz.incorrect")}`,
-    partial: `🟡 ${t("quiz.partly")}`,
-    pending: `🧑🏽‍🏫 ${t("quiz.teacherMarked")}`,
+  const [icon, heading] = {
+    right: ["ok", t("quiz.correct")],
+    wrong: ["fail", t("quiz.incorrect")],
+    partial: ["partial", t("quiz.partly")],
+    pending: ["teach", t("quiz.teacherMarked")],
   }[v];
   const showTyped = ["numeric", "short"].includes(question.type);
   const expected = question.type === "numeric" ? s.numeric_answer : s.accepted_answers?.[0];
@@ -161,7 +162,9 @@ function SolutionPanel({ question, answer }) {
   return (
     <div className={`feedback ${cls}`} aria-live="polite">
       <div className="spread">
-        <strong>{heading}</strong>
+        <strong className="with-icon">
+          <Icon name={icon} /> {heading}
+        </strong>
         {s.marks_awarded !== null && (
           <span className="pill">
             {Number(s.marks_awarded)} / {Number(question.marks)}
@@ -207,8 +210,8 @@ function Results({ attempt }) {
   return (
     <div className="quiz-shell">
       <div className="card" style={{ textAlign: "center" }}>
-        <span className="small muted">
-          {attempt.quiz.subject.icon} {attempt.quiz.subject.name} · {attempt.quiz.grade}
+        <span className="small muted with-icon">
+          <SubjectIcon name={attempt.quiz.subject.icon} size={16} /> {attempt.quiz.subject.name} · {attempt.quiz.grade}
         </span>
         <h1 style={{ margin: "6px 0 16px" }}>{attempt.quiz.title}</h1>
         <div className="score-ring" style={{ "--pct": pct ?? 0 }}>
@@ -224,7 +227,7 @@ function Results({ attempt }) {
             ← {t("quiz.back")}
           </Link>
           <button className="btn" disabled={busy} onClick={() => start(attempt.quiz.id)}>
-            ↻ {t("quiz.tryAgain")}
+            <Icon name="refresh" size={16} /> {t("quiz.tryAgain")}
           </button>
           {attempt.quiz.marking_guide_link && (
             <a className="btn btn-secondary" href={attempt.quiz.marking_guide_link} target="_blank" rel="noopener noreferrer">
@@ -421,14 +424,18 @@ function Player({ initial, onFinished }) {
             {attempt.quiz.title}
           </strong>
           <div className="row">
-            <span className="small muted" aria-live="polite">
-              {saving === "saving"
-                ? t("quiz.saving")
-                : saving === "saved"
-                  ? `✓ ${t("quiz.saved")}`
-                  : saving === "failed"
-                    ? `⚠ ${t("quiz.notSaved")}`
-                    : ""}
+            <span className="small muted with-icon" aria-live="polite">
+              {saving === "saving" && t("quiz.saving")}
+              {saving === "saved" && (
+                <>
+                  <Icon name="check" size={14} /> {t("quiz.saved")}
+                </>
+              )}
+              {saving === "failed" && (
+                <>
+                  <Icon name="warning" size={14} /> {t("quiz.notSaved")}
+                </>
+              )}
             </span>
             {attempt.deadline && <Timer deadline={attempt.deadline} offset={offset} onExpire={onExpire} />}
           </div>
@@ -484,7 +491,7 @@ function Player({ initial, onFinished }) {
             </button>
           ) : (
             <button className="btn" disabled={submitting} onClick={() => submit(false)}>
-              {t("quiz.submit")} ✓
+              {t("quiz.submit")} <Icon name="check" size={16} />
             </button>
           )}
         </div>

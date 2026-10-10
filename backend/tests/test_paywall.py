@@ -1,7 +1,6 @@
 """Members of a subscribed school get everything; everyone else gets the free part only."""
 
 from datetime import timedelta
-from types import SimpleNamespace
 
 import pytest
 from django.core.files.base import ContentFile
@@ -286,15 +285,17 @@ def test_teacher_lessons_are_free(client_for, teacher, unit):
 # --- The AI tutor ------------------------------------------------------------------------
 
 
-def test_tutor_needs_a_subscription(client_for, apade_student, settings, monkeypatch):
-    from apps.tutor import services as tutor_services
-
-    settings.TUTOR_ENABLED = True
-    monkeypatch.setattr(tutor_services, "get_client", lambda: SimpleNamespace())
+def test_tutor_needs_a_subscription(client_for, apade_student):
     client = client_for(apade_student)
-    assert client.get("/api/tutor/status/").data == {"enabled": False, "reason": "subscription_required"}
-    response = client.post("/api/tutor/ask/", {"message": "help"}, format="json")
-    assert response.status_code == 403 and response.data["detail"].code == "subscription_required"
+    assert client.get("/api/tutor/status/").data == {
+        "enabled": False,
+        "reason": "subscription_required",
+        "state": "",
+        "exam": None,
+    }
+    for path in ("/api/tutor/ask/", "/api/tutor/stream/"):
+        response = client.post(path, {"message": "help"}, format="json")
+        assert response.status_code == 403 and response.data["detail"].code == "subscription_required"
 
 
 # --- Teachers see premium answer keys only with the subscription ---------------------------

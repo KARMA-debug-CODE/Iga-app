@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
+import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
 import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -117,7 +118,7 @@ function Users() {
       <Loader state={state}>
         {(data) => {
           const list = results(data);
-          if (!list.length) return <Empty icon="✅">{t("admin.nothing")}</Empty>;
+          if (!list.length) return <Empty icon="ok">{t("admin.nothing")}</Empty>;
           return (
             <div className="table-wrap">
               <table>
@@ -183,7 +184,7 @@ function Review() {
     <Loader state={state}>
       {(items) =>
         items.length === 0 ? (
-          <Empty icon="✅">{t("admin.nothing")}</Empty>
+          <Empty icon="ok">{t("admin.nothing")}</Empty>
         ) : (
           <div className="stack">
             {items.map((item) => (
@@ -228,7 +229,7 @@ function Moderation() {
     <Loader state={state}>
       {(reports) =>
         reports.length === 0 ? (
-          <Empty icon="🕊️">{t("admin.nothing")}</Empty>
+          <Empty icon="ok">{t("admin.nothing")}</Empty>
         ) : (
           <div className="stack">
             {reports.map((r) => (
@@ -374,7 +375,7 @@ function SchoolDetail({ id, onChanged }) {
                 disabled={busy}
                 onClick={() => act(school.status === "pending" ? "verify" : "reinstate")}
               >
-                ✓ {t(school.status === "pending" ? "admin.verify" : "admin.reinstate")}
+                <Icon name="check" size={16} /> {t(school.status === "pending" ? "admin.verify" : "admin.reinstate")}
               </button>
             )}
             {school.status === "pending" && (
@@ -401,7 +402,7 @@ function SchoolDetail({ id, onChanged }) {
                   )
                 }
               >
-                ✓ {t("admin.approveAdmins", { n: pendingAdmins.length })}
+                <Icon name="check" size={16} /> {t("admin.approveAdmins", { n: pendingAdmins.length })}
               </button>
             )}
           </div>
@@ -518,7 +519,7 @@ function Schools() {
       <Loader state={state}>
         {(list) =>
           list.length === 0 ? (
-            <Empty icon="🏫">{t("admin.noSchools")}</Empty>
+            <Empty icon="school">{t("admin.noSchools")}</Empty>
           ) : (
             <div className="stack">
               {list.map((s) => (
@@ -584,9 +585,11 @@ export default function Admin() {
   return (
     <>
       <div className="page-header spread">
-        <h1 style={{ margin: 0 }}>🛡️ {t("admin.title")}</h1>
+        <h1 className="title-with-icon" style={{ margin: 0 }}>
+          <Icon name="admin" size={28} /> {t("admin.title")}
+        </h1>
         <a className="btn btn-secondary btn-sm" href="/django-admin/" target="_blank" rel="noopener noreferrer">
-          {t("admin.djangoAdmin")} ↗
+          {t("admin.djangoAdmin")} <Icon name="external" size={16} />
         </a>
       </div>
       <Tabs

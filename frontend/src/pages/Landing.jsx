@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
 
+import { Icon } from "../components/Icon";
 import { Logo } from "../components/ui";
 import { LANGUAGES, useI18n } from "../i18n";
 
 const FEATURES = [
-  ["📚", "landing.f.lessons"],
-  ["🔬", "landing.f.labs"],
-  ["📝", "landing.f.exams"],
-  ["👥", "landing.f.groups"],
-  ["🧑🏽‍🏫", "landing.f.teachers"],
-  ["💻", "landing.f.code"],
+  ["learn", "landing.f.lessons"],
+  ["labs", "landing.f.labs"],
+  ["practice", "landing.f.exams"],
+  ["groups", "landing.f.groups"],
+  ["teach", "landing.f.teachers"],
+  ["code", "landing.f.code"],
 ];
 
 export function LanguagePicker() {
@@ -68,8 +69,8 @@ export default function Landing() {
       <section className="grid" aria-label={t("a11y.features")}>
         {FEATURES.map(([icon, key]) => (
           <div className="card" key={key}>
-            <div className="icon-tile" aria-hidden>
-              {icon}
+            <div className="icon-tile">
+              <Icon name={icon} size={22} />
             </div>
             <h3 style={{ marginTop: 12 }}>{t(key)}</h3>
             <p className="muted" style={{ margin: 0 }}>
@@ -80,8 +81,8 @@ export default function Landing() {
       </section>
 
       {showDemo && (
-        <p className="alert" style={{ marginTop: 20 }}>
-          🔑 {t("landing.demo")}
+        <p className="alert line-with-icon" style={{ marginTop: 20 }}>
+          <Icon name="key" /> <span>{t("landing.demo")}</span>
         </p>
       )}
 

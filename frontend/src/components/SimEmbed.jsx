@@ -4,6 +4,7 @@ import { api } from "../api";
 import { translateNow, useI18n } from "../i18n";
 import { BUILTIN_SIMS } from "../sims/registry";
 import ErrorBoundary from "./ErrorBoundary";
+import { Icon } from "./Icon";
 import { Spinner } from "./ui";
 
 function useSimulation(slug, initial, lang) {
@@ -108,7 +109,9 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
           </Suspense>
         </ErrorBoundary>
         <div className="sim-caption">
-          🔬 {sim.title} · {t("labs.offline")}
+          <span className="with-icon">
+            <Icon name="labs" size={14} /> {sim.title} · {t("labs.offline")}
+          </span>
         </div>
       </div>
     );
@@ -121,13 +124,11 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
     <div className="sim-frame">
       {!launched ? (
         <div className="sim-placeholder">
-          <div style={{ fontSize: "2.4rem" }} aria-hidden>
-            {sim.provider === "geogebra" ? "📈" : "🧪"}
-          </div>
+          <Icon name={sim.provider === "geogebra" ? "trend" : "flask"} size={40} strokeWidth={1.6} style={{ color: "var(--primary)" }} />
           <strong>{sim.title}</strong>
           <span className="small muted">{t("labs.dataNote")}</span>
           <button className="btn" onClick={() => setLaunched(true)}>
-            ▶ {t("labs.launch")}
+            <Icon name="play" size={16} /> {t("labs.launch")}
           </button>
         </div>
       ) : sim.provider === "geogebra" && !embedUrl ? (

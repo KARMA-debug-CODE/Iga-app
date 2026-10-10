@@ -4,7 +4,7 @@ import { useAuth } from "../auth";
 import { GradeChips, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
-import { SubjectCard } from "./Dashboard";
+import { SubjectGrid } from "./Dashboard";
 
 export default function Subjects() {
   const { user } = useAuth();
@@ -22,13 +22,7 @@ export default function Subjects() {
       <GradeChips value={grade} onChange={(g) => setParams({ grade: g })} />
       <div style={{ marginTop: 16 }}>
         <Loader state={state}>
-          {(list) => (
-            <div className="grid">
-              {list.map((s) => (
-                <SubjectCard key={s.code} subject={s} grade={grade} />
-              ))}
-            </div>
-          )}
+          {(list) => <SubjectGrid subjects={list} grade={grade} headingLevel={2} />}
         </Loader>
       </div>
     </>

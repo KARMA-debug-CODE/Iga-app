@@ -1,7 +1,7 @@
 {
   "access": "free",
   "title": "HTML basics — practice",
-  "subject": "ict", "grade": "S1", "unit": 5,
+  "subject": "ict", "grade": "S1", "unit": 6,
   "kind": "practice", "feedback_mode": "immediate",
   "questions": [
     {"type": "mcq", "difficulty": 1, "prompt": "What does HTML stand for?",

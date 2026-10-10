@@ -31,7 +31,7 @@ Keza has 2,000 FRW. She would like a data bundle (2,000 FRW) and she also needs 
 2. Rank them. The books help her study, so they come first. The data bundle is her next-best choice.
 3. Keza buys the books.
 4. Her opportunity cost is the **data bundle**, the thing she gave up.
-5. Check: the opportunity cost is a *thing* (the data bundle), not "2,000 FRW" ✓.
+5. Check: the opportunity cost is a *thing* (the data bundle), not "2,000 FRW". Correct.
 
 Opportunity cost is not only about money. If you spend Saturday afternoon selling eggs, the opportunity cost might be the football match you missed.
 
@@ -99,7 +99,7 @@ Here is her finished budget:
 | **Total expenses** | | **10,500** |
 | **Savings** | | **1,500** |
 
-Check: $12\,000 - 10\,500 = 1\,500$ FRW ✓. This is a surplus budget, and all the surplus goes into savings.
+Check: $12\,000 - 10\,500 = 1\,500$ FRW. Correct. This is a surplus budget, and all the surplus goes into savings.
 
 ## When expenses are bigger than income
 
@@ -118,7 +118,7 @@ Eric's income is 12,000 FRW a month. He plans to spend:
 4. Cut a want: the earphones can wait. New total: $13\,500 - 1\,000 = 12\,500$ FRW. There is still a deficit of 500 FRW.
 5. Cut another want: snacks go from 2,000 to 1,000 FRW. New total: $12\,500 - 1\,000 = 11\,500$ FRW.
 6. Now $12\,000 - 11\,500 = 500$ FRW. Eric has a surplus of 500 FRW, which he saves.
-7. Check: $7\,500 + 3\,000 + 1\,000 = 11\,500$ FRW ✓.
+7. Check: $7\,500 + 3\,000 + 1\,000 = 11\,500$ FRW. Correct.
 
 Next month, Eric can pay himself first, as Keza does.
 
@@ -136,7 +136,7 @@ Keza wants a bicycle that costs 60,000 FRW. How long will it take to save for it
 2. If she saves 4,000 FRW a month: $60\,000 \div 4\,000 = 15$ months.
 3. If she saves 5,000 FRW a month: $60\,000 \div 5\,000 = 12$ months.
 4. Saving 1,000 FRW more each month gets her the bicycle 3 months sooner.
-5. Check: $12 \times 5\,000 = 60\,000$ FRW ✓.
+5. Check: $12 \times 5\,000 = 60\,000$ FRW. Correct.
 
 ## Ways to save in Rwanda
 
@@ -172,7 +172,7 @@ Here is one week of Keza's tracker:
 4. Look for small things that repeat: sweets, 3 times at 100 FRW, so 300 FRW a week.
 5. In 4 weeks: $300 \times 4 = 1\,200$ FRW. That is as much as her whole "save first" amount!
 6. Compare with her plan in Worked example 2: snacks were planned at 1,000 FRW a month. This week, sweets and chapati cost $300 + 300 = 600$ FRW, so in 4 weeks about $600 \times 4 = 2\,400$ FRW. She is spending more than she planned on snacks, so next week she can cut the sweets.
-7. Check: add all eight amounts in the table: $500 + 100 + 100 + 500 + 500 + 100 + 200 + 300 = 2\,300$ FRW ✓.
+7. Check: add all eight amounts in the table: $500 + 100 + 100 + 500 + 500 + 100 + 200 + 300 = 2\,300$ FRW. Correct.
 
 ## Common mistakes
 

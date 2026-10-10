@@ -6,7 +6,7 @@ class Badge(models.Model):
     code = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=80)
     description = models.CharField(max_length=200)
-    icon = models.CharField(max_length=8, default="🏅")
+    icon = models.CharField(max_length=32, default="award", help_text="Name of a line icon (see Icon.jsx)")
 
     def __str__(self):
         return self.name

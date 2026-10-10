@@ -117,7 +117,7 @@ export async function forgetPremiumLessons() {
   writeSaved(saved);
 }
 
-/** Ask AI conversations are kept for the browser tab; they go with the student on logout. */
+/** Santa page conversations are kept for the browser tab; they go with the student on logout. */
 export function clearAskHistory() {
   try {
     for (const name of Object.keys(sessionStorage).filter((k) => k.startsWith("iga.ask."))) sessionStorage.removeItem(name);

@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import { Icon } from "../components/Icon";
 import Markdown from "../components/Markdown";
 import { Empty, Loader } from "../components/ui";
 import { useApi } from "../hooks";
@@ -26,7 +27,7 @@ function ViewToggle({ table, onChange }) {
   const { t } = useI18n();
   return (
     <button type="button" className="btn btn-ghost btn-sm" aria-pressed={table} onClick={() => onChange(!table)}>
-      {table ? `📊 ${t("analytics.showChart")}` : `▦ ${t("analytics.showTable")}`}
+      <Icon name={table ? "chart" : "table"} size={16} /> {table ? t("analytics.showChart") : t("analytics.showTable")}
     </button>
   );
 }
@@ -107,7 +108,11 @@ function OptionBreakdown({ question }) {
           <div key={c.id} className="option-stat">
             <div className="spread small">
               <span className="option-stat-text">
-                {c.is_correct && <span className="pill pill-success">✓ {t("analytics.correct")}</span>}{" "}
+                {c.is_correct && (
+                  <span className="pill pill-success">
+                    <Icon name="check" size={14} /> {t("analytics.correct")}
+                  </span>
+                )}{" "}
                 <Markdown interactive={false}>{c.text}</Markdown>
               </span>
               <span className="muted">{label}</span>
@@ -221,7 +226,9 @@ export default function QuizAnalytics() {
               <span>›</span> <span>{t("analytics.title")}</span>
             </div>
             <div className="page-header">
-              <h1>📊 {data.quiz.title}</h1>
+              <h1 className="title-with-icon">
+                <Icon name="chart" size={28} /> {data.quiz.title}
+              </h1>
               <p>
                 {data.quiz.subject} · {data.quiz.grade}
               </p>
@@ -247,7 +254,7 @@ export default function QuizAnalytics() {
             <p className="small muted">{t("analytics.firstAttemptNote")}</p>
 
             {data.students_attempted === 0 ? (
-              <Empty icon="📭">{t("analytics.none")}</Empty>
+              <Empty icon="inbox">{t("analytics.none")}</Empty>
             ) : (
               <>
                 <Histogram bins={data.histogram} total={data.students_attempted} />

@@ -1,6 +1,7 @@
 // Books for a lesson or a unit: the official REB textbook first, then free open textbooks.
 // They are links to the publishers' own sites, so they need internet (they are not saved offline).
 import { useI18n } from "../i18n";
+import { Icon } from "./Icon";
 
 // Licences that books.json repeats, shown in the reader's language; any other licence is shown as written.
 const LICENCE_KEYS = {
@@ -10,11 +11,11 @@ const LICENCE_KEYS = {
 };
 
 function icon(book) {
-  if (book.kind === "teacher_guide") return "🧑🏽‍🏫";
-  if (book.kind === "video") return "🎬";
-  if (book.kind === "link") return "🔗";
-  if (book.kind === "textbook") return book.is_official ? "📕" : "📗";
-  return "📄";
+  if (book.kind === "teacher_guide") return "teach";
+  if (book.kind === "video") return "video";
+  if (book.kind === "link") return "link";
+  if (book.kind === "textbook") return book.is_official ? "bookmark" : "book";
+  return "file";
 }
 
 /** The official textbooks among `books`, for linking a unit that has no Iga lesson yet. */
@@ -46,19 +47,21 @@ export default function BookList({ books, unit }) {
           return (
             <li key={book.id}>
               <a className="list-link" href={book.file_url || book.url} target="_blank" rel="noopener noreferrer">
-                <div className="icon-tile" aria-hidden>
-                  {icon(book)}
+                <div className="icon-tile">
+                  <Icon name={icon(book)} size={22} />
                 </div>
                 <div className="grow">
                   <strong>{book.title}</strong>
                   {book.is_official && <span className="pill pill-success book-pill">{t("learn.official")}</span>}
                   {description && <div className="small">{description}</div>}
                   {book.is_official && unit && book.kind === "textbook" && (
-                    <div className="small book-hint">🔎 {t("books.lookFor", { unit: unitTitleFor(book, unit) })}</div>
+                    <div className="small book-hint">
+                      <Icon name="search" size={14} /> {t("books.lookFor", { unit: unitTitleFor(book, unit) })}
+                    </div>
                   )}
                   {meta.length > 0 && <div className="small muted">{meta.join(" · ")}</div>}
                 </div>
-                <span aria-hidden>↗</span>
+                <Icon name="external" size={16} />
               </a>
             </li>
           );

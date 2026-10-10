@@ -5,7 +5,7 @@ from .models import TutorExchange
 
 @admin.register(TutorExchange)
 class TutorExchangeAdmin(admin.ModelAdmin):
-    """Read-only log of tutor conversations, for safeguarding review and cost tracking."""
+    """Read-only log of questions to Santa and its answers, for safeguarding review."""
 
     list_display = ("created_at", "user", "subject", "lesson", "question", "stop_reason", "input_tokens", "output_tokens")
     list_filter = ("stop_reason", "model")

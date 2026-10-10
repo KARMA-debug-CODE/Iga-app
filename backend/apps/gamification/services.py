@@ -14,15 +14,16 @@ XP_QUIZ_BASE = 5
 XP_PERFECT_BONUS = 10
 XP_JOIN_GROUP = 5
 
+# code: (name, description, line icon name from frontend/src/components/Icon.jsx)
 BADGES = {
-    "first-lesson": ("First Steps", "Completed your first lesson", "👣"),
-    "bookworm": ("Bookworm", "Completed 10 lessons", "📚"),
-    "quiz-whiz": ("Quiz Whiz", "Scored 100% on a quiz", "🎯"),
-    "exam-ready": ("Exam Ready", "Finished a past national exam paper", "📝"),
-    "lab-explorer": ("Lab Explorer", "Explored 5 different simulations", "🔬"),
-    "team-player": ("Team Player", "Joined a study group", "🤝"),
-    "streak-3": ("On a Roll", "Learned 3 days in a row", "🔥"),
-    "streak-7": ("Unstoppable", "Learned 7 days in a row", "⚡"),
+    "first-lesson": ("First Steps", "Completed your first lesson", "footprints"),
+    "bookworm": ("Bookworm", "Completed 10 lessons", "book"),
+    "quiz-whiz": ("Quiz Whiz", "Scored 100% on a quiz", "target"),
+    "exam-ready": ("Exam Ready", "Finished a past national exam paper", "fileCheck"),
+    "lab-explorer": ("Lab Explorer", "Explored 5 different simulations", "microscope"),
+    "team-player": ("Team Player", "Joined a study group", "handshake"),
+    "streak-3": ("On a Roll", "Learned 3 days in a row", "flame"),
+    "streak-7": ("Unstoppable", "Learned 7 days in a row", "zap"),
 }
 
 

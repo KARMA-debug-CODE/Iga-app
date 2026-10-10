@@ -13,7 +13,7 @@
         └───────────────┬─────────────────────────────────────┘
                         │
         ┌───────────────▼────────────────┐       ┌──────────────┐
-        │ Django + DRF on gunicorn       │──────▶│ Redis        │ shared rate limits
+        │ Django + DRF on gunicorn       │──────►│ Redis        │ shared rate limits
         │ (stateless; scale horizontally)│       └──────────────┘ (cache)
         └───────┬───────────────┬────────┘
                 │               │
@@ -25,8 +25,8 @@
    Third-party, loaded only when a student taps "Launch":
    phet.colorado.edu (iframes)   geogebra.org (deployggb.js)
 
-   Called by the server only, when an API key is configured:
-   Claude API (AI tutor and Ask AI)
+   Called by the server only, when SANTA_URL is set:
+   Santa's model server (llama.cpp with an open model: the AI tutor; internal network, no outside AI service)
 
    Called by the server only, when CODE_RUNNER_URL is set:
    Iga code runner (coderunner/: compiles and runs C++ and Java; internal network, no internet)
@@ -49,7 +49,7 @@
 | `community` | Study groups, chat, shared notes, reports | `StudyGroup`, `GroupMembership`, `Message`, `SharedNote`, `MessageReport` |
 | `gamification` | XP ledger, streaks, badges, leaderboards | `XPEvent`, `Badge`, `UserBadge` |
 | `schools` | Schools (verification, join code, paid-through date), memberships, payments (Flutterwave, manual, test), reminders, and the single access rule every content endpoint uses | `School`, `Payment`, `BillingReminder` |
-| `tutor` | AI study tutor and the Ask AI page: builds the context the model may see (lesson, chosen subject, or a question once its solution is visible), switches itself off while the student sits a timed test, calls the Claude API, logs exchanges | `TutorExchange` |
+| `tutor` | Santa, the AI tutor, in lessons, quizzes and on the Santa page: builds the context the model may see (lesson, chosen subject, or a question once its solution is visible), switches itself off while the student sits a timed test, finds matching lesson passages, runs the calculator tool, talks to Santa's model server, answers from the lessons when the model can't, logs exchanges | `TutorExchange` |
 | `coderun` | C++ and Java for the code playground: checks the request, starts the program on the code runner, and passes the student's answers to a program waiting for input. Each session belongs to the student who started it. Stores nothing | – |
 | `core` | Constants, permissions, audit log, dashboard, search, admin API, content loader and management commands | `AuditLog` |
 
@@ -83,7 +83,7 @@ One function, `apps/schools/access.content_access(user)`, decides whether someon
 | Attempt results | Score and answers stay; explanations and marking guides withheld |
 | Past papers | Links withheld; uploaded files only through signed 10-minute links that re-check access (nginx `X-Accel-Redirect` from an internal location; `/media/exam_papers/` is not served) |
 | Question bank | Library questions hidden from teachers without access, and can't be put in their quizzes |
-| AI tutor, search, dashboard | Tutor refused; locked lesson text not searchable; "continue learning" suggests lessons the student can open |
+| Santa (AI tutor), search, dashboard | Santa refused; Santa never quotes locked lessons; locked lesson text not searchable; "continue learning" suggests lessons the student can open |
 
 Payments are applied by `billing.apply_payment` inside a transaction that locks the payment and school rows, so a redirect, a webhook retry and an administrator can't extend a subscription twice. See [School subscriptions](SUBSCRIPTIONS.md).
 
@@ -100,6 +100,25 @@ The integrity rules live in `apps/assessments/services.py`:
 7. **Scoring.** MCQ and true/false are all-or-nothing. Multi-select gives partial credit, `(right − wrong) / total right`, never below zero. Numeric answers allow an absolute tolerance (plus a tiny relative allowance for floating-point noise). Short answers ignore case, extra spaces and a trailing full stop. Essays, and short answers with no accepted list, go to the teacher.
 8. **Teacher marking.** A teacher marks written answers only for their current classes: work set as one of their assignments, or a student's self-practice in that class's subject. Auto-marked questions can't be re-marked. The attempt becomes `marked` once every answer has marks, and XP is awarded then.
 9. **Exactly-once rewards.** XP events carry a unique `reference` (`quiz:42`, `quiz-perfect:42`), so quiz XP is earned once per quiz however often it is retaken, and racing requests can't award it twice. Blank attempts earn nothing.
+
+## Santa, the AI tutor
+
+Santa's model runs on our own infrastructure: llama.cpp's `llama-server` (the `santa` Compose service) with an open model, Gemma 4 E4B by default. Django is its only client, on an internal Docker network, with a shared API key (`SANTA_API_KEY`); no port is published and no question goes to an outside AI service. The code is in `apps/tutor/`:
+
+| Module | Job |
+|---|---|
+| `services.py` | Checks access and builds the context (the rules below), writes the fixed system prompt and the student's turn, runs up to 3 calculator rounds, falls back to lesson passages, adds the child-helpline line when a message sounds unsafe, logs the exchange |
+| `retrieval.py` | BM25 over every published lesson, cut into passages at its headings, in English and French. Built in each process's memory on first use and rebuilt when a lesson, translation, unit or subject changes (a version in the shared cache) or every 15 minutes. The open lesson comes first; the student's grade and subject rank higher, lessons two or more years ahead lower; only lessons the student may read are quoted |
+| `calculator.py` | The `calculate` tool: an `ast` whitelist of numbers, `+ - * / ** %`, brackets and a few maths functions, worked out with exact fractions where possible, with limits on length, size and exponents. Nothing reaches `eval` or `exec` |
+| `llm.py` | The OpenAI-compatible client (`POST /v1/chat/completions`, standard library only): plain and streamed answers (`data:` chunks, `:` pings ignored, `[DONE]`), tool calls, `GET /health`, and one error per problem: not installed, loading (503 "Loading model"), unreachable, timeout, bad reply, tools rejected (Santa then asks again without the calculator), too long for a slot (Santa then asks again with no history and one passage) |
+
+The rules:
+
+1. **What Santa may see** is decided by the server, never the model: the open lesson, the chosen subject, or a quiz question with the student's answer, plus the correct answer only once the student may see it (after submitting, or after checking a practice answer). Nothing while a timed or exam-mode attempt is open anywhere.
+2. **Prompt cache.** The system prompt is short and the same for every request, so llama.cpp reuses its cached prefix; everything about this question (context, lesson passages, the question) goes in the student's turn, sized to fit a 4,000-token slot with the trimmed history and the answer: a long question, quiz or history leaves less room for lesson passages, and the oldest turns go first.
+3. **Limits.** One answer at a time per student, `SANTA_PARALLEL` answers at a time in all (matching `-np`), `SANTA_TIMEOUT_SECONDS` per answer including calculator rounds, `THROTTLE_TUTOR` per student.
+4. **Never a dead end.** When the model is not installed, still loading, busy or not answering, Santa answers with the best matching lesson passages and a short note; the status endpoint lets the app say so up front.
+5. **Streaming.** `tutor/stream/` is a `StreamingHttpResponse` (`text/event-stream`, `X-Accel-Buffering: no`); nginx does not buffer `/api/tutor/` and allows 200 s. gunicorn runs threaded workers, and each stream is bounded by the timeout. When the student presses Stop, the browser aborts the request, Django closes the connection to the model (which stops writing) and logs what was said.
 
 ## API
 
@@ -131,7 +150,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `POST messages/{id}/report/` · `POST messages/{id}/hide/` | member / moderator | Moderation |
 | `GET dashboard/` · `GET search/?q=` · `GET leaderboard/` · `GET badges/` | user | Home screen, search, motivation |
 | `GET code/status/` · `POST code/run/` · `POST code/input/` · `POST code/stop/` | user | C++ and Java for the playground on the code runner: start a program, answer it when it waits for input, stop it (one program per student; `THROTTLE_CODE_RUN`, `THROTTLE_CODE_INPUT`); 503 when it is off, busy or not answering, 410 when the program has already finished |
-| `GET tutor/status/` · `POST tutor/ask/` | user | AI tutor: from a lesson or question, or the Ask AI page with an optional `subject`; off everywhere while the student has a timed test or exam running; needs the school subscription |
+| `GET tutor/status/` · `POST tutor/ask/` · `POST tutor/stream/` | user | Santa: from a lesson or question, or the Santa page with an optional `subject`. `status` says ready, loading, not installed, unavailable or exam; `ask` returns the whole answer as JSON (reply, sources, fallback, tools); `stream` sends it as Server-Sent Events while it is written. Off everywhere while the student has a timed test or exam running; needs the school subscription; `THROTTLE_TUTOR` |
 | `GET schools/?q=&district=` · `GET schools/districts/` | anyone | Verified school directory for the sign-up picker |
 | `GET/POST/DELETE my-school/` | user | See, choose (optionally with the school code) or leave a school |
 | `GET/PATCH school/` · `GET school/members/` · `POST school/members/decide/` · `POST school/members/{id}/remove/` · `POST school/new-code/` · `GET school/payments/` | school admin | Manage the school |
@@ -151,7 +170,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | Authorisation | Role checks on every endpoint; teachers see only students enrolled in their current classes; students never reach the question bank; teacher self-registration needs admin approval; accounts with a teacher-issued temporary password can do nothing but change it |
 | Content injection | Markdown is rendered without raw HTML; code-playground previews run in a sandboxed iframe; Python and SQL run in Web Workers, entirely in the browser. Uploads get random names, must be an allowed type whose bytes match the extension, and nginx serves them with `nosniff`, a sandboxing CSP, and as downloads unless they are PDFs, images or media |
 | Student code | HTML/CSS/JS runs in a sandboxed iframe, Python (Pyodide) and SQL (sql.js) in Web Workers in the student's browser. C++ and Java never run on the Django server: Django sends them to Iga's **code runner** (`coderunner/`), a separate container on an internal network with no internet access and no published port, which only accepts requests carrying `CODE_RUNNER_TOKEN`. It has no privileges except those needed to start each program as its slot's own unprivileged user (one user per slot, so programs running at once can't see or signal each other), in a fresh folder that is deleted afterwards, with limits: 10 s of CPU and 10 s to finish or ask for input after each answer, 512 MB (C++) or a 256 MB Java heap, 32/128 processes, 8 MB files, 64 KB of output, 120 s to answer, 10 minutes per session, and 4 sessions at a time (`CODE_RUNNER_SLOTS`; the container itself is capped at 2 GB and 2 CPUs). A program waiting for input is detected from `/proc` (every thread blocked reading stdin) and paused until the student answers. Each student's requests go one at a time, and starting a new program ends the previous one |
-| Minors' safety | No direct messages, only group chat; reporting and hiding; teacher badge only for approved teachers; group members, chat and leaderboards show first name + initial; parents see only their linked child, read-only; the AI tutor never sees other students' data |
+| Minors' safety | No direct messages, only group chat; reporting and hiding; teacher badge only for approved teachers; group members, chat and leaderboards show first name + initial; parents see only their linked child, read-only; Santa never sees other students' data, and every question and answer is logged for review |
 | Accountability | `AuditLog` records content changes, approvals, marks, role changes and moderation, with actor and IP |
 | Transport | HTTPS enforced (redirect, HSTS, secure cookies) when `HTTPS` is on, which is the default in production |
 

@@ -1,13 +1,13 @@
 # Local trial of the production setup: PostgreSQL + Redis + Django (gunicorn) + nginx, plus Iga's code
-# runner for C++ and Java in the code playground.
+# runner for C++ and Java in the code playground, and Santa's model server (Iga's own AI tutor).
 #   cp .env.docker.example .env      # then fill in DJANGO_SECRET_KEY (see the file)
-#   docker compose up --build
+#   docker compose up --build        # the first start downloads Santa's model once (about 4.5 GB)
 #   docker compose exec backend python manage.py load_curriculum
 #   docker compose exec backend python manage.py seed_demo --force   # optional demo accounts
 # Then open http://localhost:8080
 #
 # For a real deployment, use strong secrets in .env, serve over HTTPS and remove
-# HTTPS=false from .env (HTTPS defaults to on), and set a random CODE_RUNNER_TOKEN.
+# HTTPS=false from .env (HTTPS defaults to on), and set a random CODE_RUNNER_TOKEN and SANTA_API_KEY.
 services:
   db:
     image: postgres:16-alpine
@@ -38,7 +38,14 @@ services:
       # nginx in front appends the client address to X-Forwarded-For.
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Santa, Iga's own AI tutor: the "santa" service below. Set SANTA_URL= (empty) in .env to run without
+      # the model; Santa then answers from the lessons only.
+      SANTA_URL: ${SANTA_URL-http://santa:8080}
+      SANTA_API_KEY: ${SANTA_API_KEY:-iga-local-santa}
+      SANTA_MAX_TOKENS: ${SANTA_MAX_TOKENS:-600}
+      SANTA_TEMPERATURE: ${SANTA_TEMPERATURE:-0.6}
+      SANTA_TIMEOUT_SECONDS: ${SANTA_TIMEOUT_SECONDS:-150}
+      SANTA_PARALLEL: ${SANTA_PARALLEL:-4}
       # C++ and Java in the code playground. Set CODE_RUNNER_URL= (empty) in .env to switch them off.
       CODE_RUNNER_URL: ${CODE_RUNNER_URL-http://coderunner:2000}
       CODE_RUNNER_TOKEN: ${CODE_RUNNER_TOKEN:-iga-local-code-runner}
@@ -61,11 +68,11 @@ services:
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Iga <no-reply@iga.rw>}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
-      # Threads per worker, so slow calls (the AI tutor, C++/Java runs) don't hold up other requests.
+      # Threads per worker, so slow calls (Santa's answers, C++/Java runs) don't hold up other requests.
       GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
     volumes:
       - media:/app/media
-    networks: [default, coderunner]
+    networks: [default, coderunner, santa]
     depends_on:
       db:
         condition: service_healthy
@@ -107,6 +114,54 @@ services:
     cpus: 2
     networks: [coderunner]
 
+  # Santa's brain: llama.cpp's llama-server running an open model (Gemma 4 E4B by default, Apache-2.0) on
+  # this server's CPU. Only the backend talks to it, on the internal "santa" network, with SANTA_API_KEY;
+  # no port is published. The first start downloads the model once into the santa-models volume (about
+  # 4.5 GB; Santa answers from the lessons until it is ready). A 16 GB RAM server is recommended; on an 8 GB
+  # server set SANTA_MODEL=google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0 and SANTA_MEMORY_LIMIT=5g in .env.
+  # Once the model is downloaded, SANTA_OFFLINE=true keeps it from ever going online. README: "Santa".
+  # The image is the CPU build for amd64 and arm64, and checks itself (HEALTHCHECK on :8080/health).
+  santa:
+    image: ghcr.io/ggml-org/llama.cpp:server-b11151
+    restart: unless-stopped
+    command:
+      - -hf
+      - ${SANTA_MODEL:-google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0}
+      - --no-mmproj # text only: skip the image and audio part of the model
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - -c # context, shared by the 4 parallel answers (about 4,000 tokens each)
+      - "16384"
+      - -np
+      - "4"
+      - -t # CPU threads: the number of physical cores is best
+      - ${SANTA_THREADS:-4}
+      - -tb
+      - ${SANTA_THREADS:-4}
+      - --reasoning # answer straight away, without a hidden "thinking" phase
+      - "off"
+      - --cache-ram # MiB of RAM to keep recent prompts (Santa's instructions) ready for reuse
+      - "1024"
+      - -n # the longest answer, in tokens (Django asks for SANTA_MAX_TOKENS)
+      - "768"
+      - --alias # the model's name in the API (Django's SANTA_MODEL_NAME)
+      - santa
+      - --metrics # Prometheus numbers at /metrics
+    environment:
+      LLAMA_CACHE: /models
+      LLAMA_API_KEY: ${SANTA_API_KEY:-iga-local-santa}
+      # true = use only the model already in /models and never go online.
+      LLAMA_ARG_OFFLINE: ${SANTA_OFFLINE:-false}
+      # Only for gated or private models on Hugging Face.
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      - santa-models:/models
+    mem_limit: ${SANTA_MEMORY_LIMIT:-8g}
+    # "santa" (internal) is how Django reaches it; "santa-download" only lets it fetch the model.
+    networks: [santa, santa-download]
+
   web:
     build: ./frontend
     ports:
@@ -119,9 +174,16 @@ services:
 volumes:
   pgdata:
   media:
+  santa-models:
 
 networks:
   default: {}
   # Internal only: the code runner can't reach the internet, and only the backend can reach it.
   coderunner:
     internal: true
+  # Internal only: Django and Santa's model server, nothing else.
+  santa:
+    internal: true
+  # Lets Santa's model server download its model (nothing else is on it, and no port is published).
+  # With SANTA_OFFLINE=true it is not used; remove it from the santa service to cut it off completely.
+  santa-download: {}

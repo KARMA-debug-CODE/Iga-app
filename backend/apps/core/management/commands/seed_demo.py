@@ -143,7 +143,7 @@ class Command(BaseCommand):
             GroupMembership.objects.create(group=group, user=students[0], role=GroupMembership.Role.OWNER)
             GroupMembership.objects.create(group=group, user=students[1])
             Message.objects.create(group=group, author=students[0], body="Muraho! Who has finished the linear graphs quiz?")
-            Message.objects.create(group=group, author=students[1], body="Me! Question 3 was tricky — remember rise over run 😄")
+            Message.objects.create(group=group, author=students[1], body="Me! Question 3 was tricky — remember rise over run!")
             SharedNote.objects.create(
                 group=group,
                 author=students[0],

@@ -21,6 +21,7 @@ class UserAdmin(BaseUserAdmin):
                     "teacher_approved_by_school",
                     "teacher_revoked",
                     "grade",
+                    "combination",
                     "school",
                     "school_status",
                     "preferred_language",

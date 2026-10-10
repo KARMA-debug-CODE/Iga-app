@@ -39,7 +39,7 @@ Imaginez 500 souris des champs dans un champ de sorgho. L'allèle **F** donne un
 2. Allèles F : chaque souris FF en a 2 et chaque souris Ff en a 1, donc $(200 \times 2) + 200 = 600$.
 3. Allèles f : chaque souris Ff en a 1 et chaque souris ff en a 2, donc $200 + (100 \times 2) = 400$.
 4. Fréquence de F $= \dfrac{600}{1000} = 0.6$. Fréquence de f $= \dfrac{400}{1000} = 0.4$.
-5. Vérification : $0.6 + 0.4 = 1$ ✓
+5. Vérification : $0.6 + 0.4 = 1$. C'est juste.
 
 Supposons maintenant que les chouettes attrapent plus facilement les souris blanches. Quelques générations plus tard, il y a 250 souris FF, 200 Ff et 50 ff. La fréquence de F vaut maintenant $\dfrac{500 + 200}{1000} = 0.7$. La fréquence allélique a changé : la population a donc **évolué**. Pourtant, aucune souris n'a changé ses propres allèles. Ce sont les populations qui évoluent, pas les individus.
 
@@ -56,7 +56,7 @@ Une infection contient $10^9$ (un milliard) de bactéries. Une mutation a rendu 
 5. Part des résistantes maintenant : $\dfrac{1000}{101\,000} \approx 0.0099$, soit environ $1\%$.
 6. Comparez : $\dfrac{1\%}{0.0001\%} = 10\,000$. Les bactéries résistantes sont maintenant environ 10 000 fois plus fréquentes.
 
-Vérification : $0.0099 \times 101\,000 \approx 1000$ bactéries résistantes ✓
+Vérification : $0.0099 \times 101\,000 \approx 1000$ bactéries résistantes. C'est juste.
 
 L'antibiotique n'a pas créé la résistance. Il a seulement tué les autres bactéries : un allèle rare est donc devenu fréquent. Les survivantes se multiplient. L'infection peut revenir avec beaucoup plus de bactéries résistantes, et celles-ci peuvent se transmettre à d'autres personnes.
 
@@ -93,7 +93,7 @@ Ce sont des exemples de résultats obtenus lors d'un essai. Vos nombres seront d
 5. **Survie et hérédité :** les lapins bruns vivent plus souvent jusqu'à l'âge de se reproduire et transmettent l'allèle brun, donc sa fréquence augmente.
 6. Prédiction : sur la neige, les lapins blancs sont mieux cachés, donc c'est le pelage blanc qui devrait augmenter.
 
-Vérification : $40 + 15 = 55$ ✓
+Vérification : $40 + 15 = 55$. C'est juste.
 
 ## Trois types de sélection
 

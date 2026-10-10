@@ -29,7 +29,7 @@ from .models import Assignment, Classroom, Enrollment
 class ClassroomSerializer(serializers.ModelSerializer):
     teacher_name = serializers.CharField(source="teacher.display_name", read_only=True)
     subject_name = serializers.SerializerMethodField()
-    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="🏫")
+    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="school")
     student_count = serializers.SerializerMethodField()
     join_code = serializers.SerializerMethodField()
 

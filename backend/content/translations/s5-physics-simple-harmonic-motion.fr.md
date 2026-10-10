@@ -94,7 +94,7 @@ Une masse de 0,50 kg est suspendue à un ressort de raideur $k = 200$ N/m. On la
 
 **Énergie totale :** $E = \tfrac{1}{2}kA^2 = 0.5 \times 200 \times 0.040^2 = 0.16$ J
 
-Vérification : $\tfrac{1}{2}mv_{\max}^2 = 0.5 \times 0.50 \times 0.80^2 = 0.16$ J. ✓
+Vérification : $\tfrac{1}{2}mv_{\max}^2 = 0.5 \times 0.50 \times 0.80^2 = 0.16$ J. C'est juste.
 
 **Vitesse lorsque $x = 2.0$ cm :**
 

@@ -30,7 +30,7 @@ Une **droite graduée** est une droite sur laquelle les entiers sont placés à 
 
 ```
  -5  -4  -3  -2  -1   0   1   2   3   4   5
-──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──▶
+──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──►
 ```
 
 La flèche montre que les nombres sont de plus en plus grands vers la droite. Voici la règle d'or : **plus un nombre est à droite, plus il est grand. Plus il est à gauche, plus il est petit.**
@@ -54,7 +54,7 @@ Sur une montagne, une station météo a relevé ces températures du matin, en �
 4. Viennent enfin les nombres positifs : $2 < 4$.
 5. L'ordre est $-5,\ -1,\ 0,\ 2,\ 4$.
 
-Vérification : sur la droite graduée, chaque nombre de la liste est à droite du précédent ✓.
+Vérification : sur la droite graduée, chaque nombre de la liste est à droite du précédent. C'est juste.
 
 ## Opposés et valeur absolue
 
@@ -99,12 +99,12 @@ Imaginez que la droite graduée est une route et que vous marchez dessus. Partez
 
 ```text
  -5  -4  -3  -2  -1   0   1   2   3   4   5
-──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──▶
+──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──►
           └─1─┴─2─┴─3─┴─4─┴─5─┘
        départ              arrivée
 ```
 
-Donc $-3 + 5 = 2$. Vérification : si vous devez 3 000 FRW et que vous recevez ensuite 5 000 FRW, vous pouvez payer la dette et garder 2 000 FRW ✓.
+Donc $-3 + 5 = 2$. Vérification : si vous devez 3 000 FRW et que vous recevez ensuite 5 000 FRW, vous pouvez payer la dette et garder 2 000 FRW. C'est juste.
 
 **(b)** Calculez $4 - 7$.
 
@@ -114,12 +114,12 @@ Donc $-3 + 5 = 2$. Vérification : si vous devez 3 000 FRW et que vous recevez e
 
 ```text
  -5  -4  -3  -2  -1   0   1   2   3   4   5
-──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──▶
+──┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼──►
           └─7─┴─6─┴─5─┴─4─┴─3─┴─2─┴─1─┘
        arrivée                     départ
 ```
 
-Donc $4 - 7 = -3$. Vérification : si la température est de $4\,^{\circ}\text{C}$ et qu'elle baisse de 7 degrés, elle devient $-3\,^{\circ}\text{C}$ ✓.
+Donc $4 - 7 = -3$. Vérification : si la température est de $4\,^{\circ}\text{C}$ et qu'elle baisse de 7 degrés, elle devient $-3\,^{\circ}\text{C}$. C'est juste.
 
 Avec de grands nombres, faites une pause à zéro. Pour $-20 + 50$, faites 20 pas vers la droite pour arriver à 0. Il vous reste encore 30 pas à faire, donc la réponse est $30$.
 
@@ -148,7 +148,7 @@ Calculez (a) $7 + (-3)$, (b) $-2 - (+5)$ et (c) $-4 - (-9)$.
 
 **(c)** Les signes $-$ et $-$ sont identiques, donc ils deviennent $+$. Alors $-4 - (-9) = -4 + 9$. Partez de $-4$ et faites 9 pas vers la droite. Après 4 pas, vous arrivez à 0, et 5 pas de plus vous mènent à $5$. La réponse est $5$.
 
-Vérification de (c) : une soustraction comme $-4 - (-9)$ indique aussi combien de pas il faut pour aller du deuxième nombre au premier. Sur la droite graduée, de $-9$ à $-4$, il y a 5 pas vers la droite, donc $-4 - (-9) = 5$ ✓.
+Vérification de (c) : une soustraction comme $-4 - (-9)$ indique aussi combien de pas il faut pour aller du deuxième nombre au premier. Sur la droite graduée, de $-9$ à $-4$, il y a 5 pas vers la droite, donc $-4 - (-9) = 5$. C'est juste.
 
 ## Multiplier et diviser
 
@@ -182,11 +182,11 @@ Travaillez en deux étapes. D'abord, calculez le nombre sans les signes. Ensuite
 
 ### Exemple corrigé 4 : multiplier et diviser
 
-**(a)** $(-6) \times (-4)$. Sans les signes, $6 \times 4 = 24$. Les signes sont identiques, donc la réponse est positive : $24$. Vérification : $24 \div (-4) = -6$ ✓.
+**(a)** $(-6) \times (-4)$. Sans les signes, $6 \times 4 = 24$. Les signes sont identiques, donc la réponse est positive : $24$. Vérification : $24 \div (-4) = -6$. C'est juste.
 
-**(b)** $(-36) \div (-4)$. Sans les signes, $36 \div 4 = 9$. Les signes sont identiques, donc la réponse est positive : $9$. Vérification : $(-4) \times 9 = -36$ ✓.
+**(b)** $(-36) \div (-4)$. Sans les signes, $36 \div 4 = 9$. Les signes sont identiques, donc la réponse est positive : $9$. Vérification : $(-4) \times 9 = -36$. C'est juste.
 
-**(c)** $45 \div (-9)$. Sans les signes, $45 \div 9 = 5$. Les signes sont différents, donc la réponse est négative : $-5$. Vérification : $(-9) \times (-5) = 45$ ✓.
+**(c)** $45 \div (-9)$. Sans les signes, $45 \div 9 = 5$. Les signes sont différents, donc la réponse est négative : $-5$. Vérification : $(-9) \times (-5) = 45$. C'est juste.
 
 ## L'ordre des opérations avec les nombres négatifs
 
@@ -207,7 +207,7 @@ En français, on parle des **priorités opératoires** ; en anglais, beaucoup de
 2. Multipliez d'abord : $4 \times (-2) = -8$.
 3. Puis additionnez : $-3 + (-8) = -3 - 8 = -11$.
 
-Vérification avec de l'argent : quatre dettes de 2 font une dette de 8. Devoir 3, puis 8 de plus, c'est devoir 11 ✓.
+Vérification avec de l'argent : quatre dettes de 2 font une dette de 8. Devoir 3, puis 8 de plus, c'est devoir 11. C'est juste.
 
 **(b)** Calculez $(-3 + 4) \times (-2)$.
 
@@ -230,14 +230,14 @@ Pour résoudre un problème, écrivez-le d'abord sous forme de calcul avec des e
 2. Faites 1 500 pas vers la droite pour arriver à 0. Il reste $4\,000 - 1\,500 = 2\,500$ pas.
 3. Il reste 2 500 FRW à Aline.
 
-Vérification : 2 500 FRW gardés plus 1 500 FRW remboursés font 4 000 FRW ✓.
+Vérification : 2 500 FRW gardés plus 1 500 FRW remboursés font 4 000 FRW. C'est juste.
 
 **(b) Une plongeuse remonte.** Une plongeuse est à $-10$ m dans le lac Kivu. Elle remonte de 4 m. Où est-elle maintenant ?
 
 1. Remonter veut dire aller vers le haut, donc on additionne : $-10 + 4 = -6$.
 2. Elle est à $-6$ m, c'est-à-dire à 6 m sous la surface.
 
-Vérification : $-6$ est plus haut que $-10$, et l'écart entre les deux est de $10 - 6 = 4$ m ✓.
+Vérification : $-6$ est plus haut que $-10$, et l'écart entre les deux est de $10 - 6 = 4$ m. C'est juste.
 
 **(c) Un matin froid sur le mont Karisimbi.** À 6 h, la température était de $-3\,^{\circ}\text{C}$. À midi, elle était de $8\,^{\circ}\text{C}$. De combien de degrés a-t-elle augmenté ?
 
@@ -245,7 +245,7 @@ Vérification : $-6$ est plus haut que $-10$, et l'écart entre les deux est de 
 2. Les deux signes moins sont identiques, donc ils donnent $+$ : $8 + 3 = 11$.
 3. La température a augmenté de $11\,^{\circ}\text{C}$.
 
-Vérification : de $-3$ jusqu'à 0, il y a 3 degrés, et de 0 jusqu'à 8, il y a 8 degrés. $3 + 8 = 11$ ✓.
+Vérification : de $-3$ jusqu'à 0, il y a 3 degrés, et de 0 jusqu'à 8, il y a 8 degrés. $3 + 8 = 11$. C'est juste.
 
 ## Erreurs fréquentes
 
