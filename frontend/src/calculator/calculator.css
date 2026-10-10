@@ -1,0 +1,752 @@
+/* The calculator, in the style of the Windows 11 Calculator (Fluent): light digit keys,
+   slightly darker function keys, "=" in the accent colour, a big right-aligned display.
+   Colours come from the app's theme variables, so light and dark themes both work.
+   The layout follows the calculator's own width (a container query), not the screen's:
+   history and memory sit at the side when there is room, and open over the keys otherwise. */
+
+.calc {
+  /* Light theme: digit keys are the lightest, as in Windows. */
+  --calc-bg: var(--surface-2);
+  --calc-fn: color-mix(in srgb, var(--surface) 55%, var(--surface-2));
+  --calc-digit: var(--surface);
+  --calc-panel: var(--surface);
+  --calc-hover: color-mix(in srgb, var(--text) 7%, transparent);
+  --calc-key-radius: 5px;
+  --calc-key-h: 46px;
+
+  container: calc / inline-size;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--calc-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .calc {
+    --calc-bg: var(--surface);
+    --calc-fn: var(--surface-2);
+    --calc-digit: color-mix(in srgb, var(--surface-2) 85%, var(--text));
+    --calc-panel: var(--surface-2);
+  }
+}
+
+:root[data-theme="dark"] .calc {
+  --calc-bg: var(--surface);
+  --calc-fn: var(--surface-2);
+  --calc-digit: color-mix(in srgb, var(--surface-2) 85%, var(--text));
+  --calc-panel: var(--surface-2);
+}
+
+.calc:focus {
+  outline: none;
+}
+
+/* A clear ring on every control (the app's yellow ring is hard to see on white keys). */
+.calc :focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+.calc-mode-scientific {
+  --calc-key-h: 40px;
+}
+
+.calc-mode-programmer {
+  --calc-key-h: 40px;
+}
+
+.calc-shell {
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.calc-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 4px 4px 6px;
+}
+
+/* ---------- Title bar ---------- */
+
+.calc-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.calc-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.calc-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.calc-flat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calc-flat[aria-pressed="true"] {
+  color: var(--primary);
+}
+
+.calc-flat[aria-disabled="true"] {
+  color: color-mix(in srgb, var(--text-soft) 55%, transparent);
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .calc-icon-btn:hover,
+  .calc-flat:not([aria-disabled="true"]):hover {
+    background: var(--calc-hover);
+  }
+}
+
+.calc-icon-btn:active,
+.calc-flat:not([aria-disabled="true"]):active {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  color: var(--text-soft);
+}
+
+/* ---------- Mode menu (the hamburger) ---------- */
+
+.calc-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgb(0 0 0 / 28%);
+}
+
+/* While the menu is open, the title bar stays above the dimmed calculator. */
+.calc-menu-open .calc-bar {
+  position: relative;
+  z-index: 7;
+}
+
+.calc-nav {
+  position: absolute;
+  top: 48px;
+  bottom: 0;
+  left: 0;
+  z-index: 6;
+  width: min(300px, 88%);
+  padding: 4px 6px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--calc-panel);
+  border-right: 1px solid var(--border);
+  border-top-right-radius: 8px;
+  box-shadow: 8px 0 24px rgb(0 0 0 / 14%);
+  animation: calc-slide-in 140ms ease-out;
+}
+
+@keyframes calc-slide-in {
+  from {
+    transform: translateX(-16px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calc-nav,
+  .calc-side.is-open {
+    animation: none;
+  }
+}
+
+.calc-nav-heading {
+  margin: 0;
+  padding: 12px 12px 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.calc-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calc-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calc-nav-item[aria-current="true"] {
+  background: var(--calc-hover);
+  font-weight: 600;
+}
+
+/* The accent pill beside the current mode, as in Windows. */
+.calc-nav-item[aria-current="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--primary);
+  transform: translateY(-50%);
+}
+
+@media (hover: hover) {
+  .calc-nav-item:hover {
+    background: var(--calc-hover);
+  }
+}
+
+/* ---------- Display ---------- */
+
+.calc-display {
+  container-type: inline-size;
+  padding: 6px 10px 4px;
+  text-align: right;
+}
+
+.calc-expr {
+  min-height: 1.6em;
+  overflow-x: auto;
+  white-space: nowrap;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+  scrollbar-width: none;
+}
+
+.calc-expr::-webkit-scrollbar {
+  display: none;
+}
+
+/* Shrinks for long numbers: the width divided by the number of characters (set from JS). */
+.calc-value {
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: clamp(1.4rem, calc(150cqi / var(--calc-len, 8)), 3.4rem);
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-value.is-error {
+  font-size: clamp(1.2rem, calc(170cqi / var(--calc-len, 8)), 2.4rem);
+}
+
+/* ---------- Programmer: HEX DEC OCT BIN ---------- */
+
+.calc-bases {
+  display: grid;
+  margin: 0 0 4px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.calc-base {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.4em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px 10px;
+  border-radius: var(--calc-key-radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* The radio button covers its row, so the whole row can be clicked (the row shows the focus). */
+.calc-base .calc-base-input,
+.calc-base .calc-base-input:focus-visible {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  outline: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.calc-base:has(.calc-base-input:focus-visible) {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.calc-base-name {
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.calc-base-value {
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.calc-base.is-selected {
+  background: var(--calc-hover);
+}
+
+.calc-base.is-selected .calc-base-name {
+  color: var(--text);
+}
+
+.calc-base.is-selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--primary);
+  transform: translateY(-50%);
+}
+
+@media (hover: hover) {
+  .calc-base:hover {
+    background: var(--calc-hover);
+  }
+}
+
+/* ---------- Toolbars ---------- */
+
+.calc-toolbar,
+.calc-memrow {
+  display: flex;
+  gap: 2px;
+}
+
+.calc-memrow {
+  flex: 1;
+  min-width: 0;
+}
+
+.calc-memrow .calc-flat {
+  flex: 1;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.calc-word {
+  flex: none;
+}
+
+/* ---------- Keys ---------- */
+
+.calc-keys {
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: repeat(var(--calc-cols, 4), minmax(0, 1fr));
+  grid-auto-rows: minmax(var(--calc-key-h), 1fr);
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.calc-keys-bits {
+  flex: none;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-auto-rows: 36px;
+}
+
+.calc-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  border-bottom-color: var(--border);
+  border-radius: var(--calc-key-radius);
+  background: var(--calc-fn);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 80ms linear;
+}
+
+.calc-key sup,
+.calc-key sub {
+  position: relative;
+  font-size: 0.72em;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+.calc-key sup {
+  top: -0.5em;
+}
+
+.calc-key sub {
+  top: 0.3em;
+}
+
+.calc-key-digit {
+  background: var(--calc-digit);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.calc-key-equals {
+  border-color: transparent;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-size: 1.5rem;
+}
+
+.calc-key-on {
+  border-color: transparent;
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.calc-keys-bits .calc-key {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.calc-mode-scientific .calc-key-fn:not(.calc-key-equals),
+.calc-mode-programmer .calc-key-fn:not(.calc-key-equals) {
+  font-size: 1rem;
+}
+
+.calc-paren-count {
+  margin-left: 2px;
+  color: inherit;
+  opacity: 0.75;
+}
+
+@media (hover: hover) {
+  .calc-key:not([aria-disabled="true"]):hover {
+    background: color-mix(in srgb, var(--calc-fn) 45%, var(--calc-bg));
+  }
+
+  .calc-key-digit:not([aria-disabled="true"]):hover {
+    background: color-mix(in srgb, var(--calc-digit) 65%, var(--calc-bg));
+  }
+
+  .calc-key-equals:not([aria-disabled="true"]):hover,
+  .calc-key-on:not([aria-disabled="true"]):hover {
+    background: color-mix(in srgb, var(--primary) 88%, var(--calc-bg));
+  }
+}
+
+/* Pressed: on click, and briefly when the same key is typed on the keyboard. */
+.calc-key:not([aria-disabled="true"]):active,
+.calc-key.calc-key-pressed {
+  background: color-mix(in srgb, var(--calc-fn) 20%, var(--calc-bg));
+  color: var(--text-soft);
+}
+
+.calc-key-digit:not([aria-disabled="true"]):active,
+.calc-key-digit.calc-key-pressed {
+  background: color-mix(in srgb, var(--calc-digit) 35%, var(--calc-bg));
+}
+
+.calc-key-equals:not([aria-disabled="true"]):active,
+.calc-key-equals.calc-key-pressed,
+.calc-key-on:not([aria-disabled="true"]):active {
+  background: color-mix(in srgb, var(--primary) 75%, var(--calc-bg));
+  color: var(--primary-contrast);
+}
+
+.calc-key[aria-disabled="true"] {
+  color: color-mix(in srgb, var(--text-soft) 50%, transparent);
+  cursor: default;
+}
+
+.calc-key-equals[aria-disabled="true"] {
+  background: color-mix(in srgb, var(--primary) 40%, var(--calc-bg));
+  color: color-mix(in srgb, var(--primary-contrast) 70%, transparent);
+}
+
+/* ---------- History and memory ---------- */
+
+.calc-side {
+  display: none;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--calc-panel);
+}
+
+/* On narrow calculators the panel slides up over the keys, as on Windows. */
+.calc-side.is-open {
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  height: 66%;
+  border-top: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -8px 24px rgb(0 0 0 / 14%);
+  animation: calc-slide-up 140ms ease-out;
+}
+
+@keyframes calc-slide-up {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+.calc-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px 0;
+}
+
+.calc-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.calc-tab {
+  position: relative;
+  padding: 10px 10px 12px;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calc-tab[aria-selected="true"] {
+  color: var(--text);
+}
+
+.calc-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--primary);
+  transform: translateX(-50%);
+}
+
+@media (hover: hover) {
+  .calc-tab:hover {
+    background: var(--calc-hover);
+  }
+}
+
+.calc-side-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+.calc-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calc-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: right;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .calc-item:hover {
+    background: var(--calc-hover);
+  }
+}
+
+.calc-item-expr {
+  max-width: 100%;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.calc-item-value {
+  max-width: 100%;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.calc-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 10px 8px;
+}
+
+.calc-item-btn {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  background: var(--calc-fn);
+  font-size: 0.8rem;
+}
+
+.calc-empty {
+  margin: 0;
+  padding: 12px 10px;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.calc-side-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 8px 8px;
+}
+
+/* ---------- Wide calculators: history and memory at the side ---------- */
+
+@container calc (min-width: 680px) {
+  .calc-with-side:not(.calc-compact) .calc-shell {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
+  }
+
+  .calc:not(.calc-compact) .calc-side {
+    display: flex;
+    position: static;
+    background: transparent;
+    height: auto;
+    border: 0;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+    /* Never taller than the keypad: a long history scrolls inside the panel. */
+    contain: size;
+  }
+
+  .calc:not(.calc-compact) .calc-narrow-only,
+  .calc:not(.calc-compact) .calc-scrim-panel {
+    display: none;
+  }
+
+  .calc:not(.calc-compact) .calc-main {
+    padding: 6px 8px 8px;
+  }
+}
+
+/* ---------- The calculator page ---------- */
+
+.calc-page {
+  max-width: 1000px;
+}
+
+/* Fill the screen between the page title and the bottom menu, but never squeeze the keys
+   (the page scrolls then). On phones the keys get the room of the intro sentence. */
+.calc-page .calc {
+  min-height: max(420px, min(calc(100dvh - 236px), 780px));
+}
+
+@media (max-width: 599px) {
+  .calc-page .page-header p {
+    display: none;
+  }
+}
+
+@media (min-width: 600px) {
+  .calc-page .calc {
+    min-height: max(480px, min(calc(100dvh - 300px), 780px));
+  }
+}
+
+@media (min-width: 900px) {
+  .calc-page .calc {
+    min-height: max(500px, min(calc(100dvh - 230px), 780px));
+  }
+}
+
+/* Short screens: smaller keys and display, so more of the keypad fits. */
+@media (max-height: 700px) {
+  .calc {
+    --calc-key-h: 38px;
+  }
+
+  .calc-mode-scientific,
+  .calc-mode-programmer {
+    --calc-key-h: 32px;
+  }
+
+  .calc-value {
+    font-size: clamp(1.3rem, calc(150cqi / var(--calc-len, 8)), 2.6rem);
+  }
+}

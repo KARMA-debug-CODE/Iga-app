@@ -21,7 +21,7 @@
 | Mobile-first, dark mode, Rwanda colours | Done | Installable PWA |
 | Security (2FA, HTTPS, scoped access, anti-cheat) | Done | Session revocation, refresh-token reuse detection, admin 2FA, upload checks. See the Architecture doc |
 | Scalable cloud deployment | In progress | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
-| Testing & QA | Done | 429 API tests (SQLite + PostgreSQL), unit tests, 60 E2E runs (31 journeys on mobile and desktop; two school journeys run on desktop only), CI |
+| Testing & QA | Done | 429 API tests (SQLite + PostgreSQL), 158 unit tests, 64 E2E runs (33 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | Done | Linked by a one-time code from the student; read-only progress report |
 | Santa (AI tutor) | Done, needs testing by teachers | Santa, Iga's own tutor: an open model on the school's server (llama.cpp), no outside AI service. In lessons and quizzes and on the Santa page for any subject; answers stream, quote and link Iga's lessons, use a calculator; off while an exam is open, never reveals answers early; answers from the lessons when the model is not installed. Far less capable than large cloud models: needs testing by teachers in English and French |
 | Offline use | In progress | Whole units can be saved for offline reading and labs; quizzes still need a connection |
