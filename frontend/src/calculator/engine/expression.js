@@ -120,6 +120,8 @@ function parseTokens(tokens) {
     throw tok ? new ParseError("unexpected", tok.text) : new ParseError("end");
   };
   const startsFactor = (tok) => Boolean(tok) && (["num", "name", "fn", "("].includes(tok.type) || (tok.type === "|" && bars === 0));
+  // Two numbers side by side ("2 3", "2.3.4", "x²3") are a typing mistake, not a product.
+  const multiplies = (tok) => startsFactor(tok) && !(tok.type === "num" && ["num", "sup"].includes(tokens[i - 1]?.type));
 
   function expr() {
     let node = term();
@@ -137,7 +139,7 @@ function parseTokens(tokens) {
       if (tok?.type === "*" || tok?.type === "/") {
         next();
         node = bin(tok.type, node, unary());
-      } else if (startsFactor(tok)) node = bin("*", node, power());
+      } else if (multiplies(tok)) node = bin("*", node, power());
       else return node;
     }
   }
@@ -185,7 +187,7 @@ function parseTokens(tokens) {
     }
     if (!peek()) fail();
     let node = unary();
-    while (startsFactor(peek()) && peek().type !== "fn") node = bin("*", node, power());
+    while (multiplies(peek()) && peek().type !== "fn") node = bin("*", node, power());
     return node;
   }
 

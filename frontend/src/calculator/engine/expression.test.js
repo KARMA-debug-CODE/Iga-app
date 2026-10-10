@@ -111,6 +111,14 @@ describe("Graphing parser", () => {
     expect(errorOf("x)")).toEqual({ code: "unexpected", near: ")" });
     expect(errorOf("2 # x")).toEqual({ code: "unexpected", near: "#" });
     expect(errorOf("sin")).toEqual({ code: "end", near: "" });
+    // Two numbers side by side are a typing mistake, never a hidden product.
+    expect(errorOf("2.3.4")).toEqual({ code: "unexpected", near: ".4" });
+    expect(errorOf("2 3")).toEqual({ code: "unexpected", near: "3" });
+    expect(errorOf("x^2 3")).toEqual({ code: "unexpected", near: "3" });
+    expect(errorOf("x² 3")).toEqual({ code: "unexpected", near: "3" });
+    expect(errorOf("sin 2 3")).toEqual({ code: "unexpected", near: "3" });
+    expect(at("2(3)", 0)).toBe(6);
+    expect(at("x 2", 3)).toBe(6);
   });
 
   it("cannot run code", () => {
