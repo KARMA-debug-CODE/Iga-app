@@ -4,6 +4,7 @@
 
 - **Lessons** that follow the competence-based curriculum, with maths rendering, worked examples and live code editors (HTML/JS and Python)
 - **Virtual labs**: our own offline simulations plus PhET and GeoGebra
+- **A calculator like the Windows 11 one**: Standard, Scientific, Programmer, Graphing, Date calculation and 12 unit converters, all working offline
 - **Practice quizzes** with instant feedback, and **past papers** in timed exam mode
 - **Santa, Iga's own AI tutor**, which runs on the school's own server (no outside AI service): it explains ideas from Iga's lessons and links them, gives hints without handing out answers, checks arithmetic with a calculator, and has its own page for questions on any subject
 - **Books on every lesson and unit**: the official REB student's book for that subject and grade, plus free open textbooks
@@ -25,6 +26,7 @@ It is mobile-first, installable as an app (PWA), works in **English and French**
 | **Curriculum** | 16 subjects (all core O- and A-level subjects, with ICT for everyone and Computer Science for the MCE and MPC combinations), a 398-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, all 39 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
 | **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
 | **Coding** | Code playground with HTML/CSS/JS, real Python (Pyodide) and SQL (SQLite via sql.js), all in the browser, self-hosted and working offline; plus **C++ and Java**, compiled and run on Iga's own sandboxed code runner. A real code editor (automatic indentation, colours, line numbers) and a terminal-style console: when a program asks for input (`input()`, `cin`, `Scanner`), the question appears and it waits for the student's answer. Python and web code also run inside lessons |
+| **Calculator** | A calculator page in the style of the Windows 11 Calculator, chosen from its menu: Standard (immediate execution), Scientific (precedence, brackets, trigonometry in degrees, radians or gradians, exact decimals), Programmer (HEX/DEC/OCT/BIN, word sizes, bit operations), Graphing (several functions, pan, zoom and trace, gaps at asymptotes, its own safe parser), Date calculation, and converters for volume, length, weight, temperature, energy, area, speed, time, power, data (kB and KiB), pressure and angle with exact factors. History and memory as in Windows, keyboard shortcuts, English and French, and it works offline |
 | **Santa (AI tutor)** | Iga's own learning assistant: an open model (Gemma 4 E4B by default) running with llama.cpp on the school's server, so questions never leave it. In lessons, quizzes and on the **Santa** page (pick a subject, or ask about anything you study). Answers appear as they are written, are grounded in passages from Iga's own lessons (linked under each answer), use a calculator for arithmetic, and come in English or French. The server controls the context: Santa is switched off everywhere while a student has an exam or timed test running, never sees answers before the student may, and is rate-limited. Without its model (not installed, or still starting) Santa answers with the best matching lesson passages. See [Santa](#santa-igas-own-ai-tutor) |
 | **Books** | Every lesson lists the official REB student's book for its subject and grade (with the unit to look for) and free open textbooks (OpenStax, Standard Ebooks, CS Field Guide, Think Java…); units without an Iga lesson point to the textbook. Books are links, kept in `content/books.json`; `check_book_links` finds links that have moved |
 | **Offline** | Save a unit for offline use (lessons, maths fonts, built-in labs); the app opens without a connection for a student who logged in before, and logging out clears the saved pages on shared computers |
@@ -168,6 +170,7 @@ coderunner/              the code runner: compiles and runs students' C++ and Ja
 frontend/                React 19 + Vite single-page app (PWA)
   src/pages              one file per screen
   src/sims               built-in offline labs and their maths
+  src/calculator         the Windows 11-style calculator: engine/ (plain JS maths, with tests) and its modes
   src/i18n               en / fr interface strings
   tests/e2e              Playwright journeys
 docs/                    architecture, content guide, roadmap
