@@ -211,9 +211,15 @@ test("Python asks for input in the console like a real interpreter, and indents 
   await editor.click();
   await page.keyboard.press("ControlOrMeta+a");
   await page.keyboard.press("Delete");
-  await page.keyboard.type("for i in range(3):");
+  // Each line goes in as one text input, like a phone keyboard sends it: with Android emulated, CodeMirror's
+  // guards against keyboard composition glitches can drop keys that a script types a few milliseconds apart.
+  // It also ignores an Enter less than 50 ms after the last change, so the test pauses as a person would.
+  await page.keyboard.insertText("for i in range(3):");
+  await expect(editor).toHaveText("for i in range(3):");
+  await page.waitForTimeout(100);
   await page.keyboard.press("Enter");
-  await page.keyboard.type("print(i * 2)");
+  await expect(editor.locator(".cm-line")).toHaveCount(2);
+  await page.keyboard.insertText("print(i * 2)");
   expect(await editor.innerText()).toMatch(/for i in range\(3\):\n {4}print\(i \* 2\)/);
   await page.getByRole("button", { name: /^run$/i }).click();
   await expect(console_).toContainText(/0\s+2\s+4/);
@@ -232,7 +238,7 @@ test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
 
   await page.getByLabel("SQL editor").click();
   await page.keyboard.press("ControlOrMeta+a");
-  await page.keyboard.type("CREATE TABLE t (x INTEGER);\nSELEC x FROM t;");
+  await page.keyboard.insertText("CREATE TABLE t (x INTEGER);\nSELEC x FROM t;");
   await page.getByRole("button", { name: /run/i }).click();
   await expect(output.locator(".sql-error")).toContainText(/syntax error/i);
 });
@@ -279,7 +285,7 @@ test("C++ and Java run on the code runner and wait for answers in the console", 
   const editor = page.getByLabel("C++ code editor");
   await editor.click();
   await page.keyboard.press("ControlOrMeta+a");
-  await page.keyboard.type("int main() {\noops;\n}");
+  await page.keyboard.insertText("int main() {\noops;\n}");
   await page.getByRole("button", { name: /^run$/i }).click();
   await expect(console_).toContainText("did not compile");
   await expect(console_).toContainText("'oops' was not declared");
