@@ -19,12 +19,12 @@ from apps.schools.models import School
 
 DEMO_PASSWORD = "Iga-demo-2026"
 
-STUDENTS = [
-    ("aline", "Aline", "Uwase", "S2"),
-    ("eric", "Eric", "Mugisha", "S2"),
-    ("divine", "Divine", "Ishimwe", "S2"),
-    ("kevin", "Kevin", "Niyonzima", "S4"),
-    ("grace", "Grace", "Mukamana", "S1"),
+STUDENTS = [  # username, first name, last name, grade, A-level combination
+    ("aline", "Aline", "Uwase", "S2", ""),
+    ("eric", "Eric", "Mugisha", "S2", ""),
+    ("divine", "Divine", "Ishimwe", "S2", ""),
+    ("kevin", "Kevin", "Niyonzima", "S4", "MPC"),
+    ("grace", "Grace", "Mukamana", "S1", ""),
 ]
 
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         admin = make("admin", "Ada", "Admin", User.Role.ADMIN, is_staff=True, is_superuser=True)
         teacher = make("teacher", "Jean", "Habimana", User.Role.TEACHER, teacher_approved=True)
-        students = [make(u, first, last, User.Role.STUDENT, g) for u, first, last, g in STUDENTS]
+        students = [make(u, first, last, User.Role.STUDENT, g, combination=c) for u, first, last, g, c in STUDENTS]
         parent = make("parent", "Claudine", "Uwase", User.Role.PARENT)
         ParentLink.objects.get_or_create(parent=parent, student=students[0])
 

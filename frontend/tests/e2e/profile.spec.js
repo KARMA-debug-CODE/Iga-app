@@ -86,6 +86,12 @@ test("an A-level student's combination comes first in their subject lists", asyn
   await expect(page.getByRole("link", { name: /^ICT/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your combination (MCE)" })).toBeHidden();
 
+  // Subject pickers group their options the same way.
+  await page.goto("/practice");
+  const picker = page.getByRole("combobox", { name: "Subject" });
+  await expect(picker.locator('optgroup[label="Your combination (MCE)"] option')).toHaveText(["Mathematics", "Computer Science", "Economics"]);
+  await expect(picker.locator('optgroup[label="Other subjects"] option', { hasText: "ICT" })).toHaveCount(1);
+
   // Back to S2 (the other tests use this student): the combination goes with A-level.
   await page.goto("/profile");
   await page.getByLabel("Grade").selectOption("S2");

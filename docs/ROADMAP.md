@@ -4,11 +4,11 @@
 
 | Vision item | Status | Notes |
 |---|---|---|
-| All subjects, S1–S6, matching the REB curriculum | In progress: structure done, content started | 15 subjects and a 352-unit outline; 39 full lessons, each with a quiz (10 of the shortest were expanded with worked examples and answers). Units still need line-by-line checking against REB syllabi |
-| Official textbooks & guides | Done | Every lesson and unit links the official REB student's book for its subject and grade (81) plus 45 free open textbooks (`content/books.json`); units without a lesson point to the book. Links need checking each term (`check_book_links`). Hosting PDFs is waiting on redistribution rights |
+| All subjects, S1–S6, matching the REB curriculum | In progress: structure done, content started | 16 subjects (ICT for every student, Computer Science for the MCE and MPC combinations) and a 398-unit outline; 42 full lessons, each with a quiz (10 of the shortest were expanded with worked examples and answers). Units still need line-by-line checking against REB syllabi |
+| Official textbooks & guides | Done | Every lesson and unit links the official REB student's book for its subject and grade (84) plus 47 free open textbooks (`content/books.json`); units without a lesson point to the book. Links need checking each term (`check_book_links`). Hosting PDFs is waiting on redistribution rights |
 | Simplified lessons, visuals, rich media | Done | Markdown lessons with maths, tables, embedded labs and video links |
 | ICT / coding modules (W3Schools-style) | Done | Live HTML/CSS/JS editor, real Python (Pyodide) and SQL (sql.js) in the browser, and C++ and Java on Iga's sandboxed code runner, in a standalone playground with a real code editor and an interactive console (web and Python also inside lessons) |
-| English / French | Done | Interface, server messages and emails, subject names, unit titles, lab descriptions and all 39 lessons in both languages; search works in French; the tutor answers in the student's reading language. French needs review by a fluent teacher; quizzes are English-only |
+| English / French | Done | Interface, server messages and emails, subject names, unit titles, lab descriptions and all 42 lessons in both languages; search works in French; the tutor answers in the student's reading language. French needs review by a fluent teacher; quizzes are English-only |
 | School subscriptions | Done | Schools pay USD 200/month for all their members; free starter lessons for everyone else. Flutterwave (cards, mobile money), bank transfers recorded by the team, receipts and reminders |
 | Interactive simulations (PhET, GeoGebra) | Done | 32 PhET, 3 GeoGebra, 4 built-in offline labs, mapped to subjects and grades |
 | Past national exam papers with marking guides | In progress: engine done | Library, timed exam mode, importer and marking guides. Needs NESA papers and permission; ships with 2 unofficial samples |
@@ -21,7 +21,7 @@
 | Mobile-first, dark mode, Rwanda colours | Done | Installable PWA |
 | Security (2FA, HTTPS, scoped access, anti-cheat) | Done | Session revocation, refresh-token reuse detection, admin 2FA, upload checks. See the Architecture doc |
 | Scalable cloud deployment | In progress | Stateless API, Docker, PostgreSQL, Redis. Load testing and CDN still to do |
-| Testing & QA | Done | 331 API tests (SQLite + PostgreSQL), unit tests, 48 E2E runs (25 journeys on mobile and desktop; two school journeys run on desktop only), CI |
+| Testing & QA | Done | 429 API tests (SQLite + PostgreSQL), unit tests, 60 E2E runs (31 journeys on mobile and desktop; two school journeys run on desktop only), CI |
 | Parent role | Done | Linked by a one-time code from the student; read-only progress report |
 | Santa (AI tutor) | Done, needs testing by teachers | Santa, Iga's own tutor: an open model on the school's server (llama.cpp), no outside AI service. In lessons and quizzes and on the Santa page for any subject; answers stream, quote and link Iga's lessons, use a calculator; off while an exam is open, never reveals answers early; answers from the lessons when the model is not installed. Far less capable than large cloud models: needs testing by teachers in English and French |
 | Offline use | In progress | Whole units can be saved for offline reading and labs; quizzes still need a connection |

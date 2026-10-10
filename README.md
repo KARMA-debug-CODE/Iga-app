@@ -22,7 +22,7 @@ It is mobile-first, installable as an app (PWA), works in **English and French**
 
 | Area | What works today |
 |---|---|
-| **Curriculum** | 16 subjects (all core O- and A-level subjects, with ICT for everyone and Computer Science for the MCE and MPC combinations), a 398-unit S1–S6 outline, 39 complete lessons (each with a practice quiz) across maths, sciences, ICT, languages and humanities, all 39 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
+| **Curriculum** | 16 subjects (all core O- and A-level subjects, with ICT for everyone and Computer Science for the MCE and MPC combinations), a 398-unit S1–S6 outline, 42 complete lessons (each with a practice quiz) across maths, sciences, ICT, computer science, languages and humanities, all 42 also in French, French unit titles, and resources (with a link to the REB e-learning portal) |
 | **Labs** | 4 built-in offline labs (projectile motion, function grapher, Ohm's law circuit, market equilibrium), 32 PhET simulations, 3 GeoGebra apps. Heavy sims only load when a student taps *Launch*, which saves mobile data |
 | **Coding** | Code playground with HTML/CSS/JS, real Python (Pyodide) and SQL (SQLite via sql.js), all in the browser, self-hosted and working offline; plus **C++ and Java**, compiled and run on Iga's own sandboxed code runner. A real code editor (automatic indentation, colours, line numbers) and a terminal-style console: when a program asks for input (`input()`, `cin`, `Scanner`), the question appears and it waits for the student's answer. Python and web code also run inside lessons |
 | **Santa (AI tutor)** | Iga's own learning assistant: an open model (Gemma 4 E4B by default) running with llama.cpp on the school's server, so questions never leave it. In lessons, quizzes and on the **Santa** page (pick a subject, or ask about anything you study). Answers appear as they are written, are grounded in passages from Iga's own lessons (linked under each answer), use a calculator for arithmetic, and come in English or French. The server controls the context: Santa is switched off everywhere while a student has an exam or timed test running, never sees answers before the student may, and is rate-limited. Without its model (not installed, or still starting) Santa answers with the best matching lesson passages. See [Santa](#santa-igas-own-ai-tutor) |
@@ -63,7 +63,7 @@ npm run dev
 |---|---|---|
 | `aline`, `eric`, `divine` | Student, S2 | In the demo class, with assignments and a study group |
 | `grace` | Student, S1 | |
-| `kevin` | Student, S4 | |
+| `kevin` | Student, S4 | MPC combination: Mathematics, Physics and Computer Science come first |
 | `teacher` | Teacher | Owns "S2 Mathematics — Stream A" |
 | `parent` | Parent | Linked to Aline |
 | `lkadmin` | School administrator | Lycée de Kigali (subscribed) — all students above belong to it |
@@ -76,11 +76,11 @@ To load only the curriculum (no demo users), for example on a pilot server, run 
 ## Running the tests
 
 ```bash
-cd backend && pytest                 # 294 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
+cd backend && pytest                 # 429 API tests (SQLite by default; set DATABASE_URL to test on PostgreSQL)
 cd backend && ruff check .           # lint
 cd frontend && npm test              # unit tests for the lab maths
 cd frontend && npm run lint
-cd frontend && npx playwright test   # 18 end-to-end journeys × (mobile + desktop) against the real API
+cd frontend && npx playwright test   # 31 end-to-end journeys × (mobile + desktop) against the real API
 ```
 
 The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.

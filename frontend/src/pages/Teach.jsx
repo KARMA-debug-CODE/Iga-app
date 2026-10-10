@@ -37,7 +37,7 @@ function useScope() {
         <select value={scope.subject} onChange={(e) => setScope({ ...scope, subject: e.target.value, unit: "" })}>
           {subjectList.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.name}
+              {s.display_name || s.name}
             </option>
           ))}
         </select>
