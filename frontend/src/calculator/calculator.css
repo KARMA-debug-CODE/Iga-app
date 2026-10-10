@@ -240,28 +240,10 @@
   transform: translateY(-50%);
 }
 
-.calc-nav-item:disabled {
-  color: var(--text-soft);
-  cursor: not-allowed;
-}
-
-.calc-nav-item:disabled .icon {
-  opacity: 0.6;
-}
-
 @media (hover: hover) {
-  .calc-nav-item:not(:disabled):hover {
+  .calc-nav-item:hover {
     background: var(--calc-hover);
   }
-}
-
-.calc-soon {
-  margin-left: auto;
-  padding: 0 8px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.72rem;
-  white-space: nowrap;
 }
 
 /* ---------- Display ---------- */
@@ -695,7 +677,7 @@
 /* ---------- Wide calculators: history and memory at the side ---------- */
 
 @container calc (min-width: 680px) {
-  .calc:not(.calc-compact) .calc-shell {
+  .calc-with-side:not(.calc-compact) .calc-shell {
     grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
   }
 

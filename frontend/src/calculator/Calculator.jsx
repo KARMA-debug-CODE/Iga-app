@@ -1,6 +1,7 @@
-// A calculator in the style of the Windows 11 Calculator app: Standard, Scientific and
-// Programmer modes chosen from a menu, with history and memory. Everything runs in the
-// browser (no network), and history, memory and settings stay in this browser.
+// A calculator in the style of the Windows 11 Calculator app. Its menu has every mode:
+// Standard, Scientific and Programmer (with history and memory), Graphing, Date
+// calculation and the unit converters. Everything runs in the browser (no network), and
+// history, memory, the last mode and other settings stay in this browser.
 //
 // Props: lang ("en" | "fr"); compact (always the narrow layout, and the keyboard only
 // works while the calculator has focus, for when it sits inside another page).
@@ -8,31 +9,29 @@ import { useEffect, useId, useLayoutEffect, useReducer, useRef, useState } from 
 
 import { Icon } from "../components/Icon";
 import "./calculator.css";
+import ConverterMode from "./ConverterMode";
+import DateMode from "./DateMode";
 import { keyFor } from "./engine/keyboard.js";
 import * as M from "./engine/machine.js";
 import { BASE_NAMES, WORD_NAMES } from "./engine/programmer.js";
+import { CONVERTERS } from "./engine/units.js";
+import GraphingMode from "./GraphingMode";
+import { load, store } from "./storage.js";
 import STRINGS from "./strings.js";
 
-const STORAGE = "iga.calc.";
-
-function load(name) {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE + name) || "null");
-  } catch {
-    return null;
-  }
-}
-
-function store(name, value) {
-  try {
-    localStorage.setItem(STORAGE + name, JSON.stringify(value));
-  } catch {
-    // Private windows may refuse storage: the calculator still works, it just forgets.
-  }
-}
+// Every mode in the menu. Standard, Scientific and Programmer use the keypad, the
+// display, history and memory (engine/machine.js); the others are their own components.
+const VIEWS = [...M.MODES, "graphing", "date", ...CONVERTERS];
 
 function initial() {
   return M.initMachine(M.fromSaved({ settings: load("settings"), history: load("history"), memory: load("memory") }));
+}
+
+/** The mode chosen last time (settings.view), or the last keypad mode. */
+function initialView() {
+  const settings = load("settings");
+  if (VIEWS.includes(settings?.view)) return settings.view;
+  return M.MODES.includes(settings?.mode) ? settings.mode : "standard";
 }
 
 function reducer(state, action) {
@@ -58,7 +57,7 @@ function reducer(state, action) {
   }
 }
 
-// The menu, as in Windows. Modes that are not built yet are listed but switched off.
+// The menu, as in Windows (without Currency, which would need live exchange rates).
 const MENU = [
   {
     section: "sectionCalculator",
@@ -73,7 +72,6 @@ const MENU = [
   {
     section: "sectionConverter",
     items: [
-      { id: "currency", icon: "coins" },
       { id: "volume", icon: "beaker" },
       { id: "length", icon: "ruler" },
       { id: "weight", icon: "weight" },
@@ -208,6 +206,7 @@ function fill(text, vars) {
 export default function Calculator({ lang = "en", compact = false }) {
   const t = STRINGS[lang] || STRINGS.en;
   const [state, dispatch] = useReducer(reducer, null, initial);
+  const [view, setView] = useState(initialView);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState("history");
   const [panelOpen, setPanelOpen] = useState(false);
@@ -217,14 +216,17 @@ export default function Calculator({ lang = "en", compact = false }) {
   const panelRef = useRef(null);
   const panelOpenerRef = useRef(null);
   const exprRef = useRef(null);
-  const live = useRef({ state, lang, menuOpen, panelOpen });
+  // Keys, paste and copy for the mode on show when it is not a keypad mode (see ConverterMode).
+  const modeKeys = useRef(null);
+  const live = useRef({ state, lang, menuOpen, panelOpen, view });
   const uid = useId();
 
   useLayoutEffect(() => {
-    live.current = { state, lang, menuOpen, panelOpen };
+    live.current = { state, lang, menuOpen, panelOpen, view };
   });
 
   const { mode } = state;
+  const keypad = M.MODES.includes(view);
   const calc = state.calcs[mode];
   const kind = M.kindOf(mode);
   const history = state.history[kind];
@@ -232,8 +234,7 @@ export default function Calculator({ lang = "en", compact = false }) {
   const error = M.errorOf(state);
   const display = error ? t.errors[error] : M.displayText(state, lang);
   const expression = M.expressionText(state, lang);
-  const settings = M.savedSettings(state);
-  const settingsKey = JSON.stringify(settings);
+  const settingsKey = JSON.stringify({ ...M.savedSettings(state), view });
 
   // Keep history, memory and settings in this browser.
   useEffect(() => store("settings", JSON.parse(settingsKey)), [settingsKey]);
@@ -292,7 +293,7 @@ export default function Calculator({ lang = "en", compact = false }) {
 
     function onKeyDown(event) {
       if (event.defaultPrevented || !ours(event)) return;
-      const { state: s, lang: l, menuOpen: menu, panelOpen: panel } = live.current;
+      const { state: s, menuOpen: menu, panelOpen: panel } = live.current;
       if (event.key === "Escape" && menu) {
         event.preventDefault();
         setMenuOpen(false);
@@ -310,8 +311,18 @@ export default function Calculator({ lang = "en", compact = false }) {
       if ((event.key === "Enter" || event.key === " ") && event.target.closest?.("button, a, [role=tab]")) return;
       if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "c" && !hasSelection()) {
         // The copy event below fills the clipboard; this covers browsers that send no copy event.
-        const text = M.copyText(s, l);
+        const text = copyText();
         if (text) navigator.clipboard?.writeText(text).catch(() => {});
+        return;
+      }
+      if (!M.MODES.includes(live.current.view)) {
+        // Graphing and Date calculation use text boxes; the converters have their own keypad.
+        const handler = modeKeys.current;
+        const key = handler?.keyFor(event);
+        if (!key) return;
+        event.preventDefault();
+        flash(root, key);
+        handler.press(key);
         return;
       }
       const key = keyFor(event, s.mode, s.base);
@@ -321,9 +332,15 @@ export default function Calculator({ lang = "en", compact = false }) {
       dispatch({ type: "press", key });
     }
 
+    function copyText() {
+      const { state: s, lang: l, view: v } = live.current;
+      if (M.MODES.includes(v)) return M.copyText(s, l);
+      return modeKeys.current?.copy?.() ?? "";
+    }
+
     function onCopy(event) {
       if (!ours(event) || hasSelection()) return;
-      const text = M.copyText(live.current.state, live.current.lang);
+      const text = copyText();
       if (!text || !event.clipboardData) return;
       event.clipboardData.setData("text/plain", text);
       event.preventDefault();
@@ -333,6 +350,10 @@ export default function Calculator({ lang = "en", compact = false }) {
       if (!ours(event)) return;
       const text = event.clipboardData?.getData("text/plain");
       if (!text) return;
+      if (!M.MODES.includes(live.current.view)) {
+        if (modeKeys.current?.paste?.(text)) event.preventDefault();
+        return;
+      }
       event.preventDefault();
       dispatch({ type: "paste", text, lang: live.current.lang });
     }
@@ -421,7 +442,7 @@ export default function Calculator({ lang = "en", compact = false }) {
   return (
     <section
       ref={rootRef}
-      className={`calc calc-mode-${mode} ${compact ? "calc-compact" : ""} ${menuOpen ? "calc-menu-open" : ""}`}
+      className={`calc calc-mode-${view} ${keypad ? "calc-with-side" : ""} ${compact ? "calc-compact" : ""} ${menuOpen ? "calc-menu-open" : ""}`}
       aria-label={t.title}
       tabIndex={-1}
       onMouseDown={onMouseDown}
@@ -440,10 +461,17 @@ export default function Calculator({ lang = "en", compact = false }) {
             >
               <Icon name="menu" size={20} />
             </button>
-            <h2 className="calc-title">{t.modes[mode]}</h2>
-            <button type="button" className="calc-icon-btn calc-narrow-only" aria-label={t.showHistory} onClick={(e) => openPanel("history", e)}>
-              <Icon name="history" size={20} />
-            </button>
+            <h2 className="calc-title">{t.modes[view]}</h2>
+            {keypad && (
+              <button
+                type="button"
+                className="calc-icon-btn calc-narrow-only"
+                aria-label={t.showHistory}
+                onClick={(e) => openPanel("history", e)}
+              >
+                <Icon name="history" size={20} />
+              </button>
+            )}
           </div>
 
           {menuOpen && (
@@ -464,27 +492,24 @@ export default function Calculator({ lang = "en", compact = false }) {
                   <div key={group.section} className="calc-nav-group">
                     <h3 className="calc-nav-heading">{t[group.section]}</h3>
                     <ul>
-                      {group.items.map((item) => {
-                        const ready = M.MODES.includes(item.id);
-                        return (
-                          <li key={item.id}>
-                            <button
-                              type="button"
-                              className="calc-nav-item"
-                              aria-current={item.id === mode ? "true" : undefined}
-                              disabled={!ready}
-                              onClick={() => {
-                                dispatch({ type: "mode", mode: item.id });
-                                closeMenu();
-                              }}
-                            >
-                              <Icon name={item.icon} size={18} />
-                              <span>{t.modes[item.id]}</span>
-                              {!ready && <span className="calc-soon">{t.soon}</span>}
-                            </button>
-                          </li>
-                        );
-                      })}
+                      {group.items.map((item) => (
+                        <li key={item.id}>
+                          <button
+                            type="button"
+                            className="calc-nav-item"
+                            aria-current={item.id === view ? "true" : undefined}
+                            onClick={() => {
+                              if (M.MODES.includes(item.id)) dispatch({ type: "mode", mode: item.id });
+                              setView(item.id);
+                              setPanelOpen(false);
+                              closeMenu();
+                            }}
+                          >
+                            <Icon name={item.icon} size={18} />
+                            <span>{t.modes[item.id]}</span>
+                          </button>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 ))}
@@ -492,233 +517,249 @@ export default function Calculator({ lang = "en", compact = false }) {
             </>
           )}
 
-          <div className="calc-display">
-            <div className="calc-expr" ref={exprRef}>
-              {expression && <span className="sr-only">{t.expressionIs} </span>}
-              {expression}
-            </div>
-            <div
-              className={`calc-value ${error ? "is-error" : ""}`}
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-              style={{ "--calc-len": Math.max(displayLength, 8) }}
-            >
-              <span className="sr-only">{t.displayIs} </span>
-              {display}
-            </div>
-          </div>
+          {view === "graphing" && <GraphingMode t={t} lang={lang} />}
+          {view === "date" && <DateMode t={t} lang={lang} />}
+          {CONVERTERS.includes(view) && <ConverterMode key={view} category={view} t={t} lang={lang} keysRef={modeKeys} />}
 
-          {mode === "programmer" && (
-            <fieldset className="calc-bases">
-              <legend className="sr-only">{t.baseGroup}</legend>
-              {M.baseValues(state, lang).map(({ base, text }) => (
-                <label key={base} className={`calc-base ${state.base === base ? "is-selected" : ""}`}>
-                  <input
-                    type="radio"
-                    className="calc-base-input"
-                    name={`${uid}-base`}
-                    checked={state.base === base}
-                    onChange={() => dispatch({ type: "base", base })}
-                    aria-label={`${t.bases[base]} (${BASE_NAMES[base]}) ${text}`}
-                  />
-                  <span className="calc-base-name" aria-hidden="true">
-                    {BASE_NAMES[base]}
-                  </span>
-                  <span className="calc-base-value" aria-hidden="true">
-                    {text}
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-          )}
+          {keypad && (
+            <>
+              <div className="calc-display">
+                <div className="calc-expr" ref={exprRef}>
+                  {expression && <span className="sr-only">{t.expressionIs} </span>}
+                  {expression}
+                </div>
+                <div
+                  className={`calc-value ${error ? "is-error" : ""}`}
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  style={{ "--calc-len": Math.max(displayLength, 8) }}
+                >
+                  <span className="sr-only">{t.displayIs} </span>
+                  {display}
+                </div>
+              </div>
 
-          {mode === "scientific" && (
-            <div className="calc-toolbar">
-              <button
-                type="button"
-                className="calc-flat"
-                data-key="angle"
-                aria-label={fill(t.angleKey, { unit: t.angles[state.angle] })}
-                onClick={() => press("angle")}
-              >
-                {state.angle.toUpperCase()}
-              </button>
-              <button type="button" className="calc-flat" data-key="fe" aria-pressed={state.fe} aria-label={t.fe} onClick={() => press("fe")}>
-                F-E
-              </button>
-            </div>
-          )}
+              {mode === "programmer" && (
+                <fieldset className="calc-bases">
+                  <legend className="sr-only">{t.baseGroup}</legend>
+                  {M.baseValues(state, lang).map(({ base, text }) => (
+                    <label key={base} className={`calc-base ${state.base === base ? "is-selected" : ""}`}>
+                      <input
+                        type="radio"
+                        className="calc-base-input"
+                        name={`${uid}-base`}
+                        checked={state.base === base}
+                        onChange={() => dispatch({ type: "base", base })}
+                        aria-label={`${t.bases[base]} (${BASE_NAMES[base]}) ${text}`}
+                      />
+                      <span className="calc-base-name" aria-hidden="true">
+                        {BASE_NAMES[base]}
+                      </span>
+                      <span className="calc-base-value" aria-hidden="true">
+                        {text}
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
 
-          <div className="calc-toolbar">
-            {mode === "programmer" && (
-              // The word size shares the memory row, as in Windows.
-              <button
-                type="button"
-                className="calc-flat calc-word"
-                aria-label={fill(t.wordKey, { name: WORD_NAMES[state.bits], bits: state.bits })}
-                onClick={() => dispatch({ type: "bits" })}
-              >
-                {WORD_NAMES[state.bits]}
-              </button>
-            )}
-            <div className="calc-memrow" role="group" aria-label={t.memory}>
-              {M.MEMORY_KEYS.map((id) => {
-                const enabled = M.isEnabled(state, id);
-                return (
+              {mode === "scientific" && (
+                <div className="calc-toolbar">
                   <button
-                    key={id}
                     type="button"
                     className="calc-flat"
-                    data-key={id}
-                    aria-label={t.keys[id]}
-                    aria-disabled={enabled ? undefined : true}
-                    onClick={() => enabled && press(id)}
+                    data-key="angle"
+                    aria-label={fill(t.angleKey, { unit: t.angles[state.angle] })}
+                    onClick={() => press("angle")}
                   >
-                    {MEMORY_LABELS[id]}
+                    {state.angle.toUpperCase()}
                   </button>
-                );
-              })}
-              <button
-                type="button"
-                className="calc-flat calc-narrow-only"
-                aria-label={t.showMemory}
-                onClick={(e) => openPanel("memory", e)}
-              >
-                M<Icon name="chevronDown" size={14} />
-              </button>
-            </div>
-          </div>
+                  <button
+                    type="button"
+                    className="calc-flat"
+                    data-key="fe"
+                    aria-pressed={state.fe}
+                    aria-label={t.fe}
+                    onClick={() => press("fe")}
+                  >
+                    F-E
+                  </button>
+                </div>
+              )}
 
-          {layout.bits && (
-            <div className="calc-keys calc-keys-bits" role="group" aria-label={t.bitwise}>
-              {layout.bits.map(renderKey)}
-            </div>
+              <div className="calc-toolbar">
+                {mode === "programmer" && (
+                  // The word size shares the memory row, as in Windows.
+                  <button
+                    type="button"
+                    className="calc-flat calc-word"
+                    aria-label={fill(t.wordKey, { name: WORD_NAMES[state.bits], bits: state.bits })}
+                    onClick={() => dispatch({ type: "bits" })}
+                  >
+                    {WORD_NAMES[state.bits]}
+                  </button>
+                )}
+                <div className="calc-memrow" role="group" aria-label={t.memory}>
+                  {M.MEMORY_KEYS.map((id) => {
+                    const enabled = M.isEnabled(state, id);
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        className="calc-flat"
+                        data-key={id}
+                        aria-label={t.keys[id]}
+                        aria-disabled={enabled ? undefined : true}
+                        onClick={() => enabled && press(id)}
+                      >
+                        {MEMORY_LABELS[id]}
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    className="calc-flat calc-narrow-only"
+                    aria-label={t.showMemory}
+                    onClick={(e) => openPanel("memory", e)}
+                  >
+                    M<Icon name="chevronDown" size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {layout.bits && (
+                <div className="calc-keys calc-keys-bits" role="group" aria-label={t.bitwise}>
+                  {layout.bits.map(renderKey)}
+                </div>
+              )}
+              <div className="calc-keys" role="group" aria-label={t.keypad} style={{ "--calc-cols": layout.cols }}>
+                {layout.keys.map(renderKey)}
+              </div>
+            </>
           )}
-          <div className="calc-keys" role="group" aria-label={t.keypad} style={{ "--calc-cols": layout.cols }}>
-            {layout.keys.map(renderKey)}
-          </div>
         </div>
 
-        {panelOpen && <div className="calc-scrim calc-scrim-panel" onClick={closePanel} aria-hidden="true" />}
-        <aside
-          ref={panelRef}
-          className={`calc-side ${panelOpen ? "is-open" : ""}`}
-          aria-label={`${t.history}, ${t.memory}`}
-          onBlur={(event) => {
-            // On phones, tabbing out of the panel closes it (as with the menu).
-            const next = event.relatedTarget;
-            if (panelOpen && next && !panelRef.current.contains(next)) setPanelOpen(false);
-          }}
-        >
-          <div className="calc-side-head">
-            <div className="calc-tabs" role="tablist" onKeyDown={onTabKey}>
-              {tabs.map((item) => (
-                <button
-                  key={item.id}
-                  id={`${uid}-tab-${item.id}`}
-                  type="button"
-                  role="tab"
-                  className="calc-tab"
-                  aria-selected={tab === item.id}
-                  aria-controls={`${uid}-panel`}
-                  tabIndex={tab === item.id ? 0 : -1}
-                  onClick={() => setTab(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
+        {keypad && panelOpen && <div className="calc-scrim calc-scrim-panel" onClick={closePanel} aria-hidden="true" />}
+        {keypad && (
+          <aside
+            ref={panelRef}
+            className={`calc-side ${panelOpen ? "is-open" : ""}`}
+            aria-label={`${t.history}, ${t.memory}`}
+            onBlur={(event) => {
+              // On phones, tabbing out of the panel closes it (as with the menu).
+              const next = event.relatedTarget;
+              if (panelOpen && next && !panelRef.current.contains(next)) setPanelOpen(false);
+            }}
+          >
+            <div className="calc-side-head">
+              <div className="calc-tabs" role="tablist" onKeyDown={onTabKey}>
+                {tabs.map((item) => (
+                  <button
+                    key={item.id}
+                    id={`${uid}-tab-${item.id}`}
+                    type="button"
+                    role="tab"
+                    className="calc-tab"
+                    aria-selected={tab === item.id}
+                    aria-controls={`${uid}-panel`}
+                    tabIndex={tab === item.id ? 0 : -1}
+                    onClick={() => setTab(item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <button type="button" className="calc-icon-btn calc-narrow-only" aria-label={t.closePanel} onClick={closePanel}>
+                <Icon name="close" size={20} />
+              </button>
             </div>
-            <button type="button" className="calc-icon-btn calc-narrow-only" aria-label={t.closePanel} onClick={closePanel}>
-              <Icon name="close" size={20} />
-            </button>
-          </div>
 
-          <div className="calc-side-body" id={`${uid}-panel`} role="tabpanel" aria-labelledby={`${uid}-tab-${tab}`}>
-            {tab === "history" &&
-              (history.length ? (
-                <ul className="calc-list">
-                  {history.map((item, index) => (
-                    // History entries are only ever added at the front, so the index is stable enough here.
-                    <li key={`${history.length - index}`}>
-                      <button
-                        type="button"
-                        className="calc-item"
-                        onClick={() => {
-                          dispatch({ type: "recall", index });
-                          if (panelOpen) closePanel();
-                        }}
-                      >
-                        <span className="calc-item-expr">{M.expressionText(state, lang, item.parts)}</span>
-                        <span className="calc-item-value">{M.formatValue(state, item.value, lang)}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="calc-empty">{t.noHistory}</p>
-              ))}
-            {tab === "memory" &&
-              (memory.length ? (
-                <ul className="calc-list">
-                  {memory.map((value, index) => {
-                    const text = M.formatValue(state, value, lang);
-                    return (
-                      <li key={`${memory.length - index}`} className="calc-memory-item">
+            <div className="calc-side-body" id={`${uid}-panel`} role="tabpanel" aria-labelledby={`${uid}-tab-${tab}`}>
+              {tab === "history" &&
+                (history.length ? (
+                  <ul className="calc-list">
+                    {history.map((item, index) => (
+                      // History entries are only ever added at the front, so the index is stable enough here.
+                      <li key={`${history.length - index}`}>
                         <button
                           type="button"
                           className="calc-item"
-                          aria-label={fill(t.useItem, { value: text })}
                           onClick={() => {
-                            dispatch({ type: "memoryItem", op: "recall", index });
+                            dispatch({ type: "recall", index });
                             if (panelOpen) closePanel();
                           }}
                         >
-                          <span className="calc-item-value">{text}</span>
+                          <span className="calc-item-expr">{M.expressionText(state, lang, item.parts)}</span>
+                          <span className="calc-item-value">{M.formatValue(state, item.value, lang)}</span>
                         </button>
-                        <div className="calc-item-actions">
-                          {[
-                            ["clear", "MC", t.itemClear],
-                            ["add", "M+", t.itemAdd],
-                            ["sub", "M−", t.itemSub],
-                          ].map(([op, short, aria]) => (
-                            <button
-                              key={op}
-                              type="button"
-                              className="calc-flat calc-item-btn"
-                              aria-label={aria}
-                              aria-disabled={op !== "clear" && error ? true : undefined}
-                              onClick={() => dispatch({ type: "memoryItem", op, index })}
-                            >
-                              {short}
-                            </button>
-                          ))}
-                        </div>
                       </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="calc-empty">{t.noMemory}</p>
-              ))}
-          </div>
-
-          {(tab === "history" ? history.length : memory.length) > 0 && (
-            <div className="calc-side-foot">
-              <button
-                type="button"
-                className="calc-icon-btn"
-                aria-label={tab === "history" ? t.clearHistory : t.clearMemory}
-                title={tab === "history" ? t.clearHistory : t.clearMemory}
-                onClick={() => (tab === "history" ? dispatch({ type: "clearHistory" }) : press("mc"))}
-              >
-                <Icon name="trash" size={18} />
-              </button>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="calc-empty">{t.noHistory}</p>
+                ))}
+              {tab === "memory" &&
+                (memory.length ? (
+                  <ul className="calc-list">
+                    {memory.map((value, index) => {
+                      const text = M.formatValue(state, value, lang);
+                      return (
+                        <li key={`${memory.length - index}`} className="calc-memory-item">
+                          <button
+                            type="button"
+                            className="calc-item"
+                            aria-label={fill(t.useItem, { value: text })}
+                            onClick={() => {
+                              dispatch({ type: "memoryItem", op: "recall", index });
+                              if (panelOpen) closePanel();
+                            }}
+                          >
+                            <span className="calc-item-value">{text}</span>
+                          </button>
+                          <div className="calc-item-actions">
+                            {[
+                              ["clear", "MC", t.itemClear],
+                              ["add", "M+", t.itemAdd],
+                              ["sub", "M−", t.itemSub],
+                            ].map(([op, short, aria]) => (
+                              <button
+                                key={op}
+                                type="button"
+                                className="calc-flat calc-item-btn"
+                                aria-label={aria}
+                                aria-disabled={op !== "clear" && error ? true : undefined}
+                                onClick={() => dispatch({ type: "memoryItem", op, index })}
+                              >
+                                {short}
+                              </button>
+                            ))}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="calc-empty">{t.noMemory}</p>
+                ))}
             </div>
-          )}
-        </aside>
+
+            {(tab === "history" ? history.length : memory.length) > 0 && (
+              <div className="calc-side-foot">
+                <button
+                  type="button"
+                  className="calc-icon-btn"
+                  aria-label={tab === "history" ? t.clearHistory : t.clearMemory}
+                  title={tab === "history" ? t.clearHistory : t.clearMemory}
+                  onClick={() => (tab === "history" ? dispatch({ type: "clearHistory" }) : press("mc"))}
+                >
+                  <Icon name="trash" size={18} />
+                </button>
+              </div>
+            )}
+          </aside>
+        )}
       </div>
     </section>
   );
 }
-

@@ -1,0 +1,159 @@
+/* Converters, as in Windows 11: big values on the left, each with its unit below it as a
+   plain drop-down, and the keypad underneath (beside the values on wide calculators).
+   The keys reuse .calc-key from calculator.css. */
+
+.calc-conv {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.calc-conv-values {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 4px;
+  container-type: inline-size;
+}
+
+.calc-conv-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding-right: 44px; /* room for the swap button */
+}
+
+.calc-conv-value {
+  width: 100%;
+  min-width: 0;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(1.4rem, calc(150cqi / var(--calc-len, 8)), 2.6rem);
+  font-weight: 400;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-conv-value.is-active {
+  font-weight: 600;
+}
+
+.calc-conv-value[aria-invalid="true"] {
+  color: var(--danger);
+}
+
+@media (hover: hover) {
+  .calc-conv-value:hover {
+    background: var(--calc-hover);
+  }
+}
+
+/* The unit: a flat drop-down with a chevron, like the Windows one. */
+.calc-conv-unit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  color: var(--text-soft);
+}
+
+.calc-conv-unit select {
+  max-width: 100%;
+  min-height: 36px;
+  padding: 4px 28px 4px 6px;
+  border: 0;
+  border-radius: var(--calc-key-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  appearance: none;
+  cursor: pointer;
+}
+
+.calc-conv-unit select option {
+  background: var(--calc-panel);
+  color: var(--text);
+}
+
+.calc-conv-unit .icon {
+  position: absolute;
+  right: 6px;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .calc-conv-unit select:hover {
+    background: var(--calc-hover);
+    color: var(--text);
+  }
+}
+
+/* The swap button sits on the line between the two boxes, at the right. */
+.calc-conv-swap-row {
+  display: flex;
+  justify-content: flex-end;
+  height: 0;
+}
+
+.calc-conv-swap {
+  border: 1px solid var(--border);
+  background: var(--calc-fn);
+  transform: translateY(-50%);
+}
+
+.calc-conv-problem {
+  min-height: 1.3em;
+  margin: 0;
+  padding: 0 6px;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.calc-conv-about {
+  padding: 0 6px 4px;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.calc-conv-about ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text);
+}
+
+/* Three columns of keys; CE takes two, as in Windows. */
+.calc-conv-keys {
+  --calc-cols: 3;
+  margin-top: auto;
+}
+
+.calc-conv-keys .calc-conv-ce {
+  grid-column: span 2;
+}
+
+@container calc (min-width: 680px) {
+  .calc-conv {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
+    align-items: stretch;
+    gap: 16px;
+    padding-top: 8px;
+  }
+
+  .calc-conv-keys {
+    margin-top: 0;
+  }
+}

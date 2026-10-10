@@ -231,9 +231,7 @@ export const CATEGORIES = Object.fromEntries(
       id,
       units: def.units.map(([unit]) => unit),
       factors: Object.fromEntries(
-        def.units
-          .filter(([, size]) => size)
-          .map(([unit, size]) => [unit, size === "rad" ? new D(180).div(PI) : exact(size)]),
+        def.units.filter(([, size]) => size).map(([unit, size]) => [unit, size === "rad" ? new D(180).div(PI) : exact(size)]),
       ),
       pair: def.pair,
       also: def.also,

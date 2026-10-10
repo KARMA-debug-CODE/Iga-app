@@ -39,9 +39,7 @@ export function fromDayNumber(n) {
 export function isValidDate(date) {
   if (!date) return false;
   const { y, m, d } = date;
-  return (
-    [y, m, d].every(Number.isInteger) && y >= MIN_YEAR && y <= MAX_YEAR && m >= 1 && m <= 12 && d >= 1 && d <= daysInMonth(y, m)
-  );
+  return [y, m, d].every(Number.isInteger) && y >= MIN_YEAR && y <= MAX_YEAR && m >= 1 && m <= 12 && d >= 1 && d <= daysInMonth(y, m);
 }
 
 /** "2026-10-09" (what a date box gives) to {y, m, d}, or null. */

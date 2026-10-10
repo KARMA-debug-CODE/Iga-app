@@ -119,8 +119,7 @@ function parseTokens(tokens) {
     const tok = peek();
     throw tok ? new ParseError("unexpected", tok.text) : new ParseError("end");
   };
-  const startsFactor = (tok) =>
-    Boolean(tok) && (["num", "name", "fn", "("].includes(tok.type) || (tok.type === "|" && bars === 0));
+  const startsFactor = (tok) => Boolean(tok) && (["num", "name", "fn", "("].includes(tok.type) || (tok.type === "|" && bars === 0));
 
   function expr() {
     let node = term();

@@ -1,17 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  addMonths,
-  addToDate,
-  dateDifference,
-  dayNumber,
-  daysInMonth,
-  fromDayNumber,
-  isLeap,
-  parseISO,
-  toISO,
-  today,
-} from "./dates.js";
+import { addMonths, addToDate, dateDifference, dayNumber, daysInMonth, fromDayNumber, isLeap, parseISO, toISO, today } from "./dates.js";
 
 const d = (text) => parseISO(text);
 const add = (text, amounts, sign = 1) => {

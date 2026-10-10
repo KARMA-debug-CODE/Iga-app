@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpDown,
   Atom,
   Award,
   Beaker,
@@ -38,6 +39,7 @@ import {
   Drama,
   ExternalLink,
   Eye,
+  EyeOff,
   FileCheck,
   FileText,
   Flag,
@@ -125,6 +127,8 @@ import {
   WifiOff,
   X,
   Zap,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 
 const ICONS = {
@@ -149,6 +153,11 @@ const ICONS = {
   area: SquareDashed,
   gauge: Gauge,
   angle: TriangleRight,
+  // Calculator: graph zoom, hidden functions and the converter's swap button.
+  zoomIn: ZoomIn,
+  zoomOut: ZoomOut,
+  eyeOff: EyeOff,
+  swap: ArrowUpDown,
   teach: Presentation,
   marking: CheckCheck,
   admin: ShieldCheck,
