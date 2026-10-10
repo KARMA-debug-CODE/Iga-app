@@ -16,10 +16,14 @@ Both commands are **idempotent**: running them again updates existing items, mat
 
 ## Subjects and units
 
-- `content/subjects.json` holds code, names in English and French (`name_fr`), icon, colour, and whether the subject is offered at O-level and/or A-level.
+- `content/subjects.json` holds code, names in English and French (`name_fr`), icon (the name of a line icon in `frontend/src/components/Icon.jsx`, such as `atom`; no emojis), colour, and whether the subject is offered at O-level and/or A-level.
 - `content/units.json` maps `{subject_code: {grade: [unit titles in order]}}`.
 
 After checking a unit against the official REB syllabus, tick **alignment verified** in the Django admin (and fill in *syllabus reference* and *key unit competence*). The "draft outline" notice then disappears for that unit.
+
+Units are matched by `(subject, grade, number)`, so giving a unit another number renames the unit that had that number. A unit removed from `units.json` is deleted by the next `load_curriculum` when nothing is in it; a unit that still holds lessons, questions, quizzes or teachers' material is kept, and the command lists it so you can move that content first.
+
+ICT and Computer Science are two subjects, as in REB's curriculum: `ict` for every student (S1–S6) and `computer-science` for A-level students in the MCE and MPC combinations (S4–S6). The migration `curriculum/0007_computer_science` moved the units of the old combined subject, with everything in them, to their new places; run `load_curriculum` after it. A-level students can set their combination in their profile, and its three principal subjects then come first in their subject lists: the combinations and their subjects are `COMBINATIONS` in `apps/core/constants.py` (with the names in the frontend dictionaries, `combination.MCE`…).
 
 ## Lessons: `content/lessons/<slug>.md`
 
@@ -134,7 +138,7 @@ Same format as a quiz plus a `paper` block:
 
 ## Books: `content/books.json`
 
-Every lesson and every unit shows **📚 Books**: the official REB student's book for that subject and grade first, then a few
+Every lesson and every unit shows **Books**: the official REB student's book for that subject and grade first, then a few
 free open textbooks. Units that have no Iga lesson yet point students to the official book, with the unit to look for.
 Books are **links** to the publishers' own sites (REB's e-learning portal, OpenStax, Standard Ebooks…); the app never copies
 them, so a book's licence does not need to allow redistribution. They need internet; they are not saved for offline use.

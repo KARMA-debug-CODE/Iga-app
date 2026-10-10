@@ -199,6 +199,7 @@ class QuizViewSet(viewsets.ModelViewSet):
                 quiz=quiz,
                 classroom__archived=False,
                 classroom__enrollments__student=request.user,
+                classroom__enrollments__active=True,
             )
         attempt = services.start_attempt(request.user, quiz, assignment)
         return Response(AttemptSerializer(attempt, context={"request": request}).data, status=status.HTTP_201_CREATED)

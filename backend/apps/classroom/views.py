@@ -29,7 +29,7 @@ from .models import Assignment, Classroom, Enrollment
 class ClassroomSerializer(serializers.ModelSerializer):
     teacher_name = serializers.CharField(source="teacher.display_name", read_only=True)
     subject_name = serializers.SerializerMethodField()
-    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="🏫")
+    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="school")
     student_count = serializers.SerializerMethodField()
     join_code = serializers.SerializerMethodField()
 
@@ -51,7 +51,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at"]
 
     def get_student_count(self, classroom):
-        return classroom.enrollments.count()
+        return classroom.enrollments.filter(active=True).count()
 
     def get_subject_name(self, obj):
         return obj.subject.localized_name(serializer_language(self)) if obj.subject_id else None
@@ -207,7 +207,12 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             return qs
         if user.can_teach:
             return qs.filter(teacher=user)
-        mine = qs.filter(enrollments__student=user)
+        if self.action == "list":
+            # Classes for the student's grade; ?previous=1 lists the ones they had before moving grade.
+            moved = self.request.query_params.get("previous") in ("1", "true")
+            mine = qs.filter(enrollments__student=user, enrollments__active=not moved)
+        else:
+            mine = qs.filter(enrollments__student=user)
         # Students can still leave a class after it was archived.
         return mine if self.action == "leave" else mine.filter(archived=False)
 
@@ -230,10 +235,19 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             context={"request": request},
         ).data
         if classroom.teacher_id == request.user.id or request.user.is_platform_admin:
-            students = [e.student for e in classroom.enrollments.select_related("student").order_by("student__first_name")]
+            enrollments = classroom.enrollments.select_related("student").order_by("-active", "student__first_name")
             data["students"] = [
-                {**PublicUserSerializer(s).data, "awaiting_first_login": s.must_change_password} for s in students
+                {
+                    **PublicUserSerializer(e.student).data,
+                    "awaiting_first_login": e.student.must_change_password,
+                    # Moved to another grade: kept here with their results, but the class left their lists.
+                    "moved_to": "" if e.active else e.student.grade,
+                }
+                for e in enrollments
             ]
+        elif request.user.is_student:
+            # A class from before the student changed grade: still readable, but no longer counted.
+            data["previous"] = not classroom.enrollments.filter(student=request.user, active=True).exists()
         return Response(data)
 
     @action(detail=False, methods=["post"], throttle_classes=[JoinRateThrottle])
@@ -244,7 +258,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         classroom = Classroom.objects.filter(join_code=code, archived=False).first()
         if not classroom:
             raise ValidationError({"code": _("No class has that code. Check with your teacher.")})
-        Enrollment.objects.get_or_create(classroom=classroom, student=request.user)
+        Enrollment.objects.update_or_create(classroom=classroom, student=request.user, defaults={"active": True, "left_at": None})
         return Response(self.get_serializer(classroom).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -305,7 +319,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def report(self, request, pk=None):
         """Gradebook: every student × every assignment, plus weakest units for the class."""
         classroom = self.get_object()
-        students = [e.student for e in classroom.enrollments.select_related("student")]
+        enrollments = list(classroom.enrollments.select_related("student").order_by("-active"))
+        students = [e.student for e in enrollments]
+        moved = {e.student_id: e.student.grade for e in enrollments if not e.active}
         assignments = list(classroom.assignments.select_related("quiz", "lesson", "simulation"))
 
         statuses = assignment_statuses(assignments, students)
@@ -323,6 +339,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
                     "completed": sum(1 for c in cells.values() if c["state"] in ("done", "needs_marking")),
                     "average_score": round(sum(scores) / len(scores), 1) if scores else None,
                     "lessons_completed": lesson_counts.get(student.id, 0),
+                    "moved_to": moved.get(student.id, ""),
                 }
             )
 
@@ -378,7 +395,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         elif user.can_teach:
             qs = qs.filter(classroom__teacher=user)
         else:
-            qs = qs.filter(classroom__enrollments__student=user, classroom__archived=False)
+            qs = qs.filter(classroom__enrollments__student=user, classroom__enrollments__active=True, classroom__archived=False)
         if self.request.query_params.get("classroom"):
             qs = qs.filter(classroom_id=self.request.query_params["classroom"])
         if self.request.query_params.get("upcoming"):

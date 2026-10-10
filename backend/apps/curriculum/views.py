@@ -36,7 +36,9 @@ def visible_lessons(user):
     if user.can_teach:
         rule |= Q(author=user)
     else:
-        assigned_ids = Lesson.objects.filter(assignments__classroom__enrollments__student=user).values("id")
+        assigned_ids = Lesson.objects.filter(
+            assignments__classroom__enrollments__student=user, assignments__classroom__enrollments__active=True
+        ).values("id")
         rule |= Q(id__in=assigned_ids)
     return qs.filter(rule)
 

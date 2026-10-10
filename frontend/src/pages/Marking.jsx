@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { api } from "../api";
+import { Icon } from "../components/Icon";
 import Markdown from "../components/Markdown";
 import { Empty, ErrorMessage, Loader } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
@@ -71,12 +72,14 @@ export default function Marking() {
   return (
     <div style={{ maxWidth: 820 }}>
       <div className="page-header">
-        <h1>✅ {t("marking.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="marking" size={28} /> {t("marking.title")}
+        </h1>
       </div>
       <Loader state={state}>
         {(items) =>
           items.length === 0 ? (
-            <Empty icon="🎉">{t("marking.empty")}</Empty>
+            <Empty icon="ok">{t("marking.empty")}</Empty>
           ) : (
             <div className="stack">
               {items.map((item) => (

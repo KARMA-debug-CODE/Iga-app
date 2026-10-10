@@ -2,7 +2,7 @@
 slug: s4-ict-python-basics
 subject: ict
 grade: S4
-unit: 3
+unit: 4
 order: 1
 title: Programming in Python: first steps
 summary: Write and run real Python programs using variables, data types, operators, decisions, loops and functions.

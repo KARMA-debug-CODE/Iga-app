@@ -2,7 +2,7 @@
 slug: s1-ict-first-web-page
 subject: ict
 grade: S1
-unit: 5
+unit: 6
 order: 1
 title: Your first web page with HTML
 summary: Build a real web page using HTML tags for headings, paragraphs, lists, links and images, and see the result live.

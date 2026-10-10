@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { Icon } from "../components/Icon";
 import { useI18n } from "../i18n";
 import { Slider } from "./canvas";
 import { ohmsLaw, round } from "./physics";
@@ -84,7 +85,7 @@ export default function OhmsLaw() {
       </div>
       <div className="row">
         <button className="btn btn-secondary btn-sm" onClick={() => setReadings((r) => [...r, { voltage, resistance, current }].slice(-8))}>
-          📋 {t("sim.ohms.record")}
+          <Icon name="plus" size={16} /> {t("sim.ohms.record")}
         </button>
         {readings.length > 0 && (
           <button className="btn btn-ghost btn-sm" onClick={() => setReadings([])}>

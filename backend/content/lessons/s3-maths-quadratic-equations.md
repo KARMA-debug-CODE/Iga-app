@@ -37,10 +37,10 @@ So if we write the quadratic as a product of two brackets, each bracket gives on
 
 Solve $x^2 - 5x - 14 = 0$.
 
-- We need two numbers with product $-14$ and sum $-5$. Try the pairs: $1$ and $-14$ (sum $-13$), $2$ and $-7$ (sum $-5$) ✓.
+- We need two numbers with product $-14$ and sum $-5$. Try the pairs: $1$ and $-14$ (sum $-13$), $2$ and $-7$ (sum $-5$). This pair works.
 - So $(x + 2)(x - 7) = 0$.
 - Either $x + 2 = 0$, giving $x = -2$, or $x - 7 = 0$, giving $x = 7$.
-- Check: $7^2 - 5(7) - 14 = 49 - 35 - 14 = 0$ ✓ and $(-2)^2 - 5(-2) - 14 = 4 + 10 - 14 = 0$ ✓.
+- Check: $7^2 - 5(7) - 14 = 49 - 35 - 14 = 0$ and $(-2)^2 - 5(-2) - 14 = 4 + 10 - 14 = 0$. Both are correct.
 
 Two special cases come up often:
 
@@ -115,7 +115,7 @@ A farmer in Musanze has a rectangular plot for Irish potatoes. Its length is 5 m
 - Let the width be $w$ metres, so the length is $w + 5$ metres.
 - Area: $w(w + 5) = 84$, so $w^2 + 5w - 84 = 0$.
 - Two numbers with product $-84$ and sum $5$: $12$ and $-7$. So $(w + 12)(w - 7) = 0$.
-- $w = -12$ or $w = 7$. A width cannot be negative, so $w = 7$ m and the length is $12$ m. Check: $7 \times 12 = 84$ ✓.
+- $w = -12$ or $w = 7$. A width cannot be negative, so $w = 7$ m and the length is $12$ m. Check: $7 \times 12 = 84$. Correct.
 - Perimeter $= 2(7 + 12) = 38$ m. Cost $= 38 \times 1\,500 = 57\,000$ FRW.
 
 Always ask whether each root makes sense in the real situation, and reject any that do not.

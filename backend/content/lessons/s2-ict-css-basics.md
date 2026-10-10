@@ -2,7 +2,7 @@
 slug: s2-ict-css-basics
 subject: ict
 grade: S2
-unit: 3
+unit: 5
 order: 1
 title: Styling web pages with CSS
 summary: Use CSS selectors, colours, fonts, spacing and the box model to make HTML look great.

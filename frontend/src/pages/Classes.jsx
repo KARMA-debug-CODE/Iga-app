@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, GRADES, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -84,43 +85,75 @@ function CreateClass({ onCreated }) {
   );
 }
 
+function ClassCard({ c }) {
+  const { t } = useI18n();
+  return (
+    <Link to={`/classes/${c.id}`} className="card card-link">
+      <div className="row" style={{ flexWrap: "nowrap" }}>
+        <div className="icon-tile">
+          <SubjectIcon name={c.subject_icon || "classes"} />
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <strong>{c.name}</strong>
+          <div className="small muted">
+            {c.grade} · {c.subject_name || ""} · {t("classes.teacher", { name: c.teacher_name })}
+          </div>
+        </div>
+        {c.join_code && <span className="pill pill-blue">{c.join_code}</span>}
+      </div>
+    </Link>
+  );
+}
+
+/** Classes a student was in before they changed level; they stay readable but no longer count. */
+function PreviousClasses() {
+  const { t } = useI18n();
+  const state = useApi("/classes/", { params: { previous: 1 } });
+  const list = results(state.data);
+  if (!list.length) return null;
+  return (
+    <details className="card previous-classes">
+      <summary>
+        <strong>{t("classes.previous", { n: list.length })}</strong>
+        <div className="small muted">{t("classes.previousHelp")}</div>
+      </summary>
+      <div className="stack" style={{ marginTop: 12 }}>
+        {list.map((c) => (
+          <ClassCard key={c.id} c={c} />
+        ))}
+      </div>
+    </details>
+  );
+}
+
 export default function Classes() {
-  const { isTeacher } = useAuth();
+  const { user, isTeacher } = useAuth();
   const { t } = useI18n();
   const state = useApi("/classes/");
   return (
     <>
       <div className="page-header">
-        <h1>🏫 {t("classes.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="classes" size={28} /> {t("classes.title")}
+        </h1>
+        {!isTeacher && user?.grade && <p className="muted">{t("classes.forGrade", { grade: user.grade })}</p>}
       </div>
       <div className="grid-2">
-        <div>
+        <div className="stack" style={{ alignContent: "start" }}>
           <Loader state={state}>
             {(data) => {
               const list = results(data);
-              if (!list.length) return <Empty icon="🏫">{t("classes.empty")}</Empty>;
+              if (!list.length) return <Empty icon="classes">{t("classes.empty")}</Empty>;
               return (
                 <div className="stack">
                   {list.map((c) => (
-                    <Link key={c.id} to={`/classes/${c.id}`} className="card card-link">
-                      <div className="row" style={{ flexWrap: "nowrap" }}>
-                        <div className="icon-tile" aria-hidden>
-                          {c.subject_icon || "🏫"}
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <strong>{c.name}</strong>
-                          <div className="small muted">
-                            {c.grade} · {c.subject_name || ""} · {t("classes.teacher", { name: c.teacher_name })}
-                          </div>
-                        </div>
-                        {c.join_code && <span className="pill pill-blue">{c.join_code}</span>}
-                      </div>
-                    </Link>
+                    <ClassCard key={c.id} c={c} />
                   ))}
                 </div>
               );
             }}
           </Loader>
+          {!isTeacher && <PreviousClasses />}
         </div>
         <div>{isTeacher ? <CreateClass onCreated={state.reload} /> : <JoinClass onJoined={state.reload} />}</div>
       </div>

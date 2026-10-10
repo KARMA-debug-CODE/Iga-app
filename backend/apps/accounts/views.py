@@ -15,6 +15,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.classroom.services import follow_grade
 from apps.core import audit
 
 from .models import User
@@ -179,10 +180,15 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
     def patch(self, request):
+        old_grade = request.user.grade
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        user = serializer.save()
+        data = dict(serializer.data)
+        if user.grade != old_grade:
+            # The whole app follows the new grade; classes for the old grade leave the student's lists.
+            data["left_classes"] = follow_grade(user)
+        return Response(data)
 
 
 class ChangePasswordView(APIView):

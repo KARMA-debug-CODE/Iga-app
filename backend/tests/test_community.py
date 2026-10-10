@@ -115,7 +115,7 @@ def test_members_see_short_names_and_real_roles(client_for, student, other_stude
     assert members[pending.id]["role"] == "student"  # no teacher badge until approved
     assert "xp" not in members[student.id] and "username" not in members[student.id]
     message = client_for(other_student).get(f"/api/groups/{group.id}/messages/").data["messages"][-1]
-    assert message["author"] == {"id": pending.id, "name": "Paul K.", "role": "student"}
+    assert message["author"] == {"id": pending.id, "name": "Paul K.", "role": "student", "avatar": {}}
 
 
 def test_join_codes_are_rate_limited(client_for, other_student, group, monkeypatch):

@@ -38,7 +38,7 @@ Voici un ballon frappé à $u = 20$ m/s avec $\theta = 30^\circ$ :
    u_x = 20 cos 30° = 17,3 m/s
 ```
 
-Les deux composantes et $u$ forment un triangle rectangle, donc le théorème de Pythagore permet de les vérifier : $\sqrt{17.32^2 + 10^2} = \sqrt{300 + 100} = 20$ m/s ✓.
+Les deux composantes et $u$ forment un triangle rectangle, donc le théorème de Pythagore permet de les vérifier : $\sqrt{17.32^2 + 10^2} = \sqrt{300 + 100} = 20$ m/s, comme prévu.
 
 > Vérifiez que votre calculatrice est en mode **degrés** (elle affiche D ou DEG). Testez-la : $\sin 30^\circ$ doit donner $0.5$.
 
@@ -91,7 +91,7 @@ Le temps pour atteindre le sommet vient de $v_y = u_y - gt$ avec $v_y = 0$. On o
 
 $$R = u_x \times T = u\cos\theta \times \frac{2u\sin\theta}{g} = \frac{u^2 \times 2\sin\theta\cos\theta}{g}$$
 
-Une identité de trigonométrie dit que $2\sin\theta\cos\theta = \sin 2\theta$. Vérifiez-la avec $\theta = 30^\circ$ : $2 \times 0.5 \times 0.866 = 0.866$, et $\sin 60^\circ = 0.866$ ✓. Donc
+Une identité de trigonométrie dit que $2\sin\theta\cos\theta = \sin 2\theta$. Vérifiez-la avec $\theta = 30^\circ$ : $2 \times 0.5 \times 0.866 = 0.866$, et $\sin 60^\circ = 0.866$ aussi. Donc
 
 $$R = \frac{u^2 \sin 2\theta}{g}$$
 
@@ -105,7 +105,7 @@ Un footballeur frappe un ballon à 20 m/s avec un angle de 30° par rapport au s
 2. Durée du vol : $T = \dfrac{2 \times 10}{9.8} = \dfrac{20}{9.8} \approx 2.04$ s.
 3. Hauteur maximale : $H = \dfrac{20^2 \times 0.5^2}{2 \times 9.8} = \dfrac{100}{19.6} \approx 5.10$ m.
 4. Portée : $R = \dfrac{20^2 \times \sin 60^\circ}{9.8} = \dfrac{400 \times 0.866}{9.8} \approx 35.3$ m.
-5. Vérification : la portée doit aussi être égale à $u_x \times T = 17.32 \times 2.04 \approx 35.3$ m ✓.
+5. Vérification : la portée doit aussi être égale à $u_x \times T = 17.32 \times 2.04 \approx 35.3$ m. C'est juste.
 
 ## Quel angle va le plus loin ?
 
@@ -121,7 +121,7 @@ Le footballeur frappe de nouveau à 20 m/s, mais cette fois à 60°. Comparez le
 2. Durée du vol : $T = \dfrac{2 \times 17.32}{9.8} \approx 3.53$ s, plus longue que 2,04 s.
 3. Hauteur maximale : $H = \dfrac{17.32^2}{2 \times 9.8} = \dfrac{300}{19.6} \approx 15.3$ m, trois fois plus haut.
 4. Portée : $R = \dfrac{400 \times \sin 120^\circ}{9.8} = \dfrac{400 \times 0.866}{9.8} \approx 35.3$ m.
-5. Vérification : la portée est la même qu'à 30°, car $30^\circ + 60^\circ = 90^\circ$ ✓.
+5. Vérification : la portée est la même qu'à 30°, car $30^\circ + 60^\circ = 90^\circ$. C'est juste.
 
 ## La vitesse et la position à tout instant
 
@@ -141,7 +141,7 @@ Reprenez le tir de l'exemple corrigé 1 (20 m/s à 30°). Trouvez la vitesse du 
 2. Verticalement : $v_y = 10 - 9.8 \times 1.5 = 10 - 14.7 = -4.7$ m/s. Le signe moins signifie que le ballon se déplace **vers le bas**.
 3. Valeur de la vitesse : $v = \sqrt{17.32^2 + 4.7^2} = \sqrt{300 + 22.09} = \sqrt{322.09} \approx 17.9$ m/s.
 4. Direction : $\tan\alpha = \dfrac{4.7}{17.32} \approx 0.271$, donc $\alpha = \tan^{-1} 0.271 \approx 15.2^\circ$ sous l'horizontale.
-5. Vérification : le ballon atteint le sommet à $t_{\text{sommet}} = \dfrac{10}{9.8} \approx 1.02$ s. À 1,5 s, il a dépassé le sommet, il doit donc descendre, et $v_y$ est bien négative ✓.
+5. Vérification : le ballon atteint le sommet à $t_{\text{sommet}} = \dfrac{10}{9.8} \approx 1.02$ s. À 1,5 s, il a dépassé le sommet, il doit donc descendre, et $v_y$ est bien négative.
 
 ### Exemple corrigé 4 : passe-t-il au-dessus de la barre ?
 
@@ -151,7 +151,7 @@ Le même ballon (20 m/s à 30°) est frappé vers un but situé à 30 m. La barr
 2. Trouvez sa hauteur à cet instant, avec $\tfrac{1}{2} g = \tfrac{1}{2} \times 9.8 = 4.9$ : $y = u_y t - \tfrac{1}{2} g t^2 = 10 \times 1.732 - 4.9 \times 1.732^2$.
 3. Comme $1.732^2 = 3.00$, on obtient $y = 17.32 - 14.70 = 2.62$ m.
 4. Comparez : 2,62 m est supérieur à 2,44 m, donc le ballon passe environ 0,18 m (18 cm) **au-dessus** de la barre.
-5. Vérification : 1,732 s est inférieur à $T = 2.04$ s, donc le ballon est bien encore en l'air lorsqu'il atteint le but ✓.
+5. Vérification : 1,732 s est inférieur à $T = 2.04$ s, donc le ballon est bien encore en l'air lorsqu'il atteint le but.
 
 ## Le lancement horizontal
 
@@ -184,7 +184,7 @@ Une élève se tient sur une falaise, à 20 m au-dessus de l'eau du lac Kivu. El
 4. (c) Vitesse verticale : $v_y = 0 - 9.8 \times 2.02 \approx -19.8$ m/s, vers le bas. La vitesse horizontale vaut toujours 12 m/s.
 5. Valeur de la vitesse : $v = \sqrt{12^2 + 19.8^2} = \sqrt{144 + 392} = \sqrt{536} \approx 23.2$ m/s.
 6. Direction : $\tan\alpha = \dfrac{19.8}{12} = 1.65$, donc $\alpha = \tan^{-1} 1.65 \approx 58.8^\circ$ sous l'horizontale.
-7. Vérification avec l'équation « sans $t$ » : $v_y^2 = 0 - 2 \times 9.8 \times (-20) = 392$, et $\sqrt{392} \approx 19.8$ ✓.
+7. Vérification avec l'équation « sans $t$ » : $v_y^2 = 0 - 2 \times 9.8 \times (-20) = 392$, et $\sqrt{392} \approx 19.8$. C'est juste.
 
 ## Les vrais ballons et la résistance de l'air
 

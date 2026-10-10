@@ -180,6 +180,8 @@ REST_FRAMEWORK = {
         "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
         # Per user: C++ and Java runs in the code playground.
         "code_run": os.environ.get("THROTTLE_CODE_RUN", "20/min"),
+        # Per user: answers typed into a running program.
+        "code_input": os.environ.get("THROTTLE_CODE_INPUT", "120/min"),
     },
 }
 
@@ -205,23 +207,32 @@ CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,h
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 
-# --- AI tutor (Claude API) -------------------------------------------------
-# Switched on when an Anthropic credential is configured (ANTHROPIC_API_KEY),
-# or explicitly with TUTOR_ENABLED=true (e.g. when using an `ant auth` profile).
-TUTOR_ENABLED = env_bool("TUTOR_ENABLED", bool(os.environ.get("ANTHROPIC_API_KEY")))
-TUTOR_MODEL = os.environ.get("TUTOR_MODEL", "claude-opus-5-5")
-TUTOR_EFFORT = os.environ.get("TUTOR_EFFORT", "low")
-TUTOR_MAX_TOKENS = int(os.environ.get("TUTOR_MAX_TOKENS", "4000"))
-TUTOR_TIMEOUT_SECONDS = float(os.environ.get("TUTOR_TIMEOUT_SECONDS", "60"))
+# --- Santa, Iga's own AI tutor ---------------------------------------------
+# Santa's model runs on the school's own server: the "santa" service in docker-compose.yml (llama.cpp's
+# llama-server with an open model). Django calls its OpenAI-compatible API on the internal network, so
+# questions never leave the server. Empty SANTA_URL = the model is not installed; Santa then answers
+# from Iga's lessons only. See apps/tutor/llm.py and the Santa section of README.md.
+SANTA_URL = os.environ.get("SANTA_URL", "").strip()
+# The key the model server expects (its LLAMA_API_KEY). Docker Compose gives both sides the same value.
+SANTA_API_KEY = os.environ.get("SANTA_API_KEY", "").strip()
+# The model's name on the server (llama-server --alias).
+SANTA_MODEL_NAME = os.environ.get("SANTA_MODEL_NAME", "santa")
+# Longest answer, in tokens (about 450 words), and how creative answers are (0 = always the same).
+SANTA_MAX_TOKENS = int(os.environ.get("SANTA_MAX_TOKENS", "600"))
+SANTA_TEMPERATURE = float(os.environ.get("SANTA_TEMPERATURE", "0.6"))
+# The most time one answer may take, tool rounds included. A CPU server writes about 8-12 tokens a second.
+SANTA_TIMEOUT_SECONDS = float(os.environ.get("SANTA_TIMEOUT_SECONDS", "150"))
+# Answers written at the same time (match llama-server -np). Each holds a web-server thread while it
+# streams; when all are busy, Santa answers from the lessons and asks the student to try again soon.
+SANTA_PARALLEL = int(os.environ.get("SANTA_PARALLEL", "4"))
 
 # --- Code runner (C++ and Java in the playground) ---------------------------
-# A Piston server (https://github.com/engineer-man/piston) that only Django can reach; empty = off.
+# Iga's code runner (the coderunner/ folder), reachable only from Django; empty = C++ and Java are off.
 # Docker Compose starts one at http://coderunner:2000. See apps/coderun/services.py.
 CODE_RUNNER_URL = os.environ.get("CODE_RUNNER_URL", "").strip()
-# Compile (10 s) + run (6 s) + a margin. Runs at once across the site: match Piston's
-# PISTON_MAX_CONCURRENT_JOBS so requests never wait in its queue holding a web-server thread.
-CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "20"))
-CODE_RUNNER_MAX_RUNNING = int(os.environ.get("CODE_RUNNER_MAX_RUNNING", "4"))
+CODE_RUNNER_TOKEN = os.environ.get("CODE_RUNNER_TOKEN", "").strip()
+# Compiling (up to 30 s) plus running until the program ends or asks for input (up to 10 s), plus a margin.
+CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "45"))
 
 # --- School subscriptions -------------------------------------------------
 # Each school pays a flat monthly price for all its members. Prices per currency:

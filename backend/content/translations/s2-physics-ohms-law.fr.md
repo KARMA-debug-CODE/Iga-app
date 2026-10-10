@@ -26,7 +26,7 @@ L'ampoule d'une lampe torche est traversée par un courant de 0,5 A pendant 2 mi
 1. Écrivez ce que vous savez : $I = 0.5$ A et $t = 2$ minutes.
 2. Convertissez le temps en secondes : $t = 2 \times 60 = 120$ s.
 3. Utilisez $Q = It$ : $Q = 0.5 \times 120 = 60$ C.
-4. Vérification : $\dfrac{60\ \text{C}}{120\ \text{s}} = 0.5$ A, c'est bien le courant de départ ✓.
+4. Vérification : $\dfrac{60\ \text{C}}{120\ \text{s}} = 0.5$ A, c'est bien le courant de départ.
 
 ## La tension : l'énergie de chaque coulomb
 
@@ -90,13 +90,13 @@ Une famille du district de Nyagatare possède un système solaire domestique ave
 
 1. On cherche $R$, donc on utilise $R = \dfrac{V}{I}$.
 2. $R = \dfrac{12}{0.5} = 24\ \Omega$.
-3. Vérification : $V = IR = 0.5 \times 24 = 12$ V ✓.
+3. Vérification : $V = IR = 0.5 \times 24 = 12$ V. C'est juste.
 
 (b) Une résistance de 48 Ω est branchée sur la même batterie. Quel courant circule ?
 
 1. On cherche $I$, donc on utilise $I = \dfrac{V}{R}$.
 2. $I = \dfrac{12}{48} = 0.25$ A.
-3. Vérification : $0.25 \times 48 = 12$ V ✓. Une résistance deux fois plus grande donne un courant deux fois plus faible.
+3. Vérification : $0.25 \times 48 = 12$ V. C'est juste. Une résistance deux fois plus grande donne un courant deux fois plus faible.
 
 ## Petites et grandes unités : mA et kΩ
 
@@ -120,7 +120,7 @@ Une pile de 9 V est branchée sur une résistance de 2,2 kΩ. Trouvez l'intensit
 1. Convertissez la résistance en ohms : $2.2\ \text{k}\Omega = 2.2 \times 1000 = 2200\ \Omega$.
 2. Utilisez $I = \dfrac{V}{R}$ : $I = \dfrac{9}{2200} \approx 0.0041$ A.
 3. Convertissez en mA : $0.0041 \times 1000 = 4.1$ mA.
-4. Vérification : $V = IR = 0.0041 \times 2200 \approx 9$ V ✓.
+4. Vérification : $V = IR = 0.0041 \times 2200 \approx 9$ V. C'est juste.
 
 Si vous oubliez l'étape 1, vous obtenez $\dfrac{9}{2.2} \approx 4.1$ A. C'est 1000 fois trop grand !
 
@@ -151,7 +151,7 @@ Une élève de Huye teste une résistance et obtient ces mesures. Est-ce un cond
 ```
 
 4. La **pente** (l'inclinaison) de la droite est la hausse de $V$ divisée par la hausse de $I$ correspondante. Ici, elle vaut $\dfrac{6.0 - 0}{0.40 - 0} = 15\ \Omega$. Sur un graphique de $V$ en fonction de $I$, la pente est égale à la résistance.
-5. Vérification : quand $V$ double, de 3,0 V à 6,0 V, $I$ double aussi, de 0,20 A à 0,40 A, comme le dit la loi d'Ohm ✓.
+5. Vérification : quand $V$ double, de 3,0 V à 6,0 V, $I$ double aussi, de 0,20 A à 0,40 A, comme le dit la loi d'Ohm.
 
 ## Une lampe n'obéit pas à la loi d'Ohm
 
@@ -168,7 +168,7 @@ Un élève mesure la tension aux bornes d'une petite lampe de torche et l'intens
 1. Calculez $R = \dfrac{V}{I}$ pour chaque colonne : $\dfrac{1}{0.10} = 10\ \Omega$, $\dfrac{2}{0.16} = 12.5\ \Omega$, $\dfrac{4}{0.24} \approx 16.7\ \Omega$ et $\dfrac{6}{0.30} = 20\ \Omega$.
 2. La résistance **augmente** quand la tension augmente. Le filament chauffe, et un métal plus chaud a une plus grande résistance.
 3. La lampe n'est donc **pas un conducteur ohmique**. Sur un graphique de $V$ en fonction de $I$, ses points sont sur une **courbe** qui devient de plus en plus raide, et non sur une droite.
-4. Vérification : de 2 V à 4 V, la tension double, mais l'intensité passe seulement de 0,16 A à 0,24 A. Elle ne double pas ✓.
+4. Vérification : de 2 V à 4 V, la tension double, mais l'intensité passe seulement de 0,16 A à 0,24 A. Elle ne double pas.
 
 La loi d'Ohm exige une température constante. La lampe ne respecte pas cette condition : c'est pourquoi elle n'obéit pas à la loi.
 
@@ -206,7 +206,7 @@ Une résistance de 4 Ω et une résistance de 6 Ω sont branchées en série sur
 2. Intensité : $I = \dfrac{V}{R} = \dfrac{12}{10} = 1.2$ A. Ce courant traverse les deux résistances.
 3. Tension aux bornes de la résistance de 4 Ω : $V_1 = IR_1 = 1.2 \times 4 = 4.8$ V.
 4. Tension aux bornes de la résistance de 6 Ω : $V_2 = IR_2 = 1.2 \times 6 = 7.2$ V.
-5. Vérification : $4.8 + 7.2 = 12$ V, la tension de la batterie ✓.
+5. Vérification : $4.8 + 7.2 = 12$ V, la tension de la batterie. C'est juste.
 
 Construisez vous-même ce circuit dans le kit PhET. Ajoutez un ampèremètre et un voltmètre, puis vérifiez les valeurs.
 

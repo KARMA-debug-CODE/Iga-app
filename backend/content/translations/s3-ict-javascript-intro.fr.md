@@ -62,7 +62,7 @@ Keza vend des tomates au marché. Elle tape deux ventes, 500 FRW et 300 FRW, dan
 3. `Number("500")` donne le nombre 500, et `Number("300")` donne 300.
 4. Maintenant, `+` a deux nombres, donc il additionne : `500 + 300` donne `800`.
 
-Vérification : 500 FRW + 300 FRW = 800 FRW ✓. La règle : **le texte d'une case est toujours une chaîne, donc convertissez-le avec `Number()` avant de calculer.**
+Vérification : 500 FRW + 300 FRW = 800 FRW. C'est juste. La règle : **le texte d'une case est toujours une chaîne, donc convertissez-le avec `Number()` avant de calculer.**
 
 ## Afficher les résultats sur la page
 
@@ -142,7 +142,7 @@ La ligne `let message;` crée une variable qui n'a pas encore de valeur ; l'inst
 1. La condition devient `45 >= 50`. Elle est `false`, car 45 est plus petit que 50.
 2. Le premier bloc est sauté et le bloc `else` s'exécute. `message` vaut `"Réessayez"`.
 
-Vérification : une note d'exactement 50 donne `50 >= 50`, qui est `true`, car `>=` veut dire « supérieur **ou égal** à ». Donc 50 donne `"Réussi"` ✓.
+Vérification : une note d'exactement 50 donne `50 >= 50`, qui est `true`, car `>=` veut dire « supérieur **ou égal** à ». Donc 50 donne `"Réussi"`. C'est juste.
 
 ## Les fonctions
 
@@ -179,7 +179,7 @@ Que contient `total` ?
 3. Puis l'addition : 2400 + 500 = 2900.
 4. `return` renvoie 2900, donc `total` stocke `2900`.
 
-Vérification : 3 kg coûtent 2 400 FRW, et 500 FRW de transport donnent 2 900 FRW ✓.
+Vérification : 3 kg coûtent 2 400 FRW, et 500 FRW de transport donnent 2 900 FRW. C'est juste.
 
 ## Les boucles : répéter du code
 
@@ -213,7 +213,7 @@ Un **tableau de suivi** note la valeur des variables après chaque tour de boucl
 
 Après le tour 5, `i++` donne à `i` la valeur 6. Alors `6 <= 5` est `false`, et la boucle s'arrête.
 
-Vérification : la boucle a tourné 5 fois, et le dernier carré est 5 × 5 = 25 ✓.
+Vérification : la boucle a tourné 5 fois, et le dernier carré est 5 × 5 = 25. C'est juste.
 
 On peut aussi compter à partir de 0 : `for (let i = 0; i < 5; i++)` tourne aussi 5 fois, avec `i` = 0, 1, 2, 3, 4. Elle s'arrête quand `i` vaut 5, car `5 < 5` est `false`.
 
@@ -317,7 +317,7 @@ Voici ce qui se passe quand vous tapez 70, 85 et 92 puis appuyez sur Calculer.
 7. `"Moyenne : " + "82.3"` colle les chaînes et donne `"Moyenne : 82.3"`.
 8. `textContent` met ce texte dans le paragraphe dont l'`id` est `"result"`, et il apparaît sur la page.
 
-Vérification : 70 + 85 + 92 = 247, et 247 ÷ 3 ≈ 82,3 ✓.
+Vérification : 70 + 85 + 92 = 247, et 247 ÷ 3 ≈ 82,3. C'est juste.
 
 Sans `Number()`, `a + b + c` collerait `"70"`, `"85"` et `"92"` en `"708592"`, et la page afficherait `Moyenne : 236197.3`. Cela n'a aucun sens !
 

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import Markdown from "../components/Markdown";
 import BookList from "../components/Books";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge, LockedNotice } from "../components/Locked";
 import SimEmbed from "../components/SimEmbed";
 import TutorPanel from "../components/TutorPanel";
@@ -25,7 +26,7 @@ export default function Lesson() {
     try {
       const res = await api(`/lessons/${slug}/complete/`, { method: "POST" });
       state.setData((d) => ({ ...d, completed: true }));
-      if (res.xp_gained) showToast(`🎉 ${t("learn.xpGained", { n: res.xp_gained })}`);
+      if (res.xp_gained) showToast(t("learn.xpGained", { n: res.xp_gained }));
     } finally {
       setBusy(false);
     }
@@ -50,18 +51,24 @@ export default function Lesson() {
           <article style={{ maxWidth: 820 }}>
             {toast}
             <div className="breadcrumb">
-              <Link to={`/learn/${lesson.subject.code}?grade=${lesson.unit.grade}`}>
-                {lesson.subject.icon} {lesson.subject.name}
+              <Link to={`/learn/${lesson.subject.code}?grade=${lesson.unit.grade}`} className="with-icon">
+                <SubjectIcon name={lesson.subject.icon} size={16} /> {lesson.subject.name}
               </Link>
               <span>›</span>
               <span>
-                {lesson.unit.grade} · {t("learn.unit", { n: lesson.unit.number })}: {lesson.unit.title}
+                {lesson.unit.grade} · {t("learn.unitTitle", { n: lesson.unit.number, title: lesson.unit.title })}
               </span>
             </div>
             <h1>{lesson.title}</h1>
             <div className="row small muted" style={{ marginBottom: 16 }}>
-              <span>⏱ {t("learn.minutes", { n: lesson.estimated_minutes })}</span>
-              {lesson.completed && <span className="pill pill-success">✓ {t("learn.completed")}</span>}
+              <span className="with-icon">
+                <Icon name="clock" size={16} /> {t("learn.minutes", { n: lesson.estimated_minutes })}
+              </span>
+              {lesson.completed && (
+                <span className="pill pill-success">
+                  <Icon name="check" size={14} /> {t("learn.completed")}
+                </span>
+              )}
               {lesson.available_languages.length > 1 && (
                 <span className="row">
                   {t("learn.readIn")}:
@@ -83,7 +90,7 @@ export default function Lesson() {
             {lesson.video_url && (
               <div className="sim-frame">
                 <a className="sim-placeholder" href={lesson.video_url} target="_blank" rel="noopener noreferrer">
-                  🎬 {t("learn.watchVideo")}
+                  <Icon name="video" size={36} strokeWidth={1.6} /> {t("learn.watchVideo")}
                 </a>
               </div>
             )}
@@ -105,14 +112,18 @@ export default function Lesson() {
             {/* Shown on locked lessons too: the REB books are free for every student. */}
             {lesson.resources.length > 0 && (
               <section className="section" id="books">
-                <h2>📚 {t("books.forLesson")}</h2>
+                <h2 className="title-with-icon">
+                  <Icon name="library" /> {t("books.forLesson")}
+                </h2>
                 <BookList books={lesson.resources} unit={lesson.unit} />
               </section>
             )}
 
             {extraSims.length > 0 && (
               <section className="section">
-                <h2>🔬 {t("learn.simulations")}</h2>
+                <h2 className="title-with-icon">
+                  <Icon name="labs" /> {t("learn.simulations")}
+                </h2>
                 {extraSims.map((sim) => (
                   <SimEmbed key={sim.slug} slug={sim.slug} sim={sim} />
                 ))}
@@ -122,10 +133,12 @@ export default function Lesson() {
             {!lesson.locked && (
               <div className="card section" style={{ textAlign: "center" }}>
                 {lesson.completed ? (
-                  <strong style={{ color: "var(--success)" }}>✓ {t("learn.completed")}</strong>
+                  <strong className="with-icon" style={{ color: "var(--success)" }}>
+                    <Icon name="ok" /> {t("learn.completed")}
+                  </strong>
                 ) : (
                   <button className="btn btn-success" onClick={complete} disabled={busy}>
-                    ✓ {t("learn.markComplete")}
+                    <Icon name="check" /> {t("learn.markComplete")}
                   </button>
                 )}
               </div>
@@ -133,7 +146,9 @@ export default function Lesson() {
 
             {lesson.quizzes.length > 0 && (
               <section className="section">
-                <h2>📝 {t("learn.quizzes")}</h2>
+                <h2 className="title-with-icon">
+                  <Icon name="practice" /> {t("learn.quizzes")}
+                </h2>
                 <div className="grid">
                   {lesson.quizzes.map((q) => (
                     <button

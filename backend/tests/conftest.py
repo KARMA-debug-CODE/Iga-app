@@ -21,6 +21,7 @@ RELAXED_RATES = {
     "billing_confirm": "1000/min",
     "tutor": "1000/min",
     "code_run": "1000/min",
+    "code_input": "1000/min",
 }
 
 

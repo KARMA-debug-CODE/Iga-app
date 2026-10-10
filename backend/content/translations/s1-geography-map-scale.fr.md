@@ -50,7 +50,7 @@ Trois conversions rapides :
 3. Échelle verbale : « 1 cm représente 0,25 km » (ou 250 m).
 4. De la même façon, 1 : 250 000 signifie que 1 cm représente $250\,000$ cm $= 2\,500$ m $= 2.5$ km.
 
-Vérification : $0.25 \times 100\,000 = 25\,000$ ✓
+Vérification : $0.25 \times 100\,000 = 25\,000$. C'est juste.
 
 Voici les échelles que vous rencontrerez le plus souvent :
 
@@ -71,7 +71,7 @@ Voici les échelles que vous rencontrerez le plus souvent :
 2. Pour la seconde, cherchez d'abord ce que représente 1 cm : $1 \div 4 = 0.25$ km.
 3. $0.25 \times 100\,000 = 25\,000$ cm, donc la FR est **1 : 25 000**.
 
-Vérification : $4 \times 25\,000 = 100\,000$ cm $= 1$ km ✓
+Vérification : $4 \times 25\,000 = 100\,000$ cm $= 1$ km. C'est juste.
 
 ## Mesurer une distance
 
@@ -85,7 +85,7 @@ Sur la carte topographique au 1 : 50 000 utilisée en classe, un chemin droit en
 
 Raccourci : au 1 : 50 000, 1 cm représente 0,5 km, donc $8.4 \times 0.5 = 4.2$ km.
 
-Vérification : les deux méthodes donnent 4,2 km ✓
+Vérification : les deux méthodes donnent 4,2 km. C'est juste.
 
 ### Exemple corrigé 4 : du terrain à la carte
 
@@ -96,7 +96,7 @@ Cette fois, on fait le chemin inverse : on **divise** donc par l'échelle.
 1. Convertissez en cm : $3.5 \times 100\,000 = 350\,000$ cm.
 2. Divisez par l'échelle : $350\,000 \div 50\,000 = 7$ cm.
 
-Vérification : $7 \times 0.5 = 3.5$ km ✓
+Vérification : $7 \times 0.5 = 3.5$ km. C'est juste.
 
 ### Exemple corrigé 5 : lire une échelle graphique avec une bande de papier
 
@@ -115,7 +115,7 @@ Sur beaucoup de cartes, la partie de l'échelle graphique située **à gauche du
 4. Lisez A : elle est à 3 petites parties à gauche du 0, soit $3 \times 250 = 750$ m.
 5. Additionnez : 2 km + 750 m = **2,75 km**.
 
-Vérification : $2 + 3 \times 0.25 = 2.75$ km ✓
+Vérification : $2 + 3 \times 0.25 = 2.75$ km. C'est juste.
 
 Vous n'avez pas eu besoin de la FR : l'échelle graphique a fait le travail.
 
@@ -129,7 +129,7 @@ Une route sinueuse entre un marché et une école du district de Nyamagabe est m
 2. Convertissez : $8.1 \times 0.5 = 4.05$ km.
 3. À 4 km/h, on parcourt 4 km en une heure. Le temps est donc distance ÷ vitesse : $4.05 \div 4 \approx 1.01$ h, soit **environ 1 heure**. (C'est la formule vitesse = distance ÷ temps de la leçon de physique de S1 « Vitesse, vecteur vitesse et accélération », écrite dans l'autre sens.)
 
-Vérification : $4 \times 1 = 4$ km, très proche de 4,05 km ✓
+Vérification : $4 \times 1 = 4$ km, très proche de 4,05 km. C'est juste.
 
 Une règle posée en ligne droite du départ à l'arrivée donnerait une réponse plus courte et fausse, car la ligne droite est le chemin le plus court.
 

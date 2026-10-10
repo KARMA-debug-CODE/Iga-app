@@ -23,7 +23,7 @@ class StudyGroupSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
     is_member = serializers.BooleanField(read_only=True)
     subject_name = serializers.SerializerMethodField()
-    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="👥")
+    subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="users")
     join_code = serializers.SerializerMethodField()
 
     class Meta:
@@ -63,7 +63,12 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_author(self, message):
         if message.author is None:
             return None
-        return {"id": message.author_id, "name": message.author.short_name, "role": message.author.public_role}
+        return {
+            "id": message.author_id,
+            "name": message.author.short_name,
+            "role": message.author.public_role,
+            "avatar": message.author.avatar,
+        }
 
     def get_body(self, message):
         return REMOVED_TEXT if message.is_hidden else message.body

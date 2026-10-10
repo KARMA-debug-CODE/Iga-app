@@ -15,14 +15,14 @@ La plupart des cellules sont trop petites pour être vues sans **microscope**.
 
 | Partie | Rôle | Cellule animale | Cellule végétale |
 |---|---|---|---|
-| Membrane cellulaire | contrôle ce qui entre dans la cellule et ce qui en sort | ✓ | ✓ |
-| Cytoplasme | substance gélatineuse où se déroulent la plupart des réactions | ✓ | ✓ |
-| Noyau | contient l'ADN ; dirige la cellule | ✓ | ✓ |
-| Mitochondries | libèrent l'énergie par la respiration | ✓ | ✓ |
-| Ribosomes | fabriquent les protéines | ✓ | ✓ |
-| Paroi cellulaire | faite de cellulose ; donne sa forme à la cellule et la soutient | ✗ | ✓ |
-| Chloroplastes | contiennent la chlorophylle ; photosynthèse | ✗ | ✓ |
-| Grande vacuole permanente | contient le suc vacuolaire ; maintient la cellule ferme | ✗ | ✓ |
+| Membrane cellulaire | contrôle ce qui entre dans la cellule et ce qui en sort | oui | oui |
+| Cytoplasme | substance gélatineuse où se déroulent la plupart des réactions | oui | oui |
+| Noyau | contient l'ADN ; dirige la cellule | oui | oui |
+| Mitochondries | libèrent l'énergie par la respiration | oui | oui |
+| Ribosomes | fabriquent les protéines | oui | oui |
+| Paroi cellulaire | faite de cellulose ; donne sa forme à la cellule et la soutient | non | oui |
+| Chloroplastes | contiennent la chlorophylle ; photosynthèse | non | oui |
+| Grande vacuole permanente | contient le suc vacuolaire ; maintient la cellule ferme | non | oui |
 
 > **Astuce mémoire :** les cellules végétales ont **3 éléments en plus**, retenez « PCV » : la **P**aroi cellulaire, les **C**hloroplastes et une grande **V**acuole centrale.
 

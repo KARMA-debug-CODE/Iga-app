@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "../api";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Progress, scoreClass } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -61,7 +62,7 @@ export function ParentDashboard() {
         <Loader state={state}>
           {(children) =>
             children.length === 0 ? (
-              <Empty icon="👨‍👩‍👧">{t("parent.none")}</Empty>
+              <Empty icon="users">{t("parent.none")}</Empty>
             ) : (
               <div className="stack">
                 {children.map((c) => (
@@ -70,7 +71,9 @@ export function ParentDashboard() {
                       <strong>
                         {c.name} · {c.grade}
                       </strong>
-                      <span className="pill pill-warn">🔥 {t("dash.streak", { n: c.streak_days })}</span>
+                      <span className="pill pill-warn">
+                        <Icon name="flame" size={14} /> {t("dash.streak", { n: c.streak_days })}
+                      </span>
                     </div>
                     <div className="stats stats-3" style={{ marginTop: 12 }}>
                       <div className="stat">
@@ -138,7 +141,9 @@ export default function ChildReport() {
               </span>
             </div>
             <div className="card stat">
-              <strong>🔥 {child.streak_days}</strong>
+              <strong className="with-icon">
+                <Icon name="flame" size={22} style={{ color: "var(--warn)" }} /> {child.streak_days}
+              </strong>
               <span className="small muted">{t("parent.streak")}</span>
             </div>
             <div className="card stat">
@@ -163,8 +168,8 @@ export default function ChildReport() {
                     .map((s) => (
                       <li key={s.code}>
                         <div className="spread small">
-                          <span>
-                            {s.icon} {s.name}
+                          <span className="with-icon">
+                            <SubjectIcon name={s.icon} size={16} /> {s.name}
                           </span>
                           <span className="muted">
                             {s.completed}/{s.lessons}
@@ -187,7 +192,9 @@ export default function ChildReport() {
                   {child.recent_results.map((r, i) => (
                     <li key={i} className="spread">
                       <span style={{ minWidth: 0 }}>
-                        {r.icon} {r.quiz}
+                        <span className="with-icon">
+                          <SubjectIcon name={r.icon} size={16} /> {r.quiz}
+                        </span>
                         <div className="small muted">{formatDate(r.submitted_at, lang)}</div>
                       </span>
                       <span className={scoreClass(r.percentage)}>

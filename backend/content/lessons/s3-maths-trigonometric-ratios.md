@@ -72,7 +72,7 @@ A 6 m ladder leans against the wall of a house, making an angle of $70^\circ$ wi
 - The ladder is the hypotenuse, $H = 6$. The height is opposite the $70^\circ$ angle and the distance along the ground is adjacent.
 - Height: $\sin 70^\circ = \frac{h}{6}$, so $h = 6\sin 70^\circ \approx 6 \times 0.9397 \approx 5.64$ m.
 - Foot: $\cos 70^\circ = \frac{d}{6}$, so $d = 6\cos 70^\circ \approx 6 \times 0.3420 \approx 2.05$ m.
-- Check with Pythagoras: $5.64^2 + 2.05^2 \approx 31.81 + 4.20 = 36.01 \approx 6^2$ ✓.
+- Check with Pythagoras: $5.64^2 + 2.05^2 \approx 31.81 + 4.20 = 36.01 \approx 6^2$. Correct.
 
 ### Worked example 3: the unknown on the bottom
 

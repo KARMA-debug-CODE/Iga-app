@@ -37,9 +37,9 @@ L'oxygène provient de l'air que nous inspirons. Le dioxyde de carbone est trans
 
 L'équation chimique est-elle équilibrée ? Comptez chaque type d'atome des deux côtés.
 
-- **Carbone :** à gauche $6$ ; à droite $6 \times 1 = 6$ ✓
-- **Hydrogène :** à gauche $12$ ; à droite $6 \times 2 = 12$ ✓
-- **Oxygène :** à gauche $6 + (6 \times 2) = 6 + 12 = 18$ ; à droite $(6 \times 2) + (6 \times 1) = 12 + 6 = 18$ ✓
+- **Carbone :** à gauche $6$ ; à droite $6 \times 1 = 6$ (égal)
+- **Hydrogène :** à gauche $12$ ; à droite $6 \times 2 = 12$ (égal)
+- **Oxygène :** à gauche $6 + (6 \times 2) = 6 + 12 = 18$ ; à droite $(6 \times 2) + (6 \times 1) = 12 + 6 = 18$ (égal)
 
 Tous les atomes sont retrouvés, donc l'équation est équilibrée. Les atomes sont seulement réarrangés ; l'énergie qui était stockée dans le glucose est libérée.
 

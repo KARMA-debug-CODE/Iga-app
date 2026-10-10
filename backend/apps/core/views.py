@@ -82,11 +82,15 @@ def _continue_learning(user, lang="en"):
     candidate = None
     if not has_premium(user):
         lessons = lessons.filter(is_free=True)  # suggest something the student can actually open
-    if last:
+    if last and (not user.grade or last.lesson.unit.grade == user.grade):
+        # Carry on in the same subject, unless the student has since moved to another grade.
         unit = last.lesson.unit
         candidate = lessons.filter(unit__subject=unit.subject, unit__grade=unit.grade).order_by("unit__number", "order").first()
     if candidate is None and user.grade:
-        candidate = lessons.filter(unit__grade=user.grade).order_by("unit__subject__order", "unit__number", "order").first()
+        in_grade = lessons.filter(unit__grade=user.grade).order_by("unit__subject__order", "unit__number", "order")
+        if user.combination_subjects:  # an A-level student starts with a subject of their combination
+            candidate = in_grade.filter(unit__subject__code__in=user.combination_subjects).first()
+        candidate = candidate or in_grade.first()
     if candidate is None and not user.grade:
         candidate = lessons.order_by("unit__grade", "unit__subject__order", "unit__number", "order").first()
     if candidate is None:
@@ -108,7 +112,9 @@ def dashboard(request):
     data = {"level": level_from_xp(user.xp), "xp": user.xp, "streak_days": user.current_streak}
 
     if user.can_teach:
-        classes = Classroom.objects.filter(teacher=user, archived=False).annotate(student_total=Count("enrollments"))
+        classes = Classroom.objects.filter(teacher=user, archived=False).annotate(
+            student_total=Count("enrollments", filter=Q(enrollments__active=True))
+        )
         my_students = User.objects.filter(enrollments__classroom__teacher=user, enrollments__classroom__archived=False).values(
             "id"
         )
@@ -140,7 +146,9 @@ def dashboard(request):
     # Work out what is still to do first, then take the soonest six (not the other way round,
     # or six finished assignments could hide an unfinished one).
     candidates = list(
-        Assignment.objects.filter(classroom__enrollments__student=user, classroom__archived=False)
+        Assignment.objects.filter(
+            classroom__enrollments__student=user, classroom__enrollments__active=True, classroom__archived=False
+        )
         .filter(Q(due_at__isnull=True) | Q(due_at__gte=timezone.now() - timedelta(days=7)))
         .select_related("classroom", "quiz", "lesson", "simulation")
         .order_by(F("due_at").asc(nulls_last=True), "-created_at")[:200]

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
+import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -12,8 +13,8 @@ function GroupCard({ group, onJoin }) {
   return (
     <div className="card">
       <div className="row" style={{ flexWrap: "nowrap" }}>
-        <div className="icon-tile" aria-hidden>
-          {group.subject_icon || "👥"}
+        <div className="icon-tile">
+          <SubjectIcon name={group.subject_icon || "groups"} />
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
           <Link to={`/groups/${group.id}`} style={{ color: "inherit", textDecoration: "none" }}>
@@ -23,7 +24,11 @@ function GroupCard({ group, onJoin }) {
             {[group.grade, group.subject_name, t("groups.membersCount", { n: group.member_count })].filter(Boolean).join(" · ")}
           </div>
         </div>
-        {group.is_private && <span className="pill">🔒</span>}
+        {group.is_private && (
+          <span className="pill" title={t("groups.private")}>
+            <Icon name="lock" size={14} label={t("groups.private")} />
+          </span>
+        )}
       </div>
       {group.description && <p className="small" style={{ margin: "10px 0 0" }}>{group.description}</p>}
       <div style={{ marginTop: 12 }}>
@@ -86,7 +91,9 @@ export default function Groups() {
   return (
     <>
       <div className="page-header">
-        <h1>👥 {t("groups.title")}</h1>
+        <h1 className="title-with-icon">
+          <Icon name="groups" size={28} /> {t("groups.title")}
+        </h1>
         <p>{t("groups.rules")}</p>
       </div>
       <ErrorMessage error={error} />
@@ -103,7 +110,7 @@ export default function Groups() {
           <Loader state={state}>
             {(data) => {
               const list = results(data);
-              if (!list.length) return <Empty icon="👥">{t("groups.empty")}</Empty>;
+              if (!list.length) return <Empty icon="groups">{t("groups.empty")}</Empty>;
               return (
                 <div className="stack">
                   {list.map((g) => (

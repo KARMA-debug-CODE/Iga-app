@@ -1,19 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "../i18n";
+import CodeEditor from "./CodeEditor";
+import Console from "./Console";
+import { Icon } from "./Icon";
 
 function newWorker() {
   return new Worker(new URL("../python/pyodide.worker.js", import.meta.url), { type: "module" });
 }
+
+// Browsers with JavaScript Promise Integration let input() pause the program and wait for typing.
+const INTERACTIVE = typeof WebAssembly !== "undefined" && typeof WebAssembly.Suspending === "function";
 
 /** A "try it yourself" Python editor. Python runs in the browser (Pyodide), so no server is involved. */
 export default function PythonPlayground({ initialCode = "", height = 300 }) {
   const { t } = useI18n();
   const [code, setCode] = useState(initialCode);
   const [stdin, setStdin] = useState("");
-  const [showInput, setShowInput] = useState(/input\(/.test(initialCode));
+  const [showInput, setShowInput] = useState(!INTERACTIVE && /input\(/.test(initialCode));
   const [output, setOutput] = useState([]);
-  const [status, setStatus] = useState("idle"); // idle | loading | running
+  const [status, setStatus] = useState("idle"); // idle | loading | running | waiting
   const worker = useRef(null);
   const loadedOnce = useRef(false);
   const tr = useRef(t); // the worker's handlers outlive renders, so they read the current language from here
@@ -28,6 +34,7 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
   }
 
   function run() {
+    if (status !== "idle") return;
     if (!worker.current) {
       worker.current = newWorker();
       worker.current.onmessage = ({ data }) => {
@@ -36,8 +43,11 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
           setStatus("running");
         } else if (data.type === "out") {
           append(data.stream, data.text);
+        } else if (data.type === "input") {
+          setStatus("waiting");
         } else if (data.type === "done") {
-          if (data.result !== null) append("result", data.result);
+          if (data.result !== null) append("result", `${data.result}\n`);
+          append("info", `\n${tr.current("code.finished")}`);
           setStatus("idle");
         } else if (data.type === "error") {
           append("stderr", data.code === "start-failed" ? tr.current("python.startFailed", { error: data.detail }) : data.text);
@@ -56,11 +66,17 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
     worker.current.postMessage({ type: "run", code, stdin });
   }
 
+  function answer(text) {
+    append("stdin", `${text}\n`);
+    setStatus("running");
+    worker.current?.postMessage({ type: "stdin", text });
+  }
+
   function stop() {
     worker.current?.terminate();
     worker.current = null;
     loadedOnce.current = false;
-    append("stderr", `⏹ ${t("python.stopped")}`);
+    append("stderr", `\n${t("python.stopped")}`);
     setStatus("idle");
   }
 
@@ -69,10 +85,14 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
   return (
     <div className="playground python-playground">
       <div className="playground-bar">
-        <strong style={{ marginRight: "auto" }}>🐍 Python</strong>
-        <button className="btn btn-sm btn-ghost" onClick={() => setShowInput((v) => !v)} aria-pressed={showInput}>
-          ⌨ {t("python.input")}
-        </button>
+        <strong className="playground-title">
+          <Icon name="terminal" /> Python
+        </strong>
+        {!INTERACTIVE && (
+          <button className="btn btn-sm btn-ghost" onClick={() => setShowInput((v) => !v)} aria-pressed={showInput}>
+            <Icon name="keyboard" /> {t("python.input")}
+          </button>
+        )}
         <button
           className="btn btn-sm btn-secondary"
           onClick={() => {
@@ -81,40 +101,20 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
           }}
           disabled={busy}
         >
-          {t("common.reset")}
+          <Icon name="reset" /> {t("common.reset")}
         </button>
         {busy ? (
           <button className="btn btn-sm btn-danger" onClick={stop}>
-            ⏹ {t("python.stop")}
+            <Icon name="stop" /> {t("python.stop")}
           </button>
         ) : (
           <button className="btn btn-sm btn-success" onClick={run}>
-            ▶ {t("common.run")}
+            <Icon name="play" /> {t("common.run")}
           </button>
         )}
       </div>
       <div className="playground-panes">
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Tab" && !e.shiftKey) {
-              e.preventDefault();
-              const el = e.currentTarget;
-              const { selectionStart: s, selectionEnd: end } = el;
-              setCode(`${code.slice(0, s)}    ${code.slice(end)}`);
-              requestAnimationFrame(() => {
-                el.selectionStart = el.selectionEnd = s + 4;
-              });
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !busy) run();
-          }}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoCorrect="off"
-          aria-label={t("python.editor")}
-          style={{ minHeight: height }}
-        />
+        <CodeEditor value={code} onChange={setCode} language="python" onRun={run} ariaLabel={t("python.editor")} minHeight={height} />
         <div className="python-output-wrap">
           {showInput && (
             <label className="python-stdin">
@@ -122,16 +122,15 @@ export default function PythonPlayground({ initialCode = "", height = 300 }) {
               <textarea value={stdin} onChange={(e) => setStdin(e.target.value)} rows={3} spellCheck={false} />
             </label>
           )}
-          <pre className="python-output" aria-live="polite" style={{ minHeight: height }}>
-            {status === "loading" && <span className="muted">{t("python.loading")}</span>}
-            {output.map((line, i) => (
-              <span key={i} className={`py-${line.stream}`}>
-                {line.text}
-                {"\n"}
-              </span>
-            ))}
-            {status === "idle" && output.length === 0 && <span className="muted">{t("python.empty")}</span>}
-          </pre>
+          <Console
+            entries={output}
+            waiting={status === "waiting"}
+            onAnswer={answer}
+            status={status === "loading" ? t("python.loading") : ""}
+            empty={t("python.empty")}
+            minHeight={height}
+            label={t("console.output")}
+          />
         </div>
       </div>
     </div>

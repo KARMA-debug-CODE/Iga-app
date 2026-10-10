@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import { Icon } from "./Icon";
 
 const ACTIONS = {
   no_school: { to: "/profile#school", key: "access.chooseSchool" },
@@ -29,8 +30,8 @@ export function LockedNotice({ reason: given, compact = false }) {
   const isSchoolAdmin = user?.role === "school_admin" && user?.school_status === "approved";
   return (
     <div className={`locked-notice ${compact ? "compact" : "card"}`} role="note">
-      <div className="locked-icon" aria-hidden>
-        🔒
+      <div className="locked-icon">
+        <Icon name="lock" size={26} />
       </div>
       <div>
         <strong>{t("access.title")}</strong>
@@ -69,8 +70,8 @@ export function AccessBanner() {
   const action = ACTIONS[reason];
   return (
     <div className="alert alert-warn access-banner" role="status">
-      <span>
-        🔓 {t(`access.banner.${reason}`, { school: user.school?.name || "" })}
+      <span className="with-icon">
+        <Icon name="unlock" /> {t(`access.banner.${reason}`, { school: user.school?.name || "" })}
       </span>
       {action && (
         <Link className="btn btn-sm" to={action.to}>
@@ -85,7 +86,7 @@ export function LockBadge() {
   const { t } = useI18n();
   return (
     <span className="pill pill-lock" title={t("access.title")}>
-      🔒 {t("access.locked")}
+      <Icon name="lock" size={14} /> {t("access.locked")}
     </span>
   );
 }

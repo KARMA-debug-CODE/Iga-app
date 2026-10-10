@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { A_LEVEL, COMBINATIONS } from "../combinations";
+import Avatar from "../components/Avatar";
+import AvatarBuilder from "../components/AvatarBuilder";
+import { BadgeIcon, Icon } from "../components/Icon";
 import SchoolPicker from "../components/SchoolPicker";
-import { ErrorMessage, GRADES, Loader, useToast } from "../components/ui";
+import { ErrorMessage, GRADES, Loader, Tabs, useToast } from "../components/ui";
 import { useApi } from "../hooks";
 import { LANGUAGES, useI18n } from "../i18n";
 import { getTheme, setTheme } from "../theme";
@@ -36,8 +41,10 @@ function MySchool() {
 
   const status = user.school_status;
   return (
-    <div className="card" id="school">
-      <h2>🏫 {t("school.mySchool")}</h2>
+    <div className="card profile-card" id="school">
+      <h2>
+        <Icon name="school" /> {t("school.mySchool")}
+      </h2>
       {user.school ? (
         <div className="stack" style={{ gap: 8 }}>
           <div>
@@ -48,7 +55,11 @@ function MySchool() {
           </span>
           {status === "approved" && user.school.subscription && (
             <span className="small muted">
-              {user.access?.premium ? t("school.fullAccess") : t(`access.reason.${user.access?.reason}`, { school: user.school.name })}
+              {user.access?.premium
+                ? t("school.fullAccess")
+                : t(`access.reason.${user.access?.reason}`, {
+                    school: user.school.name,
+                  })}
             </span>
           )}
           {status === "pending" && <span className="small muted">{t("school.pendingHelp")}</span>}
@@ -62,7 +73,11 @@ function MySchool() {
             {user.school ? t("school.changeSchool") : t("access.chooseSchool")}
           </button>
           {user.school && (
-            <button className="btn btn-sm btn-ghost" disabled={busy} onClick={() => window.confirm(t("school.leaveConfirm")) && send("DELETE")}>
+            <button
+              className="btn btn-sm btn-ghost"
+              disabled={busy}
+              onClick={() => window.confirm(t("school.leaveConfirm")) && send("DELETE")}
+            >
               {t("school.leave")}
             </button>
           )}
@@ -137,7 +152,9 @@ function TwoFactor() {
 
   return (
     <div className="card">
-      <h2>🔐 {t("profile.twoFactor")}</h2>
+      <h2>
+        <Icon name="shield" /> {t("profile.twoFactor")}
+      </h2>
       <p className="muted">{user.totp_enabled ? t("profile.twoFactorOn") : t("profile.twoFactorOff")}</p>
       {setup && (
         <div className="stack">
@@ -152,7 +169,15 @@ function TwoFactor() {
       )}
       {(setup || user.totp_enabled) && (
         <div className="row" style={{ marginTop: 12 }}>
-          <input value={otp} onChange={(e) => setOtp(e.target.value)} inputMode="numeric" maxLength={8} placeholder="123456" style={{ maxWidth: 160 }} aria-label={t("auth.otp")} />
+          <input
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            inputMode="numeric"
+            maxLength={8}
+            placeholder="123456"
+            style={{ maxWidth: 160 }}
+            aria-label={t("auth.otp")}
+          />
           {user.totp_enabled ? (
             <button className="btn btn-danger" onClick={() => confirm("/auth/2fa/disable/")}>
               {t("profile.disable")}
@@ -193,12 +218,18 @@ function ParentAccess() {
   }
   return (
     <div className="card">
-      <h2>👨‍👩‍👧 {t("parent.access")}</h2>
+      <h2>
+        <Icon name="users" /> {t("parent.access")}
+      </h2>
       <p className="muted small">{t("parent.accessHelp")}</p>
       {invite ? (
         <div className="stack">
           <span className="code-display">{invite.code}</span>
-          <span className="small muted">{t("parent.expires", { date: new Date(invite.expires_at).toLocaleDateString(lang) })}</span>
+          <span className="small muted">
+            {t("parent.expires", {
+              date: new Date(invite.expires_at).toLocaleDateString(lang),
+            })}
+          </span>
         </div>
       ) : (
         <button className="btn btn-secondary" onClick={makeCode}>
@@ -241,14 +272,29 @@ function ChangePassword() {
   }
   return (
     <form className="card form" onSubmit={submit}>
-      <h2>{t("profile.changePassword")}</h2>
+      <h2>
+        <Icon name="key" /> {t("profile.changePassword")}
+      </h2>
       <label>
         {t("profile.currentPassword")}
-        <input type="password" autoComplete="current-password" value={form.current_password} onChange={(e) => setForm({ ...form, current_password: e.target.value })} required />
+        <input
+          type="password"
+          autoComplete="current-password"
+          value={form.current_password}
+          onChange={(e) => setForm({ ...form, current_password: e.target.value })}
+          required
+        />
       </label>
       <label>
         {t("profile.newPassword")}
-        <input type="password" autoComplete="new-password" minLength={8} value={form.new_password} onChange={(e) => setForm({ ...form, new_password: e.target.value })} required />
+        <input
+          type="password"
+          autoComplete="new-password"
+          minLength={8}
+          value={form.new_password}
+          onChange={(e) => setForm({ ...form, new_password: e.target.value })}
+          required
+        />
       </label>
       <ErrorMessage error={error} />
       {done && <div className="alert alert-success">{t("common.saved")}</div>}
@@ -257,138 +303,300 @@ function ChangePassword() {
   );
 }
 
-export default function Profile() {
-  const { user, setUser, logout } = useAuth();
+const TABS = ["details", "avatar", "badges", "school", "security", "appearance"];
+
+function ProfileHeader({ onEditAvatar }) {
+  const { user, logout } = useAuth();
+  const { t } = useI18n();
+  const role = t(`auth.${user.role === "admin" ? "teacher" : user.role}`);
+  return (
+    <section className="card profile-hero">
+      <button type="button" className="profile-hero-avatar" onClick={onEditAvatar} aria-label={t("avatar.edit")}>
+        <Avatar user={user} size={104} />
+        <span className="profile-hero-edit" aria-hidden>
+          <Icon name="edit" size={14} />
+        </span>
+      </button>
+      <div className="profile-hero-text">
+        <h1>{user.display_name}</h1>
+        <p className="muted">@{user.username}</p>
+        <div className="profile-hero-tags">
+          <span className="pill pill-blue">{role}</span>
+          {user.role === "student" && user.grade && <span className="pill">{user.grade}</span>}
+          {user.combination_subjects?.length > 0 && <span className="pill">{user.combination}</span>}
+          {user.school && <span className="pill">{user.school.name}</span>}
+        </div>
+      </div>
+      <div className="profile-hero-side">
+        {user.role === "student" && (
+          <dl className="profile-hero-stats">
+            <div>
+              <dt>{t("profile.xp")}</dt>
+              <dd>{user.xp}</dd>
+            </div>
+            <div>
+              <dt>{t("profile.streak")}</dt>
+              <dd>
+                <Icon name="flame" size={16} /> {user.streak_days}
+              </dd>
+            </div>
+            <div>
+              <dt>{t("profile.badges")}</dt>
+              <dd>{user.badges?.length ?? 0}</dd>
+            </div>
+          </dl>
+        )}
+        <button className="btn btn-secondary btn-sm profile-hero-logout" onClick={logout}>
+          <Icon name="logout" /> {t("nav.logout")}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function Details() {
+  const { user, setUser } = useAuth();
   const { t, lang, setLang } = useI18n();
   const [form, setForm] = useState(() => ({
     first_name: user.first_name,
     last_name: user.last_name,
     grade: user.grade,
+    combination: user.combination || "",
     preferred_language: user.preferred_language,
   }));
-  const [theme, setThemeState] = useState(getTheme);
   const [error, setError] = useState(null);
-  const [toast, showToast] = useToast();
-  const badges = useApi("/badges/");
+  const [notice, setNotice] = useState(null);
+  const gradeChanges = user.role === "student" && form.grade !== user.grade;
+  const aLevel = user.role === "student" && A_LEVEL.includes(form.grade);
 
   useEffect(() => setForm((f) => ({ ...f, preferred_language: lang })), [lang]);
 
   async function save(e) {
     e.preventDefault();
     setError(null);
+    setNotice(null);
     try {
       const updated = await api("/auth/me/", { method: "PATCH", body: form });
       setUser(updated);
+      setForm((f) => ({ ...f, combination: updated.combination }));
       setLang(updated.preferred_language);
-      showToast(t("common.saved"));
+      if (updated.left_classes !== undefined) {
+        setNotice(
+          [
+            t("profile.gradeMoved", { grade: updated.grade }),
+            updated.left_classes.length
+              ? t("profile.gradeLeftClasses", {
+                  classes: updated.left_classes.join(", "),
+                })
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        );
+      } else {
+        setNotice(t("common.saved"));
+      }
     } catch (err) {
       setError(err);
     }
   }
 
   return (
-    <>
-      {toast}
-      <div className="page-header spread">
-        <div>
-          <h1 style={{ margin: 0 }}>{user.display_name}</h1>
-          <p>
-            @{user.username} · {t(`auth.${user.role === "admin" ? "teacher" : user.role}`)} {user.grade && `· ${user.grade}`} · {user.xp} XP
-          </p>
-        </div>
-        <button className="btn btn-secondary" onClick={logout}>
-          {t("nav.logout")}
-        </button>
+    <form className="card form profile-card" onSubmit={save}>
+      <h2>
+        <Icon name="user" /> {t("profile.title")}
+      </h2>
+      <div className="form-row">
+        <label>
+          {t("auth.firstName")}
+          <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} autoComplete="given-name" />
+        </label>
+        <label>
+          {t("auth.lastName")}
+          <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} autoComplete="family-name" />
+        </label>
       </div>
-      <div className="grid-2">
-        <form className="card form" onSubmit={save}>
-          <h2>{t("profile.title")}</h2>
-          <div className="form-row">
-            <label>
-              {t("auth.firstName")}
-              <input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
-            </label>
-            <label>
-              {t("auth.lastName")}
-              <input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
-            </label>
-          </div>
-          <div className="form-row">
-            {user.role === "student" && (
-              <label>
-                {t("auth.grade")}
-                <select value={form.grade} onChange={(e) => setForm({ ...form, grade: e.target.value })}>
-                  {GRADES.map((g) => (
-                    <option key={g}>{g}</option>
-                  ))}
-                </select>
-              </label>
-            )}
-          </div>
+      <div className="form-row">
+        {user.role === "student" && (
           <label>
-            {t("profile.language")}
-            <select value={form.preferred_language} onChange={(e) => setForm({ ...form, preferred_language: e.target.value })}>
-              {LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.name}
-                </option>
+            {t("auth.grade")}
+            <select value={form.grade} onChange={(e) => setForm({ ...form, grade: e.target.value })}>
+              {GRADES.map((g) => (
+                <option key={g}>{g}</option>
               ))}
             </select>
           </label>
-          <ErrorMessage error={error} />
-          <button className="btn">{t("common.save")}</button>
-        </form>
-
-        <div className="stack">
-          {user.role !== "parent" && user.role !== "admin" && <MySchool />}
-          <div className="card">
-            <h2>{t("profile.theme")}</h2>
-            <div className="chips">
-              {[
-                ["system", `🌓 ${t("profile.system")}`],
-                ["light", `☀️ ${t("profile.light")}`],
-                ["dark", `🌙 ${t("profile.dark")}`],
-              ].map(([value, label]) => (
-                <button
-                  key={value}
-                  className={`chip ${theme === value ? "active" : ""}`}
-                  aria-pressed={theme === value}
-                  onClick={() => {
-                    setTheme(value);
-                    setThemeState(value);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="card">
-            <h2>🏅 {t("profile.badges")}</h2>
-            <Loader state={badges}>
-              {(list) => (
-                <div className="badge-grid">
-                  {list.map((b) => (
-                    <div key={b.code} className={`badge-tile ${b.earned ? "" : "locked"}`} title={t(`badge.${b.code}.desc`)}>
-                      <div className="big" aria-hidden>
-                        {b.icon}
-                      </div>
-                      <strong className="small">{t(`badge.${b.code}.name`)}</strong>
-                      <div className="small muted">{t(`badge.${b.code}.desc`)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Loader>
-          </div>
+        )}
+        <label>
+          {t("profile.language")}
+          <select value={form.preferred_language} onChange={(e) => setForm({ ...form, preferred_language: e.target.value })}>
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {aLevel && (
+        <label>
+          <span id="combination-label">{t("profile.combination")}</span>
+          <select
+            value={form.combination}
+            onChange={(e) => setForm({ ...form, combination: e.target.value })}
+            aria-labelledby="combination-label"
+            aria-describedby="combination-help"
+          >
+            <option value="">{t("profile.combinationNone")}</option>
+            {COMBINATIONS.map((code) => (
+              <option key={code} value={code}>
+                {t(`combination.${code}`)}
+              </option>
+            ))}
+          </select>
+          <span id="combination-help" className="small muted" style={{ fontWeight: 400 }}>
+            {t("profile.combinationHelp")}
+          </span>
+        </label>
+      )}
+      {gradeChanges && (
+        <p className="alert alert-info small" role="note">
+          <Icon name="info" /> {t("profile.gradeChangeHelp", { grade: form.grade })}
+        </p>
+      )}
+      <ErrorMessage error={error} />
+      {notice && (
+        <div className="alert alert-success" role="status">
+          {notice}
         </div>
+      )}
+      <div>
+        <button className="btn">
+          <Icon name="save" /> {t("common.save")}
+        </button>
       </div>
-      <h2 className="section">{t("profile.security")}</h2>
-      <div className="grid-2">
-        <ChangePassword />
-        <TwoFactor />
-        {user.role === "student" && <ParentAccess />}
+    </form>
+  );
+}
+
+function Appearance() {
+  const { t } = useI18n();
+  const [theme, setThemeState] = useState(getTheme);
+  const options = [
+    ["system", "monitor", t("profile.system")],
+    ["light", "sun", t("profile.light")],
+    ["dark", "moon", t("profile.dark")],
+  ];
+  return (
+    <div className="card profile-card">
+      <h2>
+        <Icon name="palette" /> {t("profile.theme")}
+      </h2>
+      <div className="theme-choices" role="radiogroup" aria-label={t("profile.theme")}>
+        {options.map(([value, icon, label]) => (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={theme === value}
+            className={`theme-choice ${theme === value ? "selected" : ""}`}
+            onClick={() => {
+              setTheme(value);
+              setThemeState(value);
+            }}
+          >
+            <Icon name={icon} size={22} />
+            {label}
+          </button>
+        ))}
       </div>
-    </>
+    </div>
+  );
+}
+
+function Badges() {
+  const { t } = useI18n();
+  const badges = useApi("/badges/");
+  return (
+    <div className="card profile-card">
+      <h2>
+        <Icon name="award" /> {t("profile.badges")}
+      </h2>
+      <Loader state={badges}>
+        {(list) => (
+          <div className="badge-grid">
+            {list.map((b) => (
+              <div key={b.code} className={`badge-tile ${b.earned ? "earned" : "locked"}`} title={t(`badge.${b.code}.desc`)}>
+                <div className="badge-icon">
+                  <BadgeIcon name={b.icon} />
+                </div>
+                <strong className="small">{t(`badge.${b.code}.name`)}</strong>
+                <div className="small muted">{t(`badge.${b.code}.desc`)}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Loader>
+    </div>
+  );
+}
+
+export default function Profile() {
+  const { user } = useAuth();
+  const { t } = useI18n();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [toast, showToast] = useToast();
+  const hasSchool = user.role !== "parent" && user.role !== "admin";
+  const tabs = TABS.filter((tab) => (tab === "school" ? hasSchool : tab === "badges" ? user.role === "student" : true));
+  const fromHash = location.hash.slice(1);
+  const [tab, setTab] = useState(tabs.includes(fromHash) ? fromHash : "details");
+
+  // Links such as /profile#school open that tab.
+  useEffect(() => {
+    if (tabs.includes(fromHash)) setTab(fromHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromHash]);
+
+  function choose(next) {
+    setTab(next);
+    navigate({ hash: next === "details" ? "" : next }, { replace: true });
+  }
+
+  return (
+    <div className="profile-page">
+      {toast}
+      <ProfileHeader onEditAvatar={() => choose("avatar")} />
+      <Tabs
+        value={tab}
+        onChange={choose}
+        tabs={tabs.map((value) => ({
+          value,
+          label: t(`profile.tab.${value}`),
+        }))}
+      />
+      <div className="profile-panel">
+        {tab === "details" && <Details />}
+        {tab === "avatar" && (
+          <div className="card profile-card">
+            <h2>
+              <Icon name="palette" /> {t("avatar.title")}
+            </h2>
+            <p className="muted small">{t("avatar.help")}</p>
+            <AvatarBuilder onSaved={() => showToast(t("common.saved"))} />
+          </div>
+        )}
+        {tab === "badges" && <Badges />}
+        {tab === "school" && <MySchool />}
+        {tab === "security" && (
+          <div className="grid-2">
+            <ChangePassword />
+            <TwoFactor />
+            {user.role === "student" && <ParentAccess />}
+          </div>
+        )}
+        {tab === "appearance" && <Appearance />}
+      </div>
+    </div>
   );
 }

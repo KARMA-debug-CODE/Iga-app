@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from "react";
 
 import { api } from "../api";
 import { useI18n } from "../i18n";
+import { Icon } from "./Icon";
 
 export function useDistricts() {
   const [provinces, setProvinces] = useState([]);
@@ -73,7 +74,9 @@ export default function SchoolPicker({ value, onChange }) {
     return (
       <div className="school-chosen">
         <div>
-          <strong>🏫 {value.name}</strong>
+          <strong className="with-icon">
+            <Icon name="school" /> {value.name}
+          </strong>
           <div className="small muted">{value.district}</div>
         </div>
         <button type="button" className="btn btn-sm btn-ghost" onClick={() => onChange(null)}>

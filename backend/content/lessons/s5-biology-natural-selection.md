@@ -43,7 +43,7 @@ Imagine 500 field mice in a sorghum field. Allele **F** gives brown fur and alle
 2. F alleles: each FF mouse has 2 and each Ff mouse has 1, so $(200 \times 2) + 200 = 600$.
 3. f alleles: each Ff mouse has 1 and each ff mouse has 2, so $200 + (100 \times 2) = 400$.
 4. Frequency of F $= \dfrac{600}{1000} = 0.6$. Frequency of f $= \dfrac{400}{1000} = 0.4$.
-5. Check: $0.6 + 0.4 = 1$ ✓
+5. Check: $0.6 + 0.4 = 1$. Correct.
 
 Now suppose owls catch white mice more easily. A few generations later there are 250 FF, 200 Ff and 50 ff mice. The frequency of F is now $\dfrac{500 + 200}{1000} = 0.7$. The allele frequency has changed, so the population has **evolved**. Yet no single mouse changed its own alleles. Populations evolve; individuals do not.
 
@@ -60,7 +60,7 @@ An infection contains $10^9$ (one thousand million) bacteria. A mutation has mad
 5. Resistant fraction now: $\dfrac{1000}{101\,000} \approx 0.0099$, which is about $1\%$.
 6. Compare: $\dfrac{1\%}{0.0001\%} = 10\,000$. Resistant bacteria are now about 10,000 times more common.
 
-Check: $0.0099 \times 101\,000 \approx 1000$ resistant bacteria ✓
+Check: $0.0099 \times 101\,000 \approx 1000$ resistant bacteria. Correct.
 
 The antibiotic did not create the resistance. It only killed the other bacteria, so a rare allele became common. The survivors multiply. The infection can come back with far more resistant bacteria, and these can spread to other people.
 
@@ -97,7 +97,7 @@ These are example results from one run. Your numbers will be different, but the 
 5. **Survival and inheritance:** brown bunnies more often live to breed and pass on the brown allele, so its frequency rises.
 6. Prediction: on snow, white bunnies are better hidden, so white fur should increase instead.
 
-Check: $40 + 15 = 55$ ✓
+Check: $40 + 15 = 55$. Correct.
 
 ## Three types of selection
 

@@ -68,7 +68,7 @@ Une échelle de 6 m est appuyée contre le mur d'une maison et forme un angle de
 - L'échelle est l'hypoténuse, $H = 6$. La hauteur est le côté opposé à l'angle de $70^\circ$ et la distance au sol est le côté adjacent.
 - Hauteur : $\sin 70^\circ = \frac{h}{6}$, donc $h = 6\sin 70^\circ \approx 6 \times 0.9397 \approx 5.64$ m.
 - Pied : $\cos 70^\circ = \frac{d}{6}$, donc $d = 6\cos 70^\circ \approx 6 \times 0.3420 \approx 2.05$ m.
-- Vérification avec le théorème de Pythagore : $5.64^2 + 2.05^2 \approx 31.81 + 4.20 = 36.01 \approx 6^2$ ✓.
+- Vérification avec le théorème de Pythagore : $5.64^2 + 2.05^2 \approx 31.81 + 4.20 = 36.01 \approx 6^2$. C'est juste.
 
 ### Exemple corrigé 3 : l'inconnue au dénominateur
 

@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 
-from apps.core.constants import GRADES, LANGUAGES
+from apps.core.constants import A_LEVEL_GRADES, COMBINATION_CHOICES, COMBINATIONS, GRADES, LANGUAGES
 
 
 class User(AbstractUser):
@@ -23,6 +23,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, null=True, blank=True)
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.STUDENT, db_index=True)
     grade = models.CharField(max_length=2, choices=GRADES, blank=True)
+    # An S4–S6 student's combination (MCE, PCB...): its principal subjects come first in their subject lists.
+    combination = models.CharField(max_length=3, choices=COMBINATION_CHOICES, blank=True, default="")
     # The school the user belongs to. Membership only counts once the school approves it
     # (or the user entered the school's code), because membership unlocks the school's subscription.
     school = models.ForeignKey("schools.School", null=True, blank=True, on_delete=models.SET_NULL, related_name="members")
@@ -32,6 +34,8 @@ class User(AbstractUser):
     # What the user typed before schools were a list (kept for reference, not used for access).
     school_name = models.CharField(max_length=200, blank=True)
     preferred_language = models.CharField(max_length=2, choices=LANGUAGES, default="en")
+    # The avatar the user built in their profile (see avatar.py); empty = one drawn from their id.
+    avatar = models.JSONField(default=dict, blank=True)
 
     # Self-registered teachers must be approved by an administrator before they
     # can create classes or author content (safeguarding: classes contain minors).
@@ -83,6 +87,13 @@ class User(AbstractUser):
     @property
     def is_school_admin(self):
         return self.role == self.Role.SCHOOL_ADMIN
+
+    @property
+    def combination_subjects(self):
+        """The principal subjects of an S4–S6 student's combination (subject codes). O-level ignores it."""
+        if self.is_student and self.grade in A_LEVEL_GRADES:
+            return list(COMBINATIONS.get(self.combination, ()))
+        return []
 
     @property
     def school_member(self):

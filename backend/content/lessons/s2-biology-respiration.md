@@ -41,9 +41,9 @@ The oxygen comes from the air we breathe in. The carbon dioxide is carried by th
 
 Is the symbol equation balanced? Count each type of atom on both sides.
 
-- **Carbon:** left $6$; right $6 \times 1 = 6$ ✓
-- **Hydrogen:** left $12$; right $6 \times 2 = 12$ ✓
-- **Oxygen:** left $6 + (6 \times 2) = 6 + 12 = 18$; right $(6 \times 2) + (6 \times 1) = 12 + 6 = 18$ ✓
+- **Carbon:** left $6$; right $6 \times 1 = 6$ (equal)
+- **Hydrogen:** left $12$; right $6 \times 2 = 12$ (equal)
+- **Oxygen:** left $6 + (6 \times 2) = 6 + 12 = 18$; right $(6 \times 2) + (6 \times 1) = 12 + 6 = 18$ (equal)
 
 Every atom is accounted for, so the equation is balanced. Atoms are only rearranged; the energy that was stored in glucose is released.
 

@@ -98,7 +98,7 @@ A 0.50 kg mass hangs on a spring with $k = 200$ N/m. It is pulled down 4.0 cm an
 
 **Total energy:** $E = \tfrac{1}{2}kA^2 = 0.5 \times 200 \times 0.040^2 = 0.16$ J
 
-Check: $\tfrac{1}{2}mv_{\max}^2 = 0.5 \times 0.50 \times 0.80^2 = 0.16$ J. ✓
+Check: $\tfrac{1}{2}mv_{\max}^2 = 0.5 \times 0.50 \times 0.80^2 = 0.16$ J. Correct.
 
 **Speed when $x = 2.0$ cm:**
 

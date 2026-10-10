@@ -43,6 +43,10 @@ class Enrollment(models.Model):
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE, related_name="enrollments")
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="enrollments")
     joined_at = models.DateTimeField(auto_now_add=True)
+    # False once the student moved to another grade: the class leaves their lists, but the teacher keeps
+    # them (and their results) in the roster and gradebook, marked as moved. See services.follow_grade.
+    active = models.BooleanField(default=True, db_index=True)
+    left_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["classroom", "student"], name="unique_enrollment")]

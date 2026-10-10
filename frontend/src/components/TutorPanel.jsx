@@ -1,165 +1,90 @@
 import { useEffect, useRef, useState } from "react";
 
-import { api } from "../api";
-import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
-import Markdown from "./Markdown";
+import { Icon } from "./Icon";
+import { SantaForm, SantaLog, SantaMark, SantaNote, SantaState, useSantaChat, useScrollToEnd, useTutorStatus } from "./Santa";
 import { ErrorMessage } from "./ui";
 
-const statusRequests = new Map();
+export { useTutorStatus };
 
-const OFF = { enabled: false, reason: "" };
-
-/**
- * The tutor's status for this user, asked once per user and access state:
- * `{ enabled, reason, loading, retry }`. reason is "subscription_required" when the tutor is on but
- * this student's school hasn't subscribed, and "unreachable" when the server couldn't be asked
- * (that answer isn't kept, so the next page or `retry()` asks again).
- */
-export function useTutorStatus() {
-  const { user } = useAuth();
-  const key = user ? `${user.id}:${user.access?.premium ? 1 : 0}` : "";
-  const [status, setStatus] = useState({ key: "", ...OFF });
-  const [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    if (!key) return undefined;
-    if (!statusRequests.has(key)) {
-      statusRequests.set(
-        key,
-        api("/tutor/status/")
-          .then((s) => ({ enabled: Boolean(s?.enabled), reason: s?.reason || "" }))
-          .catch(() => {
-            statusRequests.delete(key);
-            return { enabled: false, reason: "unreachable" };
-          }),
-      );
-    }
-    let alive = true;
-    statusRequests.get(key).then((value) => alive && setStatus({ key, ...value }));
-    return () => {
-      alive = false;
-    };
-  }, [key, attempt]);
-  const retry = () => {
-    setStatus({ key: "", ...OFF });
-    setAttempt((n) => n + 1);
-  };
-  if (!key) return { ...OFF, loading: false, retry };
-  return status.key === key
-    ? { enabled: status.enabled, reason: status.reason, loading: false, retry }
-    : { ...OFF, loading: true, retry };
-}
-
-/** Whether the tutor is on and this user may use it. */
+/** Whether Santa is on and this user may use it. */
 export function useTutorEnabled() {
   return useTutorStatus().enabled;
 }
 
 /**
- * A small chat with the AI tutor about what the student is looking at.
+ * A small chat with Santa about what the student is looking at.
  * Pass `lesson` (slug) and/or `attempt` + `question` (ids); the server decides what
- * the tutor may see, so answers stay hidden until the student is allowed to see them.
+ * Santa may see, so answers stay hidden until the student is allowed to see them.
  */
 export default function TutorPanel({ lesson, attempt, question, starters = [], label, defaultOpen = false, lang: readingLang }) {
   const { t, lang: uiLang } = useI18n();
-  const lang = readingLang || uiLang; // the tutor answers in the language the student is reading
-  const enabled = useTutorEnabled();
+  const lang = readingLang || uiLang; // Santa answers in the language the student is reading
+  const status = useTutorStatus();
   const [open, setOpen] = useState(defaultOpen);
-  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(null);
+  const chat = useSantaChat({ scope: { lesson, attempt, question }, lang });
   const log = useRef(null);
+  const box = useRef(null);
+  const opened = useRef(defaultOpen);
+  useScrollToEnd(log, chat.messages, chat.phase);
 
   useEffect(() => {
-    if (log.current) log.current.scrollTop = log.current.scrollHeight;
-  }, [messages.length, busy]);
+    // Opening the panel puts the cursor in the question box (not on page load).
+    if (open && !opened.current) box.current?.focus();
+    opened.current = open;
+  }, [open]);
 
-  if (!enabled) return null;
-
-  async function send(text) {
-    const message = text.trim();
-    if (!message || busy) return;
-    const history = messages;
-    setMessages([...history, { role: "user", content: message }]);
-    setInput("");
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await api("/tutor/ask/", {
-        method: "POST",
-        body: { message, history, lesson, attempt, question, lang },
-      });
-      setMessages((current) => [...current, { role: "assistant", content: res.reply }]);
-    } catch (err) {
-      setError(err);
-      setMessages(history);
-      setInput(message);
-    } finally {
-      setBusy(false);
-    }
-  }
+  if (!status.enabled) return null;
 
   if (!open) {
     return (
-      <button className="btn btn-secondary btn-sm" onClick={() => setOpen(true)}>
-        {label || `🤖 ${t("tutor.open")}`}
+      <button className="btn btn-secondary btn-sm santa-open" onClick={() => setOpen(true)}>
+        <SantaMark size={18} />
+        {label || t("tutor.open")}
       </button>
     );
   }
 
+  const id = `tutor-${lesson || ""}-${question || ""}`;
   return (
     <section className="card tutor" aria-label={t("tutor.title")}>
       <div className="spread">
-        <strong>🤖 {t("tutor.title")}</strong>
-        <button className="btn btn-ghost btn-sm" onClick={() => setOpen(false)} aria-label={t("common.close")}>
-          ✕
+        <strong className="santa-title">
+          <SantaMark size={22} />
+          {t("tutor.title")}
+        </strong>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => {
+            chat.stop();
+            setOpen(false);
+          }}
+          aria-label={t("common.close")}
+        >
+          <Icon name="close" />
         </button>
       </div>
-      <p className="small muted" style={{ margin: "4px 0 10px" }}>
-        {t("tutor.disclaimer")}
-      </p>
-      <div className="chat-log tutor-log" ref={log} aria-live="polite">
-        {messages.map((m, i) => (
-          <div key={i} className={`bubble ${m.role === "user" ? "mine" : ""}`}>
-            {m.role === "assistant" ? <Markdown interactive={false}>{m.content}</Markdown> : m.content}
+      <SantaNote />
+      <SantaState status={status} />
+      {status.state !== "exam" && (
+        <>
+          <SantaLog chat={chat} logRef={log} className="tutor-log" />
+          {chat.messages.length === 0 && starters.length > 0 && (
+            <div className="chips wrap" style={{ margin: "8px 0" }}>
+              {starters.map((s) => (
+                <button key={s} className="chip" onClick={() => chat.send(s)} disabled={chat.busy}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+          <ErrorMessage error={chat.error} />
+          <div style={{ marginTop: 8 }}>
+            <SantaForm id={id} chat={chat} value={input} onChange={setInput} inputRef={box} placeholder={t("tutor.placeholder")} />
           </div>
-        ))}
-        {busy && <div className="bubble muted">{t("tutor.thinking")}</div>}
-      </div>
-      {messages.length === 0 && starters.length > 0 && (
-        <div className="chips" style={{ flexWrap: "wrap", margin: "8px 0" }}>
-          {starters.map((s) => (
-            <button key={s} className="chip" onClick={() => send(s)} disabled={busy}>
-              {s}
-            </button>
-          ))}
-        </div>
+        </>
       )}
-      <ErrorMessage error={error} />
-      <form
-        className="chat-form"
-        style={{ marginTop: 8 }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          send(input);
-        }}
-      >
-        <label className="sr-only" htmlFor={`tutor-${lesson || ""}-${question || ""}`}>
-          {t("tutor.placeholder")}
-        </label>
-        <input
-          id={`tutor-${lesson || ""}-${question || ""}`}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={t("tutor.placeholder")}
-          maxLength={2000}
-          autoComplete="off"
-        />
-        <button className="btn" disabled={busy || !input.trim()}>
-          {t("groups.send")}
-        </button>
-      </form>
     </section>
   );
 }

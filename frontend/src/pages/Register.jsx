@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import { Icon } from "../components/Icon";
 import SchoolPicker, { DistrictSelect } from "../components/SchoolPicker";
 import { GRADES } from "../components/ui";
 import { useI18n } from "../i18n";
 import AuthShell from "./AuthShell";
 
-const ROLES = { student: "🎒 ", teacher: "🧑🏽‍🏫 ", parent: "👨‍👩‍👧 ", school_admin: "🏫 " };
+// Role -> icon on the role buttons.
+const ROLES = { student: "backpack", teacher: "teach", parent: "users", school_admin: "school" };
 
 export default function Register() {
   const { register } = useAuth();
@@ -66,11 +68,11 @@ export default function Register() {
               <button
                 type="button"
                 key={role}
-                className={`chip ${form.role === role ? "active" : ""}`}
+                className={`chip with-icon ${form.role === role ? "active" : ""}`}
                 aria-pressed={form.role === role}
                 onClick={() => setForm((f) => ({ ...f, role }))}
               >
-                {ROLES[role]}
+                <Icon name={ROLES[role]} size={16} />
                 {t(`auth.${role === "school_admin" ? "schoolAdmin" : role}`)}
               </button>
             ))}

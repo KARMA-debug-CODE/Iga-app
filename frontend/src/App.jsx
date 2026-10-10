@@ -30,6 +30,7 @@ const Marking = lazy(() => import("./pages/Marking"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Search = lazy(() => import("./pages/Search"));
 const Playground = lazy(() => import("./pages/Playground"));
+const CalculatorPage = lazy(() => import("./pages/Calculator"));
 const Ask = lazy(() => import("./pages/Ask"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ChildReport = lazy(() => import("./pages/Children"));
@@ -128,6 +129,7 @@ export default function App() {
               <Route path="/profile" element={page(<Profile />)} />
               <Route path="/search" element={page(<Search />)} />
               <Route path="/playground" element={page(<Playground />)} />
+              <Route path="/calculator" element={page(<CalculatorPage />)} />
               <Route path="/ask" element={page(<Ask />)} />
               <Route path="/children/:id" element={page(<ChildReport />)} />
               <Route path="/teach" element={page(<Teach />, { teacher: true })} />

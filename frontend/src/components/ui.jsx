@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useI18n } from "../i18n";
+import { Icon } from "./Icon";
 
 export function Spinner() {
   const { t } = useI18n();
@@ -35,11 +36,11 @@ export function Loader({ state, children }) {
   return children(state.data);
 }
 
-export function Empty({ icon = "🌱", children }) {
+export function Empty({ icon = "inbox", children }) {
   return (
     <div className="empty">
-      <div className="big" aria-hidden>
-        {icon}
+      <div className="big">
+        <Icon name={icon} size={40} strokeWidth={1.6} />
       </div>
       <p>{children}</p>
     </div>

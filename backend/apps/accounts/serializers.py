@@ -3,12 +3,13 @@ from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from apps.core.constants import GRADE_CODES
+from apps.core.constants import A_LEVEL_GRADES, GRADE_CODES
 from apps.schools.access import content_access
 from apps.schools.constants import DISTRICTS
 from apps.schools.membership import choose_school
 from apps.schools.models import School
 
+from . import avatar
 from .models import User
 
 
@@ -34,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
     access = serializers.SerializerMethodField()
     display_name = serializers.CharField(read_only=True)
     badges = serializers.SerializerMethodField()
+    combination_subjects = serializers.ListField(child=serializers.CharField(), read_only=True)
 
     class Meta:
         model = User
@@ -46,10 +48,13 @@ class UserSerializer(serializers.ModelSerializer):
             "display_name",
             "role",
             "grade",
+            "combination",
+            "combination_subjects",
             "school",
             "school_status",
             "access",
             "preferred_language",
+            "avatar",
             "xp",
             "streak_days",
             "teacher_approved",
@@ -72,6 +77,9 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
         ]
 
+    def validate_avatar(self, value):
+        return avatar.clean(value)
+
     def get_school(self, user):
         return school_summary(user)
 
@@ -89,6 +97,16 @@ class UserSerializer(serializers.ModelSerializer):
         if value and value not in GRADE_CODES:
             raise serializers.ValidationError(_("Unknown grade."))
         return value
+
+    def validate(self, attrs):
+        user = self.instance
+        if attrs.get("combination") and user is not None and not user.is_student:
+            raise serializers.ValidationError({"combination": _("Only students in S4–S6 choose a combination.")})
+        # A combination belongs to A-level: moving to S1–S3 (or saving one there) leaves none.
+        if user is not None and ("grade" in attrs or "combination" in attrs):
+            if attrs.get("grade", user.grade) not in A_LEVEL_GRADES:
+                attrs["combination"] = ""
+        return attrs
 
     def validate_email(self, value):
         if not value:
@@ -111,7 +129,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "display_name", "role", "grade", "xp"]
+        fields = ["id", "username", "display_name", "role", "grade", "xp", "avatar"]
 
 
 class NewSchoolSerializer(serializers.Serializer):

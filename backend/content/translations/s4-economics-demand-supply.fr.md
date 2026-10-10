@@ -83,7 +83,7 @@ Trouvez l'équilibre. Expliquez ensuite ce qui se passe à 1 200 FRW et à 800 F
 1. Cherchez le prix où les deux barèmes donnent la même quantité : à 1 000 FRW, 300 kg sont demandés et 300 kg sont offerts. Équilibre : 1 000 FRW le kg, 300 kg par jour.
 2. À 1 200 FRW : 200 kg demandés, 400 kg offerts. Excédent $= 400 - 200 = 200$ kg. Les vendeurs ne veulent pas rapporter leurs haricots à la maison, donc ils baissent le prix. Les acheteurs achètent alors davantage et les vendeurs proposent moins, jusqu'à ce que le prix revienne à 1 000 FRW.
 3. À 800 FRW : 400 kg demandés, 200 kg offerts. Pénurie $= 400 - 200 = 200$ kg. Les acheteurs se disputent les rares haricots, donc les vendeurs remontent le prix vers 1 000 FRW.
-4. Vérification : à 1 000 FRW, l'écart est $300 - 300 = 0$ ✓.
+4. Vérification : à 1 000 FRW, l'écart est $300 - 300 = 0$. C'est juste.
 
 ### Exemple corrigé 2 : L'équilibre à partir des équations
 
@@ -93,11 +93,11 @@ Les barèmes viennent de $Q_d = 800 - 0.5P$ et $Q_s = -200 + 0.5P$. Ici, $Q_d$ e
 2. Mettez les termes en $P$ d'un côté et les nombres de l'autre. Ajoutez $0.5P$ aux deux membres, et ajoutez $200$ aux deux membres : $800 + 200 = 0.5P + 0.5P$.
 3. Simplifiez : la moitié de $P$ plus la moitié de $P$ font un $P$ entier, donc $1\,000 = P$. Le prix d'équilibre est de 1 000 FRW le kg.
 4. Demande : $Q_d = 800 - 0.5(1\,000) = 800 - 500 = 300$ kg.
-5. Vérification avec l'offre : $Q_s = -200 + 0.5(1\,000) = -200 + 500 = 300$ kg ✓. Cela correspond au tableau.
+5. Vérification avec l'offre : $Q_s = -200 + 0.5(1\,000) = -200 + 500 = 300$ kg. C'est juste. Cela correspond au tableau.
 
 > **Astuce :** remplacez toujours le prix dans **les deux** équations. Si les quantités sont différentes, cherchez l'erreur.
 
-> **Des nombres différents devant $P$ ?** Suivez les mêmes étapes. Pour $Q_d = 70 - 2P$ et $Q_s = 3P - 10$ : $70 - 2P = 3P - 10$. Ajoutez $2P$ et $10$ aux deux membres : $80 = 5P$, donc $P = 80 \div 5 = 16$. Alors $Q_d = 70 - 2(16) = 38$, et la vérification donne $Q_s = 3(16) - 10 = 38$ ✓.
+> **Des nombres différents devant $P$ ?** Suivez les mêmes étapes. Pour $Q_d = 70 - 2P$ et $Q_s = 3P - 10$ : $70 - 2P = 3P - 10$. Ajoutez $2P$ et $10$ aux deux membres : $80 = 5P$, donc $P = 80 \div 5 = 16$. Alors $Q_d = 70 - 2(16) = 38$, et la vérification donne $Q_s = 3(16) - 10 = 38$, la même quantité.
 
 ## Qu'est-ce qui déplace la courbe de demande ?
 
@@ -159,7 +159,7 @@ Le prix passe de 800 à 1 000 FRW le kg. Rien d'autre ne change.
 
 1. Seul le prix du bien lui-même a changé, donc c'est un **mouvement le long** de la courbe de demande, de B vers A.
 2. La quantité demandée passe de 400 kg à 300 kg : une **contraction** de 100 kg.
-3. Vérification : $Q_d = 800 - 0.5(1\,000) = 300$ kg ✓. Dites « la quantité demandée a diminué », et non « la demande a diminué ».
+3. Vérification : $Q_d = 800 - 0.5(1\,000) = 300$ kg. C'est juste. Dites « la quantité demandée a diminué », et non « la demande a diminué ».
 
 ### Exemple corrigé 4 : Les revenus augmentent à Kigali
 
@@ -168,7 +168,7 @@ Grâce à des revenus plus élevés, les acheteurs veulent 100 kg de plus à cha
 1. Le revenu n'est pas le prix du bien lui-même, donc la demande **se déplace vers la droite**.
 2. Égalisez la demande et l'offre : $900 - 0.5P = -200 + 0.5P$. Alors $900 + 200 = 0.5P + 0.5P$, donc $P = 1\,100$ FRW.
 3. Quantité : $Q_d = 900 - 0.5(1\,100) = 900 - 550 = 350$ kg.
-4. Vérification : $Q_s = -200 + 0.5(1\,100) = -200 + 550 = 350$ kg ✓.
+4. Vérification : $Q_s = -200 + 0.5(1\,100) = -200 + 550 = 350$ kg. C'est juste.
 5. Le prix passe de 1 000 à 1 100 FRW, et la quantité de 300 à 350 kg. L'offre ne s'est pas déplacée ; les vendeurs se sont déplacés le long de leur courbe.
 
 ### Exemple corrigé 5 : Une sécheresse frappe la récolte de haricots
@@ -178,7 +178,7 @@ Grâce à des revenus plus élevés, les acheteurs veulent 100 kg de plus à cha
 1. La météo n'est pas le prix du bien lui-même, donc l'offre **se déplace vers la gauche**.
 2. Égalisez-les : $800 - 0.5P = -300 + 0.5P$. Alors $800 + 300 = 0.5P + 0.5P$, donc $P = 1\,100$ FRW.
 3. Quantité : $Q_d = 800 - 0.5(1\,100) = 800 - 550 = 250$ kg.
-4. Vérification : $Q_s = -300 + 0.5(1\,100) = -300 + 550 = 250$ kg ✓.
+4. Vérification : $Q_s = -300 + 0.5(1\,100) = -300 + 550 = 250$ kg. C'est juste.
 5. Le prix passe de 1 000 à 1 100 FRW, mais la quantité baisse de 300 à 250 kg. Les acheteurs paient plus cher et obtiennent moins.
 
 ## Tableau récapitulatif

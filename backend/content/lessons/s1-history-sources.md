@@ -38,7 +38,7 @@ For each source, ask: "Was it made at the time, by someone who was there?"
 
 **It depends on your question.** The documentary is secondary for life in the early 1900s. But it is primary if your question is "How did film-makers in 2020 tell the story of the past?" In the same way, when your grandmother repeats what *her* grandmother told her, that part is oral tradition, not her eyewitness account.
 
-Check: 4 primary and 2 secondary, each with a reason ✓
+Check: 4 primary and 2 secondary, each with a reason. Done.
 
 ## Main sources of history
 
@@ -108,7 +108,7 @@ This account was invented for practice. It is not a real document.
 4. **Agree?** Compare it with oral traditions about local chiefs, farming tools found by archaeologists and other records of markets. If they disagree, trust him less.
 5. **Conclusion:** weak evidence about markets and chiefs, but useful evidence about how some Europeans argued for colonial rule.
 
-Check: all four questions answered ✓
+Check: all four questions answered. Done.
 
 ### Worked example 3: when did the market begin?
 
@@ -123,7 +123,7 @@ This example is invented. A student wants to know when her village market starte
 3. C is about 20 years earlier. It was written much later and does not say where its number came from.
 4. **Conclusion:** the market most likely began around 1965–1966.
 
-Check: two independent primary sources agree, so the answer is corroborated ✓
+Check: two independent primary sources agree, so the answer is corroborated.
 
 ## Bias, fact and opinion
 
@@ -141,7 +141,7 @@ A **fact** can be checked and proved true or false. An **opinion** is what someo
 4. "Oral tradition was passed down by word of mouth." **Fact**.
 5. "Proverbs are the most beautiful part of our culture." **Opinion**: people can disagree.
 
-Check: 3 facts and 2 opinions; each opinion has a judgement word ✓
+Check: 3 facts and 2 opinions; each opinion has a judgement word. Done.
 
 ## Try it at home: interview an elder
 

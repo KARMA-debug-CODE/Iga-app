@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "../api";
 import { useAuth } from "../auth";
+import Avatar from "../components/Avatar";
+import { Icon, SubjectIcon } from "../components/Icon";
 import Markdown from "../components/Markdown";
 import { Empty, ErrorMessage, Loader, Tabs, useToast } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
@@ -94,19 +96,22 @@ function Chat({ group }) {
     <div className="card chat">
       {toast}
       <div className="chat-log" ref={log} aria-live="polite">
-        {messages.length === 0 && <Empty icon="💬">{t("groups.typeMessage")}</Empty>}
+        {messages.length === 0 && <Empty icon="message">{t("groups.typeMessage")}</Empty>}
         {messages.map((m) => {
           const mine = m.author?.id === user.id;
           return (
-            <div key={m.id} className={`bubble ${mine ? "mine" : ""} ${m.is_hidden ? "hidden" : ""}`}>
-              <div className="meta">
-                <strong>{mine ? t("board.you") : m.author?.name || "—"}</strong>
-                {m.author?.role === "teacher" && <span className="pill pill-blue">🧑🏽‍🏫</span>}
-                <span>{formatDate(m.created_at, lang)}</span>
-                {!mine && !m.is_hidden && <button onClick={() => report(m)}>{t("groups.report")}</button>}
-                {group.can_moderate && !m.is_hidden && <button onClick={() => hide(m)}>{t("groups.hide")}</button>}
+            <div key={m.id} className={`msg-row ${mine ? "mine" : ""}`}>
+              {!mine && <Avatar user={m.author} size={32} title="" />}
+              <div className={`bubble ${mine ? "mine" : ""} ${m.is_hidden ? "hidden" : ""}`}>
+                <div className="meta">
+                  <strong>{mine ? t("board.you") : m.author?.name || "—"}</strong>
+                  {m.author?.role === "teacher" && <span className="pill pill-blue">{t("auth.teacher")}</span>}
+                  <span>{formatDate(m.created_at, lang)}</span>
+                  {!mine && !m.is_hidden && <button onClick={() => report(m)}>{t("groups.report")}</button>}
+                  {group.can_moderate && !m.is_hidden && <button onClick={() => hide(m)}>{t("groups.hide")}</button>}
+                </div>
+                <div>{m.body}</div>
               </div>
-              <div>{m.body}</div>
             </div>
           );
         })}
@@ -156,7 +161,7 @@ function Notes({ group }) {
               ))}
             </div>
           ) : (
-            <Empty icon="🗒️">—</Empty>
+            <Empty icon="notebook">—</Empty>
           )
         }
       </Loader>
@@ -193,8 +198,8 @@ export default function GroupDetail() {
           </div>
           <div className="page-header spread">
             <div>
-              <h1 style={{ margin: 0 }}>
-                {group.subject_icon} {group.name}
+              <h1 className="title-with-icon" style={{ margin: 0 }}>
+                <SubjectIcon name={group.subject_icon} size={28} /> {group.name}
               </h1>
               <p>{group.description}</p>
             </div>
@@ -220,9 +225,9 @@ export default function GroupDetail() {
                 value={tab}
                 onChange={setTab}
                 tabs={[
-                  { value: "chat", label: `💬 ${t("groups.chat")}` },
-                  { value: "notes", label: `🗒️ ${t("groups.notes")}` },
-                  { value: "members", label: `👥 ${t("groups.members")} (${group.members?.length || 0})` },
+                  { value: "chat", label: t("groups.chat") },
+                  { value: "notes", label: t("groups.notes") },
+                  { value: "members", label: `${t("groups.members")} (${group.members?.length || 0})` },
                 ]}
               />
               {tab === "chat" && <Chat group={group} />}
@@ -233,9 +238,20 @@ export default function GroupDetail() {
                     {(group.members || []).map((m) => (
                       <li key={m.id} className="spread">
                         <span>
-                          <strong>{m.display_name}</strong> {m.group_role === "owner" && <span className="pill pill-warn">★</span>}
+                          <strong>{m.display_name}</strong>{" "}
+                          {m.group_role === "owner" && (
+                            <span className="pill pill-warn" title={t("groups.owner")}>
+                              <Icon name="star" size={14} label={t("groups.owner")} />
+                            </span>
+                          )}
                         </span>
-                        <span className="small muted">{m.role === "teacher" ? `🧑🏽‍🏫 ${t("auth.teacher")}` : m.grade}</span>
+                        {m.role === "teacher" ? (
+                          <span className="small muted with-icon">
+                            <Icon name="teach" size={14} /> {t("auth.teacher")}
+                          </span>
+                        ) : (
+                          <span className="small muted">{m.grade}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -251,8 +267,8 @@ export default function GroupDetail() {
                   </button>
                 </div>
               )}
-              <p className="small muted" style={{ marginTop: 12 }}>
-                ⓘ {t("groups.rules")}
+              <p className="small muted line-with-icon" style={{ marginTop: 12 }}>
+                <Icon name="info" size={14} /> <span>{t("groups.rules")}</span>
               </p>
             </>
           )}

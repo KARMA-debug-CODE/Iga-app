@@ -26,7 +26,7 @@ Keza a 2 000 FRW. Elle aimerait un forfait internet (2 000 FRW) et elle a aussi 
 2. Classez-les. Les cahiers l'aident à étudier, donc ils passent en premier. Le forfait internet est son deuxième meilleur choix.
 3. Keza achète les cahiers.
 4. Son coût d'opportunité est le **forfait internet**, la chose à laquelle elle a renoncé.
-5. Vérification : le coût d'opportunité est une *chose* (le forfait internet), et non « 2 000 FRW » ✓.
+5. Vérification : le coût d'opportunité est une *chose* (le forfait internet), et non « 2 000 FRW ». C'est juste.
 
 Le coût d'opportunité ne concerne pas seulement l'argent. Si vous passez le samedi après-midi à vendre des œufs, le coût d'opportunité peut être le match de football que vous avez manqué.
 
@@ -94,7 +94,7 @@ Voici son budget terminé :
 | **Total des dépenses** | | **10 500** |
 | **Épargne** | | **1 500** |
 
-Vérification : $12\,000 - 10\,500 = 1\,500$ FRW ✓. C'est un budget excédentaire, et tout l'excédent va dans l'épargne.
+Vérification : $12\,000 - 10\,500 = 1\,500$ FRW. C'est juste. C'est un budget excédentaire, et tout l'excédent va dans l'épargne.
 
 ## Quand les dépenses dépassent les revenus
 
@@ -113,7 +113,7 @@ Eric a des revenus de 12 000 FRW par mois. Il prévoit de dépenser :
 4. Supprimez un désir : les écouteurs peuvent attendre. Nouveau total : $13\,500 - 1\,000 = 12\,500$ FRW. Il reste un déficit de 500 FRW.
 5. Réduisez un autre désir : les friandises passent de 2 000 à 1 000 FRW. Nouveau total : $12\,500 - 1\,000 = 11\,500$ FRW.
 6. Maintenant $12\,000 - 11\,500 = 500$ FRW. Eric a un excédent de 500 FRW, qu'il épargne.
-7. Vérification : $7\,500 + 3\,000 + 1\,000 = 11\,500$ FRW ✓.
+7. Vérification : $7\,500 + 3\,000 + 1\,000 = 11\,500$ FRW. C'est juste.
 
 Le mois prochain, Eric pourra se payer d'abord, comme Keza.
 
@@ -131,7 +131,7 @@ Keza veut un vélo qui coûte 60 000 FRW. Combien de temps lui faudra-t-il pour 
 2. Si elle épargne 4 000 FRW par mois : $60\,000 \div 4\,000 = 15$ mois.
 3. Si elle épargne 5 000 FRW par mois : $60\,000 \div 5\,000 = 12$ mois.
 4. Épargner 1 000 FRW de plus chaque mois lui donne le vélo 3 mois plus tôt.
-5. Vérification : $12 \times 5\,000 = 60\,000$ FRW ✓.
+5. Vérification : $12 \times 5\,000 = 60\,000$ FRW. C'est juste.
 
 ## Les façons d'épargner au Rwanda
 
@@ -167,7 +167,7 @@ Voici une semaine du suivi de Keza :
 4. Cherchez les petites dépenses qui reviennent : les bonbons, 3 fois à 100 FRW, donc 300 FRW par semaine.
 5. En 4 semaines : $300 \times 4 = 1\,200$ FRW. C'est autant que toute la somme qu'elle épargne d'abord !
 6. Comparez avec son plan de l'exemple corrigé 2 : elle avait prévu 1 000 FRW de friandises par mois. Cette semaine, les bonbons et le chapati ont coûté $300 + 300 = 600$ FRW, donc environ $600 \times 4 = 2\,400$ FRW en 4 semaines. Elle dépense plus que prévu en friandises, donc la semaine prochaine elle peut supprimer les bonbons.
-7. Vérification : additionnez les huit montants du tableau : $500 + 100 + 100 + 500 + 500 + 100 + 200 + 300 = 2\,300$ FRW ✓.
+7. Vérification : additionnez les huit montants du tableau : $500 + 100 + 100 + 500 + 500 + 100 + 200 + 300 = 2\,300$ FRW. C'est juste.
 
 ## Erreurs fréquentes
 

@@ -42,7 +42,7 @@ Here is a football kicked at $u = 20$ m/s and $\theta = 30^\circ$:
    u_x = 20 cos 30° = 17.3 m/s
 ```
 
-The two components and $u$ form a right-angled triangle, so Pythagoras checks them: $\sqrt{17.32^2 + 10^2} = \sqrt{300 + 100} = 20$ m/s ✓.
+The two components and $u$ form a right-angled triangle, so Pythagoras checks them: $\sqrt{17.32^2 + 10^2} = \sqrt{300 + 100} = 20$ m/s, as expected.
 
 > Make sure your calculator is in **degrees** mode (it shows D or DEG). Test it: $\sin 30^\circ$ must give $0.5$.
 
@@ -95,7 +95,7 @@ The time to reach the top comes from $v_y = u_y - gt$ with $v_y = 0$. This gives
 
 $$R = u_x \times T = u\cos\theta \times \frac{2u\sin\theta}{g} = \frac{u^2 \times 2\sin\theta\cos\theta}{g}$$
 
-A trigonometry identity says $2\sin\theta\cos\theta = \sin 2\theta$. Check it with $\theta = 30^\circ$: $2 \times 0.5 \times 0.866 = 0.866$, and $\sin 60^\circ = 0.866$ ✓. So
+A trigonometry identity says $2\sin\theta\cos\theta = \sin 2\theta$. Check it with $\theta = 30^\circ$: $2 \times 0.5 \times 0.866 = 0.866$, and $\sin 60^\circ = 0.866$ too. So
 
 $$R = \frac{u^2 \sin 2\theta}{g}$$
 
@@ -109,7 +109,7 @@ A footballer kicks a ball at 20 m/s at 30° above the ground. Find the time of f
 2. Time of flight: $T = \dfrac{2 \times 10}{9.8} = \dfrac{20}{9.8} \approx 2.04$ s.
 3. Maximum height: $H = \dfrac{20^2 \times 0.5^2}{2 \times 9.8} = \dfrac{100}{19.6} \approx 5.10$ m.
 4. Range: $R = \dfrac{20^2 \times \sin 60^\circ}{9.8} = \dfrac{400 \times 0.866}{9.8} \approx 35.3$ m.
-5. Check: the range should also equal $u_x \times T = 17.32 \times 2.04 \approx 35.3$ m ✓.
+5. Check: the range should also equal $u_x \times T = 17.32 \times 2.04 \approx 35.3$ m. Correct.
 
 ## Which angle goes furthest?
 
@@ -125,7 +125,7 @@ The footballer kicks again at 20 m/s, but this time at 60°. Compare the results
 2. Time of flight: $T = \dfrac{2 \times 17.32}{9.8} \approx 3.53$ s, longer than 2.04 s.
 3. Maximum height: $H = \dfrac{17.32^2}{2 \times 9.8} = \dfrac{300}{19.6} \approx 15.3$ m, three times higher.
 4. Range: $R = \dfrac{400 \times \sin 120^\circ}{9.8} = \dfrac{400 \times 0.866}{9.8} \approx 35.3$ m.
-5. Check: the range is the same as at 30°, because $30^\circ + 60^\circ = 90^\circ$ ✓.
+5. Check: the range is the same as at 30°, because $30^\circ + 60^\circ = 90^\circ$. Correct.
 
 ## Velocity and position at any moment
 
@@ -145,7 +145,7 @@ Use the kick from Worked example 1 (20 m/s at 30°). Find the ball's velocity 1.
 2. Vertical: $v_y = 10 - 9.8 \times 1.5 = 10 - 14.7 = -4.7$ m/s. The minus sign means the ball is moving **down**.
 3. Speed: $v = \sqrt{17.32^2 + 4.7^2} = \sqrt{300 + 22.09} = \sqrt{322.09} \approx 17.9$ m/s.
 4. Direction: $\tan\alpha = \dfrac{4.7}{17.32} \approx 0.271$, so $\alpha = \tan^{-1} 0.271 \approx 15.2^\circ$ below the horizontal.
-5. Check: the ball reaches the top at $t_{\text{top}} = \dfrac{10}{9.8} \approx 1.02$ s. At 1.5 s it is past the top, so it should be falling, and $v_y$ is indeed negative ✓.
+5. Check: the ball reaches the top at $t_{\text{top}} = \dfrac{10}{9.8} \approx 1.02$ s. At 1.5 s it is past the top, so it should be falling, and $v_y$ is indeed negative.
 
 ### Worked example 4: does it clear the crossbar?
 
@@ -155,7 +155,7 @@ The same ball (20 m/s at 30°) is kicked towards a goal 30 m away. The crossbar 
 2. Find its height at that moment, using $\tfrac{1}{2} g = \tfrac{1}{2} \times 9.8 = 4.9$: $y = u_y t - \tfrac{1}{2} g t^2 = 10 \times 1.732 - 4.9 \times 1.732^2$.
 3. Since $1.732^2 = 3.00$, we get $y = 17.32 - 14.70 = 2.62$ m.
 4. Compare: 2.62 m is more than 2.44 m, so the ball passes about 0.18 m (18 cm) **over** the crossbar.
-5. Check: 1.732 s is less than $T = 2.04$ s, so the ball really is still in the air when it reaches the goal ✓.
+5. Check: 1.732 s is less than $T = 2.04$ s, so the ball really is still in the air when it reaches the goal.
 
 ## Horizontal launch
 
@@ -188,7 +188,7 @@ A student stands on a cliff 20 m above the water of Lake Kivu. She throws a ston
 4. (c) Vertical velocity: $v_y = 0 - 9.8 \times 2.02 \approx -19.8$ m/s, downward. The horizontal velocity is still 12 m/s.
 5. Speed: $v = \sqrt{12^2 + 19.8^2} = \sqrt{144 + 392} = \sqrt{536} \approx 23.2$ m/s.
 6. Direction: $\tan\alpha = \dfrac{19.8}{12} = 1.65$, so $\alpha = \tan^{-1} 1.65 \approx 58.8^\circ$ below the horizontal.
-7. Check with the "without $t$" equation: $v_y^2 = 0 - 2 \times 9.8 \times (-20) = 392$, and $\sqrt{392} \approx 19.8$ ✓.
+7. Check with the "without $t$" equation: $v_y^2 = 0 - 2 \times 9.8 \times (-20) = 392$, and $\sqrt{392} \approx 19.8$. Correct.
 
 ## Real balls and air resistance
 

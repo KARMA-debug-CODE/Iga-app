@@ -42,11 +42,13 @@ def leaderboard(request):
     if scope == "class":
         classroom = Classroom.objects.filter(pk=request.query_params.get("classroom") or None).first()
         allowed = classroom and (
-            classroom.teacher_id == user.id or classroom.enrollments.filter(student=user).exists() or user.is_platform_admin
+            classroom.teacher_id == user.id
+            or classroom.enrollments.filter(student=user, active=True).exists()
+            or user.is_platform_admin
         )
         if not allowed:
             return Response({"detail": _("Class not found.")}, status=404)
-        students = students.filter(enrollments__classroom=classroom)
+        students = students.filter(enrollments__classroom=classroom, enrollments__active=True)
     elif not (user.is_student or user.is_platform_admin):
         return _empty(scope, period)
     elif scope == "school":
@@ -80,13 +82,22 @@ def leaderboard(request):
     for uid, points in top:
         rank = 1 + sum(1 for _, p in top if p > points)  # ties share a rank
         entries.append(
-            {"rank": rank, "name": users[uid].short_name, "grade": users[uid].grade, "points": points, "is_me": uid == user.pk}
+            {
+                "rank": rank,
+                "id": uid,
+                "name": users[uid].short_name,
+                "avatar": users[uid].avatar,
+                "grade": users[uid].grade,
+                "points": points,
+                "is_me": uid == user.pk,
+            }
         )
     me = next((e for e in entries if e["is_me"]), None)
     if me is None and my_points:
         me = {
             "rank": ahead_of_me(my_points) + 1,
             "name": user.short_name,
+            "avatar": user.avatar,
             "grade": user.grade,
             "points": my_points,
             "is_me": True,

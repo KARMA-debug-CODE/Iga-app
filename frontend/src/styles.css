@@ -209,13 +209,38 @@ p {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--green);
-  color: #fff;
   display: grid;
   place-items: center;
-  font-weight: 700;
   text-decoration: none;
   flex: none;
+}
+
+.avatar .avatar-svg {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--border);
+}
+
+.avatar:hover .avatar-svg,
+.avatar:focus-visible .avatar-svg {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--primary);
+}
+
+.nav-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.nav-toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .layout {
@@ -265,9 +290,13 @@ p {
   justify-content: center;
 }
 
-.bottom-nav .icon {
-  font-size: 1.35rem;
-  line-height: 1;
+.bottom-nav .nav-icon {
+  flex: none;
+}
+
+/* With the menu hidden there is no bottom bar on phones, so the page needs no room for it. */
+.layout.nav-hidden .main {
+  padding-bottom: 32px;
 }
 
 .bottom-nav a.active,
@@ -289,9 +318,18 @@ p {
     padding: 20px 8px 20px var(--gutter);
   }
 
+  .sidebar[hidden] {
+    display: none;
+  }
+
   .sidebar nav {
     display: grid;
     gap: 2px;
+  }
+
+  .layout.nav-hidden {
+    grid-template-columns: 1fr;
+    max-width: 1440px;
   }
 
   .sidebar a {
@@ -690,6 +728,21 @@ input[type="range"] {
   border-color: transparent;
 }
 
+.alert-info {
+  background: color-mix(in srgb, var(--blue) 12%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--blue) 30%, transparent);
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.alert-info .icon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--blue);
+}
+
 .empty {
   text-align: center;
   padding: 32px 16px;
@@ -697,7 +750,14 @@ input[type="range"] {
 }
 
 .empty .big {
-  font-size: 2.4rem;
+  display: inline-grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-soft);
 }
 
 .spinner {
@@ -789,9 +849,9 @@ input[type="range"] {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 1.4rem;
   flex: none;
   background: var(--surface-2);
+  color: var(--primary);
 }
 
 .truncate {
@@ -882,8 +942,22 @@ tr:last-child td {
   border-top: 5px solid var(--subject, var(--blue));
 }
 
-.subject-card .icon-tile {
+.subject-card .icon-tile,
+.icon-tile.subject-tile {
   background: color-mix(in srgb, var(--subject, var(--blue)) 16%, transparent);
+  /* Mixed with the text colour so light subject colours (yellow) stay readable in both themes. */
+  color: color-mix(in srgb, var(--subject, var(--blue)) 70%, var(--text));
+}
+
+/* An A-level student's subjects: their combination first, then the others. */
+.subject-group + .subject-group {
+  margin-top: 22px;
+}
+
+.subject-group > h2,
+.subject-group > h3 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
 }
 
 .stat {
@@ -987,6 +1061,23 @@ tr:last-child td {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+}
+
+/* Lesson tables: tighter cells on phones, and headers that can wrap, so most fit without scrolling. */
+.prose th,
+.prose td {
+  padding: 8px 6px;
+}
+
+.prose th {
+  white-space: normal;
+}
+
+@media (min-width: 760px) {
+  .prose th,
+  .prose td {
+    padding: 9px 12px;
+  }
 }
 
 .prose blockquote {
@@ -1280,6 +1371,14 @@ tr:last-child td {
   background: var(--surface-2);
 }
 
+.feedback.good .with-icon .icon {
+  color: var(--success);
+}
+
+.feedback.bad .with-icon .icon {
+  color: var(--danger);
+}
+
 .score-ring {
   --pct: 0;
   width: 140px;
@@ -1319,17 +1418,31 @@ tr:last-child td {
   padding: 4px 2px 12px;
 }
 
+.msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 88%;
+  align-self: flex-start;
+}
+
+.msg-row.mine {
+  align-self: flex-end;
+}
+
+.msg-row .avatar-svg {
+  flex: none;
+}
+
 .bubble {
-  max-width: 85%;
+  min-width: 0;
   padding: 8px 12px;
   border-radius: 16px;
   background: var(--surface-2);
-  align-self: flex-start;
   overflow-wrap: anywhere;
 }
 
 .bubble.mine {
-  align-self: flex-end;
   background: color-mix(in srgb, var(--blue) 22%, var(--surface));
 }
 
@@ -1364,11 +1477,29 @@ tr:last-child td {
 /* Leaderboard */
 
 .rank {
-  width: 36px;
-  text-align: center;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   flex: none;
+}
+
+.rank-1 {
+  background: #fde68a;
+  color: #78350f;
+}
+
+.rank-2 {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.rank-3 {
+  background: #fed7aa;
+  color: #7c2d12;
 }
 
 .me-row {
@@ -1391,8 +1522,15 @@ tr:last-child td {
   background: var(--surface-2);
 }
 
-.badge-tile .big {
-  font-size: 2rem;
+.badge-tile .badge-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--yellow) 30%, var(--surface));
+  color: color-mix(in srgb, var(--yellow) 30%, #7c4a03);
 }
 
 .badge-tile.locked {
@@ -1411,7 +1549,7 @@ tr:last-child td {
   display: inline-block;
 }
 
-/* AI tutor */
+/* Santa in lessons and quizzes (more in components/Santa.css) */
 
 .tutor {
   border-left: 5px solid var(--blue);
@@ -1426,7 +1564,7 @@ tr:last-child td {
   font-size: 0.98rem;
 }
 
-/* Ask AI page */
+/* The Santa page */
 
 .ask {
   display: flex;
@@ -1480,33 +1618,102 @@ tr:last-child td {
 
 .python-output-wrap {
   display: flex;
+  min-height: 0;
   flex-direction: column;
   min-width: 0;
   background: #0b141b;
 }
 
-.python-output {
-  margin: 0;
-  padding: 12px;
-  color: #e3edf5;
-  font-family: var(--mono);
-  font-size: 0.88rem;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  overflow-y: auto;
+/* Code editor (CodeMirror) and the terminal-style console */
+
+.code-editor {
+  min-width: 0;
+  background: #282c34;
+  display: flex;
+  flex-direction: column;
+}
+
+.code-editor .cm-editor {
   flex: 1;
 }
 
-.python-output .muted {
+.code-editor .cm-editor.cm-focused {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.playground textarea.code-editor-fallback {
+  background: #282c34;
+  color: #abb2bf;
+}
+
+.playground-title {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.console {
+  min-width: 0;
+  background: #0b141b;
+  color: #e3edf5;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  overflow-y: auto;
+  max-height: 640px;
+  flex: 1;
+  cursor: text;
+}
+
+.console-output {
+  margin: 0;
+  padding: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+
+.console .out-info {
   color: #8aa0b2;
 }
 
-.python-output .py-stderr {
+.console .out-stderr,
+.console .out-compile {
   color: #ff9b9b;
 }
 
-.python-output .py-result {
+.console .out-result {
   color: #9be7b4;
+}
+
+.console .out-stdin {
+  color: #ffd166;
+}
+
+.console-input {
+  display: inline-block;
+  min-height: 0;
+  width: auto;
+  padding: 0 2px;
+  margin: 0;
+  border: 0;
+  border-bottom: 2px solid #ffd166;
+  border-radius: 0;
+  background: transparent;
+  color: #ffd166;
+  font: inherit;
+  caret-color: #ffd166;
+  outline: none;
+  vertical-align: baseline;
+}
+
+.console-hint {
+  margin: 0;
+  padding: 0 12px 10px;
+  color: #8aa0b2;
+  font-family: var(--font);
+  font-size: 0.78rem;
 }
 
 .python-stdin {
@@ -1679,8 +1886,10 @@ tr:last-child td {
 }
 
 .locked-icon {
-  font-size: 1.6rem;
+  /* Without this the text beside it squeezes the box, and the icon (max-width: 100%) shrinks with it. */
+  flex: none;
   line-height: 1;
+  color: var(--text-soft);
 }
 
 .access-banner {
@@ -1862,4 +2071,285 @@ tr:last-child td {
 .playground-alert {
   margin: 0;
   border-radius: 0;
+}
+
+/* Profile */
+
+.profile-page {
+  max-width: 980px;
+}
+
+.profile-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px 20px;
+  align-items: center;
+  margin-bottom: 18px;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--blue) 14%, transparent), transparent 55%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--yellow) 16%, transparent), transparent 50%),
+    var(--surface);
+}
+
+.profile-hero-avatar {
+  position: relative;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.profile-hero-avatar .avatar-svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--surface), 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.profile-hero-edit {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--surface);
+}
+
+.profile-hero-text h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.profile-hero-text p {
+  margin: 2px 0 8px;
+}
+
+.profile-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.profile-hero-side {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+}
+
+.profile-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.profile-hero-stats div {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.profile-hero-stats dt {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.profile-hero-stats dd {
+  margin: 2px 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-hero-logout {
+  justify-self: start;
+}
+
+@media (min-width: 760px) {
+  .profile-hero {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .profile-hero-side {
+    grid-column: auto;
+  }
+
+  .profile-hero-stats {
+    grid-template-columns: repeat(3, minmax(84px, 1fr));
+  }
+
+  .profile-hero-logout {
+    justify-self: end;
+  }
+}
+
+.profile-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+}
+
+.profile-card h2 .icon {
+  color: var(--primary);
+}
+
+.profile-panel {
+  margin-top: 4px;
+}
+
+.theme-choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.theme-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 8px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-choice.selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+
+/* Avatars */
+
+.avatar-svg {
+  display: block;
+  flex: none;
+  border-radius: 50%;
+}
+
+.avatar-builder {
+  display: grid;
+  gap: 18px;
+}
+
+@media (min-width: 860px) {
+  .avatar-builder {
+    grid-template-columns: 220px 1fr;
+    align-items: start;
+  }
+
+  .avatar-preview {
+    position: sticky;
+    top: 84px;
+  }
+}
+
+.avatar-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-parts {
+  display: grid;
+  gap: 12px;
+}
+
+.avatar-part {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.avatar-part legend {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.avatar-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 2px;
+}
+
+.avatar-option {
+  flex: none;
+  padding: 3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--surface-2);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.avatar-option.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.avatar-option:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.icon {
+  flex: none;
+  vertical-align: -0.2em;
+}
+
+/* A page title that starts with a line icon. */
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-with-icon .icon {
+  flex: none;
+  color: var(--primary);
+}
+
+/* A short piece of text that starts with a line icon (a pill, a timer, a meta line). */
+.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A note or error line that starts with a line icon and may wrap. */
+.line-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.line-with-icon .icon {
+  margin-top: 0.15em;
+}
+
+.moved-pill {
+  margin-left: 6px;
+}
+
+.previous-classes summary {
+  cursor: pointer;
+  list-style-position: outside;
 }

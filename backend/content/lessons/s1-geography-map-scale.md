@@ -55,7 +55,7 @@ Write 1 : 25 000 and 1 : 250 000 as statement scales.
 3. Statement: "1 cm represents 0.25 km" (or 250 m).
 4. In the same way, 1 : 250 000 means 1 cm represents $250\,000$ cm $= 2\,500$ m $= 2.5$ km.
 
-Check: $0.25 \times 100\,000 = 25\,000$ ✓
+Check: $0.25 \times 100\,000 = 25\,000$. Correct.
 
 Here are the scales you will meet most often:
 
@@ -76,7 +76,7 @@ Write "1 cm represents 2 km" and "4 cm represent 1 km" as RFs.
 2. For the second, first find what 1 cm represents: $1 \div 4 = 0.25$ km.
 3. $0.25 \times 100\,000 = 25\,000$ cm, so the RF is **1 : 25 000**.
 
-Check: $4 \times 25\,000 = 100\,000$ cm $= 1$ km ✓
+Check: $4 \times 25\,000 = 100\,000$ cm $= 1$ km. Correct.
 
 ## Measuring distance
 
@@ -90,7 +90,7 @@ On the 1 : 50 000 topographic map used in class, a straight path from a school t
 
 Shortcut: on 1 : 50 000, 1 cm represents 0.5 km, so $8.4 \times 0.5 = 4.2$ km.
 
-Check: both methods give 4.2 km ✓
+Check: both methods give 4.2 km. Correct.
 
 ### Worked example 4: from the ground to the map
 
@@ -101,7 +101,7 @@ This time we go backwards, so we **divide** by the scale.
 1. Change to cm: $3.5 \times 100\,000 = 350\,000$ cm.
 2. Divide by the scale: $350\,000 \div 50\,000 = 7$ cm.
 
-Check: $7 \times 0.5 = 3.5$ km ✓
+Check: $7 \times 0.5 = 3.5$ km. Correct.
 
 ### Worked example 5: reading a bar scale with a paper strip
 
@@ -120,7 +120,7 @@ On many maps, the part of the bar scale to the **left of 0** is divided into sma
 4. Read A: it is 3 small parts left of 0, which is $3 \times 250 = 750$ m.
 5. Add: 2 km + 750 m = **2.75 km**.
 
-Check: $2 + 3 \times 0.25 = 2.75$ km ✓
+Check: $2 + 3 \times 0.25 = 2.75$ km. Correct.
 
 You did not need the RF at all: the bar scale did the work.
 
@@ -134,7 +134,7 @@ A winding road from a market to a school in Nyamagabe District is measured on a 
 2. Convert: $8.1 \times 0.5 = 4.05$ km.
 3. At 4 km/h you walk 4 km in each hour. So the time is distance ÷ speed: $4.05 \div 4 \approx 1.01$ h, which is **about 1 hour**. (This is the formula speed = distance ÷ time from the S1 physics lesson "Speed, velocity and acceleration", turned around.)
 
-Check: $4 \times 1 = 4$ km, very close to 4.05 km ✓
+Check: $4 \times 1 = 4$ km, very close to 4.05 km. Correct.
 
 A ruler laid straight from start to end would give a shorter, wrong answer, because a straight line is the shortest path.
 
