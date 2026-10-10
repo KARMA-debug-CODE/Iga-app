@@ -182,7 +182,7 @@ Comparez les résultats. Regardez aussi le **temps de réponse** : le temps entr
 | Temps de réponse | 4,75 | 4 | 1,5 |
 
 - Ici, SJF donne les plus petits temps d'attente et de séjour moyens.
-- Round Robin donne les plus grandes moyennes, mais le plus petit temps de réponse : chaque processus démarre moins de 4 ms après son arrivée. Pour quelqu'un qui tape au clavier, une réponse rapide compte davantage.
+- Round Robin donne les plus grandes moyennes, mais le plus petit temps de réponse : chaque processus démarre au plus 4 ms après son arrivée. Pour quelqu'un qui tape au clavier, une réponse rapide compte davantage.
 - FCFS est le plus simple, mais P3, qui n'a besoin que de 1 ms, attend 7 ms.
 
 Il n'existe pas un seul meilleur algorithme : chaque système d'exploitation choisit ce qui convient à ses objectifs, et les vrais systèmes combinent souvent plusieurs idées.

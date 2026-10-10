@@ -1,9 +1,10 @@
 import json
+import re
 
 import pytest
 
 from apps.assessments.models import ExamPaper, Question, Quiz
-from apps.core.content_loader import ContentError, import_quiz_file, load_all, parse_front_matter
+from apps.core.content_loader import DEFAULT_CONTENT_DIR, ContentError, import_quiz_file, load_all, parse_front_matter
 from apps.curriculum.models import Lesson, Subject, Unit
 
 pytestmark = pytest.mark.django_db
@@ -182,3 +183,17 @@ def test_ict_and_computer_science_are_two_subjects():
     for lesson in Lesson.objects.filter(unit__subject=cs):
         assert lesson.translations.filter(language="fr").exists(), lesson.slug
     assert not Unit.objects.filter(alignment_verified=True).exists()
+
+
+def test_french_lessons_keep_the_shape_of_the_english_ones():
+    """A translation mirrors its lesson: the same headings, code blocks and table rows, in the same order."""
+
+    def shape(path):
+        _meta, body = parse_front_matter(path.read_text(encoding="utf-8"), path.name)
+        return [line.split(" ", 1)[0] for line in body.splitlines() if re.match(r"(#{2,3} |```|\|)", line)]
+
+    translations = sorted((DEFAULT_CONTENT_DIR / "translations").glob("*.fr.md"))
+    assert len(translations) >= 42
+    for french in translations:
+        english = DEFAULT_CONTENT_DIR / "lessons" / french.name.replace(".fr.md", ".md")
+        assert shape(french) == shape(english), french.name
