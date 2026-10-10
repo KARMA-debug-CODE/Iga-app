@@ -87,6 +87,10 @@
   overflow-wrap: anywhere;
 }
 
+.calc-date-part {
+  white-space: nowrap;
+}
+
 .calc-date-main.is-problem {
   color: var(--text-soft);
   font-size: 1.05rem;

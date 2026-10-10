@@ -44,6 +44,8 @@ export default function ConverterMode({ category, t, lang, keysRef }) {
   }, [category, units]);
 
   const other = active === "from" ? "to" : "from";
+  // Only temperatures and angles can be below zero (the +/− key is off for the others too).
+  const unsigned = (typed) => (cat.signed ? typed : typed.replace(/^\s*[-−–]/, ""));
   const name = (unit) => names[unit][0];
   const label = (unit) => (names[unit][1] ? `${names[unit][0]} (${names[unit][1]})` : names[unit][0]);
   const symbol = (unit) => names[unit][1] || names[unit][0].toLowerCase();
@@ -72,7 +74,8 @@ export default function ConverterMode({ category, t, lang, keysRef }) {
     for (const unit of alsoUnits(category, units.from, units.to)) {
       try {
         const rounded = convert(category, units[active], unit, value).toSignificantDigits(ABOUT_DIGITS);
-        about.push(`${formatDecimal(rounded, { lang })} ${symbol(unit)}`);
+        // An angle's degree sign goes straight after the number (90°); other symbols after a space.
+        about.push(`${formatDecimal(rounded, { lang })}${symbol(unit) === "°" ? "" : " "}${symbol(unit)}`);
       } catch {
         // Too large in that unit: leave it out.
       }
@@ -100,7 +103,7 @@ export default function ConverterMode({ category, t, lang, keysRef }) {
   // Keys, paste and copy from Calculator.jsx (when no text box has the keyboard).
   const live = useRef(null);
   useLayoutEffect(() => {
-    live.current = { press, text: result ? formatDecimal(result, { lang, grouping: false }) : "" };
+    live.current = { press, signed: cat.signed, text: result ? formatDecimal(result, { lang, grouping: false }) : "" };
   });
   useEffect(() => {
     keysRef.current = {
@@ -114,7 +117,7 @@ export default function ConverterMode({ category, t, lang, keysRef }) {
       paste(pasted) {
         const entry = parseDecimalText(pasted, lang);
         if (entry === null) return false;
-        setText(formatEntry(entry, lang));
+        setText(formatEntry(live.current.signed ? entry : entry.replace(/^-/, ""), lang));
         return true;
       },
       copy: () => live.current.text,
@@ -144,7 +147,7 @@ export default function ConverterMode({ category, t, lang, keysRef }) {
           onFocus={() => activate(side)}
           onChange={(event) => {
             setActive(side);
-            setText(event.target.value);
+            setText(unsigned(event.target.value));
           }}
         />
         <span className="calc-conv-unit">

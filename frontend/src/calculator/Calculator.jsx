@@ -24,7 +24,10 @@ import STRINGS from "./strings.js";
 const VIEWS = [...M.MODES, "graphing", "date", ...CONVERTERS];
 
 function initial() {
-  return M.initMachine(M.fromSaved({ settings: load("settings"), history: load("history"), memory: load("memory") }));
+  let settings = load("settings");
+  // A keypad mode chosen last time is also the keypad's mode, even if the two were saved apart.
+  if (M.MODES.includes(settings?.view)) settings = { ...settings, mode: settings.view };
+  return M.initMachine(M.fromSaved({ settings, history: load("history"), memory: load("memory") }));
 }
 
 /** The mode chosen last time (settings.view), or the last keypad mode. */

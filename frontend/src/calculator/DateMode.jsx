@@ -1,6 +1,6 @@
 // Date calculation, like the Windows calculator: the difference between two dates, or a
 // date plus or minus some years, months and days. The maths is in engine/dates.js.
-import { useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 
 import "./datecalc.css";
 import { addToDate, dateDifference, parseISO, toISO, today } from "./engine/dates.js";
@@ -61,7 +61,16 @@ export default function DateMode({ t, lang }) {
       ]
         .filter(([n]) => n > 0)
         .map(([n, words]) => count(n, words, lang));
-      main = diff.totalDays === 0 ? T.same : parts.join(", ");
+      // Each part stays on one line ("3 days" never splits), so a long answer wraps between parts.
+      main =
+        diff.totalDays === 0
+          ? T.same
+          : parts.map((part, i) => (
+              <Fragment key={part}>
+                {i > 0 && ", "}
+                <span className="calc-date-part">{part}</span>
+              </Fragment>
+            ));
       // The total in days, unless the line above already says only days.
       if (diff.totalDays > 0 && (diff.years || diff.months || diff.weeks)) detail = count(diff.totalDays, T.words.day, lang);
     }

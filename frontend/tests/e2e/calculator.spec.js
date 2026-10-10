@@ -216,11 +216,20 @@ test("student graphs functions, works out dates and converts units", async ({ pa
   // Typing in the other box converts the other way.
   await calc.getByRole("textbox", { name: "Value in Miles" }).fill("26.2");
   await expect(calc.getByRole("textbox", { name: "Value in Kilometres" })).toHaveValue("42.1648128");
+  // A length cannot be negative (the +/- key is off here too).
+  await calc.getByRole("textbox", { name: "Value in Miles" }).fill("-3");
+  await expect(calc.getByRole("textbox", { name: "Value in Miles" })).toHaveValue("3");
+  await expect(key("Positive negative")).toHaveAttribute("aria-disabled", "true");
 
   await chooseMode(calc, "Temperature");
   await page.keyboard.type("100");
   await expect(calc.getByRole("textbox", { name: "Value in Celsius" })).toHaveValue("100");
   await expect(calc.getByRole("textbox", { name: "Value in Fahrenheit" })).toHaveValue("212");
+  // Temperatures can be negative: F9 is +/-, as in the other modes.
+  await page.keyboard.press("Escape");
+  await page.keyboard.type("40");
+  await page.keyboard.press("F9");
+  await expect(calc.getByRole("textbox", { name: "Value in Fahrenheit" })).toHaveValue("-40");
 
   await chooseMode(calc, "Data");
   await calc.getByRole("combobox", { name: "Convert from" }).selectOption("KiB");
@@ -241,4 +250,10 @@ test("student graphs functions, works out dates and converts units", async ({ pa
   await chooseMode(calc, "Graphing");
   await expect(calc.getByRole("textbox", { name: "Function 2, y equals" })).toHaveValue("tan(x)");
   await expect(calc.getByRole("button", { name: "Angle unit: Degrees. Press to change it." })).toBeVisible();
+
+  // A keypad mode saved as the last mode also gives its keys.
+  await page.evaluate(() => localStorage.setItem("iga.calc.settings", JSON.stringify({ view: "scientific", mode: "standard" })));
+  await page.reload();
+  await expect(calc.getByRole("heading", { level: 2 })).toHaveText("Scientific");
+  await expect(key("Sine")).toBeVisible();
 });
