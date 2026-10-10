@@ -123,6 +123,9 @@ def test_upgrading_from_the_combined_subject_keeps_everything(before_the_split, 
     assert notes.unit.title == "Introduction to algorithms" and notes.unit.number == 6
     assert not Unit.objects.filter(title__in=["Software engineering", "ICT and society", "Multimedia"]).exists()
 
+    # Then the rest of the upgrade, as on a real server: every other migration (the icon column grows to hold icon
+    # names), and load_curriculum.
+    migrate(MigrationExecutor(connection).loader.graph.leaf_nodes())
     log = []
     load_all(log=log.append)
 

@@ -417,13 +417,16 @@ def test_an_answer_cut_half_way_keeps_what_arrived(client_for, student, santa):
     assert done["fallback"] is None
 
 
+# Closing a stream ends the request, which closes the database connection as on a real server; only a
+# transactional test can open a new one afterwards (on PostgreSQL; SQLite's in-memory test database stays open).
+@pytest.mark.django_db(transaction=True)
 def test_stopping_a_stream_logs_what_was_said(client_for, student, santa):
     santa.script = [{"content": "A long answer that the student stops."}]
     response = client_for(student).post("/api/tutor/stream/", {"message": "Explain"}, format="json")
     content = iter(response.streaming_content)
     next(content)  # start
     next(content)  # first piece of text
-    response.close()
+    response.close()  # Stop, as a browser does by closing the stream
     exchange = TutorExchange.objects.get()
     assert exchange.stop_reason == "stopped"
     assert cache.get(f"santa:user:{student.pk}") is None  # the student can ask again at once
