@@ -56,7 +56,7 @@ export default function Lesson() {
               </Link>
               <span>›</span>
               <span>
-                {lesson.unit.grade} · {t("learn.unit", { n: lesson.unit.number })}: {lesson.unit.title}
+                {lesson.unit.grade} · {t("learn.unitTitle", { n: lesson.unit.number, title: lesson.unit.title })}
               </span>
             </div>
             <h1>{lesson.title}</h1>

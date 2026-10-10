@@ -79,6 +79,7 @@ export default {
   "learn.otherSubjects": "Autres matières",
   "learn.chooseGrade": "Niveau",
   "learn.unit": "Unité {n}",
+  "learn.unitTitle": "Unité {n} : {title}",
   "learn.lessons": "{n} leçons",
   "learn.noLessons": "Les leçons de cette unité arrivent bientôt.",
   "learn.minutes": "{n} min",

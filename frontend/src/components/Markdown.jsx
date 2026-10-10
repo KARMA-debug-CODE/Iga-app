@@ -5,6 +5,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
+import remarkNoBreakSpaces from "../noBreakSpaces";
 import CodePlayground from "./CodePlayground";
 import PythonPlayground from "./PythonPlayground";
 import SimEmbed from "./SimEmbed";
@@ -35,7 +36,7 @@ export default function Markdown({ children, sims = {}, interactive = true }) {
   return (
     <div className="prose">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
+        remarkPlugins={[remarkGfm, remarkMath, remarkNoBreakSpaces]}
         rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: "ignore" }]]}
         components={{
           pre({ node, children: kids }) {
