@@ -702,6 +702,10 @@ msgid "Santa is helping many students right now. Ask again in a minute for a ful
 msgstr "Santa aide beaucoup d'élèves en ce moment. Reposez votre question dans une minute pour avoir une réponse complète."
 
 #: apps/tutor/services.py
+msgid "This is too long for Santa. Ask a shorter question, or start a new chat."
+msgstr "C'est trop long pour Santa. Posez une question plus courte, ou commencez une nouvelle discussion."
+
+#: apps/tutor/services.py
 msgid "Santa can't answer just now. Try again in a minute."
 msgstr "Santa ne peut pas répondre pour le moment. Réessayez dans une minute."
 

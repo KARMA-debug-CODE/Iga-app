@@ -6,7 +6,7 @@ import "./Santa.css";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { api, apiStream, readEvents } from "../api";
+import { api, ApiError, apiStream, NetworkError, readEvents } from "../api";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
 import { Icon } from "./Icon";
@@ -187,7 +187,9 @@ export function useSantaChat({ scope, lang, initial = [] }) {
         }
       });
     } catch (err) {
-      if (err?.name !== "AbortError") failure = err;
+      // Stop aborts the request. Anything else not from the server (the connection dropped while Santa
+      // wrote, an unreadable piece) is shown as a network problem, in the student's language.
+      if (err?.name !== "AbortError") failure = err instanceof ApiError || err instanceof NetworkError ? err : new NetworkError();
     } finally {
       clearTimeout(redraw);
       controller.current = null;
@@ -336,7 +338,7 @@ export function SantaLog({ chat, logRef, className = "", children }) {
 }
 
 /** The question box with Send, which becomes Stop while Santa writes (the same button, so focus stays). */
-export function SantaForm({ id, chat, value, onChange, multiline = false, inputRef, placeholder }) {
+export function SantaForm({ id, chat, value, onChange, multiline = false, inputRef, placeholder, label = placeholder }) {
   const { t } = useI18n();
   async function submit() {
     const message = value;
@@ -361,7 +363,7 @@ export function SantaForm({ id, chat, value, onChange, multiline = false, inputR
       }}
     >
       <label className="sr-only" htmlFor={id}>
-        {placeholder}
+        {label}
       </label>
       {multiline ? (
         <textarea

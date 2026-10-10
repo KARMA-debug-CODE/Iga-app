@@ -299,7 +299,8 @@ def search(user, query, language, *, lesson=None, subject_id=None, budget=2800, 
 
     `lesson` is the lesson the student has open, quoted in `language` (its passages come first, in reading
     order; when the question matches none of its words, its beginning). Other lessons must be ones the
-    student may read; those in the reply language, the student's grade and the subject rank higher."""
+    student may read, in the reply language when it matches there too; the student's grade and the subject
+    rank higher."""
     index = get_index()
     terms = tokens(query)
     own = []
@@ -319,13 +320,20 @@ def search(user, query, language, *, lesson=None, subject_id=None, budget=2800, 
     readable = _readable_lessons(user)
     grade = getattr(user, "grade", "") or ""
     level = _level(grade)
+    matches = {
+        i: score
+        for i, score in index.scores(terms).items()
+        if index.passages[i].lesson_id in readable and (lesson is None or index.passages[i].lesson_id != lesson.id)
+    }
+    # A lesson that matches in the reply language is quoted in that language only, not the same section twice.
+    in_reply_language = {index.passages[i].lesson_id for i in matches if index.passages[i].language == language}
     weighted = []
-    for i, score in index.scores(terms).items():
+    for i, score in matches.items():
         passage = index.passages[i]
-        if passage.lesson_id not in readable or (lesson is not None and passage.lesson_id == lesson.id):
-            continue
         weight = 1.0
         if passage.language != language:
+            if passage.lesson_id in in_reply_language:
+                continue
             weight *= 0.8
         if grade and passage.grade == grade:
             weight *= 1.25

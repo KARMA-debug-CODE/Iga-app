@@ -160,6 +160,21 @@ test("Santa page explains when the student's school hasn't subscribed", async ({
   await expect(page.getByLabel(/type your question/i)).toHaveCount(0);
 });
 
+test("without its model, Santa answers from the lessons through the real stream", async ({ page }) => {
+  // Nothing mocked: the test server has no SANTA_URL, so Django streams an answer made of lesson passages.
+  await login(page, "aline");
+  await page.goto("/ask");
+  await expect(page.getByText(/santa's ai model isn't installed yet/i)).toBeVisible();
+  const box = page.getByLabel(/type your question/i);
+  await box.fill("What does the cell membrane control?");
+  await box.press("Enter");
+  const answer = page.locator(".santa-answer").last();
+  await expect(answer.getByText(/here is what your lessons say/i)).toBeVisible();
+  await expect(answer.getByText(/controls what enters and leaves/i).first()).toBeVisible();
+  await expect(answer.getByRole("link", { name: "The cell, the unit of life" })).toHaveAttribute("href", "/lessons/s1-biology-the-cell");
+  await expect(page.getByRole("button", { name: /^send$/i })).toBeVisible();
+});
+
 test("a parent links to their child with a code and sees progress", async ({ page }) => {
   await login(page, "eric");
   await page.goto("/profile#security");

@@ -34,6 +34,8 @@ class FakeSanta(BaseHTTPRequestHandler):
     garbage = False
     delay = 0
     cut_after = None  # stream: drop the connection after this many pieces of text
+    too_long = 0  # refuse this many requests, as llama-server does when a request doesn't fit a slot
+    shape = None  # valid JSON that isn't an answer: sent as the reply, or as a streamed chunk
 
     def log_message(self, *args):
         pass
@@ -58,8 +60,14 @@ class FakeSanta(BaseHTTPRequestHandler):
             return self._json(503, LOADING)
         if self.headers.get("Authorization") != f"Bearer {KEY}":
             return self._json(401, {"error": {"code": 401, "message": "Invalid API Key"}})
+        if FakeSanta.too_long:
+            FakeSanta.too_long -= 1
+            message = "request (5120 tokens) exceeds the available context size (4096 tokens), try increasing it"
+            return self._json(400, {"error": {"code": 400, "message": message, "type": "exceed_context_size_error"}})
         if FakeSanta.reject_tools and body.get("tools"):
             return self._json(400, {"error": {"code": 400, "message": "tools param requires --jinja flag"}})
+        if FakeSanta.shape is not None and not body.get("stream"):
+            return self._json(200, FakeSanta.shape)
         if FakeSanta.delay:
             time.sleep(FakeSanta.delay)
         if FakeSanta.garbage:
@@ -101,6 +109,8 @@ class FakeSanta(BaseHTTPRequestHandler):
 
         delta({"role": "assistant", "content": None})
         self.wfile.write(b": keep-alive\n\n")
+        if FakeSanta.shape is not None:
+            return send(FakeSanta.shape)
         pieces = [content[i : i + 4] for i in range(0, len(content), 4)]
         for n, piece in enumerate(pieces):
             if FakeSanta.cut_after is not None and n >= FakeSanta.cut_after:
@@ -136,6 +146,7 @@ def santa(settings):
     FakeSanta.calls, FakeSanta.script = [], []
     FakeSanta.loading = FakeSanta.reject_tools = FakeSanta.garbage = False
     FakeSanta.delay, FakeSanta.cut_after = 0, None
+    FakeSanta.too_long, FakeSanta.shape = 0, None
     settings.SANTA_URL = f"http://127.0.0.1:{server.server_address[1]}"
     settings.SANTA_API_KEY = KEY
     settings.SANTA_MODEL_NAME = "santa"
@@ -320,6 +331,77 @@ def test_a_server_that_rejects_tools_is_asked_again_without_them(client_for, stu
     assert [bool(c["body"].get("tools")) for c in santa.calls] == [True, False]
 
 
+def test_a_bare_expression_as_the_tool_argument_still_works(client_for, student, santa):
+    santa.script = [{"content": "", "tool_calls": [("calculate", "6 * 7")]}, {"content": "It is 42."}]
+    response = ask(client_for(student), message="6 * 7?")
+    assert response.data["tools"] == [{"expression": "6 * 7", "result": "42"}]
+
+
+@pytest.mark.parametrize("streamed", [False, True])
+@pytest.mark.parametrize(
+    "shape",
+    [
+        {"choices": ["text"]},
+        {"choices": [{"message": "text", "delta": "text"}]},
+        {"choices": [{"message": {"content": 5}, "delta": {"content": 5}}]},
+        {"choices": [{"message": {"tool_calls": ["x"]}, "delta": {"tool_calls": ["x"]}}]},
+        {"choices": [], "usage": {"prompt_tokens": "many"}},
+    ],
+)
+def test_a_reply_of_the_wrong_shape_answers_from_the_lessons(client_for, student, biology, santa, shape, streamed):
+    santa.shape = shape
+    client = client_for(student)
+    if streamed:
+        events, response = stream(client, message="cell membrane")
+        done = events[-1]
+    else:
+        response = ask(client, message="cell membrane")
+        done = response.data
+    assert response.status_code == 200
+    assert done["fallback"] == "unavailable" and "controls what enters" in done["reply"]
+    assert TutorExchange.objects.get().stop_reason == "fallback:unavailable"
+
+
+def test_a_question_too_long_for_the_model_is_asked_again_with_less(client_for, student, gradient_lesson, biology, santa):
+    santa.too_long = 1
+    santa.script = [{"content": "The membrane controls what goes in and out."}]
+    history = [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hello! What shall we study?"}]
+    response = ask(client_for(student), message="cell membrane gradient", history=history)
+    assert response.data["reply"] == "The membrane controls what goes in and out."
+    first, second = (c["body"] for c in santa.calls)
+    assert "tools" in first and len(first["messages"]) == 4
+    # Not mistaken for a server that refuses the calculator: no history, one passage and no tools.
+    assert "tools" not in second and [m["role"] for m in second["messages"]] == ["system", "user"]
+    assert second["messages"][1]["content"].count("\n[") == 1
+    assert len(response.data["sources"]) == 1
+
+
+def test_a_question_that_never_fits_answers_from_the_lessons(client_for, student, gradient_lesson, santa):
+    santa.too_long = 5
+    response = ask(client_for(student), message="linear graphs: gradient and intercept")
+    assert len(santa.calls) == 2
+    reply = response.data["reply"]
+    assert response.data["fallback"] == "too_long" and "too long for Santa" in reply
+    assert "rise over run" in reply and "crosses the y-axis" in reply  # all it found, not just what was sent last
+
+
+def test_long_questions_leave_less_room_for_lesson_passages(student, unit):
+    paragraph = "Photosynthesis makes glucose from carbon dioxide and water using light energy. " * 8
+    for i in range(6):
+        Lesson.objects.create(
+            unit=unit, slug=f"plants-{i}", title=f"Plants {i}", status="published", body=f"## Part {i}\n\n{paragraph}"
+        )
+    question = "How does photosynthesis make glucose? " + "Please explain every step. " * 70
+    history = [{"role": "user", "content": "x" * 1400}, {"role": "assistant", "content": "y" * 1400}] * 2
+    roomy = services.prepare(student, "How does photosynthesis make glucose?")
+    tight = services.prepare(student, question[: services.MAX_MESSAGE_CHARS], history=history)
+    assert sum(len(p.text) for p in roomy.others) > services.MIN_PASSAGE_CHARS
+    assert sum(len(p.text) for p in tight.others) <= services.MIN_PASSAGE_CHARS
+    assert len(tight.history) < len(history)  # old turns make way
+    written = sum(len(m["content"]) for m in tight.history) + len(tight.prompt)
+    assert written <= services.TURN_CHARS + 500  # what is left is labels around the passages
+
+
 def test_a_long_answer_says_it_ran_out_of_space(client_for, student, santa):
     santa.script = [{"content": "First, ", "finish_reason": "length"}]
     response = ask(client_for(student), message="Tell me everything")
@@ -451,6 +533,14 @@ def test_retrieval_finds_the_relevant_lessons(student, gradient_lesson, biology)
     assert others[0].slug == "linear" and others[0].heading == "Gradient"
     _, french = retrieval.search(student, "membrane cellulaire", "fr")
     assert french[0].language == "fr" and french[0].title == "La cellule"
+    # A translated lesson is quoted in the reply language only, not the same section twice.
+    _, once = retrieval.search(student, "À quoi sert la membrane cellulaire ?", "fr")
+    assert [p.language for p in once] == ["fr"]
+    _, once = retrieval.search(student, "cell membrane, la membrane cellulaire", "en")
+    assert [p.language for p in once] == ["en"]
+    # A lesson with no French yet is still quoted for a French question.
+    _, english_only = retrieval.search(student, "Quel est le gradient ?", "fr")
+    assert english_only[0].slug == "linear" and english_only[0].language == "en"
     # Questions about nothing in the lessons, or about studying in general, bring up nothing.
     assert retrieval.search(student, "Who won the football match yesterday?", "en") == ([], [])
     assert retrieval.search(student, "Explain this lesson more simply", "en") == ([], [])
@@ -523,6 +613,15 @@ def test_lesson_text_is_cleaned_and_split_at_headings():
         ("gcd(12, 18)", "6"),
         ("5 − 2 × 3 ÷ 4", "3.5"),
         ("pi * 2**2", "12.5663706144"),
+        # Rounding as taught at school: a half goes away from zero.
+        ("round(2.5)", "3"),
+        ("round(-2.5)", "-3"),
+        ("round(0.125, 2)", "0.13"),
+        ("round(2.675, 2)", "2.68"),
+        ("round(1234, -2)", "1200"),
+        ("round(sqrt(2), 3)", "1.414"),
+        ("floor(-2.5)", "-3"),
+        ("round(10 ** 200 + 0.5)", "1e200"),
     ],
 )
 def test_calculator(expression, result):
@@ -566,6 +665,16 @@ def test_the_calculator_refuses_anything_else(expression, monkeypatch):
     monkeypatch.setattr(builtins, "exec", forbidden)
     started = time.monotonic()
     assert calculator.calculate(expression).startswith("error: ")
+    assert time.monotonic() - started < 1
+
+
+@pytest.mark.parametrize(
+    ("expression", "result"),
+    [("0.5 ** (1000000000001/2)", "0"), ("2 ** (-1000000000001/2)", "0"), ("1 ** (10 ** 150 + 1/2)", "1")],
+)
+def test_huge_powers_stay_quick(expression, result):
+    started = time.monotonic()
+    assert calculator.calculate(expression) == result
     assert time.monotonic() - started < 1
 
 
