@@ -109,6 +109,20 @@ DATABASES = {
 
 AUTH_USER_MODEL = "accounts.User"
 
+# Argon2id for every new or changed password. The other hashers only read older hashes, which Django
+# re-hashes with Argon2id the next time their owner logs in.
+PASSWORD_HASHERS = [
+    "apps.accounts.hashers.IgaArgon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
+# Argon2id costs (Django's defaults). Each login briefly uses ARGON2_MEMORY_COST_KIB of memory.
+ARGON2_TIME_COST = int(os.environ.get("ARGON2_TIME_COST", "2"))
+ARGON2_MEMORY_COST_KIB = int(os.environ.get("ARGON2_MEMORY_COST_KIB", "102400"))
+ARGON2_PARALLELISM = int(os.environ.get("ARGON2_PARALLELISM", "8"))
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
