@@ -4,6 +4,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import A_LEVEL_GRADES, GRADE_CODES
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.schools.access import content_access
 from apps.schools.constants import DISTRICTS
 from apps.schools.membership import choose_school
@@ -29,7 +30,7 @@ def school_summary(user):
     return data
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     streak_days = serializers.IntegerField(source="current_streak", read_only=True)
     school = serializers.SerializerMethodField()
     access = serializers.SerializerMethodField()

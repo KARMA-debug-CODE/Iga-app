@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin, NotParent, RecentAuthentication
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
 from apps.core.validation import text_field
@@ -20,7 +21,7 @@ REMOVED_TEXT = "[message removed by a moderator]"
 MAX_MESSAGE_CHARS = 2000
 
 
-class StudyGroupSerializer(serializers.ModelSerializer):
+class StudyGroupSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True)
     is_member = serializers.BooleanField(read_only=True)
     subject_name = serializers.SerializerMethodField()
@@ -201,17 +202,20 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def leave(self, request, pk=None):
         group = self._member_group(pk)
-        GroupMembership.objects.filter(group=group, user=request.user).delete()
-        if not group.memberships.exists():
-            audit.record(request, "delete_group", group, name=group.name, reason="last member left")
-            group.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        # Hand ownership to the longest-standing member so the group stays moderated.
-        if not group.memberships.filter(role=GroupMembership.Role.OWNER).exists():
-            successor = group.memberships.order_by("joined_at").first()
-            if successor:
-                successor.role = GroupMembership.Role.OWNER
-                successor.save(update_fields=["role"])
+        # One leave at a time per group: two members leaving at once (the owner and the next in line)
+        # must still leave an owner behind, or delete the group exactly once.
+        with transaction.atomic():
+            StudyGroup.objects.select_for_update().filter(pk=group.pk).first()
+            GroupMembership.objects.filter(group=group, user=request.user).delete()
+            if not group.memberships.exists():
+                audit.record(request, "delete_group", group, name=group.name, reason="last member left")
+                group.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            # Hand ownership to the longest-standing member so the group stays moderated.
+            if not group.memberships.filter(role=GroupMembership.Role.OWNER).exists():
+                successor = group.memberships.order_by("joined_at", "id").first()
+                if successor:
+                    GroupMembership.objects.filter(pk=successor.pk).update(role=GroupMembership.Role.OWNER)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_throttles(self):

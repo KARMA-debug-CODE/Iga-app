@@ -3,6 +3,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.accounts.models import User
+from apps.core.serializers import SaveChangedFieldsMixin
 
 from .constants import PROVINCE_OF
 from .models import Payment, School
@@ -30,7 +31,7 @@ def subscription_info(school):
     }
 
 
-class SchoolAdminSerializer(serializers.ModelSerializer):
+class SchoolAdminSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     """The school administrator's view of their own school."""
 
     province = serializers.SerializerMethodField()

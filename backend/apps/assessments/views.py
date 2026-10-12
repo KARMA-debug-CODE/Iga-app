@@ -7,7 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.classroom.models import Assignment, Enrollment
+from apps.classroom.models import Assignment
 from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
@@ -28,6 +28,7 @@ from .serializers import (
     QuizSummarySerializer,
     QuizWriteSerializer,
 )
+from .services import attempts_visible_to
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -230,16 +231,6 @@ class ExamPaperViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False)
     def years(self, request):
         return Response(sorted(set(ExamPaper.objects.values_list("year", flat=True)), reverse=True))
-
-
-def attempts_visible_to(user):
-    qs = Attempt.objects.select_related("quiz", "quiz__subject", "user")
-    if user.is_platform_admin:
-        return qs
-    if user.can_teach:
-        my_students = Enrollment.objects.filter(classroom__teacher=user, classroom__archived=False).values("student_id")
-        return qs.filter(Q(user=user) | Q(user_id__in=my_students))
-    return qs.filter(user=user)
 
 
 class AttemptViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

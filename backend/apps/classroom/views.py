@@ -15,6 +15,7 @@ from apps.assessments.models import Attempt
 from apps.assessments.services import finalize_if_expired, visible_quizzes
 from apps.core import audit
 from apps.core.permissions import IsTeacher, RecentAuthentication
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
 from apps.core.validation import id_param, parse_id, text_field
@@ -27,7 +28,7 @@ from . import roster
 from .models import Assignment, Classroom, Enrollment
 
 
-class ClassroomSerializer(serializers.ModelSerializer):
+class ClassroomSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     teacher_name = serializers.CharField(source="teacher.display_name", read_only=True)
     subject_name = serializers.SerializerMethodField()
     subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="school")
@@ -62,7 +63,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
         return classroom.join_code if classroom.teacher_id == user.id or user.is_platform_admin else None
 
 
-class AssignmentSerializer(serializers.ModelSerializer):
+class AssignmentSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     kind = serializers.CharField(read_only=True)
     classroom_name = serializers.CharField(source="classroom.name", read_only=True)
     quiz_title = serializers.CharField(source="quiz.title", read_only=True, default=None)
@@ -311,8 +312,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         """Give a student in this class a new temporary password (they choose their own at next login)."""
         classroom = self.get_object()
         student_id = parse_id(request.data.get("student"), "student")
+        # Only a current student of this class: not one who has moved to another grade (inactive).
         enrollment = (
-            Enrollment.objects.filter(classroom=classroom, classroom__archived=False, student_id=student_id)
+            Enrollment.objects.filter(classroom=classroom, classroom__archived=False, student_id=student_id, active=True)
             .select_related("student")
             .first()
         )
