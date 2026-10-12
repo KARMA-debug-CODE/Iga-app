@@ -99,6 +99,9 @@ def verify_totp(user, code, now=None):
     return False
 
 
+LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
+
+
 def _origin_of(url):
     parts = urlsplit(url)
     return f"{parts.scheme}://{parts.netloc}".lower() if parts.scheme and parts.netloc else None
@@ -124,6 +127,8 @@ def is_cross_site(request):
     origin = origin.strip().lower()
     if origin == "null":
         return True
+    if settings.DEBUG and urlsplit(origin).hostname in LOOPBACK_HOSTS:
+        return False  # local development: Vite's proxy rewrites the Host header to the backend's port
     own = f"{'https' if request.is_secure() else 'http'}://{request.get_host()}".lower()
     trusted = {own, *(o.lower() for o in settings.CORS_ALLOWED_ORIGINS), *(o.lower() for o in settings.CSRF_TRUSTED_ORIGINS)}
     if origin in trusted:

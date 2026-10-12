@@ -230,6 +230,15 @@ LOGIN_LOCKOUT_MAX_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_MAX_SECONDS", "360
 # Failures further apart than this don't add up.
 LOGIN_FAILURE_WINDOW_SECONDS = int(os.environ.get("LOGIN_FAILURE_WINDOW_SECONDS", "900"))
 
+# Password reset links work once, for this many seconds, and only until the password changes or a
+# newer link is sent (apps/accounts/password_reset.py).
+PASSWORD_RESET_TIMEOUT = int(os.environ.get("PASSWORD_RESET_TIMEOUT_SECONDS", "3600"))
+# A temporary password a teacher hands out (class roster, password reset) stops working after this.
+TEMPORARY_PASSWORD_DAYS = int(os.environ.get("TEMPORARY_PASSWORD_DAYS", "14"))
+# Answers saying "this email address is already used" per hour, per IP (sign-up) or per account
+# (profile, class roster) before every request with an email is refused until the hour is over.
+EMAIL_IN_USE_LIMIT = int(os.environ.get("EMAIL_IN_USE_LIMIT", "10"))
+
 # The refresh token lives in an httpOnly cookie scoped to the auth endpoints,
 # so page scripts never see it. The short-lived access token stays in memory.
 REFRESH_COOKIE_NAME = "iga_refresh"

@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 
 from django.db.models import Count, Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers, status, viewsets
@@ -10,6 +11,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.accounts import enumeration
+from apps.accounts.models import User
 from apps.accounts.serializers import PublicUserSerializer
 from apps.assessments.models import Attempt
 from apps.assessments.services import finalize_if_expired, visible_quizzes
@@ -286,7 +289,15 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             rows = roster.parse(request.data.get("csv", ""))
         except roster.RosterError as exc:
             raise ValidationError({"csv": str(exc)})
+        # "Already used" answers about emails are limited per teacher, so the preview can't be used
+        # to find out which email addresses have an account.
+        emails = {row["email"].lower() for row in rows if row["email"]}
+        if emails:
+            enumeration.check_budget(request, request.user)
         ok = roster.check(rows)
+        in_use = User.objects.annotate(email_lower=Lower("email")).filter(email_lower__in=emails).count() if emails else 0
+        if in_use:
+            enumeration.spend(request, request.user, in_use)
         if not ok or not request.data.get("confirm"):
             return Response({"valid": ok, "rows": rows})
         created = roster.create_accounts(rows, classroom, request.user)

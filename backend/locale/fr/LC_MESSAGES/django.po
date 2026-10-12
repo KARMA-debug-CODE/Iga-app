@@ -37,13 +37,9 @@ msgstr "Les groupes d'étude sont réservés aux élèves et aux enseignants."
 msgid "This is only for students and teachers."
 msgstr "Ceci est réservé aux élèves et aux enseignants."
 
-#: apps/accounts/parents.py:205
+#: apps/accounts/parents.py:207
 msgid "That code is not valid or has expired. Ask your child to make a new one."
 msgstr "Ce code n'est pas valide ou a expiré. Demandez à votre enfant d'en créer un nouveau."
-
-#: apps/accounts/parents.py:207
-msgid "That account is not active."
-msgstr "Ce compte n'est pas actif."
 
 #: apps/accounts/password_reset.py:69
 msgid "%(app)s: choose a new password"
@@ -65,112 +61,135 @@ msgstr "Quelqu'un (vous, espérons-le) a demandé à réinitialiser le mot de pa
 msgid "Open this link to choose a new password. It works once, for %(minutes)s minutes:"
 msgstr "Ouvrez ce lien pour choisir un nouveau mot de passe. Il ne fonctionne qu'une fois, pendant %(minutes)s minutes :"
 
-#: apps/accounts/serializers.py:98
+#: apps/accounts/serializers.py:102
 msgid "Unknown grade."
 msgstr "Niveau inconnu."
 
-#: apps/accounts/serializers.py:121
-#: apps/accounts/serializers.py:227
+#: apps/accounts/serializers.py:126
 msgid "An account with this email already exists."
 msgstr "Un compte existe déjà avec cette adresse e-mail."
 
-#: apps/accounts/serializers.py:220
+#: apps/accounts/serializers.py:229
 msgid "Usernames can't contain @. Use letters, numbers, dots or dashes."
 msgstr "Un nom d'utilisateur ne peut pas contenir @. Utilisez des lettres, des chiffres, des points ou des tirets."
 
-#: apps/accounts/serializers.py:222
+#: apps/accounts/serializers.py:231
 msgid "That username is taken."
 msgstr "Ce nom d'utilisateur est déjà pris."
 
-#: apps/accounts/serializers.py:104
+#: apps/accounts/serializers.py:238
+msgid "This email address already has an account. If it's yours, log in or reset your password."
+msgstr "Cette adresse e-mail a déjà un compte. Si c'est la vôtre, connectez-vous ou réinitialisez votre mot de passe."
+
+#: apps/accounts/serializers.py:108
 msgid "Only students in S4–S6 choose a combination."
 msgstr "Seuls les élèves de S4–S6 choisissent une combinaison."
 
-#: apps/accounts/serializers.py:114
-#: apps/accounts/serializers.py:185
+#: apps/accounts/serializers.py:118
+#: apps/accounts/serializers.py:194
 msgid "School administrators need an email address for receipts and reminders."
 msgstr "Les administrateurs d'école ont besoin d'une adresse e-mail pour les reçus et les rappels."
 
-#: apps/accounts/serializers.py:177
+#: apps/accounts/serializers.py:186
 msgid "Students must choose their grade (S1–S6)."
 msgstr "Les élèves doivent choisir leur niveau (S1–S6)."
 
-#: apps/accounts/serializers.py:181
+#: apps/accounts/serializers.py:190
 msgid "Parents don't join a school; link to your child instead."
 msgstr "Les parents ne rejoignent pas d'école : reliez plutôt votre compte à celui de votre enfant."
 
-#: apps/accounts/serializers.py:208
+#: apps/accounts/serializers.py:217
 msgid "That school has already been registered and is waiting for the Iga team. If you run it, contact the Iga team."
 msgstr "Cette école a déjà été inscrite et attend la vérification de l'équipe Iga. Si vous la dirigez, contactez l'équipe Iga."
 
-#: apps/accounts/serializers.py:269
-msgid "Incorrect password."
-msgstr "Mot de passe incorrect."
-
-#: apps/accounts/serializers.py:271
+#: apps/accounts/serializers.py:283
 msgid "Choose a password different from the current one."
 msgstr "Choisissez un mot de passe différent de l'actuel."
 
-#: apps/accounts/serializers.py:188
+#: apps/accounts/serializers.py:197
 msgid "Choose your school, or register a new one (not both)."
 msgstr "Choisissez votre école ou inscrivez-en une nouvelle (pas les deux)."
 
-#: apps/accounts/serializers.py:191
+#: apps/accounts/serializers.py:200
 msgid "School administrators are approved by the Iga team or an existing administrator."
 msgstr "Les administrateurs d'école sont approuvés par l'équipe Iga ou par un administrateur existant."
 
-#: apps/accounts/serializers.py:194
+#: apps/accounts/serializers.py:203
 msgid "Only school administrators register schools."
 msgstr "Seuls les administrateurs d'école peuvent inscrire une école."
 
-#: apps/accounts/serializers.py:204
+#: apps/accounts/serializers.py:213
 msgid "That school is already on Iga. Choose it from the list instead."
 msgstr "Cette école est déjà sur Iga. Choisissez-la plutôt dans la liste."
 
-#: apps/accounts/serializers.py:246
+#: apps/accounts/serializers.py:258
 msgid "That school has just been registered. Choose it from the list."
 msgstr "Cette école vient d'être inscrite. Choisissez-la dans la liste."
 
-#: apps/accounts/views.py:102
+#: apps/accounts/views.py:111
 msgid "This request came from another site and was refused."
 msgstr "Cette demande venait d'un autre site et a été refusée."
 
-#: apps/accounts/views.py:339
-#: apps/accounts/views.py:172
-#: apps/accounts/views.py:388
-msgid "That code is not valid."
-msgstr "Ce code n'est pas valide."
-
-#: apps/accounts/views.py:81
+#: apps/accounts/views.py:90
 msgid "Too many failed attempts. Try again in %(minutes)s min."
 msgstr "Trop de tentatives échouées. Réessayez dans %(minutes)s min."
 
-#: apps/accounts/views.py:162
+#: apps/accounts/views.py:177
 msgid "Invalid username/email or password."
 msgstr "Nom d'utilisateur, e-mail ou mot de passe incorrect."
 
-#: apps/accounts/views.py:206
+#: apps/accounts/views.py:410
+#: apps/accounts/views.py:198
+#: apps/accounts/views.py:475
+msgid "That code is not valid."
+msgstr "Ce code n'est pas valide."
+
+#: apps/accounts/views.py:541
+msgid "Your password has been changed. Log in with your new password."
+msgstr "Votre mot de passe a été changé. Connectez-vous avec votre nouveau mot de passe."
+
+#: apps/accounts/views.py:184
+msgid "This temporary password has expired. Ask your teacher for a new one."
+msgstr "Ce mot de passe temporaire a expiré. Demandez-en un nouveau à votre enseignant."
+
+#: apps/accounts/views.py:232
 msgid "Not logged in."
 msgstr "Vous n'êtes pas connecté."
 
-#: apps/accounts/views.py:317
+#: apps/accounts/views.py:336
+msgid "Enter your current password to change your email address."
+msgstr "Saisissez votre mot de passe actuel pour changer votre adresse e-mail."
+
+#: apps/accounts/views.py:374
 msgid "Password updated. You were logged out on other devices."
 msgstr "Mot de passe modifié. Vous avez été déconnecté sur vos autres appareils."
 
-#: apps/accounts/views.py:352
+#: apps/accounts/views.py:439
 msgid "Two-factor authentication is already on."
 msgstr "La vérification en deux étapes est déjà activée."
 
-#: apps/accounts/views.py:168
+#: apps/accounts/views.py:501
+msgid "If an account matches and has an email address, we have sent it a link to choose a new password. The link works once, for %(minutes)s minutes."
+msgstr "Si un compte correspond et a une adresse e-mail, nous lui avons envoyé un lien pour choisir un nouveau mot de passe. Le lien ne fonctionne qu'une fois, pendant %(minutes)s minutes."
+
+#: apps/accounts/views.py:525
+msgid "This link is not valid or has expired. Ask for a new one."
+msgstr "Ce lien n'est pas valide ou a expiré. Demandez-en un nouveau."
+
+#: apps/accounts/views.py:194
 msgid "Enter the code from your authenticator app."
 msgstr "Saisissez le code de votre application d'authentification."
 
-#: apps/accounts/views.py:214
+#: apps/accounts/views.py:240
 msgid "Session expired."
 msgstr "Session expirée."
 
+#: apps/accounts/views.py:423
+msgid "Incorrect password."
+msgstr "Mot de passe incorrect."
+
 #: apps/assessments/analytics.py:20
-#: apps/classroom/views.py:102
+#: apps/classroom/views.py:105
 msgid "That is not your class."
 msgstr "Ce n'est pas votre classe."
 
@@ -318,81 +337,81 @@ msgstr "Des élèves ont commencé ce quiz ; dupliquez-le pour en changer les qu
 msgid "Unknown assignment."
 msgstr "Devoir inconnu."
 
-#: apps/classroom/roster.py:76
+#: apps/classroom/roster.py:83
 msgid "The list is empty."
 msgstr "La liste est vide."
 
-#: apps/classroom/roster.py:84
+#: apps/classroom/roster.py:91
 msgid "The first row must name the columns, e.g. first_name,last_name (username and email are optional)."
 msgstr "La première ligne doit nommer les colonnes, par exemple first_name,last_name (username et email sont facultatifs)."
 
-#: apps/classroom/roster.py:101
+#: apps/classroom/roster.py:108
 msgid "No students found under the header row."
 msgstr "Aucun élève trouvé sous la ligne d'en-tête."
 
-#: apps/classroom/roster.py:99
+#: apps/classroom/roster.py:106
 msgid "Import at most %(n)s students at a time."
 msgstr "Importez au plus %(n)s élèves à la fois."
 
-#: apps/classroom/roster.py:113
+#: apps/classroom/roster.py:120
 msgid "First name is missing."
 msgstr "Le prénom manque."
 
-#: apps/classroom/roster.py:115
+#: apps/classroom/roster.py:122
 msgid "Name is too long."
 msgstr "Le nom est trop long."
 
-#: apps/classroom/roster.py:122
+#: apps/classroom/roster.py:129
 msgid "Usernames can't contain @."
 msgstr "Un nom d'utilisateur ne peut pas contenir @."
 
-#: apps/classroom/roster.py:124
+#: apps/classroom/roster.py:131
 msgid "That username is already taken."
 msgstr "Ce nom d'utilisateur est déjà pris."
 
-#: apps/classroom/roster.py:126
+#: apps/classroom/roster.py:133
 msgid "That username appears twice in the list."
 msgstr "Ce nom d'utilisateur apparaît deux fois dans la liste."
 
-#: apps/classroom/roster.py:120
+#: apps/classroom/roster.py:127
 msgid "Usernames may use letters, numbers and . _ - only."
 msgstr "Un nom d'utilisateur ne peut contenir que des lettres, des chiffres et . _ -"
 
-#: apps/classroom/roster.py:138
+#: apps/classroom/roster.py:145
 msgid "That email is already used by another account."
 msgstr "Cette adresse e-mail est déjà utilisée par un autre compte."
 
-#: apps/classroom/roster.py:140
+#: apps/classroom/roster.py:147
 msgid "That email address isn't valid."
 msgstr "Cette adresse e-mail n'est pas valide."
 
-#: apps/classroom/views.py:98
+#: apps/classroom/views.py:101
 msgid "Attach exactly one quiz, lesson or simulation."
 msgstr "Joignez exactement un quiz, une leçon ou une simulation."
 
-#: apps/classroom/views.py:256
+#: apps/classroom/views.py:259
 msgid "Only students join classes with a code."
 msgstr "Seuls les élèves rejoignent une classe avec un code."
 
-#: apps/classroom/views.py:284
+#: apps/classroom/views.py:287
 msgid "This class is archived."
 msgstr "Cette classe est archivée."
 
-#: apps/classroom/views.py:104
+#: apps/classroom/views.py:107
 msgid "Quiz not found."
 msgstr "Quiz introuvable."
 
-#: apps/classroom/views.py:106
+#: apps/classroom/views.py:109
 #: apps/tutor/services.py:219
 msgid "Lesson not found."
 msgstr "Leçon introuvable."
 
-#: apps/classroom/views.py:260
+#: apps/classroom/views.py:263
 msgid "No class has that code. Check with your teacher."
 msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
 
-#: apps/classroom/views.py:275
-#: apps/classroom/views.py:306
+#: apps/classroom/views.py:278
+#: apps/classroom/views.py:317
 msgid "That student is not in this class."
 msgstr "Cet élève n'est pas dans cette classe."
 

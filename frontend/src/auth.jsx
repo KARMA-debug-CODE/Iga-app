@@ -120,6 +120,15 @@ export function AuthProvider({ children }) {
     await clearOfflineData().catch(() => {});
   }, []);
 
+  // Ends every session of the account on every device (this one too). Errors are thrown, so the page
+  // can say so instead of pretending the other devices were signed out.
+  const logoutEverywhere = useCallback(async () => {
+    await api("/auth/logout-all/", { method: "POST" });
+    setAccessToken(null);
+    setUser(null);
+    await clearOfflineData().catch(() => {});
+  }, []);
+
   const reloadUser = useCallback(async () => {
     const me = await api("/auth/me/");
     setUser(me);
@@ -153,12 +162,13 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      logoutEverywhere,
       reloadUser,
       setUser,
       isTeacher: !!user && (user.role === "admin" || (user.role === "teacher" && user.teacher_approved)),
       isAdmin: user?.role === "admin",
     }),
-    [user, ready, login, register, logout, reloadUser],
+    [user, ready, login, register, logout, logoutEverywhere, reloadUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

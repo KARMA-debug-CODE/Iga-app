@@ -60,6 +60,8 @@ class User(AbstractUser):
     totp_last_step = models.BigIntegerField(null=True, blank=True)
     # Set when a teacher creates the account or resets its password: the student must pick their own.
     must_change_password = models.BooleanField(default=False)
+    # A teacher's temporary password stops working after this (TEMPORARY_PASSWORD_DAYS).
+    temporary_password_expires_at = models.DateTimeField(null=True, blank=True)
     # Stamped into every access and refresh token. Raising it ends every session at once (a password
     # change or reset, a 2FA change, a stolen refresh token): tokens with an older number stop working.
     session_version = models.PositiveIntegerField(default=0, editable=False)
@@ -159,12 +161,30 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
         if password_changed:
             self.bump_session_version()
+            self.password_reset_tokens.all().delete()  # emailed reset links stop working too
+
+    @property
+    def temporary_password_expired(self):
+        expires = self.temporary_password_expires_at
+        return self.must_change_password and expires is not None and expires <= timezone.now()
 
     def bump_session_version(self):
         """End every session: tokens carrying an older session version stop working at once."""
         users = type(self).objects.filter(pk=self.pk)
         users.update(session_version=models.F("session_version") + 1)
         self.session_version = users.values_list("session_version", flat=True).get()
+
+
+class PasswordResetToken(models.Model):
+    """One emailed password-reset link (see password_reset.py). Only a hash of its secret is kept."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_reset_tokens")
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(db_index=True)
+
+    def __str__(self):
+        return f"{self.user} (until {self.expires_at:%Y-%m-%d %H:%M})"
 
 
 class ParentInvite(models.Model):

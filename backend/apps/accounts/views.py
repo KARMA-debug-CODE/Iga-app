@@ -4,10 +4,14 @@ from datetime import timedelta
 
 import pyotp
 from django.conf import settings
+from django.contrib.auth import password_validation
 from django.contrib.auth.models import update_last_login
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -23,7 +27,8 @@ from apps.core import security_log
 from apps.core.audit import client_ip
 from apps.core.security_log import fingerprint
 
-from . import lockout
+from . import enumeration, lockout, password_reset
+from .authentication import PasswordChangeRequired
 from .models import User
 from .security import (
     SESSION_VERSION_CLAIM,
@@ -39,12 +44,16 @@ from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     OTPSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
     RegisterSerializer,
     UserSerializer,
 )
 from .throttles import (
     AuthIPThrottle,
     LoginIdentifierThrottle,
+    PasswordResetIdentifierThrottle,
+    PasswordResetIPThrottle,
     RefreshIPThrottle,
     RefreshUserThrottle,
     RegisterIPThrottle,
@@ -117,8 +126,14 @@ class RegisterView(APIView):
     throttle_classes = [AuthIPThrottle, RegisterIPThrottle]
 
     def post(self, request):
+        with_email = bool(str(request.data.get("email") or "").strip())
+        if with_email:
+            enumeration.check_budget(request)
         serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            if serializer.email_in_use:
+                enumeration.spend(request)
+            raise ValidationError(serializer.errors)
         user = serializer.save()
         security_log.event(request, "register", user, role=user.role)
         return _session_response(user, status.HTTP_201_CREATED)
@@ -160,6 +175,17 @@ class LoginView(APIView):
         if not password_ok or not account.is_active:
             reason = "inactive" if password_ok else "password"
             return self._failed(request, keys, identifier, account, reason, _("Invalid username/email or password."))
+
+        if account.temporary_password_expired:
+            # Only someone who typed the right temporary password learns this.
+            security_log.event(request, "login_failed", account, level=logging.WARNING, reason="temporary_password_expired")
+            return Response(
+                {
+                    "detail": _("This temporary password has expired. Ask your teacher for a new one."),
+                    "code": "temporary_password_expired",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         if account.totp_enabled:
             otp = serializer.validated_data.get("otp", "")
@@ -290,14 +316,41 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
     def patch(self, request):
-        old_grade = request.user.grade
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        user = request.user
+        # Someone holding a teacher's temporary password may only pick the language until the
+        # password is changed (otherwise they could set an email and later reset the password).
+        if user.must_change_password and set(request.data) - {"preferred_language"}:
+            raise PasswordChangeRequired()
+        old_email = user.email or ""
+        changes_email = "email" in request.data and lockout.normalize(request.data.get("email")) != lockout.normalize(old_email)
+        if changes_email:
+            if str(request.data.get("email") or "").strip():
+                enumeration.check_budget(request, user)
+            # Password reset links go to this address, so changing it needs the password.
+            if user.has_usable_password():
+                refusal = password_refusal(
+                    request,
+                    user,
+                    request.data.get("current_password"),
+                    "change_email",
+                    _("Enter your current password to change your email address."),
+                )
+                if refusal is not None:
+                    return refusal
+        old_grade = user.grade
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            if serializer.email_in_use:
+                enumeration.spend(request, user)
+            raise ValidationError(serializer.errors)
         user = serializer.save()
         data = dict(serializer.data)
         if user.grade != old_grade:
             # The whole app follows the new grade; classes for the old grade leave the student's lists.
             data["left_classes"] = follow_grade(user)
+        if changes_email:
+            user.password_reset_tokens.all().delete()  # links sent to the old address stop working
+            security_log.event(request, "email_changed", user, had_email=bool(old_email), has_email=bool(user.email))
         return Response(data)
 
 
@@ -307,36 +360,70 @@ class ChangePasswordView(APIView):
     throttle_classes = [ScopedRateThrottle, AuthIPThrottle]
 
     def post(self, request):
+        refusal = password_refusal(request, request.user, request.data.get("current_password"), "change_password")
+        if refusal is not None:
+            return refusal
         serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data["new_password"])
         request.user.must_change_password = False
-        request.user.save(update_fields=["password", "must_change_password"])
+        request.user.temporary_password_expires_at = None
+        request.user.save(update_fields=["password", "must_change_password", "temporary_password_expires_at"])
         security_log.event(request, "change_password", request.user, other_sessions_ended=True)
         return _with_fresh_session(
             Response({"detail": _("Password updated. You were logged out on other devices.")}), request.user
         )
 
 
-def otp_refusal(request, user, code, purpose):
-    """None when `code` is the user's current 2FA code; otherwise the answer to send.
+def _second_check(request, user, passed, kind, purpose, wrong_answer):
+    """None when `passed()` is true; otherwise the answer to send.
 
-    Wrong codes count towards a lock on 2FA changes for this account (like sign-in), and are logged.
+    For an account already signed in (changing its password, email or 2FA): wrong answers count
+    towards a lock for that account, like sign-in, so a stolen session can't be used to guess the
+    password or a 2FA code; each one is logged.
     """
-    keys = [("otp", f"user:{user.pk}")]
+    keys = [(kind, f"user:{user.pk}")]
+    event = "2fa_failed" if kind == "otp" else "reauth_failed"
     wait = lockout.check(keys)
     if wait:
-        security_log.event(request, "2fa_failed", user, level=logging.WARNING, audit_every=600, purpose=purpose, locked=True)
+        security_log.event(request, event, user, level=logging.WARNING, audit_every=600, purpose=purpose, locked=True)
         return locked_response(wait)
-    if verify_totp(user, code):
+    if passed():
         lockout.succeed(keys)
         return None
     started = lockout.fail(keys)
-    security_log.event(request, "2fa_failed", user, level=logging.WARNING, purpose=purpose)
+    security_log.event(request, event, user, level=logging.WARNING, purpose=purpose)
     if started:
-        security_log.event(request, "account_locked", user, level=logging.WARNING, locks=["otp"], seconds=started["otp"])
-        return locked_response(started["otp"])
-    return Response({"detail": _("That code is not valid.")}, status=status.HTTP_400_BAD_REQUEST)
+        security_log.event(request, "account_locked", user, level=logging.WARNING, locks=[kind], seconds=started[kind])
+        return locked_response(started[kind])
+    return wrong_answer
+
+
+def otp_refusal(request, user, code, purpose):
+    """None when `code` is the user's current 2FA code; otherwise the answer to send."""
+    return _second_check(
+        request,
+        user,
+        lambda: verify_totp(user, code),
+        "otp",
+        purpose,
+        Response({"detail": _("That code is not valid.")}, status=status.HTTP_400_BAD_REQUEST),
+    )
+
+
+def password_refusal(request, user, password, purpose, message=None):
+    """None when `password` is the user's current password; otherwise the answer to send."""
+    return _second_check(
+        request,
+        user,
+        lambda: user.check_password(str(password or "")),
+        "reauth",
+        purpose,
+        Response(
+            {"current_password": [message or _("Incorrect password.")]},
+            status=status.HTTP_400_BAD_REQUEST,
+        ),
+    )
 
 
 class TwoFactorSetupView(APIView):
@@ -395,3 +482,60 @@ class TwoFactorDisableView(APIView):
         user.save(update_fields=["totp_enabled", "totp_secret", "totp_last_step"])
         security_log.event(request, "disable_2fa", user, other_sessions_ended=True)
         return _with_fresh_session(Response(UserSerializer(user).data), user)
+
+
+class PasswordResetRequestView(APIView):
+    """Email a single-use link to choose a new password. The answer never says whether an account exists."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [PasswordResetIdentifierThrottle, PasswordResetIPThrottle, AuthIPThrottle]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        password_reset.request_reset(request, serializer.validated_data["identifier"].strip())
+        minutes = settings.PASSWORD_RESET_TIMEOUT // 60
+        return Response(
+            {
+                "detail": _(
+                    "If an account matches and has an email address, we have sent it a link to choose a new "
+                    "password. The link works once, for %(minutes)s minutes."
+                )
+                % {"minutes": minutes}
+            }
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    """Choose a new password with the link's secret. Every session of the account ends."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [AuthIPThrottle]
+
+    @transaction.atomic
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        record = password_reset.valid_token(serializer.validated_data["token"], lock=True)
+        if record is None:
+            security_log.event(request, "password_reset_failed", None, level=logging.WARNING, audit_every=600)
+            return Response(
+                {"detail": _("This link is not valid or has expired. Ask for a new one."), "code": "invalid_link"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = record.user
+        new_password = serializer.validated_data["new_password"]
+        try:
+            password_validation.validate_password(new_password, user)
+        except DjangoValidationError as error:
+            return Response({"new_password": list(error.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.must_change_password = False
+        user.temporary_password_expires_at = None
+        # Saving the new password ends every session and every reset link of the account.
+        user.save(update_fields=["password", "must_change_password", "temporary_password_expires_at"])
+        revoke_all_sessions(user)
+        security_log.event(request, "password_reset", user, other_sessions_ended=True)
+        return Response({"detail": _("Your password has been changed. Log in with your new password.")})

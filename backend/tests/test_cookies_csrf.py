@@ -124,3 +124,13 @@ def test_wildcard_trusted_origins(student, settings):
     assert client.post("/api/auth/refresh/", HTTP_ORIGIN="https://app.iga.rw").status_code == 200
     assert client.post("/api/auth/refresh/", HTTP_ORIGIN="http://app.iga.rw").status_code == 403
     assert client.post("/api/auth/refresh/", HTTP_ORIGIN="https://iga.rw.evil.example").status_code == 403
+
+
+def test_local_development_trusts_any_loopback_port(student, settings):
+    """Vite's dev proxy sends the backend's own host, so the browser's origin has another port."""
+    client, _ = logged_in()
+    assert client.post("/api/auth/refresh/", HTTP_ORIGIN="http://127.0.0.1:5211").status_code == 403
+    settings.DEBUG = True
+    assert client.post("/api/auth/refresh/", HTTP_ORIGIN="http://127.0.0.1:5211").status_code == 200
+    assert client.post("/api/auth/refresh/", HTTP_ORIGIN="http://localhost:3000").status_code == 200
+    assert client.post("/api/auth/refresh/", HTTP_ORIGIN="https://evil.example").status_code == 403

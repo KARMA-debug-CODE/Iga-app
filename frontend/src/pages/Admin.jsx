@@ -260,40 +260,54 @@ function Moderation() {
 
 function Audit() {
   const { t, lang } = useI18n();
-  const state = useApi("/admin/audit/");
+  // "Security" shows sign-ins, lockouts, password and 2FA changes, refused and throttled requests.
+  const [security, setSecurity] = useState(false);
+  const state = useApi("/admin/audit/", { params: security ? { security: 1 } : undefined });
   return (
-    <Loader state={state}>
-      {(entries) => (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("admin.col.when")}</th>
-                <th>{t("admin.col.who")}</th>
-                <th>{t("admin.col.action")}</th>
-                <th>{t("admin.col.target")}</th>
-                <th>{t("admin.col.details")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((e) => (
-                <tr key={e.id}>
-                  <td className="small">{formatDate(e.created_at, lang)}</td>
-                  <td>{e.actor || "—"}</td>
-                  <td>
-                    <code>{e.action}</code>
-                  </td>
-                  <td className="small">{e.target}</td>
-                  <td className="small">
-                    <code>{JSON.stringify(e.details)}</code>
-                  </td>
+    <div className="stack">
+      <div className="chips wrap">
+        <button type="button" className={`chip ${!security ? "active" : ""}`} aria-pressed={!security} onClick={() => setSecurity(false)}>
+          {t("admin.auditAll")}
+        </button>
+        <button type="button" className={`chip ${security ? "active" : ""}`} aria-pressed={security} onClick={() => setSecurity(true)}>
+          {t("admin.auditSecurity")}
+        </button>
+      </div>
+      <Loader state={state}>
+        {(entries) => (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("admin.col.when")}</th>
+                  <th>{t("admin.col.who")}</th>
+                  <th>{t("admin.col.action")}</th>
+                  <th>{t("admin.col.target")}</th>
+                  <th>{t("admin.col.ip")}</th>
+                  <th>{t("admin.col.details")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </Loader>
+              </thead>
+              <tbody>
+                {entries.map((e) => (
+                  <tr key={e.id}>
+                    <td className="small">{formatDate(e.created_at, lang)}</td>
+                    <td>{e.actor || "—"}</td>
+                    <td>
+                      <code>{e.action}</code>
+                    </td>
+                    <td className="small">{e.target}</td>
+                    <td className="small">{e.ip || "—"}</td>
+                    <td className="small">
+                      <code>{JSON.stringify(e.details)}</code>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Loader>
+    </div>
   );
 }
 

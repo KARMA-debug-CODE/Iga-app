@@ -36,6 +36,8 @@ SECURITY_ACTIONS = {
     "enable_2fa",
     "disable_2fa",
     "2fa_failed",
+    "reauth_failed",
+    "email_in_use",
     "email_changed",
     "logout_everywhere",
     "refresh_token_reuse",

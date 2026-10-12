@@ -201,10 +201,10 @@ class ChildrenView(APIView):
     def post(self, request):
         code = str(request.data.get("code", "")).strip().upper().replace(" ", "")
         invite = ParentInvite.objects.select_for_update().filter(code=code).select_related("student").first()
-        if invite is None or invite.used_by_id or invite.expires_at < timezone.now():
+        # One answer for every unusable code (unknown, used, expired, or a deactivated account), so it
+        # can't tell anyone which codes or accounts exist.
+        if invite is None or invite.used_by_id or invite.expires_at < timezone.now() or not invite.student.is_active:
             raise ValidationError({"code": _("That code is not valid or has expired. Ask your child to make a new one.")})
-        if not invite.student.is_active:
-            raise ValidationError({"code": _("That account is not active.")})
         ParentLink.objects.get_or_create(parent=request.user, student=invite.student)
         invite.used_by = request.user
         invite.save(update_fields=["used_by"])
