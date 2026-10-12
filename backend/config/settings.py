@@ -260,6 +260,10 @@ CHECKOUT_SESSION_MINUTES = int(os.environ.get("CHECKOUT_SESSION_MINUTES", "60"))
 BILLING_RECONCILE_DAYS = int(os.environ.get("BILLING_RECONCILE_DAYS", "3"))
 # Used as the payer's email when the school administrator has none (providers require one).
 BILLING_FALLBACK_EMAIL = os.environ.get("BILLING_FALLBACK_EMAIL", "billing@iga.rw")
+# The money ledger (apps/schools/ledger.py) chains its entries by hash. With a key, the hashes are
+# HMAC-SHA256, so someone who can write to the database but doesn't have the key can't rebuild the
+# chain after changing an entry. Optional; once set, keep it (entries written with it need it to verify).
+LEDGER_HMAC_KEY = os.environ.get("LEDGER_HMAC_KEY", "")
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))

@@ -741,3 +741,63 @@ msgstr "Veuillez limiter vos questions à %(n)s caractères."
 #: apps/accounts/avatar.py:31
 msgid "Choose an avatar from the options."
 msgstr "Choisissez un avatar parmi les options proposées."
+
+#: apps/schools/billing.py:63
+msgid "Online payment isn't set up correctly yet. Please contact the Iga team."
+msgstr "Le paiement en ligne n'est pas encore correctement configuré. Veuillez contacter l'équipe Iga."
+
+#: apps/schools/billing.py:203
+msgid "This request key was already used for a different request."
+msgstr "Cette clé de requête a déjà servi pour une autre requête."
+
+#: apps/schools/billing.py:216
+msgid "This reference was already recorded on %(date)s for %(school)s."
+msgstr "Cette référence a déjà été enregistrée le %(date)s pour %(school)s."
+
+#: apps/schools/billing.py:316
+msgid "Choose a refund or a correction."
+msgstr "Choisissez un remboursement ou une correction."
+
+#: apps/schools/billing.py:321
+msgid "A refund is money paid back: enter it as a negative amount."
+msgstr "Un remboursement est de l'argent rendu : saisissez-le comme un montant négatif."
+
+#: apps/schools/billing.py:323
+msgid "The fee must be between 0 and the amount."
+msgstr "Les frais doivent être compris entre 0 et le montant."
+
+#: apps/schools/billing.py:325
+msgid "Between -24 and 24 months."
+msgstr "Entre -24 et 24 mois."
+
+#: apps/schools/billing.py:327
+msgid "A correction must change an amount or a number of months."
+msgstr "Une correction doit modifier un montant ou un nombre de mois."
+
+#: apps/schools/billing.py:329
+msgid "Say why (for example the refund reference or what was wrong)."
+msgstr "Indiquez pourquoi (par exemple la référence du remboursement ou ce qui était erroné)."
+
+#: apps/schools/billing.py:331
+msgid "That entry belongs to another school."
+msgstr "Cette écriture appartient à une autre école."
+
+#: apps/schools/billing.py:354
+msgid "This school has no paid months to take back."
+msgstr "Cette école n'a pas de mois payés à retirer."
+
+#: apps/schools/views.py:461
+msgid "Send a key of 8 to 80 letters, digits, - or _."
+msgstr "Envoyez une clé de 8 à 80 caractères : lettres, chiffres, - ou _."
+
+#: apps/schools/views.py:612
+msgid "Enter a whole number."
+msgstr "Saisissez un nombre entier."
+
+#: apps/schools/views.py:619
+msgid "Enter a date as YYYY-MM-DD."
+msgstr "Saisissez une date au format AAAA-MM-JJ."
+
+#: apps/schools/views.py:525
+msgid "No ledger entry has that number."
+msgstr "Aucune écriture du registre ne porte ce numéro."

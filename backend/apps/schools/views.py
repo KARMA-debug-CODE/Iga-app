@@ -1,12 +1,17 @@
+import csv
+import io
 import logging
+import re
+from datetime import date
 
 from django.db.models import Count, Q, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -17,17 +22,20 @@ from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin
 from apps.core.throttles import JoinRateThrottle
 
-from . import billing, membership, notify, providers
+from . import billing, membership, notify, providers, webhooks
 from .access import content_access
 from .constants import PROVINCES
-from .models import Payment, School
+from .models import LedgerEntry, Payment, School, WebhookEvent
 from .serializers import (
     CheckoutSerializer,
     ChooseSchoolSerializer,
+    CorrectionSerializer,
     DecideSerializer,
+    LedgerEntrySerializer,
     ManualPaymentSerializer,
     MemberSerializer,
     PaymentSerializer,
+    PlatformPaymentSerializer,
     PlatformSchoolSerializer,
     SchoolAdminSerializer,
     SchoolListSerializer,
@@ -35,6 +43,29 @@ from .serializers import (
 
 log = logging.getLogger(__name__)
 MAX_RESULTS = 20
+IDEMPOTENCY_KEY = re.compile(r"[A-Za-z0-9_-]{8,80}")
+_NUMBER = re.compile(r"-?\d+(\.\d+)?")
+LEDGER_CSV_COLUMNS = [
+    "sequence",
+    "recorded_at",
+    "kind",
+    "school_id",
+    "school",
+    "currency",
+    "gross",
+    "provider_fee",
+    "net",
+    "months",
+    "paid_until_before",
+    "paid_until_after",
+    "payment_reference",
+    "provider",
+    "reference",
+    "corrects",
+    "recorded_by",
+    "note",
+    "entry_hash",
+]
 
 
 # --- Finding and joining a school --------------------------------------------------
@@ -280,7 +311,8 @@ class DevCompleteView(APIView):
 
 
 class FlutterwaveWebhookView(APIView):
-    """Flutterwave tells us a transaction changed. We check the signature, then ask its API."""
+    """Flutterwave tells us a transaction changed. We check the signature, refuse replays, then ask
+    its API: nothing in the body is believed, it only says which transaction to look up."""
 
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -288,24 +320,43 @@ class FlutterwaveWebhookView(APIView):
     def post(self, request):
         provider = providers.get(Payment.Provider.FLUTTERWAVE)
         if not provider.webhook_is_authentic(request):
-            log.warning("Rejected a Flutterwave webhook with a bad signature")
+            webhooks.refuse(request, provider.key, WebhookEvent.Outcome.BAD_SIGNATURE, request.body)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
             payload = provider.parse_webhook(request.content_type, request.body)
         except ValueError:
             log.warning("Unreadable Flutterwave webhook (content type %s)", request.content_type)
+            webhooks.refuse(request, provider.key, WebhookEvent.Outcome.UNREADABLE, request.body)
             return Response(status=status.HTTP_400_BAD_REQUEST)
         reference = provider.webhook_reference(payload)
+        transaction_id = provider.webhook_transaction_id(payload)
+        event, fresh = webhooks.claim(request, provider.key, request.body, reference, transaction_id)
+        if not fresh:
+            return Response({"duplicate": True})  # acknowledged, so it isn't sent again
         if not reference:
             # Acknowledge so it isn't retried, but say so: usually the dashboard isn't set to v3 JSON webhooks.
             log.warning("Flutterwave webhook without a transaction reference; fields: %s", sorted(payload)[:12])
+            webhooks.finish(event, WebhookEvent.Outcome.NO_REFERENCE)
             return Response({"ignored": True})
         payment = Payment.objects.filter(reference=reference, provider=Payment.Provider.FLUTTERWAVE).first()
         if payment is None:
             log.info("Flutterwave webhook for an unknown reference %s", reference[:60])
+            webhooks.finish(event, WebhookEvent.Outcome.UNKNOWN_REFERENCE)
             return Response({"ignored": True})  # not ours: acknowledge so it isn't retried
-        if payment.status != Payment.Status.SUCCEEDED:
-            billing.settle(payment, provider.verify(payment, provider.webhook_transaction_id(payload)))
+        if payment.status == Payment.Status.SUCCEEDED:
+            webhooks.finish(event, WebhookEvent.Outcome.ALREADY_PAID, payment)
+            return Response({"received": True})
+        try:
+            payment = billing.settle(payment, provider.verify(payment, transaction_id), request=request)
+        except APIException:
+            webhooks.finish(event, WebhookEvent.Outcome.UNAVAILABLE, payment)
+            raise  # 503: Flutterwave sends it again later
+        outcome = {
+            Payment.Status.SUCCEEDED: WebhookEvent.Outcome.APPLIED,
+            Payment.Status.FAILED: WebhookEvent.Outcome.FAILED,
+            Payment.Status.CANCELLED: WebhookEvent.Outcome.FAILED,
+        }.get(payment.status, WebhookEvent.Outcome.PENDING)
+        webhooks.finish(event, outcome, payment)
         return Response({"received": True})
 
 
@@ -354,7 +405,10 @@ class PlatformSchoolDetailView(APIView):
     def get(self, request, school_id):
         school = get_object_or_404(School, pk=school_id)
         data = PlatformSchoolSerializer(school).data
-        data["payments"] = PaymentSerializer(school.payments.select_related("created_by")[:100], many=True).data
+        data["payments"] = PlatformPaymentSerializer(school.payments.select_related("created_by")[:100], many=True).data
+        data["ledger"] = LedgerEntrySerializer(
+            school.ledger_entries.select_related("payment", "corrects").order_by("-sequence")[:100], many=True
+        ).data
         return Response(data)
 
     def patch(self, request, school_id):
@@ -389,7 +443,7 @@ class PlatformSchoolActionView(APIView):
             school.status = School.Status.VERIFIED
             school.save(update_fields=["status"])
         elif action == "reject":
-            if school.status != School.Status.PENDING or school.payments.exists():
+            if school.status != School.Status.PENDING or school.payments.exists() or school.ledger_entries.exists():
                 raise ValidationError(_("Only a school waiting for verification, with no payments, can be rejected."))
             audit.record(request, "reject_school", school, name=school.name, district=school.district)
             school.delete()  # its members are released (signals.release_members)
@@ -400,8 +454,20 @@ class PlatformSchoolActionView(APIView):
         return Response(PlatformSchoolSerializer(school).data)
 
 
+def idempotency_key(request):
+    """The request's Idempotency-Key header ("" without one): a resent request does nothing new."""
+    key = (request.headers.get("Idempotency-Key") or "").strip()
+    if key and not IDEMPOTENCY_KEY.fullmatch(key):
+        raise ValidationError({"idempotency_key": _("Send a key of 8 to 80 letters, digits, - or _.")})
+    return key
+
+
 class PlatformManualPaymentView(APIView):
-    """Record money received outside the app (bank transfer, mobile money to the company, cash) or free months."""
+    """Record money received outside the app (bank transfer, mobile money to the company, cash) or free months.
+
+    Send an Idempotency-Key header so a resent request records nothing new, and the bank or receipt
+    reference as external_reference: the same reference can't be recorded twice.
+    """
 
     permission_classes = [IsPlatformAdmin]
 
@@ -410,7 +476,18 @@ class PlatformManualPaymentView(APIView):
         data = ManualPaymentSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         v = data.validated_data
-        payment = billing.record_manual_payment(school, request.user, v["months"], v["amount"], v["currency"], v["note"])
+        payment, created = billing.record_manual_payment_once(
+            school,
+            request.user,
+            v["months"],
+            v["amount"],
+            v["currency"],
+            v["note"],
+            external_reference=v.get("external_reference", ""),
+            idempotency_key=idempotency_key(request),
+        )
+        if not created:
+            return Response(PlatformPaymentSerializer(payment).data, status=status.HTTP_200_OK)
         audit.record(
             request,
             "manual_payment",
@@ -420,9 +497,126 @@ class PlatformManualPaymentView(APIView):
             amount=str(payment.amount),
             currency=payment.currency,
             note=payment.note,
+            external_reference=payment.external_reference,
         )
         notify.payment_received(payment)
-        return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+        return Response(PlatformPaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+
+
+class PlatformLedgerView(APIView):
+    """A school's money ledger (GET), and refunds or corrections recorded as new entries (POST)."""
+
+    permission_classes = [IsPlatformAdmin]
+
+    def get(self, request, school_id):
+        school = get_object_or_404(School, pk=school_id)
+        entries = school.ledger_entries.select_related("payment", "corrects").order_by("-sequence")[:200]
+        return Response(LedgerEntrySerializer(entries, many=True).data)
+
+    def post(self, request, school_id):
+        school = get_object_or_404(School, pk=school_id)
+        data = CorrectionSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        v = data.validated_data
+        corrects = None
+        if v.get("corrects"):
+            corrects = LedgerEntry.objects.filter(sequence=v["corrects"]).first()
+            if corrects is None:
+                raise ValidationError({"corrects": _("No ledger entry has that number.")})
+        entry, created = billing.record_correction(
+            school,
+            request.user,
+            v["kind"],
+            v["currency"],
+            v["amount"],
+            v["note"],
+            fee=v.get("provider_fee") or 0,
+            months=v.get("months", 0),
+            corrects=corrects,
+            idempotency_key=idempotency_key(request),
+        )
+        if created:
+            audit.record(
+                request,
+                f"ledger_{entry.kind}",
+                school,
+                sequence=entry.sequence,
+                amount=str(entry.gross_amount),
+                currency=entry.currency,
+                months=entry.months,
+                corrects=v.get("corrects"),
+                note=entry.note,
+            )
+        return Response(LedgerEntrySerializer(entry).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+def _csv_cell(value):
+    """Spreadsheets run a cell that starts with = + - @ (or a tab or CR) as a formula: quote it."""
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") and not _NUMBER.fullmatch(text) else text
+
+
+class PlatformLedgerExportView(APIView):
+    """The whole money ledger as CSV, oldest first. ?school=<id>&since=YYYY-MM-DD&until=YYYY-MM-DD"""
+
+    permission_classes = [IsPlatformAdmin]
+
+    def get(self, request):
+        entries = LedgerEntry.objects.select_related("school", "payment", "corrects").order_by("sequence")
+        params = request.query_params
+        if params.get("school"):
+            entries = entries.filter(school_id=_int_param(params["school"], "school"))
+        for name, lookup in (("since", "created_at__date__gte"), ("until", "created_at__date__lte")):
+            if params.get(name):
+                entries = entries.filter(**{lookup: _date_param(params[name], name)})
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(LEDGER_CSV_COLUMNS)
+        for e in entries.iterator(chunk_size=500):
+            writer.writerow(
+                [
+                    _csv_cell(v)
+                    for v in (
+                        e.sequence,
+                        timezone.localtime(e.created_at).isoformat(),
+                        e.kind,
+                        e.school_id,
+                        e.school.name,
+                        e.currency,
+                        e.gross_amount,
+                        e.provider_fee,
+                        e.net_amount,
+                        e.months,
+                        timezone.localtime(e.paid_until_before).isoformat() if e.paid_until_before else "",
+                        timezone.localtime(e.paid_until_after).isoformat() if e.paid_until_after else "",
+                        e.payment.reference if e.payment_id else "",
+                        e.payment.provider if e.payment_id else "",
+                        e.reference,
+                        e.corrects.sequence if e.corrects_id else "",
+                        e.actor_name,
+                        e.note,
+                        e.entry_hash,
+                    )
+                ]
+            )
+        audit.record(request, "export_ledger", request.user, filters={k: params.get(k, "") for k in ("school", "since", "until")})
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="iga-ledger-{timezone.localdate().isoformat()}.csv"'
+        return response
+
+
+def _int_param(value, name):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        raise ValidationError({name: _("Enter a whole number.")})
+
+
+def _date_param(value, name):
+    try:
+        return date.fromisoformat(value)
+    except (TypeError, ValueError):
+        raise ValidationError({name: _("Enter a date as YYYY-MM-DD.")})
 
 
 class PlatformMembersView(APIView):
@@ -445,7 +639,12 @@ class PlatformMembersView(APIView):
 
 
 def revenue_summary():
-    """Paid money per currency for this calendar month and in total, plus active schools."""
+    """Paid money per currency for this calendar month and in total, plus active schools.
+
+    "this_month" and "all_time" add up the prices of paid payments. "ledger" comes from the money
+    ledger, so it also counts refunds and corrections: gross (what payers were charged, less refunds),
+    the providers' fees, and net (what reached Iga), per currency.
+    """
     now = timezone.now()
     month_start = timezone.localtime(now).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     paid = Payment.objects.filter(status=Payment.Status.SUCCEEDED)
@@ -453,9 +652,17 @@ def revenue_summary():
     def by_currency(qs):
         return {row["currency"]: f"{row['total']:.2f}" for row in qs.values("currency").annotate(total=Sum("amount"))}
 
+    def ledger_totals(qs):
+        rows = qs.values("currency").annotate(gross=Sum("gross_amount"), fee=Sum("provider_fee"), net=Sum("net_amount"))
+        return {r["currency"]: {"gross": f"{r['gross']:.2f}", "fees": f"{r['fee']:.2f}", "net": f"{r['net']:.2f}"} for r in rows}
+
     return {
         "this_month": by_currency(paid.filter(paid_at__gte=month_start)),
         "all_time": by_currency(paid),
+        "ledger": {
+            "this_month": ledger_totals(LedgerEntry.objects.filter(created_at__gte=month_start)),
+            "all_time": ledger_totals(LedgerEntry.objects.all()),
+        },
         "active_schools": School.objects.filter(status=School.Status.VERIFIED, paid_until__gt=now).count(),
         "verified_schools": School.objects.filter(status=School.Status.VERIFIED).count(),
         "pending_schools": School.objects.filter(status=School.Status.PENDING).count(),

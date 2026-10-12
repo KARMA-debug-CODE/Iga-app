@@ -5,7 +5,7 @@ from rest_framework import serializers
 from apps.accounts.models import User
 
 from .constants import PROVINCE_OF
-from .models import Payment, School
+from .models import LedgerEntry, Payment, School
 
 
 class SchoolListSerializer(serializers.ModelSerializer):
@@ -144,6 +144,47 @@ class PaymentSerializer(serializers.ModelSerializer):
         return payment.created_by.display_name
 
 
+class PlatformPaymentSerializer(PaymentSerializer):
+    """For the Iga team only: what the payer was charged, the provider's fee and what reached Iga."""
+
+    class Meta(PaymentSerializer.Meta):
+        fields = PaymentSerializer.Meta.fields + [
+            "gross_amount",
+            "provider_fee",
+            "net_amount",
+            "external_reference",
+            "provider_transaction_id",
+        ]
+
+
+class LedgerEntrySerializer(serializers.ModelSerializer):
+    payment_reference = serializers.CharField(source="payment.reference", read_only=True, default="")
+    corrects = serializers.IntegerField(source="corrects.sequence", read_only=True, default=None)
+
+    class Meta:
+        model = LedgerEntry
+        fields = [
+            "sequence",
+            "kind",
+            "school",
+            "currency",
+            "gross_amount",
+            "provider_fee",
+            "net_amount",
+            "months",
+            "paid_until_before",
+            "paid_until_after",
+            "payment_reference",
+            "reference",
+            "corrects",
+            "actor_name",
+            "note",
+            "created_at",
+            "entry_hash",
+        ]
+        read_only_fields = fields
+
+
 class PlatformSchoolSerializer(SchoolAdminSerializer):
     """Platform administrators see and edit everything about a school."""
 
@@ -190,4 +231,18 @@ class ManualPaymentSerializer(serializers.Serializer):
     months = serializers.IntegerField(min_value=1, max_value=24)
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0)
     currency = serializers.ChoiceField(choices=["USD", "RWF"])
+    note = serializers.CharField(max_length=300)
+    # The bank transfer or receipt number: the same one can only be recorded once.
+    external_reference = serializers.CharField(max_length=100, required=False, allow_blank=True, default="")
+
+
+class CorrectionSerializer(serializers.Serializer):
+    """A refund (money paid back, a negative amount) or a correction of an earlier entry."""
+
+    kind = serializers.ChoiceField(choices=[LedgerEntry.Kind.REFUND, LedgerEntry.Kind.CORRECTION])
+    currency = serializers.ChoiceField(choices=["USD", "RWF"])
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    provider_fee = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False, default=0)
+    months = serializers.IntegerField(min_value=-24, max_value=24, required=False, default=0)
+    corrects = serializers.IntegerField(min_value=1, required=False, allow_null=True)
     note = serializers.CharField(max_length=300)
