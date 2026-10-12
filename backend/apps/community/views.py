@@ -7,9 +7,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from apps.accounts.parents import NotParent
 from apps.core import audit
-from apps.core.permissions import IsPlatformAdmin
+from apps.core.permissions import IsPlatformAdmin, NotParent, RecentAuthentication
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
 from apps.core.validation import text_field
@@ -293,7 +292,7 @@ class ResolveReportSerializer(serializers.Serializer):
 class ModerationViewSet(viewsets.ViewSet):
     """Admin queue of reported chat messages."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def list(self, request):
         reports = MessageReport.objects.filter(resolved=False).select_related(

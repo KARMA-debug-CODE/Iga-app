@@ -8,10 +8,8 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -20,6 +18,7 @@ from apps.classroom.models import Assignment
 from apps.classroom.views import assignment_status
 from apps.core import audit
 from apps.core.constants import ContentStatus
+from apps.core.permissions import IsParent, IsStudent
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import request_language
 from apps.core.validation import text_field
@@ -37,20 +36,6 @@ def new_code():
         code = "".join(secrets.choice(ALPHABET) for _ in range(8))
         if not ParentInvite.objects.filter(code=code).exists():
             return code
-
-
-class IsStudent(BasePermission):
-    message = gettext_lazy("Only students can do this.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_student
-
-
-class IsParent(BasePermission):
-    message = gettext_lazy("Only parent or guardian accounts can do this.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_parent
 
 
 def level_info(xp):
@@ -231,15 +216,6 @@ class ChildDetailView(APIView):
         student = self._student(request, student_id)
         ParentLink.objects.filter(parent=request.user, student=student).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class NotParent(BasePermission):
-    """Keeps parent accounts out of student spaces such as study-group chats."""
-
-    message = gettext_lazy("Study groups are for students and teachers.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and not request.user.is_parent
 
 
 def deny_parents(user):

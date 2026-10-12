@@ -15,9 +15,8 @@ function tOr(t, key, fallback) {
   return text === key ? fallback : text;
 }
 
-function Stats() {
+function Stats({ state }) {
   const { t } = useI18n();
-  const state = useApi("/admin/stats/");
   return (
     <Loader state={state}>
       {(s) => (
@@ -582,15 +581,20 @@ function SubscriptionStats({ subs }) {
 export default function Admin() {
   const { t } = useI18n();
   const [tab, setTab] = useState("stats");
+  const stats = useApi("/admin/stats/");
+  // The Django admin has a secret address, given only to platform administrators (none when it is off).
+  const djangoAdmin = stats.data?.django_admin_url;
   return (
     <>
       <div className="page-header spread">
         <h1 className="title-with-icon" style={{ margin: 0 }}>
           <Icon name="admin" size={28} /> {t("admin.title")}
         </h1>
-        <a className="btn btn-secondary btn-sm" href="/django-admin/" target="_blank" rel="noopener noreferrer">
-          {t("admin.djangoAdmin")} <Icon name="external" size={16} />
-        </a>
+        {djangoAdmin && (
+          <a className="btn btn-secondary btn-sm" href={djangoAdmin} target="_blank" rel="noopener noreferrer">
+            {t("admin.djangoAdmin")} <Icon name="external" size={16} />
+          </a>
+        )}
       </div>
       <Tabs
         value={tab}
@@ -604,7 +608,7 @@ export default function Admin() {
           { value: "audit", label: t("admin.audit") },
         ]}
       />
-      {tab === "stats" && <Stats />}
+      {tab === "stats" && <Stats state={stats} />}
       {tab === "schools" && <Schools />}
       {tab === "users" && <Users />}
       {tab === "review" && <Review />}

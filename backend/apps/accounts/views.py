@@ -27,6 +27,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
 )
+from .stepup import signed_in_now
 from .throttles import LoginIdentifierThrottle
 
 
@@ -42,10 +43,15 @@ def _set_refresh_cookie(response, refresh_token):
     )
 
 
-def _session_response(user, status_code=status.HTTP_200_OK):
+def _session_response(user, status_code=status.HTTP_200_OK, auth_time=None):
     refresh = RefreshToken.for_user(user)
+    if auth_time is not None:
+        # When the user last gave their password (sign-in), kept through refreshes like OpenID Connect's
+        # auth_time: privileged operations accept it for STEP_UP_MAX_AGE_SECONDS (apps.core.permissions).
+        refresh["auth_time"] = auth_time
+    access = refresh.access_token  # copies auth_time
     response = Response(
-        {"access": str(refresh.access_token), "user": UserSerializer(user).data},
+        {"access": str(access), "user": UserSerializer(user).data},
         status=status_code,
     )
     _set_refresh_cookie(response, refresh)
@@ -68,7 +74,7 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         audit.record(request, "register", user, role=user.role)
-        return _session_response(user, status.HTTP_201_CREATED)
+        return _session_response(user, status.HTTP_201_CREATED, auth_time=signed_in_now())
 
 
 class LoginView(APIView):
@@ -106,7 +112,7 @@ class LoginView(APIView):
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
-        return _session_response(user)
+        return _session_response(user, auth_time=signed_in_now())
 
 
 class RefreshView(APIView):
@@ -131,7 +137,8 @@ class RefreshView(APIView):
                 response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.REFRESH_COOKIE_PATH)
             return response
         old.blacklist()  # rotation: each refresh token works exactly once
-        return _session_response(user)
+        auth_time = old.get("auth_time")
+        return _session_response(user, auth_time=auth_time if isinstance(auth_time, int) else None)
 
     @staticmethod
     def _handle_reuse(raw):

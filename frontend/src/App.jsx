@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./auth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from "./components/Layout";
+import StepUpDialog from "./components/StepUpDialog";
 import { Spinner } from "./components/ui";
 import { useI18n } from "./i18n";
 import Dashboard from "./pages/Dashboard";
@@ -106,6 +107,7 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
+      {user && <StepUpDialog />}
       <ErrorBoundary resetKey={location.pathname} reloadOnRetry>
         <Suspense fallback={<Spinner />}>
           <Routes>

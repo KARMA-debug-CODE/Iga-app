@@ -13,27 +13,15 @@ msgstr "Choisissez un nouveau mot de passe avant de continuer."
 msgid "Choose an avatar from the options."
 msgstr "Choisissez un avatar parmi les options proposées."
 
-#: apps/accounts/parents.py:43
-msgid "Only students can do this."
-msgstr "Seuls les élèves peuvent faire cela."
-
-#: apps/accounts/parents.py:50
-msgid "Only parent or guardian accounts can do this."
-msgstr "Seuls les comptes de parent ou de tuteur peuvent faire cela."
-
-#: apps/accounts/parents.py:239
-msgid "Study groups are for students and teachers."
-msgstr "Les groupes d'étude sont réservés aux élèves et aux enseignants."
-
-#: apps/accounts/parents.py:247
+#: apps/accounts/parents.py:223
 msgid "This is only for students and teachers."
 msgstr "Ceci est réservé aux élèves et aux enseignants."
 
-#: apps/accounts/parents.py:210
+#: apps/accounts/parents.py:195
 msgid "That code is not valid or has expired. Ask your child to make a new one."
 msgstr "Ce code n'est pas valide ou a expiré. Demandez à votre enfant d'en créer un nouveau."
 
-#: apps/accounts/parents.py:212
+#: apps/accounts/parents.py:197
 msgid "That account is not active."
 msgstr "Ce compte n'est pas actif."
 
@@ -103,33 +91,39 @@ msgstr "Cette école est déjà sur Iga. Choisissez-la plutôt dans la liste."
 msgid "That school has just been registered. Choose it from the list."
 msgstr "Cette école vient d'être inscrite. Choisissez-la dans la liste."
 
-#: apps/accounts/views.py:94
-msgid "Invalid username/email or password."
-msgstr "Nom d'utilisateur, e-mail ou mot de passe incorrect."
+#: apps/accounts/stepup.py:55
+msgid "That password is not right."
+msgstr "Ce mot de passe n'est pas correct."
 
-#: apps/accounts/views.py:122
-msgid "Not logged in."
-msgstr "Vous n'êtes pas connecté."
+#: apps/accounts/stepup.py:61
+#: apps/accounts/views.py:106
+msgid "Enter the code from your authenticator app."
+msgstr "Saisissez le code de votre application d'authentification."
 
-#: apps/accounts/views.py:206
-msgid "Password updated. You were logged out on other devices."
-msgstr "Mot de passe modifié. Vous avez été déconnecté sur vos autres appareils."
-
-#: apps/accounts/views.py:218
-msgid "Two-factor authentication is already on."
-msgstr "La vérification en deux étapes est déjà activée."
-
-#: apps/accounts/views.py:235
-#: apps/accounts/views.py:251
-#: apps/accounts/views.py:105
+#: apps/accounts/stepup.py:67
+#: apps/accounts/views.py:242
+#: apps/accounts/views.py:258
+#: apps/accounts/views.py:111
 msgid "That code is not valid."
 msgstr "Ce code n'est pas valide."
 
 #: apps/accounts/views.py:100
-msgid "Enter the code from your authenticator app."
-msgstr "Saisissez le code de votre application d'authentification."
+msgid "Invalid username/email or password."
+msgstr "Nom d'utilisateur, e-mail ou mot de passe incorrect."
 
 #: apps/accounts/views.py:128
+msgid "Not logged in."
+msgstr "Vous n'êtes pas connecté."
+
+#: apps/accounts/views.py:213
+msgid "Password updated. You were logged out on other devices."
+msgstr "Mot de passe modifié. Vous avez été déconnecté sur vos autres appareils."
+
+#: apps/accounts/views.py:225
+msgid "Two-factor authentication is already on."
+msgstr "La vérification en deux étapes est déjà activée."
+
+#: apps/accounts/views.py:134
 msgid "Session expired."
 msgstr "Session expirée."
 
@@ -330,11 +324,11 @@ msgstr "Cette adresse e-mail n'est pas valide."
 msgid "Attach exactly one quiz, lesson or simulation."
 msgstr "Joignez exactement un quiz, une leçon ou une simulation."
 
-#: apps/classroom/views.py:264
+#: apps/classroom/views.py:266
 msgid "Only students join classes with a code."
 msgstr "Seuls les élèves rejoignent une classe avec un code."
 
-#: apps/classroom/views.py:293
+#: apps/classroom/views.py:295
 msgid "This class is archived."
 msgstr "Cette classe est archivée."
 
@@ -347,12 +341,12 @@ msgstr "Quiz introuvable."
 msgid "Lesson not found."
 msgstr "Leçon introuvable."
 
-#: apps/classroom/views.py:268
+#: apps/classroom/views.py:270
 msgid "No class has that code. Check with your teacher."
 msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
 
-#: apps/classroom/views.py:284
-#: apps/classroom/views.py:318
+#: apps/classroom/views.py:286
+#: apps/classroom/views.py:320
 msgid "That student is not in this class."
 msgstr "Cet élève n'est pas dans cette classe."
 
@@ -381,65 +375,85 @@ msgstr "Le serveur d'exécution du code ne répond pas. Réessayez dans une minu
 msgid "The code runner could not run this program. Please tell an administrator."
 msgstr "Le serveur d'exécution du code n'a pas pu lancer ce programme. Prévenez un administrateur."
 
-#: apps/community/views.py:140
+#: apps/community/views.py:139
 msgid "Join the group first."
 msgstr "Rejoignez d'abord le groupe."
 
-#: apps/community/views.py:158
+#: apps/community/views.py:157
 msgid "Only the group owner can edit the group."
 msgstr "Seul le créateur du groupe peut le modifier."
 
-#: apps/community/views.py:163
+#: apps/community/views.py:162
 msgid "Only the group owner can delete the group."
 msgstr "Seul le créateur du groupe peut le supprimer."
 
-#: apps/community/views.py:191
+#: apps/community/views.py:190
 msgid "This group is private; ask a member for the code."
 msgstr "Ce groupe est privé ; demandez le code à un membre."
 
-#: apps/community/views.py:266
+#: apps/community/views.py:265
 msgid "You are not in this group."
 msgstr "Vous n'êtes pas dans ce groupe."
 
-#: apps/community/views.py:274
+#: apps/community/views.py:273
 msgid "Thanks — a moderator will review this message."
 msgstr "Merci, un modérateur examinera ce message."
 
-#: apps/community/views.py:280
+#: apps/community/views.py:279
 msgid "Only moderators can hide messages."
 msgstr "Seuls les modérateurs peuvent masquer des messages."
 
-#: apps/community/views.py:181
+#: apps/community/views.py:180
 msgid "This group is full."
 msgstr "Ce groupe est complet."
 
-#: apps/community/views.py:199
+#: apps/community/views.py:198
 msgid "No group has that code."
 msgstr "Aucun groupe n'a ce code."
 
-#: apps/community/views.py:243
+#: apps/community/views.py:242
 msgid "Write something first."
 msgstr "Écrivez d'abord quelque chose."
 
-#: apps/core/admin_login.py:27
+#: apps/core/admin_login.py:74
 msgid "Too many attempts. Wait a minute and try again."
 msgstr "Trop de tentatives. Attendez une minute et réessayez."
 
-#: apps/core/admin_login.py:35
+#: apps/core/admin_login.py:82
 msgid "Enter the current 6-digit code from your authenticator app."
 msgstr "Saisissez le code à 6 chiffres actuel de votre application d'authentification."
 
-#: apps/core/admin_login.py:38
+#: apps/core/admin_login.py:85
 msgid "Turn on two-factor authentication in your Iga profile before using the admin site."
 msgstr "Activez la vérification en deux étapes dans votre profil Iga avant d'utiliser le site d'administration."
 
-#: apps/core/permissions.py:6
+#: apps/core/permissions.py:40
+msgid "Only students can do this."
+msgstr "Seuls les élèves peuvent faire cela."
+
+#: apps/core/permissions.py:48
+msgid "Only parent or guardian accounts can do this."
+msgstr "Seuls les comptes de parent ou de tuteur peuvent faire cela."
+
+#: apps/core/permissions.py:58
+msgid "Study groups are for students and teachers."
+msgstr "Les groupes d'étude sont réservés aux élèves et aux enseignants."
+
+#: apps/core/permissions.py:66
 msgid "Only approved teachers can do this."
 msgstr "Seuls les enseignants approuvés peuvent faire cela."
 
-#: apps/core/permissions.py:14
+#: apps/core/permissions.py:74
 msgid "Only administrators can do this."
 msgstr "Seuls les administrateurs peuvent faire cela."
+
+#: apps/core/permissions.py:82
+msgid "Only approved school administrators can do this."
+msgstr "Seuls les administrateurs d'école approuvés peuvent faire cela."
+
+#: apps/core/permissions.py:131
+msgid "For your security, enter your password again to continue."
+msgstr "Pour votre sécurité, saisissez de nouveau votre mot de passe pour continuer."
 
 #: apps/core/uploads.py:73
 msgid "The file's contents don't match its type. Re-save it and try again."
@@ -476,7 +490,7 @@ msgstr "Ce champ est obligatoire."
 msgid "Use at most %(n)s characters."
 msgstr "Utilisez au plus %(n)s caractères."
 
-#: apps/core/views.py:283
+#: apps/core/views.py:291
 msgid "You can't remove your own administrator role."
 msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
 
@@ -628,39 +642,35 @@ msgstr "Prestataire de paiement inconnu."
 msgid "Another school in this district already has this name."
 msgstr "Une autre école de ce district porte déjà ce nom."
 
-#: apps/schools/views.py:113
-msgid "Only approved school administrators can do this."
-msgstr "Seuls les administrateurs d'école approuvés peuvent faire cela."
-
-#: apps/schools/views.py:231
+#: apps/schools/views.py:222
 msgid "This payment belongs to another school."
 msgstr "Ce paiement appartient à une autre école."
 
-#: apps/schools/views.py:214
+#: apps/schools/views.py:205
 msgid "Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team."
 msgstr "Le paiement en ligne n'est pas encore disponible. Veuillez payer par virement bancaire et contacter l'équipe Iga."
 
-#: apps/schools/views.py:271
+#: apps/schools/views.py:262
 msgid "Test payments are switched off."
 msgstr "Les paiements de test sont désactivés."
 
-#: apps/schools/views.py:274
+#: apps/schools/views.py:265
 msgid "This payment can't be completed here."
 msgstr "Ce paiement ne peut pas être finalisé ici."
 
-#: apps/schools/views.py:95
+#: apps/schools/views.py:94
 msgid "School administrators change school through the Iga team."
 msgstr "Les administrateurs d'école changent d'école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:104
+#: apps/schools/views.py:103
 msgid "School administrators leave a school through the Iga team."
 msgstr "Les administrateurs d'école quittent une école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:398
+#: apps/schools/views.py:389
 msgid "Unknown action."
 msgstr "Action inconnue."
 
-#: apps/schools/views.py:393
+#: apps/schools/views.py:384
 msgid "Only a school waiting for verification, with no payments, can be rejected."
 msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
 

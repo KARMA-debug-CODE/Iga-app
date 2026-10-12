@@ -14,7 +14,7 @@ from apps.accounts.serializers import PublicUserSerializer
 from apps.assessments.models import Attempt
 from apps.assessments.services import finalize_if_expired, visible_quizzes
 from apps.core import audit
-from apps.core.permissions import IsTeacher
+from apps.core.permissions import IsTeacher, RecentAuthentication
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
 from apps.core.validation import id_param, parse_id, text_field
@@ -194,6 +194,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     serializer_class = ClassroomSerializer
 
     def get_permissions(self):
+        if self.action == "reset_password":
+            # Taking over a student's sign-in is privileged: the teacher confirms their own password first.
+            return [IsTeacher(), RecentAuthentication()]
         if self.action in (
             "create",
             "update",
@@ -203,7 +206,6 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             "remove_student",
             "new_code",
             "import_roster",
-            "reset_password",
         ):
             return [IsTeacher()]
         return [IsAuthenticated()]

@@ -25,10 +25,10 @@ from apps.schools.access import has_premium
 from apps.schools.views import revenue_summary
 from apps.simulations.models import Simulation, SimulationView
 
-from . import audit
+from . import admin_login, audit
 from .constants import GRADES, LANGUAGES, ContentStatus
 from .models import AuditLog
-from .permissions import IsPlatformAdmin
+from .permissions import IsPlatformAdmin, RecentAuthentication
 
 User = get_user_model()
 
@@ -256,7 +256,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 
 class AdminUserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
     serializer_class = AdminUserSerializer
     http_method_names = ["get", "patch", "head", "options"]
 
@@ -276,6 +276,14 @@ class AdminUserViewSet(viewsets.ModelViewSet):
                 | Q(last_name__icontains=term)
             )
         return qs
+
+    def list(self, request, *args, **kwargs):
+        # The user directory holds everyone's email address: each look at it is recorded.
+        filters = {
+            k: request.query_params[k][:100] for k in ("role", "pending_teachers", "q", "page") if k in request.query_params
+        }
+        audit.record(request, "list_users", request.user, **filters)
+        return super().list(request, *args, **kwargs)
 
     def perform_update(self, serializer):
         before = {f: getattr(serializer.instance, f) for f in ("role", "teacher_approved", "is_active")}
@@ -302,7 +310,7 @@ class ReviewDecisionSerializer(serializers.Serializer):
 class ReviewViewSet(viewsets.ViewSet):
     """Content awaiting approval before it appears in the public library."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
     MODELS = {"lesson": Lesson, "quiz": Quiz, "resource": Resource}
 
     def list(self, request):
@@ -367,7 +375,7 @@ class ReviewViewSet(viewsets.ViewSet):
 
 
 @api_view(["GET"])
-@permission_classes([IsPlatformAdmin])
+@permission_classes([IsPlatformAdmin, RecentAuthentication])
 def admin_stats(request):
     week_ago = timezone.now() - timedelta(days=7)
     users_by_role = dict(User.objects.values_list("role").annotate(n=Count("id")))
@@ -409,12 +417,14 @@ def admin_stats(request):
             },
             "popular_lessons": [{"title": r["lesson__title"], "count": r["n"]} for r in popular_lessons],
             "popular_simulations": [{"title": r["simulation__title"], "count": r["n"]} for r in popular_sims],
+            # The Django admin's secret address (None when it is off), for the Admin page's link.
+            "django_admin_url": f"/{admin_prefix}" if (admin_prefix := admin_login.admin_url_prefix()) else None,
         }
     )
 
 
 @api_view(["GET"])
-@permission_classes([IsPlatformAdmin])
+@permission_classes([IsPlatformAdmin, RecentAuthentication])
 def admin_audit(request):
     entries = AuditLog.objects.select_related("actor")
     if request.query_params.get("action"):

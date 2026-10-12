@@ -158,6 +158,9 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.IgaJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # JSON only in production: DRF's browsable HTML API is a development tool.
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
+    + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 50,
     # Per-IP throttles only trust X-Forwarded-For entries added by our own proxies.
@@ -192,6 +195,10 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
+
+# Privileged operations (the admin area, school membership and billing decisions, resetting a student's
+# password) need a password confirmed this recently: at sign-in or at POST /api/auth/step-up/.
+STEP_UP_MAX_AGE_SECONDS = int(os.environ.get("STEP_UP_MAX_AGE_SECONDS", "900"))
 
 # The refresh token lives in an httpOnly cookie scoped to the auth endpoints,
 # so page scripts never see it. The short-lived access token stays in memory.
@@ -281,11 +288,15 @@ UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
 # still accepted (covers slow mobile connections).
 EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"))
 
-# The Django admin (/django-admin/) is for content managers. In production it is
-# off unless DJANGO_ADMIN_ENABLED=true, and staff must use two-factor login.
+# The Django admin is for content managers. In production it is off unless DJANGO_ADMIN_ENABLED=true AND
+# DJANGO_ADMIN_PATH is a long random secret (at least 16 letters, digits, - or _): it then lives at
+# /django-admin/<DJANGO_ADMIN_PATH>/. Staff must use two-factor login (always, when DEBUG is off).
 ADMIN_ENABLED = env_bool("DJANGO_ADMIN_ENABLED", DEBUG)
-ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", not DEBUG)
+ADMIN_PATH = os.environ.get("DJANGO_ADMIN_PATH", "").strip().strip("/")
+ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", False) if DEBUG else True
 ADMIN_LOGIN_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_ATTEMPTS_PER_MINUTE", "10"))
+# Per address too, so one machine can't try a password on many staff accounts.
+ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE", "30"))
 
 # --- Production hardening --------------------------------------------------
 
