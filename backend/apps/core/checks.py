@@ -14,6 +14,8 @@ KNOWN_LOCAL_SECRETS = {
     "",
     "iga",
     "iga-local-only",
+    "iga-local-owner",
+    "iga-local-app",
     "iga-local-santa",
     "iga-local-code-runner",
     "a-shared-secret",
@@ -73,6 +75,48 @@ def default_credentials_check(app_configs, **kwargs):
         )
         for name, what in errors
     ]
+
+
+@register(Tags.database)
+def database_role_check(app_configs, databases=None, **kwargs):
+    """Django must not connect to PostgreSQL with powers it never needs (apps/core/dbroles.py)."""
+    if not databases or not real_deployment():
+        return []
+    from django.db import connections
+
+    from .dbroles import current_role_powers
+
+    found = []
+    for alias in databases:
+        connection = connections[alias]
+        if connection.vendor != "postgresql":
+            continue
+        try:
+            name, powers = current_role_powers(connection)
+        except DatabaseError:
+            continue
+        hint = (
+            "Run Django as a role that may only read and write rows: python manage.py db_roles sets one up "
+            '(docker compose does it for you). See "Database roles" in docs/ARCHITECTURE.md.'
+        )
+        if "superuser" in powers:
+            found.append(
+                Error(
+                    f"Django connects to PostgreSQL as {name}, a superuser: SQL it was tricked into running could "
+                    "read or change anything on the database server, and run programs on it.",
+                    hint=hint,
+                    id="iga.E004",
+                )
+            )
+        elif powers:
+            found.append(
+                Warning(
+                    f"Django connects to PostgreSQL as {name}, which has {', '.join(powers).upper()}; it needs none of these.",
+                    hint=hint,
+                    id="iga.W002",
+                )
+            )
+    return found
 
 
 @register(Tags.database)
