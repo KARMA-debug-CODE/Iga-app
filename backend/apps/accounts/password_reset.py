@@ -103,13 +103,20 @@ def _in_background(request, identifier):
         _send_link(request, identifier)
     except Exception:
         log.exception("Password reset email failed")
+
+
+def _thread_main(work, *args):
+    try:
+        work(*args)
     finally:
-        connections.close_all()  # this thread's own database connections
+        # Only ever in the background thread: it closes that thread's own database connections, which
+        # would otherwise stay open. (Run in the request's thread, it would close the request's.)
+        connections.close_all()
 
 
 def deliver(work, *args):
     """Run `work` after the answer has gone: in a background thread (tests replace this)."""
-    threading.Thread(target=work, args=args, daemon=True).start()
+    threading.Thread(target=_thread_main, args=(work, *args), daemon=True).start()
 
 
 def request_reset(request, identifier):
