@@ -18,7 +18,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db import close_old_connections, transaction
+from django.db import connections, transaction
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
@@ -101,8 +101,10 @@ def _send_link(request, identifier):
 def _in_background(request, identifier):
     try:
         _send_link(request, identifier)
+    except Exception:
+        log.exception("Password reset email failed")
     finally:
-        close_old_connections()
+        connections.close_all()  # this thread's own database connections
 
 
 def deliver(work, *args):

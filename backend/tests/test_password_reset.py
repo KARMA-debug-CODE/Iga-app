@@ -265,3 +265,25 @@ def test_parent_codes_are_single_use_expire_and_are_replaced(student, client_for
     third = kid.post("/api/auth/parent-code/").data["code"]
     ParentInvite.objects.filter(code=third).update(expires_at=timezone.now() - timedelta(seconds=1))
     assert client_for(other_parent).post("/api/children/", {"code": third}, format="json").status_code == 400
+
+
+@pytest.mark.django_db(transaction=True)
+def test_the_real_background_sending(monkeypatch):
+    """Without the inline replacement: the email goes out from a background thread."""
+    import threading
+    import time
+
+    monkeypatch.setattr(password_reset, "deliver", _real_deliver)
+    make_user("threaded")
+    started = threading.active_count()
+    assert ask("threaded").status_code == 200
+    deadline = time.monotonic() + 10
+    while not mail.outbox and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert [m.to for m in mail.outbox] == [["threaded@example.com"]]
+    while threading.active_count() > started and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert PasswordResetToken.objects.filter(user__username="threaded").count() == 1
+
+
+_real_deliver = password_reset.deliver
