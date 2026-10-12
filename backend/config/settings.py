@@ -173,6 +173,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    # Refused (403) and throttled (429) requests are logged as security events.
+    "EXCEPTION_HANDLER": "apps.core.security_log.exception_handler",
     "PAGE_SIZE": 50,
     # Per-IP throttles only trust X-Forwarded-For entries added by our own proxies.
     "NUM_PROXIES": TRUSTED_PROXY_COUNT,
@@ -182,9 +184,19 @@ REST_FRAMEWORK = {
     # Per-IP limits are generous because a whole school often shares one public IP;
     # "login" is per account and is what actually stops password guessing.
     "DEFAULT_THROTTLE_RATES": {
+        # Per IP: sign-in, sign-up, password reset and 2FA requests together.
         "auth": os.environ.get("THROTTLE_AUTH", "300/min"),
+        # Per account (the username or email typed): sign-in attempts. Repeated failures also lock
+        # the account for a while (LOGIN_LOCKOUT_* below).
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
+        # Per IP: new accounts (a whole class may sign up together from one school address).
+        "register": os.environ.get("THROTTLE_REGISTER", "100/hour"),
+        # Password reset emails: per account (so nobody floods an inbox) and per IP.
+        "password_reset": os.environ.get("THROTTLE_PASSWORD_RESET", "5/hour"),
+        "password_reset_ip": os.environ.get("THROTTLE_PASSWORD_RESET_IP", "30/hour"),
+        # Session refreshes: per IP, and per account (only validly signed refresh cookies count).
         "refresh": os.environ.get("THROTTLE_REFRESH", "600/min"),
+        "refresh_user": os.environ.get("THROTTLE_REFRESH_USER", "60/min"),
         "chat": os.environ.get("THROTTLE_CHAT", "30/min"),
         # Per user: password / 2FA changes, and guessing class, group or parent codes.
         "sensitive": os.environ.get("THROTTLE_SENSITIVE", "5/min"),
@@ -207,6 +219,17 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
+# Progressive lockout after failed sign-ins (apps/accounts/lockout.py): failures in a row for one
+# account from one IP, for one account from anywhere, and from one IP for any account. The first
+# lock lasts LOGIN_LOCKOUT_BASE_SECONDS and doubles with each lock that day, up to the maximum.
+LOGIN_LOCKOUT_THRESHOLD = int(os.environ.get("LOGIN_LOCKOUT_THRESHOLD", "5"))
+LOGIN_LOCKOUT_ACCOUNT_THRESHOLD = int(os.environ.get("LOGIN_LOCKOUT_ACCOUNT_THRESHOLD", "20"))
+LOGIN_LOCKOUT_IP_THRESHOLD = int(os.environ.get("LOGIN_LOCKOUT_IP_THRESHOLD", "100"))
+LOGIN_LOCKOUT_BASE_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_BASE_SECONDS", "60"))
+LOGIN_LOCKOUT_MAX_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_MAX_SECONDS", "3600"))
+# Failures further apart than this don't add up.
+LOGIN_FAILURE_WINDOW_SECONDS = int(os.environ.get("LOGIN_FAILURE_WINDOW_SECONDS", "900"))
+
 # The refresh token lives in an httpOnly cookie scoped to the auth endpoints,
 # so page scripts never see it. The short-lived access token stays in memory.
 REFRESH_COOKIE_NAME = "iga_refresh"
@@ -220,6 +243,8 @@ REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+# Django admin forms refused for a missing or wrong CSRF token are logged as security events.
+CSRF_FAILURE_VIEW = "apps.core.security_log.csrf_failure"
 
 # --- Santa, Iga's own AI tutor ---------------------------------------------
 # Santa's model runs on the school's own server: the "santa" service in docker-compose.yml (llama.cpp's
@@ -319,6 +344,18 @@ X_FRAME_OPTIONS = "DENY"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    # Security events (apps/core/security_log.py) are one JSON object per line, for a log collector.
+    "formatters": {"json_line": {"format": "%(message)s"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        "security": {"class": "logging.StreamHandler", "formatter": "json_line"},
+    },
+    "loggers": {
+        "iga.security": {
+            "handlers": ["security"],
+            "level": os.environ.get("SECURITY_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
     "root": {"handlers": ["console"], "level": os.environ.get("LOG_LEVEL", "INFO")},
 }

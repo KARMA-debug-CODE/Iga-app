@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import pytest
+from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -11,18 +12,8 @@ from apps.assessments.models import Choice, Question, Quiz, QuizQuestion
 from apps.curriculum.models import Lesson, Subject, Unit
 from apps.schools.models import School
 
-RELAXED_RATES = {
-    "auth": "1000/min",
-    "login": "1000/min",
-    "refresh": "1000/min",
-    "chat": "1000/min",
-    "sensitive": "1000/min",
-    "join": "1000/min",
-    "billing_confirm": "1000/min",
-    "tutor": "1000/min",
-    "code_run": "1000/min",
-    "code_input": "1000/min",
-}
+# Every scope in the settings (new ones included), at a rate no test reaches by accident.
+RELAXED_RATES = {scope: "1000/min" for scope in settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]}
 
 
 @pytest.fixture(autouse=True)

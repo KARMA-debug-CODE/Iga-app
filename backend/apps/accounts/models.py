@@ -60,6 +60,9 @@ class User(AbstractUser):
     totp_last_step = models.BigIntegerField(null=True, blank=True)
     # Set when a teacher creates the account or resets its password: the student must pick their own.
     must_change_password = models.BooleanField(default=False)
+    # Stamped into every access and refresh token. Raising it ends every session at once (a password
+    # change or reset, a 2FA change, a stolen refresh token): tokens with an older number stop working.
+    session_version = models.PositiveIntegerField(default=0, editable=False)
 
     class Meta(AbstractUser.Meta):
         constraints = [
@@ -150,7 +153,18 @@ class User(AbstractUser):
         # Store empty emails as NULL so the unique constraint allows many blanks.
         if not self.email:
             self.email = None
+        # A new password (set_password, not the automatic re-hash at login) ends every session,
+        # whichever way it was set: the app, a reset link, a teacher, the Django admin, manage.py.
+        password_changed = self._password is not None and self.pk is not None
         super().save(*args, **kwargs)
+        if password_changed:
+            self.bump_session_version()
+
+    def bump_session_version(self):
+        """End every session: tokens carrying an older session version stop working at once."""
+        users = type(self).objects.filter(pk=self.pk)
+        users.update(session_version=models.F("session_version") + 1)
+        self.session_version = users.values_list("session_version", flat=True).get()
 
 
 class ParentInvite(models.Model):
