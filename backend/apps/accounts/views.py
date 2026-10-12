@@ -29,6 +29,7 @@ from .security import (
     SESSION_VERSION_CLAIM,
     check_password_or_dummy,
     find_account,
+    is_cross_site,
     issue_refresh_token,
     revoke_all_sessions,
     token_is_current,
@@ -84,6 +85,21 @@ def locked_response(seconds):
     )
     response["Retry-After"] = str(seconds)
     return response
+
+
+def cross_site_refusal(request):
+    """The answer to a cookie-authenticated request sent from another site (CSRF), or None."""
+    if not is_cross_site(request):
+        return None
+    security_log.event(
+        request,
+        "cross_site_refused",
+        None,
+        level=logging.WARNING,
+        audit_every=600,
+        origin=request.META.get("HTTP_ORIGIN") or request.META.get("HTTP_REFERER", "")[:200],
+    )
+    return Response({"detail": _("This request came from another site and was refused.")}, status=status.HTTP_403_FORBIDDEN)
 
 
 def _with_fresh_session(response, user):
@@ -182,6 +198,9 @@ class RefreshView(APIView):
     throttle_classes = [RefreshIPThrottle, RefreshUserThrottle]
 
     def post(self, request):
+        refusal = cross_site_refusal(request)
+        if refusal is not None:
+            return refusal
         raw = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
         if not raw:
             return Response({"detail": _("Not logged in.")}, status=status.HTTP_401_UNAUTHORIZED)
@@ -235,6 +254,9 @@ class LogoutView(APIView):
     throttle_classes = [RefreshIPThrottle]
 
     def post(self, request):
+        refusal = cross_site_refusal(request)
+        if refusal is not None:
+            return refusal
         raw = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
         if raw:
             try:

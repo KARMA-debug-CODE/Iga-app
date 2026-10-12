@@ -17,6 +17,10 @@ msgstr "Votre session a pris fin. Reconnectez-vous."
 msgid "Choose an avatar from the options."
 msgstr "Choisissez un avatar parmi les options proposées."
 
+#: apps/accounts/enumeration.py:34
+msgid "Too many attempts with email addresses already in use. Try again in an hour."
+msgstr "Trop de tentatives avec des adresses e-mail déjà utilisées. Réessayez dans une heure."
+
 #: apps/accounts/parents.py:42
 msgid "Only students can do this."
 msgstr "Seuls les élèves peuvent faire cela."
@@ -40,6 +44,26 @@ msgstr "Ce code n'est pas valide ou a expiré. Demandez à votre enfant d'en cr�
 #: apps/accounts/parents.py:207
 msgid "That account is not active."
 msgstr "Ce compte n'est pas actif."
+
+#: apps/accounts/password_reset.py:69
+msgid "%(app)s: choose a new password"
+msgstr "%(app)s : choisissez un nouveau mot de passe"
+
+#: apps/accounts/password_reset.py:80
+msgid "If you didn't ask for this, ignore this email: your password stays the same."
+msgstr "Si vous n'avez rien demandé, ignorez cet e-mail : votre mot de passe reste le même."
+
+#: apps/accounts/password_reset.py:72
+msgid "Hello %(name)s,"
+msgstr "Bonjour %(name)s,"
+
+#: apps/accounts/password_reset.py:74
+msgid "Someone (hopefully you) asked to reset the password of your %(app)s account %(username)s."
+msgstr "Quelqu'un (vous, espérons-le) a demandé à réinitialiser le mot de passe de votre compte %(app)s %(username)s."
+
+#: apps/accounts/password_reset.py:76
+msgid "Open this link to choose a new password. It works once, for %(minutes)s minutes:"
+msgstr "Ouvrez ce lien pour choisir un nouveau mot de passe. Il ne fonctionne qu'une fois, pendant %(minutes)s minutes :"
 
 #: apps/accounts/serializers.py:98
 msgid "Unknown grade."
@@ -107,37 +131,41 @@ msgstr "Cette école est déjà sur Iga. Choisissez-la plutôt dans la liste."
 msgid "That school has just been registered. Choose it from the list."
 msgstr "Cette école vient d'être inscrite. Choisissez-la dans la liste."
 
-#: apps/accounts/views.py:317
-#: apps/accounts/views.py:156
-#: apps/accounts/views.py:366
+#: apps/accounts/views.py:102
+msgid "This request came from another site and was refused."
+msgstr "Cette demande venait d'un autre site et a été refusée."
+
+#: apps/accounts/views.py:339
+#: apps/accounts/views.py:172
+#: apps/accounts/views.py:388
 msgid "That code is not valid."
 msgstr "Ce code n'est pas valide."
 
-#: apps/accounts/views.py:80
+#: apps/accounts/views.py:81
 msgid "Too many failed attempts. Try again in %(minutes)s min."
 msgstr "Trop de tentatives échouées. Réessayez dans %(minutes)s min."
 
-#: apps/accounts/views.py:146
+#: apps/accounts/views.py:162
 msgid "Invalid username/email or password."
 msgstr "Nom d'utilisateur, e-mail ou mot de passe incorrect."
 
-#: apps/accounts/views.py:187
+#: apps/accounts/views.py:206
 msgid "Not logged in."
 msgstr "Vous n'êtes pas connecté."
 
-#: apps/accounts/views.py:295
+#: apps/accounts/views.py:317
 msgid "Password updated. You were logged out on other devices."
 msgstr "Mot de passe modifié. Vous avez été déconnecté sur vos autres appareils."
 
-#: apps/accounts/views.py:330
+#: apps/accounts/views.py:352
 msgid "Two-factor authentication is already on."
 msgstr "La vérification en deux étapes est déjà activée."
 
-#: apps/accounts/views.py:152
+#: apps/accounts/views.py:168
 msgid "Enter the code from your authenticator app."
 msgstr "Saisissez le code de votre application d'authentification."
 
-#: apps/accounts/views.py:195
+#: apps/accounts/views.py:214
 msgid "Session expired."
 msgstr "Session expirée."
 

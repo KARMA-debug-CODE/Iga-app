@@ -235,7 +235,9 @@ LOGIN_FAILURE_WINDOW_SECONDS = int(os.environ.get("LOGIN_FAILURE_WINDOW_SECONDS"
 REFRESH_COOKIE_NAME = "iga_refresh"
 REFRESH_COOKIE_PATH = "/api/auth/"
 REFRESH_COOKIE_SECURE = env_bool("REFRESH_COOKIE_SECURE", env_bool("HTTPS", not DEBUG))
-REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Lax")
+# Strict: the browser never sends it with a request started by another site. The app and its API
+# share one site, so nothing else is needed (refresh and logout also check the Origin header).
+REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Strict")
 # A used refresh token that comes back later means it was stolen, and every session of
 # that user is ended. Within this window it is treated as two tabs refreshing at once.
 REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", "30"))
@@ -243,6 +245,16 @@ REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+# Django's own session and CSRF cookies only serve the Django admin: scoped to it, out of reach of
+# page scripts, never sent cross-site with a form, Secure under HTTPS (below), and admin sessions
+# end after DJANGO_ADMIN_SESSION_HOURS.
+SESSION_COOKIE_PATH = "/django-admin/"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = int(float(os.environ.get("DJANGO_ADMIN_SESSION_HOURS", "8")) * 3600)
+CSRF_COOKIE_PATH = "/django-admin/"
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = "Lax"
 # Django admin forms refused for a missing or wrong CSRF token are logged as security events.
 CSRF_FAILURE_VIEW = "apps.core.security_log.csrf_failure"
 

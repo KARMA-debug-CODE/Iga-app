@@ -3,11 +3,13 @@
 import hmac
 import secrets
 import time
+from urllib.parse import urlsplit
 
 import pyotp
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import Q
+from django.utils.http import is_same_domain
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -95,3 +97,40 @@ def verify_totp(user, code, now=None):
             user.totp_last_step = step
             return True
     return False
+
+
+def _origin_of(url):
+    parts = urlsplit(url)
+    return f"{parts.scheme}://{parts.netloc}".lower() if parts.scheme and parts.netloc else None
+
+
+def is_cross_site(request):
+    """True when a browser says this request comes from a page on another site.
+
+    For the endpoints a cookie authenticates (refresh, logout), on top of the cookie's SameSite
+    flag: the Origin header (or, from older browsers, the Referer) must be this site, the
+    frontend's origin (CORS_ALLOWED_ORIGINS) or a CSRF_TRUSTED_ORIGINS entry (wildcards such as
+    https://*.iga.rw allowed). "Origin: null" (sandboxed frames, data: pages) is refused. A request
+    with neither header doesn't come from a web page (an app, curl), so CSRF can't apply to it.
+    """
+    origin = request.META.get("HTTP_ORIGIN")
+    if origin is None:
+        referer = request.META.get("HTTP_REFERER")
+        if not referer:
+            return False
+        origin = _origin_of(referer)
+        if origin is None:
+            return True
+    origin = origin.strip().lower()
+    if origin == "null":
+        return True
+    own = f"{'https' if request.is_secure() else 'http'}://{request.get_host()}".lower()
+    trusted = {own, *(o.lower() for o in settings.CORS_ALLOWED_ORIGINS), *(o.lower() for o in settings.CSRF_TRUSTED_ORIGINS)}
+    if origin in trusted:
+        return False
+    scheme, _, netloc = origin.partition("://")
+    for entry in trusted:
+        entry_scheme, _, pattern = entry.partition("://")
+        if pattern.startswith("*.") and entry_scheme == scheme and is_same_domain(netloc, pattern[1:]):
+            return False
+    return True
