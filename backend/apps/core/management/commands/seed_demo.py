@@ -1,4 +1,5 @@
-"""Demo data for local development and pilots. Never run this on a production database."""
+"""Demo data for local development and trials. It refuses to run with DEBUG off: the demo accounts'
+password is public, so they must never exist on a real server (see apps/core/demo.py)."""
 
 from datetime import timedelta
 from decimal import Decimal
@@ -12,12 +13,11 @@ from apps.accounts.models import ParentLink, User
 from apps.assessments.models import Quiz
 from apps.classroom.models import Assignment, Classroom, Enrollment
 from apps.community.models import GroupMembership, Message, SharedNote, StudyGroup
+from apps.core.demo import DEMO_EMAIL_DOMAIN, DEMO_PASSWORD
 from apps.curriculum.models import Lesson, Resource, Subject
 from apps.schools.billing import record_manual_payment
 from apps.schools.membership import choose_school
 from apps.schools.models import School
-
-DEMO_PASSWORD = "Iga-demo-2026"
 
 STUDENTS = [  # username, first name, last name, grade, A-level combination
     ("aline", "Aline", "Uwase", "S2", ""),
@@ -31,12 +31,13 @@ STUDENTS = [  # username, first name, last name, grade, A-level combination
 class Command(BaseCommand):
     help = f"Load curriculum content plus demo users (password: {DEMO_PASSWORD}), a class and a study group."
 
-    def add_arguments(self, parser):
-        parser.add_argument("--force", action="store_true", help="Allow running with DEBUG off")
-
     def handle(self, *args, **options):
-        if not settings.DEBUG and not options["force"]:
-            raise CommandError("Refusing to create demo accounts with DEBUG off. Use --force for a pilot server.")
+        if not settings.DEBUG:
+            raise CommandError(
+                "Refusing to create demo accounts with DEBUG off: their password is public. For a local trial, "
+                "run it with DJANGO_DEBUG=true (docker compose exec -e DJANGO_DEBUG=true backend python manage.py "
+                "seed_demo); never on a real server."
+            )
 
         call_command("load_curriculum", stdout=self.stdout)
 
@@ -48,7 +49,7 @@ class Command(BaseCommand):
                     "last_name": last,
                     "role": role,
                     "grade": grade,
-                    "email": f"{username}@demo.iga.rw",
+                    "email": f"{username}@{DEMO_EMAIL_DOMAIN}",
                     **extra,
                 },
             )
