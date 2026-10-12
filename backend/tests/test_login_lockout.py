@@ -264,3 +264,17 @@ def test_admin_site_logins_are_logged_and_share_the_lockout(db, settings):
     assert not locked.is_valid() and "Too many attempts" in str(locked.errors)
     # The app's sign-in sees the same lock for that account and address.
     assert attempt("boss", PASSWORD, ip="10.0.0.7").status_code == 429
+
+
+def test_secrets_in_paths_stay_out_of_the_security_log(student, client_for, caplog):
+    caplog.set_level(logging.INFO, logger="iga.security")
+    from django.test import RequestFactory
+    from django.urls import resolve
+
+    from apps.core import security_log
+
+    request = RequestFactory().get("/api/files/papers/SIGNED-SECRET-123/")
+    request.resolver_match = resolve("/api/files/papers/SIGNED-SECRET-123/")
+    security_log.event(request, "permission_denied", student)
+    text = "\n".join(r.getMessage() for r in caplog.records)
+    assert "SIGNED-SECRET-123" not in text and "/api/files/papers/<str:token>/" in text

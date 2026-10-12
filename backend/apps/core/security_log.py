@@ -82,7 +82,7 @@ def event(request, action, user=None, *, level=logging.INFO, audit_every=None, *
     """
     details = _clean(details)
     ip = audit.client_ip(request)
-    path = getattr(request, "path", None)
+    path = _loggable_path(request)
     line = {
         "ts": timezone.now().isoformat(),
         "event": action,
@@ -101,6 +101,15 @@ def event(request, action, user=None, *, level=logging.INFO, audit_every=None, *
     if user is not None and "username" not in details:
         details["username"] = user.username
     return audit.record(request, action, user, **details)
+
+
+def _loggable_path(request):
+    """The request path, or its URL pattern when the path carries a secret (a signed download link)."""
+    path = getattr(request, "path", None)
+    match = getattr(request, "resolver_match", None)
+    if match is not None and any("token" in key or "secret" in key for key in match.kwargs):
+        return "/" + match.route
+    return path
 
 
 def _request_user(request):
