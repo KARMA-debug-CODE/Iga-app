@@ -13,7 +13,7 @@ from rest_framework.test import APIClient
 from rest_framework.throttling import SimpleRateThrottle
 
 from apps.accounts import password_reset
-from apps.accounts.models import ParentInvite, PasswordResetToken, User
+from apps.accounts.models import ParentInvite, PasswordResetToken, User, parent_code_digest
 from apps.classroom.models import Classroom, Enrollment
 from apps.core.models import AuditLog
 
@@ -263,7 +263,7 @@ def test_parent_codes_are_single_use_expire_and_are_replaced(student, client_for
     assert client_for(other_parent).post("/api/children/", {"code": second}, format="json").status_code == 400  # used
 
     third = kid.post("/api/auth/parent-code/").data["code"]
-    ParentInvite.objects.filter(code=third).update(expires_at=timezone.now() - timedelta(seconds=1))
+    ParentInvite.objects.filter(code_hash=parent_code_digest(third)).update(expires_at=timezone.now() - timedelta(seconds=1))
     assert client_for(other_parent).post("/api/children/", {"code": third}, format="json").status_code == 400
 
 

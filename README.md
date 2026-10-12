@@ -92,13 +92,14 @@ The Playwright run starts its own Django server (fresh database with demo data) 
 ```bash
 cp .env.docker.example .env
 echo "DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" >> .env
+echo "FIELD_ENCRYPTION_KEYS=$(python3 -c 'import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')" >> .env
 docker compose up --build
 docker compose exec backend python manage.py load_curriculum
 docker compose exec backend python manage.py seed_demo --force   # optional demo accounts
 # open http://localhost:8080
 ```
 
-This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, Iga's code runner for C++ and Java (built from the official GCC and OpenJDK images, so the first build downloads about 700 MB once; it needs no special Docker permissions), and Santa's model server (its first start downloads the model once, about 4.5 GB: see [Santa](#santa-igas-own-ai-tutor)). To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env` (the playground then says they are off) and start only the other services: `docker compose up --build db redis backend scheduler web santa`. For a real deployment, set a random `CODE_RUNNER_TOKEN` and `SANTA_API_KEY` in `.env`. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
+This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, Iga's code runner for C++ and Java (built from the official GCC and OpenJDK images, so the first build downloads about 700 MB once; it needs no special Docker permissions), and Santa's model server (its first start downloads the model once, about 4.5 GB: see [Santa](#santa-igas-own-ai-tutor)). To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env` (the playground then says they are off) and start only the other services: `docker compose up --build db redis backend scheduler web santa`. For a real deployment, set a random `CODE_RUNNER_TOKEN` and `SANTA_API_KEY` in `.env`. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY` and a `FIELD_ENCRYPTION_KEYS` key (it encrypts 2FA secrets, phone numbers and payment details in the database: keep a copy apart from database backups). Password reset emails need real email settings (`EMAIL_BACKEND` and friends). See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
 
 ## Santa, Iga's own AI tutor
 

@@ -41,6 +41,35 @@ if SECRET_KEY in PLACEHOLDER_SECRETS or len(SECRET_KEY) < 32:
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1],testserver")
 
+# Keys for the secrets and personal data encrypted in the database (apps/core/encryption.py):
+# comma-separated Fernet keys, the first encrypts and every one decrypts (for key rotation). Generate
+# one with: python3 -c "import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())"
+FIELD_ENCRYPTION_KEYS = env_list("FIELD_ENCRYPTION_KEYS")
+if not FIELD_ENCRYPTION_KEYS:
+    if not DEBUG:
+        raise RuntimeError("Set FIELD_ENCRYPTION_KEYS (see .env.docker.example) when DJANGO_DEBUG is off.")
+    # Local development only: a key derived from the (development) secret key.
+    import base64
+    import hashlib
+
+    FIELD_ENCRYPTION_KEYS = [base64.urlsafe_b64encode(hashlib.sha256(f"iga-fields:{SECRET_KEY}".encode()).digest()).decode()]
+else:
+    import base64
+
+    from cryptography.fernet import Fernet
+
+    for _key in FIELD_ENCRYPTION_KEYS:
+        try:
+            Fernet(_key)
+        except ValueError:
+            raise RuntimeError(
+                "FIELD_ENCRYPTION_KEYS must hold Fernet keys: 32 random bytes, URL-safe base64 (44 characters)."
+            ) from None
+        _raw = base64.urlsafe_b64decode(_key)
+        # A phrase or a run of one character, base64-encoded, is a valid key but not a secret one.
+        if len(set(_raw)) < 12 or all(32 <= byte < 127 for byte in _raw):
+            raise RuntimeError("FIELD_ENCRYPTION_KEYS holds a key that is not random: generate one (see .env.docker.example).")
+
 APP_NAME = os.environ.get("APP_NAME", "Iga")
 
 INSTALLED_APPS = [

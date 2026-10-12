@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from cryptography.fernet import Fernet
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 
@@ -51,7 +52,7 @@ def test_production_settings_secure_every_cookie():
     env = {
         "PATH": os.environ.get("PATH", ""),
         "DJANGO_SECRET_KEY": "x" * 50,
-        "FIELD_ENCRYPTION_KEY": "Cs1lH4LCoM_SJMFjbM3MgKs5oXGkNVW3PVlO81oU1EM=",
+        "FIELD_ENCRYPTION_KEYS": Fernet.generate_key().decode(),
     }
     code = (
         "import json; from config import settings as s; print(json.dumps({k: getattr(s, k, None) for k in ["

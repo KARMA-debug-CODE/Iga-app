@@ -2,8 +2,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 
 from apps.core.constants import A_LEVEL_GRADES, COMBINATION_CHOICES, COMBINATIONS, GRADES, LANGUAGES
+from apps.core.encryption import EncryptedTextField
 
 
 class User(AbstractUser):
@@ -54,7 +56,8 @@ class User(AbstractUser):
     last_active_date = models.DateField(null=True, blank=True)
 
     # Optional TOTP two-factor authentication (RFC 6238, works with any authenticator app).
-    totp_secret = models.CharField(max_length=64, blank=True)
+    # The secret is encrypted in the database (FIELD_ENCRYPTION_KEYS).
+    totp_secret = EncryptedTextField(blank=True)
     totp_enabled = models.BooleanField(default=False)
     # Last 30-second time step accepted, so a code can't be used twice.
     totp_last_step = models.BigIntegerField(null=True, blank=True)
@@ -187,17 +190,25 @@ class PasswordResetToken(models.Model):
         return f"{self.user} (until {self.expires_at:%Y-%m-%d %H:%M})"
 
 
+def parent_code_digest(code):
+    """What is stored for a parent code: a keyed hash (the code itself is shown once, to the student)."""
+    return salted_hmac("iga.parent-invite", code.strip().upper().replace(" ", ""), algorithm="sha256").hexdigest()
+
+
 class ParentInvite(models.Model):
-    """A short-lived code a student gives to a parent or guardian so they can follow their progress."""
+    """A short-lived code a student gives to a parent or guardian so they can follow their progress.
+
+    Only a keyed hash of the code is kept, so a copy of the database can't be used to link to a child.
+    """
 
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="parent_invites")
-    code = models.CharField(max_length=12, unique=True)
+    code_hash = models.CharField(max_length=64, unique=True)
     expires_at = models.DateTimeField()
     used_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.student} → {self.code}"
+        return f"{self.student} (until {self.expires_at:%Y-%m-%d})"
 
 
 class ParentLink(models.Model):

@@ -10,9 +10,12 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
-# collectstatic needs settings to load; production settings refuse short keys, so the build uses a long
-# placeholder. The real key comes from the environment when the container runs.
-RUN DJANGO_DEBUG=false DJANGO_SECRET_KEY=build-time-placeholder-only-used-for-collectstatic python manage.py collectstatic --noinput \
+# collectstatic needs settings to load; production settings refuse short keys and a missing field
+# encryption key, so the build uses a long placeholder and a throwaway random key. The real keys come
+# from the environment when the container runs.
+RUN DJANGO_DEBUG=false DJANGO_SECRET_KEY=build-time-placeholder-only-used-for-collectstatic \
+    FIELD_ENCRYPTION_KEYS="$(python -c 'import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')" \
+    python manage.py collectstatic --noinput \
     && useradd --create-home --uid 1000 iga \
     && mkdir -p /app/media \
     && chown -R iga /app/media
