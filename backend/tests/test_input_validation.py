@@ -1,10 +1,12 @@
 """Every view checks its input: malformed ids, query strings and bodies are a 400 (or 403/404), never a 500."""
 
 import pytest
+from django.http import QueryDict
 
 from apps.accounts.models import User
 from apps.classroom.models import Classroom
 from apps.community.models import GroupMembership, Message, MessageReport, StudyGroup
+from apps.core.validation import contains_nul
 from apps.curriculum.models import Lesson
 
 from .conftest import make_school, make_user
@@ -40,9 +42,10 @@ JUNK_BODY = {
     "password": 5,
     "identifier": ["a"],
 }
+# Junk the views must turn away themselves (a NUL character is refused before any view: see the NUL tests).
 JUNK_QUERY = (
-    "?unit=abc&quiz=abc&classroom=abc&year=abc&page=abc&grade=%00&subject=..%2F&after=abc&scope=class"
-    "&status=x&role=x&q=%27%3B--&lang=xx"
+    "?unit=abc&quiz=abc&classroom=abc&year=abc&page=abc&grade=%01%7F&subject=..%2F&after=abc&scope=class"
+    "&status=x&role=x&q=%27%3B--&lang=xx&district=%E2%80%AE"
 )
 BAD_IDS = ["abc", "99999999999999999999999", "-1", "1.5"]
 
@@ -155,3 +158,71 @@ def test_text_fields_must_be_text_and_bounded(client_for, student, teacher):
     for bad in ("abc", True, -3, [1]):
         response = client_for(teacher).post(f"/api/classes/{classroom.id}/reset_password/", {"student": bad}, format="json")
         assert response.status_code == 400, bad
+
+
+# --- NUL characters: PostgreSQL text can't hold them, so before the fix any query parameter or body value
+# with one that reached the database was a 500 on PostgreSQL (and silently stored on SQLite).
+
+
+def test_nul_characters_are_refused_on_every_route(client_for, everyone):
+    crashes, accepted = [], []
+    for name, user in everyone.items():
+        client = client_for(user)
+        client.raise_request_exception = False
+        for route, callback in api_routes():
+            url = fill(route, default="1")
+            for method in view_methods(callback):
+                send = getattr(client, method.lower())
+                for target in (url + "?grade=%00&q=a%00b", url.rstrip("/") + "%00/"):
+                    response = send(target) if method == "GET" else send(target, {}, format="json")
+                    if response.status_code >= 500:
+                        crashes.append((name, method, target, response.status_code))
+                    elif "?" in target and response.status_code != 400:
+                        accepted.append((name, method, target, response.status_code))
+    assert not crashes, crashes
+    assert not accepted, accepted
+
+
+def test_nul_characters_in_bodies_are_refused(client_for, student):
+    group = StudyGroup.objects.create(name="G")
+    GroupMembership.objects.create(group=group, user=student, role="owner")
+    client = client_for(student)
+    url = f"/api/groups/{group.id}/messages/"
+    for body in ({"body": "hello\x00"}, {"body": "hi", "extra\x00": 1}, {"body": "hi", "nested": [{"x": ["\x00"]}]}):
+        response = client.post(url, body, format="json")
+        assert response.status_code == 400, body
+        assert response.data["detail"] == "The request contains a character that is not allowed."
+    assert client.post(url, "body=hello%00", content_type="application/x-www-form-urlencoded").status_code == 400
+    assert client.post(url, {"body": "hello\x00"}, format="multipart").status_code == 400
+    assert client.post("/api/auth/login/", {"identifier": "a\x00", "password": "x"}, format="json").status_code == 400
+    assert not Message.objects.exists()
+    # The same message without the NUL goes through, and so does the text "\u0000" itself.
+    assert client.post(url, {"body": "hello \\u0000"}, format="json").status_code == 201
+    response = client.get(f"/api/groups/{group.id}/messages/?after=%00", HTTP_ACCEPT_LANGUAGE="fr")
+    assert response.status_code == 400
+    assert response.json()["detail"] == "La requête contient un caractère non autorisé."
+
+
+def test_deeply_nested_json_is_checked_without_a_crash(client_for, student):
+    client = client_for(student)
+    client.raise_request_exception = False
+    nested = "[" * 500 + '"\\u0000"' + "]" * 500  # deeply nested, with a NUL at the bottom
+    response = client.patch("/api/auth/me/", data='{"first_name": "A", "x": ' + nested + "}", content_type="application/json")
+    assert response.status_code == 400
+    response = client.patch(
+        "/api/auth/me/",
+        data='{"first_name": "Aline", "x": ' + nested.replace("\\u0000", "") + "}",
+        content_type="application/json",
+    )
+    assert response.status_code == 200
+
+
+def test_contains_nul_looks_everywhere():
+    assert not contains_nul({"a": ["b", {"c": 1, "d": None}], "e": 2.5})
+    assert contains_nul({"a": ["b", {"c": "\x00"}]})
+    assert contains_nul({"a\x00": 1})
+    assert contains_nul(QueryDict("a=1&a=%00"))  # every value of a repeated parameter, not only the last
+    deep = ["\x00"]
+    for _ in range(20000):  # far deeper than recursion could go
+        deep = [deep]
+    assert contains_nul(deep)

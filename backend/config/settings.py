@@ -74,6 +74,8 @@ MIDDLEWARE = [
     # Answers (error messages included) in the reader's language: the app sends Accept-Language.
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # A NUL character in the URL or query string is a 400 (PostgreSQL can't store one).
+    "apps.core.middleware.RejectNulMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -158,6 +160,12 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.IgaJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # DRF's parsers, refusing text with a NUL character (a 400 instead of a database error).
+    "DEFAULT_PARSER_CLASSES": [
+        "apps.core.parsers.JSONParser",
+        "apps.core.parsers.FormParser",
+        "apps.core.parsers.MultiPartParser",
+    ],
     # JSON only in production: DRF's browsable HTML API is a development tool.
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
     + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),

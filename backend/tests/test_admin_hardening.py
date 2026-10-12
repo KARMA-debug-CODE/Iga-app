@@ -172,15 +172,25 @@ def test_a_real_admin_named_admin_is_not_a_demo_account(settings):
 
 
 def test_default_secrets_block_a_real_deployment(settings):
+    def flagged():
+        problems = checks.default_credentials_check(None)
+        assert {problem.id for problem in problems} <= {"iga.E002"}
+        return sorted(problem.msg.split(" ")[0] for problem in problems)
+
+    # The suite's own database: CI's throwaway PostgreSQL password ("iga") is a well-known value too.
+    database = settings.DATABASES["default"]
+    known_db_password = database["ENGINE"].endswith("postgresql") and database["PASSWORD"] in checks.KNOWN_LOCAL_SECRETS
+    db = ["POSTGRES_PASSWORD"] if known_db_password else []
+
     settings.HTTPS = True
     settings.SANTA_URL = "http://santa:8080"
     settings.SANTA_API_KEY = "iga-local-santa"
     settings.CODE_RUNNER_URL = "http://coderunner:2000"
     settings.CODE_RUNNER_TOKEN = "iga-local-code-runner"
-    assert [e.id for e in checks.default_credentials_check(None)] == ["iga.E002", "iga.E002"]
+    assert flagged() == sorted(["SANTA_API_KEY", "CODE_RUNNER_TOKEN", *db])
     settings.SANTA_API_KEY = "Zr8wq0C9hJ1eLmW4tYb7sKdNfVxP2aGu"
     settings.CODE_RUNNER_TOKEN = "Gd5kP0sQ3mT8wZ1xB6nV9cR2yL4hJ7fE"
-    assert checks.default_credentials_check(None) == []
+    assert flagged() == db
     settings.SANTA_API_KEY = "iga-local-santa"
     settings.HTTPS = False  # the local docker compose trial
     assert checks.default_credentials_check(None) == []

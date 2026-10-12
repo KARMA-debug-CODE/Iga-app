@@ -10,6 +10,34 @@ from rest_framework.exceptions import ValidationError
 
 # The largest id a PostgreSQL bigint can hold: anything larger can't name a row.
 MAX_ID = 2**63 - 1
+# PostgreSQL text can't hold the NUL character, and no Iga field ever needs it.
+NUL = "\x00"
+
+
+def nul_message():
+    return _("The request contains a character that is not allowed.")
+
+
+def contains_nul(value):
+    """True if a parsed request value (text, lists and dicts of it, keys included, or a QueryDict) holds a NUL
+    character. Walks without recursion, so deeply nested JSON can't overflow the stack."""
+    stack = [value]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, str):
+            if NUL in item:
+                return True
+        elif hasattr(item, "lists"):  # QueryDict / MultiValueDict: every value, not only the last
+            for key, values in item.lists():
+                stack.append(key)
+                stack.extend(values)
+        elif isinstance(item, dict):
+            for key, child in item.items():
+                stack.append(key)
+                stack.append(child)
+        elif isinstance(item, (list, tuple)):
+            stack.extend(item)
+    return False
 
 
 def parse_id(raw, name):
@@ -54,6 +82,8 @@ def text_field(data, name, max_length, required=True):
         raw = ""
     if not isinstance(raw, str):
         raise ValidationError({name: _("Enter text.")})
+    if NUL in raw:
+        raise ValidationError({name: nul_message()})
     value = raw.strip()
     if required and not value:
         raise ValidationError({name: _("This field is required.")})
