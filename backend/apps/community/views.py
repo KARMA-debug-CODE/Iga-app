@@ -1,10 +1,10 @@
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
-from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from apps.accounts.parents import NotParent
@@ -12,11 +12,13 @@ from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
+from apps.core.validation import text_field
 from apps.gamification import services as gamification
 
 from .models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
 
 REMOVED_TEXT = "[message removed by a moderator]"
+MAX_MESSAGE_CHARS = 2000
 
 
 class StudyGroupSerializer(serializers.ModelSerializer):
@@ -44,6 +46,10 @@ class StudyGroupSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+        extra_kwargs = {
+            "description": {"max_length": 1000},
+            "max_members": {"min_value": 2, "max_value": 200},
+        }
 
     def get_join_code(self, group):
         return group.join_code if getattr(group, "is_member", False) else None
@@ -76,6 +82,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class SharedNoteSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.short_name", read_only=True, default=None)
+    body = serializers.CharField(max_length=20000)
 
     class Meta:
         model = SharedNote
@@ -186,7 +193,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="join-by-code", throttle_classes=[JoinRateThrottle])
     def join_by_code(self, request):
-        code = (request.data.get("code") or "").strip().upper()
+        code = text_field(request.data, "code", 12).upper()
         group = StudyGroup.objects.filter(join_code=code).first()
         if not group:
             raise ValidationError({"code": _("No group has that code.")})
@@ -231,11 +238,9 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
         return Response({"messages": MessageSerializer(fresh, many=True).data, "hidden_ids": list(hidden)})
 
     def _post_message(self, request, group):
-        body = (request.data.get("body") or "").strip()
+        body = text_field(request.data, "body", MAX_MESSAGE_CHARS, required=False)
         if not body:
             raise ValidationError({"body": _("Write something first.")})
-        if len(body) > 2000:
-            raise ValidationError({"body": _("Messages are limited to 2000 characters.")})
         message = Message.objects.create(group=group, author=request.user, body=body)
         return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
 
@@ -264,7 +269,7 @@ class MessageViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=["post"])
     def report(self, request, pk=None):
         message = self.get_object()
-        reason = (request.data.get("reason") or "").strip()[:300] or "No reason given"
+        reason = text_field(request.data, "reason", 300, required=False) or "No reason given"
         MessageReport.objects.get_or_create(message=message, reporter=request.user, defaults={"reason": reason})
         return Response({"detail": _("Thanks — a moderator will review this message.")}, status=status.HTTP_201_CREATED)
 
@@ -279,6 +284,10 @@ class MessageViewSet(viewsets.GenericViewSet):
         message.reports.update(resolved=True, resolved_by=request.user)
         audit.record(request, "hide_message", message, group=message.group_id)
         return Response(MessageSerializer(message).data)
+
+
+class ResolveReportSerializer(serializers.Serializer):
+    hide = serializers.BooleanField(default=False)
 
 
 class ModerationViewSet(viewsets.ViewSet):
@@ -312,10 +321,13 @@ class ModerationViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["post"])
     def resolve(self, request, pk=None):
         report = get_object_or_404(MessageReport, pk=pk)
-        if request.data.get("hide"):
+        data = ResolveReportSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        hide = data.validated_data["hide"]
+        if hide:
             report.message.is_hidden = True
             report.message.hidden_by = request.user
             report.message.save(update_fields=["is_hidden", "hidden_by"])
         MessageReport.objects.filter(message=report.message).update(resolved=True, resolved_by=request.user)
-        audit.record(request, "resolve_report", report, hidden=bool(request.data.get("hide")))
+        audit.record(request, "resolve_report", report, hidden=hide)
         return Response({"resolved": True})

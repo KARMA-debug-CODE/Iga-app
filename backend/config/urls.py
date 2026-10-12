@@ -39,7 +39,7 @@ api = [
     path("tutor/", include("apps.tutor.urls")),
     path("code/", include("apps.coderun.urls")),
     path("children/", parents.ChildrenView.as_view(), name="children"),
-    path("children/<int:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
+    path("children/<id:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
     path("health/", core_views.health, name="health"),
     path("meta/", core_views.meta, name="meta"),
     path("dashboard/", core_views.dashboard, name="dashboard"),

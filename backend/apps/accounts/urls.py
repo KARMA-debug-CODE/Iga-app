@@ -14,5 +14,5 @@ urlpatterns = [
     path("2fa/disable/", views.TwoFactorDisableView.as_view(), name="2fa-disable"),
     path("parent-code/", parents.ParentCodeView.as_view(), name="parent-code"),
     path("parents/", parents.MyParentsView.as_view(), name="my-parents"),
-    path("parents/<int:parent_id>/", parents.MyParentsView.as_view(), name="my-parent"),
+    path("parents/<id:parent_id>/", parents.MyParentsView.as_view(), name="my-parent"),
 ]

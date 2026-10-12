@@ -1,9 +1,9 @@
 from django.db.models import Count, Max, Q, Sum
-from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -12,6 +12,7 @@ from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
 from apps.core.utils import request_language
+from apps.core.validation import id_param, int_param, parse_id
 from apps.schools import access
 
 from . import services
@@ -47,12 +48,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
         for field, param in (
             ("subject__code", "subject"),
             ("grade", "grade"),
-            ("unit_id", "unit"),
             ("type", "type"),
             ("source", "source"),
         ):
             if params.get(param):
                 qs = qs.filter(**{field: params[param]})
+        unit_id = id_param(self.request, "unit")
+        if unit_id:
+            qs = qs.filter(unit_id=unit_id)
         if params.get("mine"):
             qs = qs.filter(author=user)
         if params.get("q"):
@@ -94,9 +97,12 @@ class QuizViewSet(viewsets.ModelViewSet):
             .order_by("subject__order", "grade", "title")
         )
         params = self.request.query_params
-        for field, param in (("subject__code", "subject"), ("grade", "grade"), ("kind", "kind"), ("unit_id", "unit")):
+        for field, param in (("subject__code", "subject"), ("grade", "grade"), ("kind", "kind")):
             if params.get(param):
                 qs = qs.filter(**{field: params[param]})
+        unit_id = id_param(self.request, "unit")
+        if unit_id:
+            qs = qs.filter(unit_id=unit_id)
         if params.get("mine"):
             qs = qs.filter(author=self.request.user)
         if self.action == "list" and not params.get("mine") and not params.get("kind"):
@@ -178,7 +184,8 @@ class QuizViewSet(viewsets.ModelViewSet):
         # library questions needs the subscription, even for the teacher who built it.
         if not (quiz.author_id == request.user.id and quiz.is_free):
             access.require(request.user, quiz)
-        return Response(quiz_analytics(quiz, request.user, request.query_params.get("classroom"), request_language(request)))
+        classroom_id = id_param(request, "classroom")
+        return Response(quiz_analytics(quiz, request.user, classroom_id, request_language(request)))
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def start(self, request, pk=None):
@@ -189,10 +196,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         assignment = None
         assignment_id = request.data.get("assignment")
         if assignment_id not in (None, ""):
-            try:
-                assignment_id = int(assignment_id)
-            except (TypeError, ValueError):
-                raise ValidationError({"assignment": _("Unknown assignment.")})
+            assignment_id = parse_id(assignment_id, "assignment")
             assignment = get_object_or_404(
                 Assignment.objects.distinct(),
                 pk=assignment_id,
@@ -213,9 +217,12 @@ class ExamPaperViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         qs = ExamPaper.objects.select_related("subject", "quiz")
         params = self.request.query_params
-        for field, param in (("level", "level"), ("year", "year"), ("subject__code", "subject")):
+        for field, param in (("level", "level"), ("subject__code", "subject")):
             if params.get(param):
                 qs = qs.filter(**{field: params[param]})
+        year = int_param(self.request, "year", 1900, 2100)
+        if year:
+            qs = qs.filter(year=year)
         if params.get("official") in ("1", "true"):
             qs = qs.filter(is_official=True)
         return qs
@@ -240,8 +247,9 @@ class AttemptViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         qs = attempts_visible_to(self.request.user)
         if self.action == "list":
             qs = qs.filter(user=self.request.user)
-            if self.request.query_params.get("quiz"):
-                qs = qs.filter(quiz_id=self.request.query_params["quiz"])
+            quiz_id = id_param(self.request, "quiz")
+            if quiz_id:
+                qs = qs.filter(quiz_id=quiz_id)
         return qs
 
     def get_serializer_class(self):

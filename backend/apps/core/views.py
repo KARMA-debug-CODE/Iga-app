@@ -4,12 +4,12 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.db.models import Count, F, Q
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -291,6 +291,14 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             audit.record(self.request, "update_user", user, **{k: [str(v) for v in pair] for k, pair in changes.items()})
 
 
+class ReviewDecisionSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(choices=["lesson", "quiz", "resource"])
+    id = serializers.IntegerField(min_value=1)
+    # A real true/false: the text "false" must not approve anything.
+    approve = serializers.BooleanField()
+    note = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+
+
 class ReviewViewSet(viewsets.ViewSet):
     """Content awaiting approval before it appears in the public library."""
 
@@ -347,14 +355,14 @@ class ReviewViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["post"])
     def decide(self, request):
-        model = self.MODELS.get(request.data.get("type"))
-        if model is None:
-            raise ValidationError({"type": _("Unknown content type.")})
-        obj = get_object_or_404(model, pk=request.data.get("id"))
-        approve = bool(request.data.get("approve"))
+        data = ReviewDecisionSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        v = data.validated_data
+        obj = get_object_or_404(self.MODELS[v["type"]], pk=v["id"])
+        approve = v["approve"]
         obj.status = ContentStatus.PUBLISHED if approve else ContentStatus.DRAFT
         obj.save(update_fields=["status"])
-        audit.record(request, "approve_content" if approve else "reject_content", obj, note=request.data.get("note", ""))
+        audit.record(request, "approve_content" if approve else "reject_content", obj, note=v["note"])
         return Response({"status": obj.status})
 
 

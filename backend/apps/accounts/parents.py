@@ -22,6 +22,7 @@ from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import request_language
+from apps.core.validation import text_field
 from apps.curriculum.models import Lesson, LessonProgress, Subject
 
 from .models import ParentInvite, ParentLink
@@ -171,13 +172,17 @@ class MyParentsView(APIView):
 
     permission_classes = [IsStudent]
 
-    def get(self, request):
+    def get(self, request, parent_id=None):
+        if parent_id is not None:  # parents/<id>/ only removes a link
+            return self.http_method_not_allowed(request)
         links = ParentLink.objects.filter(student=request.user).select_related("parent")
         return Response(
             [{"id": link.parent_id, "name": link.parent.display_name, "linked_at": link.created_at} for link in links]
         )
 
-    def delete(self, request, parent_id):
+    def delete(self, request, parent_id=None):
+        if parent_id is None:  # parents/ lists them; removing needs one parent's id
+            return self.http_method_not_allowed(request)
         deleted, _created = ParentLink.objects.filter(student=request.user, parent_id=parent_id).delete()
         if not deleted:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -199,7 +204,7 @@ class ChildrenView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        code = str(request.data.get("code", "")).strip().upper().replace(" ", "")
+        code = text_field(request.data, "code", 20, required=False).upper().replace(" ", "")
         invite = ParentInvite.objects.select_for_update().filter(code=code).select_related("student").first()
         if invite is None or invite.used_by_id or invite.expires_at < timezone.now():
             raise ValidationError({"code": _("That code is not valid or has expired. Ask your child to make a new one.")})
