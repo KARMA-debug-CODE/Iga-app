@@ -14,7 +14,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient
 
-from apps.accounts.models import ParentInvite, ParentLink, User
+from apps.accounts.models import ParentInvite, ParentLink, User, parent_code_digest
 from apps.accounts.security import verify_totp
 from apps.classroom.models import Classroom, Enrollment
 from apps.core.models import AuditLog
@@ -220,7 +220,9 @@ def test_racing_ledger_appends_keep_one_unbroken_chain(staff):
 def test_racing_parents_cannot_both_use_one_link_code(db):
     student = make_user("child")
     parents = [make_user(f"parent{i}", role=User.Role.PARENT, school=None) for i in range(RACERS)]
-    ParentInvite.objects.create(student=student, code="ABCD2345", expires_at=timezone.now() + timedelta(days=1))
+    ParentInvite.objects.create(
+        student=student, code_hash=parent_code_digest("ABCD2345"), expires_at=timezone.now() + timedelta(days=1)
+    )
 
     def redeem(parent):
         client = APIClient()
@@ -231,6 +233,23 @@ def test_racing_parents_cannot_both_use_one_link_code(db):
     assert sorted(codes) == [201] + [400] * (RACERS - 1)
     assert ParentLink.objects.count() == 1
     assert ParentInvite.objects.get().used_by_id == ParentLink.objects.get().parent_id
+
+
+def test_racing_resets_cannot_both_use_one_password_reset_link(db):
+    from apps.accounts import password_reset
+
+    user = make_user("forgetful")
+    token = password_reset.create_link(user).split("#", 1)[1]
+    passwords = [f"Racing-pass-{i}-Kigali" for i in range(RACERS)]
+
+    def confirm(password):
+        body = {"token": token, "new_password": password}
+        return APIClient().post("/api/auth/password-reset/confirm/", body, format="json").status_code
+
+    codes = race(*[(lambda p=p: confirm(p)) for p in passwords])
+    assert sorted(codes) == [200] + [400] * (RACERS - 1)
+    user.refresh_from_db()
+    assert sum(user.check_password(p) for p in passwords) == 1
 
 
 def test_racing_logins_cannot_both_spend_one_totp_code(db):
