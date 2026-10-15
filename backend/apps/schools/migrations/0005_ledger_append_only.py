@@ -3,8 +3,8 @@
 On PostgreSQL a trigger refuses every UPDATE and DELETE on schools_ledgerentry, whoever the database
 user is (only someone who can drop or disable the trigger, i.e. the table's owner, gets past it, and
 that is a schema change). TRUNCATE is not blocked here, because the test suite empties tables that
-way; restrict it with database privileges (see docs/SUBSCRIPTIONS.md), and `verify_ledger` reports
-paid payments that have lost their entry.
+way; the role the app runs as has no TRUNCATE privilege (`manage.py db_roles`), and `verify_ledger`
+reports paid payments that have lost their entry.
 
 Payments already paid get their gross, fee and net, and one ledger entry each, oldest first.
 """
@@ -13,7 +13,11 @@ from decimal import Decimal
 
 from django.db import migrations
 
-TRIGGER_SQL = """
+
+def add_trigger(apps, schema_editor):
+    if schema_editor.connection.vendor == "postgresql":
+        schema_editor.execute(
+            """
 CREATE OR REPLACE FUNCTION schools_ledgerentry_append_only() RETURNS trigger AS $$
 BEGIN
     RAISE EXCEPTION 'schools_ledgerentry is append-only: % refused (record a correction instead)', TG_OP
@@ -24,22 +28,20 @@ DROP TRIGGER IF EXISTS schools_ledgerentry_append_only ON schools_ledgerentry;
 CREATE TRIGGER schools_ledgerentry_append_only
     BEFORE UPDATE OR DELETE ON schools_ledgerentry
     FOR EACH ROW EXECUTE FUNCTION schools_ledgerentry_append_only();
-"""
-
-DROP_SQL = """
-DROP TRIGGER IF EXISTS schools_ledgerentry_append_only ON schools_ledgerentry;
-DROP FUNCTION IF EXISTS schools_ledgerentry_append_only();
-"""
-
-
-def add_trigger(apps, schema_editor):
-    if schema_editor.connection.vendor == "postgresql":
-        schema_editor.execute(TRIGGER_SQL, params=None)
+""",
+            params=None,
+        )
 
 
 def drop_trigger(apps, schema_editor):
     if schema_editor.connection.vendor == "postgresql":
-        schema_editor.execute(DROP_SQL, params=None)
+        schema_editor.execute(
+            """
+DROP TRIGGER IF EXISTS schools_ledgerentry_append_only ON schools_ledgerentry;
+DROP FUNCTION IF EXISTS schools_ledgerentry_append_only();
+""",
+            params=None,
+        )
 
 
 def _finite(value):
@@ -100,7 +102,7 @@ def backfill(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("schools", "0003_money_ledger"),
+        ("schools", "0004_money_ledger"),
     ]
 
     operations = [

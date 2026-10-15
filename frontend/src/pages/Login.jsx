@@ -58,6 +58,9 @@ export default function Login() {
           {t("auth.login")}
         </button>
         <p className="muted small" style={{ margin: 0, textAlign: "center" }}>
+          <Link to="/forgot-password">{t("reset.forgotLink")}</Link>
+        </p>
+        <p className="muted small" style={{ margin: 0, textAlign: "center" }}>
           {t("auth.noAccount")} <Link to="/register">{t("auth.register")}</Link>
         </p>
       </form>

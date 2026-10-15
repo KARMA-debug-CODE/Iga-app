@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./auth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from "./components/Layout";
+import StepUpDialog from "./components/StepUpDialog";
 import { Spinner } from "./components/ui";
 import { useI18n } from "./i18n";
 import Dashboard from "./pages/Dashboard";
@@ -42,6 +43,9 @@ const BillingReturn = schoolPage("BillingReturn");
 const DevCheckout = schoolPage("DevCheckout");
 const Receipt = schoolPage("Receipt");
 const SchoolHome = schoolPage("SchoolHome");
+const resetPage = (name) => lazy(() => import("./pages/PasswordReset").then((m) => ({ default: m[name] })));
+const ForgotPassword = resetPage("ForgotPassword");
+const ResetPassword = resetPage("ResetPassword");
 
 function RequireAuth({ children, teacher = false, admin = false, schoolAdmin = false }) {
   const { user, isTeacher, isAdmin } = useAuth();
@@ -106,11 +110,15 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
+      {user && <StepUpDialog />}
       <ErrorBoundary resetKey={location.pathname} reloadOnRetry>
         <Suspense fallback={<Spinner />}>
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
+            <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPassword />} />
+            {/* Open even when signed in: the link in the email may be opened on a shared computer. */}
+            <Route path="/reset-password" element={<ResetPassword />} />
             {!user && <Route path="/" element={<Landing />} />}
             <Route element={user ? <Layout /> : <RedirectToLogin />}>
               <Route path="/" element={page(<Dashboard />)} />

@@ -41,6 +41,35 @@ if SECRET_KEY in PLACEHOLDER_SECRETS or len(SECRET_KEY) < 32:
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1],testserver")
 
+# Keys for the secrets and personal data encrypted in the database (apps/core/encryption.py):
+# comma-separated Fernet keys, the first encrypts and every one decrypts (for key rotation). Generate
+# one with: python3 -c "import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())"
+FIELD_ENCRYPTION_KEYS = env_list("FIELD_ENCRYPTION_KEYS")
+if not FIELD_ENCRYPTION_KEYS:
+    if not DEBUG:
+        raise RuntimeError("Set FIELD_ENCRYPTION_KEYS (see .env.docker.example) when DJANGO_DEBUG is off.")
+    # Local development only: a key derived from the (development) secret key.
+    import base64
+    import hashlib
+
+    FIELD_ENCRYPTION_KEYS = [base64.urlsafe_b64encode(hashlib.sha256(f"iga-fields:{SECRET_KEY}".encode()).digest()).decode()]
+else:
+    import base64
+
+    from cryptography.fernet import Fernet
+
+    for _key in FIELD_ENCRYPTION_KEYS:
+        try:
+            Fernet(_key)
+        except ValueError:
+            raise RuntimeError(
+                "FIELD_ENCRYPTION_KEYS must hold Fernet keys: 32 random bytes, URL-safe base64 (44 characters)."
+            ) from None
+        _raw = base64.urlsafe_b64decode(_key)
+        # A phrase or a run of one character, base64-encoded, is a valid key but not a secret one.
+        if len(set(_raw)) < 12 or all(32 <= byte < 127 for byte in _raw):
+            raise RuntimeError("FIELD_ENCRYPTION_KEYS holds a key that is not random: generate one (see .env.docker.example).")
+
 APP_NAME = os.environ.get("APP_NAME", "Iga")
 
 INSTALLED_APPS = [
@@ -74,6 +103,8 @@ MIDDLEWARE = [
     # Answers (error messages included) in the reader's language: the app sends Accept-Language.
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # A NUL character in the URL or query string is a 400 (PostgreSQL can't store one).
+    "apps.core.middleware.RejectNulMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -108,6 +139,20 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "accounts.User"
+
+# Argon2id for every new or changed password. The other hashers only read older hashes, which Django
+# re-hashes with Argon2id the next time their owner logs in.
+PASSWORD_HASHERS = [
+    "apps.accounts.hashers.IgaArgon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
+# Argon2id costs (Django's defaults). Each login briefly uses ARGON2_MEMORY_COST_KIB of memory.
+ARGON2_TIME_COST = int(os.environ.get("ARGON2_TIME_COST", "2"))
+ARGON2_MEMORY_COST_KIB = int(os.environ.get("ARGON2_MEMORY_COST_KIB", "102400"))
+ARGON2_PARALLELISM = int(os.environ.get("ARGON2_PARALLELISM", "8"))
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -158,7 +203,18 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.IgaJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # DRF's parsers, refusing text with a NUL character (a 400 instead of a database error).
+    "DEFAULT_PARSER_CLASSES": [
+        "apps.core.parsers.JSONParser",
+        "apps.core.parsers.FormParser",
+        "apps.core.parsers.MultiPartParser",
+    ],
+    # JSON only in production: DRF's browsable HTML API is a development tool.
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
+    + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    # Refused (403) and throttled (429) requests are logged as security events.
+    "EXCEPTION_HANDLER": "apps.core.security_log.exception_handler",
     "PAGE_SIZE": 50,
     # Per-IP throttles only trust X-Forwarded-For entries added by our own proxies.
     "NUM_PROXIES": TRUSTED_PROXY_COUNT,
@@ -168,9 +224,19 @@ REST_FRAMEWORK = {
     # Per-IP limits are generous because a whole school often shares one public IP;
     # "login" is per account and is what actually stops password guessing.
     "DEFAULT_THROTTLE_RATES": {
+        # Per IP: sign-in, sign-up, password reset and 2FA requests together.
         "auth": os.environ.get("THROTTLE_AUTH", "300/min"),
+        # Per account (the username or email typed): sign-in attempts. Repeated failures also lock
+        # the account for a while (LOGIN_LOCKOUT_* below).
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
+        # Per IP: new accounts (a whole class may sign up together from one school address).
+        "register": os.environ.get("THROTTLE_REGISTER", "100/hour"),
+        # Password reset emails: per account (so nobody floods an inbox) and per IP.
+        "password_reset": os.environ.get("THROTTLE_PASSWORD_RESET", "5/hour"),
+        "password_reset_ip": os.environ.get("THROTTLE_PASSWORD_RESET_IP", "30/hour"),
+        # Session refreshes: per IP, and per account (only validly signed refresh cookies count).
         "refresh": os.environ.get("THROTTLE_REFRESH", "600/min"),
+        "refresh_user": os.environ.get("THROTTLE_REFRESH_USER", "60/min"),
         "chat": os.environ.get("THROTTLE_CHAT", "30/min"),
         # Per user: password / 2FA changes, and guessing class, group or parent codes.
         "sensitive": os.environ.get("THROTTLE_SENSITIVE", "5/min"),
@@ -193,12 +259,38 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
+# Progressive lockout after failed sign-ins (apps/accounts/lockout.py): failures in a row for one
+# account from one IP, for one account from anywhere, and from one IP for any account. The first
+# lock lasts LOGIN_LOCKOUT_BASE_SECONDS and doubles with each lock that day, up to the maximum.
+LOGIN_LOCKOUT_THRESHOLD = int(os.environ.get("LOGIN_LOCKOUT_THRESHOLD", "5"))
+LOGIN_LOCKOUT_ACCOUNT_THRESHOLD = int(os.environ.get("LOGIN_LOCKOUT_ACCOUNT_THRESHOLD", "20"))
+LOGIN_LOCKOUT_IP_THRESHOLD = int(os.environ.get("LOGIN_LOCKOUT_IP_THRESHOLD", "100"))
+LOGIN_LOCKOUT_BASE_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_BASE_SECONDS", "60"))
+LOGIN_LOCKOUT_MAX_SECONDS = int(os.environ.get("LOGIN_LOCKOUT_MAX_SECONDS", "3600"))
+# Failures further apart than this don't add up.
+LOGIN_FAILURE_WINDOW_SECONDS = int(os.environ.get("LOGIN_FAILURE_WINDOW_SECONDS", "900"))
+
+# Password reset links work once, for this many seconds, and only until the password changes or a
+# newer link is sent (apps/accounts/password_reset.py).
+PASSWORD_RESET_TIMEOUT = int(os.environ.get("PASSWORD_RESET_TIMEOUT_SECONDS", "3600"))
+# A temporary password a teacher hands out (class roster, password reset) stops working after this.
+TEMPORARY_PASSWORD_DAYS = int(os.environ.get("TEMPORARY_PASSWORD_DAYS", "14"))
+# Answers saying "this email address is already used" per hour, per IP (sign-up) or per account
+# (profile, class roster) before every request with an email is refused until the hour is over.
+EMAIL_IN_USE_LIMIT = int(os.environ.get("EMAIL_IN_USE_LIMIT", "10"))
+
+# Privileged operations (the admin area, school membership and billing decisions, resetting a student's
+# password) need a password confirmed this recently: at sign-in or at POST /api/auth/step-up/.
+STEP_UP_MAX_AGE_SECONDS = int(os.environ.get("STEP_UP_MAX_AGE_SECONDS", "900"))
+
 # The refresh token lives in an httpOnly cookie scoped to the auth endpoints,
 # so page scripts never see it. The short-lived access token stays in memory.
 REFRESH_COOKIE_NAME = "iga_refresh"
 REFRESH_COOKIE_PATH = "/api/auth/"
 REFRESH_COOKIE_SECURE = env_bool("REFRESH_COOKIE_SECURE", env_bool("HTTPS", not DEBUG))
-REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Lax")
+# Strict: the browser never sends it with a request started by another site. The app and its API
+# share one site, so nothing else is needed (refresh and logout also check the Origin header).
+REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Strict")
 # A used refresh token that comes back later means it was stolen, and every session of
 # that user is ended. Within this window it is treated as two tabs refreshing at once.
 REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", "30"))
@@ -206,6 +298,18 @@ REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+# Django's own session and CSRF cookies only serve the Django admin: scoped to it, out of reach of
+# page scripts, never sent cross-site with a form, Secure under HTTPS (below), and admin sessions
+# end after DJANGO_ADMIN_SESSION_HOURS.
+SESSION_COOKIE_PATH = "/django-admin/"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = int(float(os.environ.get("DJANGO_ADMIN_SESSION_HOURS", "8")) * 3600)
+CSRF_COOKIE_PATH = "/django-admin/"
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = "Lax"
+# Django admin forms refused for a missing or wrong CSRF token are logged as security events.
+CSRF_FAILURE_VIEW = "apps.core.security_log.csrf_failure"
 
 # --- Santa, Iga's own AI tutor ---------------------------------------------
 # Santa's model runs on the school's own server: the "santa" service in docker-compose.yml (llama.cpp's
@@ -285,11 +389,15 @@ UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
 # still accepted (covers slow mobile connections).
 EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"))
 
-# The Django admin (/django-admin/) is for content managers. In production it is
-# off unless DJANGO_ADMIN_ENABLED=true, and staff must use two-factor login.
+# The Django admin is for content managers. In production it is off unless DJANGO_ADMIN_ENABLED=true AND
+# DJANGO_ADMIN_PATH is a long random secret (at least 16 letters, digits, - or _): it then lives at
+# /django-admin/<DJANGO_ADMIN_PATH>/. Staff must use two-factor login (always, when DEBUG is off).
 ADMIN_ENABLED = env_bool("DJANGO_ADMIN_ENABLED", DEBUG)
-ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", not DEBUG)
+ADMIN_PATH = os.environ.get("DJANGO_ADMIN_PATH", "").strip().strip("/")
+ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", False) if DEBUG else True
 ADMIN_LOGIN_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_ATTEMPTS_PER_MINUTE", "10"))
+# Per address too, so one machine can't try a password on many staff accounts.
+ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE", "30"))
 
 # --- Production hardening --------------------------------------------------
 
@@ -309,6 +417,18 @@ X_FRAME_OPTIONS = "DENY"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    # Security events (apps/core/security_log.py) are one JSON object per line, for a log collector.
+    "formatters": {"json_line": {"format": "%(message)s"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        "security": {"class": "logging.StreamHandler", "formatter": "json_line"},
+    },
+    "loggers": {
+        "iga.security": {
+            "handlers": ["security"],
+            "level": os.environ.get("SECURITY_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
     "root": {"handlers": ["console"], "level": os.environ.get("LOG_LEVEL", "INFO")},
 }

@@ -9,7 +9,9 @@ import io
 import re
 import secrets
 import unicodedata
+from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import password_validation
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
@@ -40,6 +42,11 @@ WORDS = [
 
 class RosterError(Exception):
     pass
+
+
+def temporary_password_expiry():
+    """When a temporary password handed out now stops working (TEMPORARY_PASSWORD_DAYS)."""
+    return timezone.now() + timedelta(days=settings.TEMPORARY_PASSWORD_DAYS)
 
 
 def temporary_password(user=None):
@@ -156,6 +163,7 @@ def create_accounts(rows, classroom, teacher):
             role=User.Role.STUDENT,
             grade=classroom.grade,
             must_change_password=True,
+            temporary_password_expires_at=temporary_password_expiry(),
         )
         # They join the teacher's school straight away: the teacher vouches for their own class.
         school = teacher.school_member
@@ -176,6 +184,7 @@ def reset_password(student):
     password = temporary_password(student)
     student.set_password(password)
     student.must_change_password = True
-    student.save(update_fields=["password", "must_change_password"])
+    student.temporary_password_expires_at = temporary_password_expiry()
+    student.save(update_fields=["password", "must_change_password", "temporary_password_expires_at"])
     revoke_all_sessions(student)
     return password

@@ -2,6 +2,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.core.utils import serializer_language
 from apps.schools.access import content_access
 
@@ -99,7 +100,7 @@ class UnitSerializer(serializers.ModelSerializer):
         return LessonSummarySerializer(lessons, many=True, context=self.context).data
 
 
-class ResourceSerializer(serializers.ModelSerializer):
+class ResourceSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     subject_code = serializers.CharField(source="subject.code", read_only=True)
     file_url = serializers.SerializerMethodField()
 
@@ -275,7 +276,7 @@ class LessonTranslationSerializer(serializers.ModelSerializer):
         read_only_fields = ["reviewed"]
 
 
-class LessonWriteSerializer(serializers.ModelSerializer):
+class LessonWriteSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     """Teachers author lessons; they go to review before students can see them."""
 
     translations = LessonTranslationSerializer(many=True, required=False)

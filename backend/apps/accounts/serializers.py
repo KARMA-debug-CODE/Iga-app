@@ -4,6 +4,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import A_LEVEL_GRADES, GRADE_CODES
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.schools.access import content_access
 from apps.schools.constants import DISTRICTS
 from apps.schools.membership import choose_school
@@ -29,7 +30,7 @@ def school_summary(user):
     return data
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     streak_days = serializers.IntegerField(source="current_streak", read_only=True)
     school = serializers.SerializerMethodField()
     access = serializers.SerializerMethodField()
@@ -76,6 +77,10 @@ class UserSerializer(serializers.ModelSerializer):
             "badges",
             "date_joined",
         ]
+        # Uniqueness is checked in validate_email, which counts "already used" answers (enumeration.py).
+        extra_kwargs = {"email": {"validators": []}}
+
+    email_in_use = False
 
     def validate_avatar(self, value):
         return avatar.clean(value)
@@ -118,6 +123,7 @@ class UserSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             others = others.exclude(pk=self.instance.pk)
         if others.exists():
+            self.email_in_use = True
             raise serializers.ValidationError(_("An account with this email already exists."))
         return value
 
@@ -144,7 +150,7 @@ class NewSchoolSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=8, max_length=4096)
     role = serializers.ChoiceField(
         choices=[User.Role.STUDENT, User.Role.TEACHER, User.Role.PARENT, User.Role.SCHOOL_ADMIN], default=User.Role.STUDENT
     )
@@ -170,6 +176,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             "new_school",
             "preferred_language",
         ]
+        # Uniqueness is checked in validate_email, which counts "already used" answers (enumeration.py).
+        extra_kwargs = {"email": {"validators": []}}
+
+    email_in_use = False
 
     def validate(self, attrs):
         role = attrs.get("role", User.Role.STUDENT)
@@ -224,7 +234,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         if value and User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError(_("An account with this email already exists."))
+            self.email_in_use = True
+            raise serializers.ValidationError(
+                _("This email address already has an account. If it's yours, log in or reset your password.")
+            )
         return value.lower() if value else value
 
     @transaction.atomic
@@ -254,23 +267,32 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    identifier = serializers.CharField(help_text="Username or email")
-    password = serializers.CharField(write_only=True)
-    otp = serializers.CharField(required=False, allow_blank=True)
+    identifier = serializers.CharField(help_text="Username or email", max_length=254)
+    password = serializers.CharField(write_only=True, max_length=4096)
+    otp = serializers.CharField(required=False, allow_blank=True, max_length=16)
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    current_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True, min_length=8)
+    """The view has already checked current_password (with the re-authentication lockout)."""
+
+    current_password = serializers.CharField(write_only=True, max_length=4096)
+    new_password = serializers.CharField(write_only=True, min_length=8, max_length=4096)
 
     def validate(self, attrs):
         user = self.context["request"].user
-        if not user.check_password(attrs["current_password"]):
-            raise serializers.ValidationError({"current_password": _("Incorrect password.")})
         if attrs["new_password"] == attrs["current_password"]:
             raise serializers.ValidationError({"new_password": _("Choose a password different from the current one.")})
         password_validation.validate_password(attrs["new_password"], user)
         return attrs
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    identifier = serializers.CharField(help_text="Username or email", max_length=254)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=128)
+    new_password = serializers.CharField(write_only=True, min_length=8, max_length=4096)
 
 
 class OTPSerializer(serializers.Serializer):

@@ -103,6 +103,16 @@ def require_manager(actor, school):
         raise PermissionDenied(_("Only this school's administrators can do that."))
 
 
+def lock_for_decision(actor, school):
+    """Inside a transaction: lock the school row, so decisions about its members happen one at a time,
+    and check the actor's powers again from the database (another administrator may have removed them,
+    or the school been suspended, while their request was on its way)."""
+    school = type(school).objects.select_for_update().get(pk=school.pk)
+    fresh = type(actor).objects.select_related("school").get(pk=actor.pk)
+    require_manager(fresh, school)
+    return school
+
+
 def needs_teacher_confirmation(user):
     """A teacher the school could vouch for: not yet approved, and not stopped by the Iga team."""
     return user.role == "teacher" and not user.teacher_approved and not user.teacher_revoked
@@ -113,6 +123,9 @@ def decide(actor, school, members, approve, request=None):
     """Approve or reject pending requests for `school`, and confirm approved members who are
     teachers (for example, teachers who joined with the code). Returns the users changed."""
     require_manager(actor, school)
+    school = lock_for_decision(actor, school)
+    # Decide on the rows as they are now (locked), not as they were when the request was read.
+    members = list(type(actor).objects.select_for_update().filter(pk__in=[m.pk for m in members]).order_by("pk"))
     changed = []
     for user in members:
         if user.school_id != school.pk:
@@ -146,8 +159,11 @@ def decide(actor, school, members, approve, request=None):
     return changed
 
 
+@transaction.atomic
 def remove(actor, school, user, request=None):
     require_manager(actor, school)
+    school = lock_for_decision(actor, school)
+    user = type(user).objects.select_for_update().get(pk=user.pk)
     if user.school_id != school.pk:
         raise ValidationError({"user": _("That person isn't a member of this school.")})
     if user.pk == actor.pk:

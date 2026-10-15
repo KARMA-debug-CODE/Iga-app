@@ -3,12 +3,16 @@
 #   cp .env.docker.example .env      # then fill in DJANGO_SECRET_KEY (see the file)
 #   docker compose up --build        # the first start downloads Santa's model once (about 4.5 GB)
 #   docker compose exec backend python manage.py load_curriculum
-#   docker compose exec backend python manage.py seed_demo --force   # optional demo accounts
+#   docker compose exec -e DJANGO_DEBUG=true backend python manage.py seed_demo   # optional demo accounts (local trial only)
 # Then open http://localhost:8080
 #
 # For a real deployment, use strong secrets in .env, serve over HTTPS and remove
-# HTTPS=false from .env (HTTPS defaults to on), and set a random CODE_RUNNER_TOKEN and SANTA_API_KEY.
+# HTTPS=false from .env (HTTPS defaults to on), and set a random CODE_RUNNER_TOKEN, SANTA_API_KEY,
+# POSTGRES_PASSWORD, POSTGRES_OWNER_PASSWORD and POSTGRES_APP_PASSWORD.
 services:
+  # Three database roles: "iga" is the superuser, used only by the migrate service below to set up the
+  # other two; iga_owner owns the tables and runs the migrations; iga_app, the only role the backend and
+  # the scheduler know, may read and write rows and nothing else (docs/ARCHITECTURE.md, "Database roles").
   db:
     image: postgres:16-alpine
     environment:
@@ -30,14 +34,18 @@ services:
     environment: &backend-env
       DJANGO_DEBUG: "false"
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env - see .env.docker.example}
+      # Encrypts 2FA secrets, phone numbers and payment details in the database. Back it up apart from the database.
+      FIELD_ENCRYPTION_KEYS: ${FIELD_ENCRYPTION_KEYS:?Set FIELD_ENCRYPTION_KEYS in .env - see .env.docker.example}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
-      DATABASE_URL: postgres://iga:${POSTGRES_PASSWORD:-iga-local-only}@db:5432/iga
+      # The app role: rows only (no superuser, no CREATE/ALTER/DROP/TRUNCATE, no new roles or databases).
+      DATABASE_URL: postgres://iga_app:${POSTGRES_APP_PASSWORD:-iga-local-app}@db:5432/iga
       REDIS_URL: redis://redis:6379/0
       HTTPS: ${HTTPS:-true}
       # nginx in front appends the client address to X-Forwarded-For.
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
+      DJANGO_ADMIN_PATH: ${DJANGO_ADMIN_PATH:-}
       # Santa, Iga's own AI tutor: the "santa" service below. Set SANTA_URL= (empty) in .env to run without
       # the model; Santa then answers from the lessons only.
       SANTA_URL: ${SANTA_URL-http://santa:8080}
@@ -74,22 +82,38 @@ services:
       - media:/app/media
     networks: [default, coderunner, santa]
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_started
+
+  # Runs before the backend and the scheduler start, then exits. With the superuser, it creates or updates
+  # the iga_owner and iga_app roles (passwords from .env, so changing them there rotates them) and moves
+  # tables left by an older single-role setup to iga_owner; then it applies the migrations as iga_owner.
+  # Only this short-lived container ever holds the superuser and owner passwords.
+  migrate:
+    build: ./backend
+    command: sh -c 'python manage.py db_roles && DATABASE_URL="$$DB_OWNER_URL" python manage.py migrate --noinput'
+    environment:
+      <<: *backend-env
+      DATABASE_URL: postgres://iga:${POSTGRES_PASSWORD:-iga-local-only}@db:5432/iga
+      DB_OWNER_URL: postgres://iga_owner:${POSTGRES_OWNER_PASSWORD:-iga-local-owner}@db:5432/iga
+      DB_APP_URL: postgres://iga_app:${POSTGRES_APP_PASSWORD:-iga-local-app}@db:5432/iga
+    depends_on:
+      db:
+        condition: service_healthy
 
   # Sends subscription reminders to school administrators once a day.
   scheduler:
     build: ./backend
     # Every 10 minutes: re-check open payments (lost webhooks, abandoned checkouts) and send any
     # subscription reminders that are due (each is sent once, so running often is safe).
-    # Waits until the backend has applied the database migrations, so the first run finds the tables.
+    # Starts once the migrate service has applied the database migrations, and checks again before its first run.
     command: sh -c "until python manage.py migrate --check > /dev/null 2>&1; do sleep 5; done; while true; do python manage.py reconcile_payments; python manage.py billing_reminders; sleep 600; done"
     environment: *backend-env
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   # Compiles and runs students' C++ and Java (coderunner/: official GCC and OpenJDK images, nothing to
   # download at start). Only the backend can reach it: no published port, and its network has no internet.

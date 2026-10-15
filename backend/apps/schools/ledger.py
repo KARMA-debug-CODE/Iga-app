@@ -2,7 +2,7 @@
 
 Every applied payment, free extension, refund and correction adds one `LedgerEntry`, in the same
 database transaction as the change it records. Nothing ever changes or deletes an entry: the model
-refuses it, the Django admin is read-only, and on PostgreSQL a trigger (migration 0004) refuses
+refuses it, the Django admin is read-only, and on PostgreSQL a trigger (migration 0005) refuses
 UPDATE and DELETE on the table. A mistake is fixed by a new entry (a correction) that points at it.
 
 Each entry stores `prev_hash`, the hash of the entry before it, and `entry_hash`, the hash of its

@@ -14,6 +14,7 @@ from apps.core import audit
 from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacherOrReadOnly
 from apps.core.utils import request_grade, request_language
+from apps.core.validation import id_param
 from apps.gamification import services as gamification
 from apps.schools.access import content_access, has_premium, require
 
@@ -122,8 +123,9 @@ class LessonViewSet(
     def get_queryset(self):
         qs = visible_lessons(self.request.user).select_related("unit", "unit__subject", "author")
         params = self.request.query_params
-        if params.get("unit"):
-            qs = qs.filter(unit_id=params["unit"])
+        unit_id = id_param(self.request, "unit")
+        if unit_id:
+            qs = qs.filter(unit_id=unit_id)
         if params.get("subject"):
             qs = qs.filter(unit__subject__code=params["subject"])
         if params.get("grade"):
@@ -233,9 +235,12 @@ class ResourceViewSet(viewsets.ModelViewSet):
         if not user.is_platform_admin:
             qs = qs.filter(Q(status=ContentStatus.PUBLISHED) | Q(uploaded_by=user))
         params = self.request.query_params
-        for field, param in (("subject__code", "subject"), ("grade", "grade"), ("kind", "kind"), ("unit_id", "unit")):
+        for field, param in (("subject__code", "subject"), ("grade", "grade"), ("kind", "kind")):
             if params.get(param):
                 qs = qs.filter(**{field: params[param]})
+        unit_id = id_param(self.request, "unit")
+        if unit_id:
+            qs = qs.filter(unit_id=unit_id)
         if params.get("official") in ("1", "true"):
             qs = qs.filter(is_official=True)
         return qs.order_by("-is_official", "kind", "title")

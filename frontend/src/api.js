@@ -7,11 +7,23 @@ import { currentLanguage, hasTranslation, translateNow } from "./i18n";
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
 // Auth endpoints where a 401 is the answer itself rather than an expired access token.
-const NO_REFRESH = new Set(["/auth/login/", "/auth/register/", "/auth/refresh/", "/auth/logout/"]);
+const NO_REFRESH = new Set([
+  "/auth/login/",
+  "/auth/register/",
+  "/auth/refresh/",
+  "/auth/logout/",
+  "/auth/password-reset/",
+  "/auth/password-reset/confirm/",
+]);
+// Security changes end every session, this one's access token included: the answer carries a new one.
+const ISSUES_ACCESS_TOKEN = new Set(["/auth/password/", "/auth/2fa/enable/", "/auth/2fa/disable/"]);
 
 let accessToken = null;
 let refreshing = null;
 let onSessionExpired = () => {};
+// Asks the person to confirm their password (StepUpDialog); resolves once they have, rejects if they cancel.
+let onStepUp = null;
+let steppingUp = null;
 
 export function setAccessToken(token) {
   accessToken = token;
@@ -19,6 +31,29 @@ export function setAccessToken(token) {
 
 export function setSessionExpiredHandler(fn) {
   onSessionExpired = fn;
+}
+
+export function setStepUpHandler(fn) {
+  onStepUp = fn;
+}
+
+/** Confirm the password (and 2FA code) for privileged actions; the new access token replaces the old one. */
+export async function confirmIdentity(password, otp) {
+  const data = await api("/auth/step-up/", { method: "POST", body: { password, otp: otp || undefined }, stepUp: false });
+  accessToken = data.access;
+  return data;
+}
+
+// Several requests refused at once share one prompt.
+function stepUpOnce() {
+  if (!steppingUp) {
+    steppingUp = Promise.resolve()
+      .then(() => onStepUp())
+      .finally(() => {
+        steppingUp = null;
+      });
+  }
+  return steppingUp;
 }
 
 export class ApiError extends Error {
@@ -78,7 +113,7 @@ export async function refreshSession() {
   return refreshing;
 }
 
-export async function api(path, { method = "GET", body, params, retry = true, signal } = {}) {
+export async function api(path, { method = "GET", body, params, retry = true, signal, stepUp = true } = {}) {
   let url = `${BASE}${path}`;
   if (params) {
     const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
@@ -106,12 +141,25 @@ export async function api(path, { method = "GET", body, params, retry = true, si
 
   if (res.status === 401 && retry && !NO_REFRESH.has(path)) {
     await refreshAfter401();
-    return api(path, { method, body, params, retry: false, signal });
+    return api(path, { method, body, params, retry: false, signal, stepUp });
   }
 
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);
+  // Privileged actions need a password confirmed in the last few minutes: ask for it, then try once more.
+  if (res.status === 403 && data?.code === "step_up_required" && stepUp && onStepUp) {
+    try {
+      await stepUpOnce();
+    } catch {
+      throw new ApiError(res.status, data);
+    }
+    return api(path, { method, body, params, retry, signal, stepUp: false });
+  }
   if (!res.ok) throw new ApiError(res.status, data);
+  if (ISSUES_ACCESS_TOKEN.has(path) && data?.access) {
+    accessToken = data.access;
+    delete data.access; // kept in memory here only, never in page state
+  }
   return data;
 }
 

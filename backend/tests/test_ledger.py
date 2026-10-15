@@ -388,8 +388,8 @@ def test_payments_made_before_the_ledger_get_their_entries(lycee, lycee_admin):
             provider_data={"amount": 200, "charged_amount": "203", "app_fee": "3"} if provider == "flutterwave" else {},
         )
     assert not ledger.verify().ok  # paid payments without entries
-    historical = MigrationExecutor(connection).loader.project_state(("schools", "0004_ledger_append_only")).apps
-    import_module("apps.schools.migrations.0004_ledger_append_only").backfill(historical, None)
+    historical = MigrationExecutor(connection).loader.project_state(("schools", "0005_ledger_append_only")).apps
+    import_module("apps.schools.migrations.0005_ledger_append_only").backfill(historical, None)
     entries = list(LedgerEntry.objects.order_by("sequence"))
     assert [e.payment.reference for e in entries] == ["old-0", "old-1"]
     assert (entries[1].gross_amount, entries[1].provider_fee, entries[1].net_amount) == (

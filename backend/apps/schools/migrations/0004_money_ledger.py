@@ -27,7 +27,7 @@ def refuse_duplicate_transactions(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("schools", "0002_payment_checked_at"),
+        ("schools", "0003_encrypt_phone_and_payment_data"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
