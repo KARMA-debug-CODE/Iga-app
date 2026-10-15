@@ -892,13 +892,14 @@ def test_school_admins_keep_an_email(client_for, lycee_admin):
     assert response.status_code == 400
 
 
-def test_seed_demo_can_run_again_after_the_pending_admin_left(client_for):
+def test_seed_demo_can_run_again_after_the_pending_admin_left(client_for, settings):
     import io
 
-    call_command("seed_demo", force=True, stdout=io.StringIO())
+    settings.DEBUG = True  # demo accounts only ever exist in development
+    call_command("seed_demo", stdout=io.StringIO())
     gsadmin = User.objects.get(username="gsadmin")
     assert client_for(gsadmin).delete("/api/my-school/").status_code == 200
-    call_command("seed_demo", force=True, stdout=io.StringIO())
+    call_command("seed_demo", stdout=io.StringIO())
     gsadmin.refresh_from_db()
     assert gsadmin.school.name == "GS Remera Catholique" and gsadmin.school_status == "pending"
     assert School.objects.filter(name="GS Remera Catholique").count() == 1

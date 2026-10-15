@@ -54,5 +54,6 @@ class ParentLinkAdmin(admin.ModelAdmin):
 
 @admin.register(ParentInvite)
 class ParentInviteAdmin(admin.ModelAdmin):
-    list_display = ("student", "code", "expires_at", "used_by")
-    readonly_fields = ("code",)
+    # Codes are kept only as hashes; the student sees the code once.
+    list_display = ("student", "expires_at", "used_by")
+    readonly_fields = ("code_hash",)

@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from apps.classroom.models import Classroom
+from apps.core.validation import id_param
 
 from .models import Badge, XPEvent
 
@@ -40,7 +41,8 @@ def leaderboard(request):
 
     students = User.objects.filter(role=User.Role.STUDENT, is_active=True)
     if scope == "class":
-        classroom = Classroom.objects.filter(pk=request.query_params.get("classroom") or None).first()
+        classroom_id = id_param(request, "classroom")
+        classroom = Classroom.objects.filter(pk=classroom_id).first() if classroom_id else None
         allowed = classroom and (
             classroom.teacher_id == user.id
             or classroom.enrollments.filter(student=user, active=True).exists()

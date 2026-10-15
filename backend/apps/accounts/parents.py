@@ -8,10 +8,8 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -20,11 +18,13 @@ from apps.classroom.models import Assignment
 from apps.classroom.views import assignment_status
 from apps.core import audit
 from apps.core.constants import ContentStatus
+from apps.core.permissions import IsParent, IsStudent
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import request_language
+from apps.core.validation import text_field
 from apps.curriculum.models import Lesson, LessonProgress, Subject
 
-from .models import ParentInvite, ParentLink
+from .models import ParentInvite, ParentLink, parent_code_digest
 
 INVITE_DAYS = 7
 # No 0/O or 1/I: easy to read over the phone.
@@ -34,22 +34,8 @@ ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 def new_code():
     while True:
         code = "".join(secrets.choice(ALPHABET) for _ in range(8))
-        if not ParentInvite.objects.filter(code=code).exists():
+        if not ParentInvite.objects.filter(code_hash=parent_code_digest(code)).exists():
             return code
-
-
-class IsStudent(BasePermission):
-    message = gettext_lazy("Only students can do this.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_student
-
-
-class IsParent(BasePermission):
-    message = gettext_lazy("Only parent or guardian accounts can do this.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_parent
 
 
 def level_info(xp):
@@ -160,10 +146,14 @@ class ParentCodeView(APIView):
     @transaction.atomic
     def post(self, request):
         ParentInvite.objects.filter(student=request.user, used_by__isnull=True).delete()
+        code = new_code()
         invite = ParentInvite.objects.create(
-            student=request.user, code=new_code(), expires_at=timezone.now() + timedelta(days=INVITE_DAYS)
+            student=request.user,
+            code_hash=parent_code_digest(code),
+            expires_at=timezone.now() + timedelta(days=INVITE_DAYS),
         )
-        return Response({"code": invite.code, "expires_at": invite.expires_at}, status=status.HTTP_201_CREATED)
+        # The only time the code is shown: only its hash is kept.
+        return Response({"code": code, "expires_at": invite.expires_at}, status=status.HTTP_201_CREATED)
 
 
 class MyParentsView(APIView):
@@ -171,13 +161,17 @@ class MyParentsView(APIView):
 
     permission_classes = [IsStudent]
 
-    def get(self, request):
+    def get(self, request, parent_id=None):
+        if parent_id is not None:  # parents/<id>/ only removes a link
+            return self.http_method_not_allowed(request)
         links = ParentLink.objects.filter(student=request.user).select_related("parent")
         return Response(
             [{"id": link.parent_id, "name": link.parent.display_name, "linked_at": link.created_at} for link in links]
         )
 
-    def delete(self, request, parent_id):
+    def delete(self, request, parent_id=None):
+        if parent_id is None:  # parents/ lists them; removing needs one parent's id
+            return self.http_method_not_allowed(request)
         deleted, _created = ParentLink.objects.filter(student=request.user, parent_id=parent_id).delete()
         if not deleted:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -199,12 +193,15 @@ class ChildrenView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        code = str(request.data.get("code", "")).strip().upper().replace(" ", "")
-        invite = ParentInvite.objects.select_for_update().filter(code=code).select_related("student").first()
-        if invite is None or invite.used_by_id or invite.expires_at < timezone.now():
+        # A string of at most 20 characters (400 otherwise); parent_code_digest ignores case and spaces.
+        code = text_field(request.data, "code", 20, required=False)
+        invite = (
+            ParentInvite.objects.select_for_update().filter(code_hash=parent_code_digest(code)).select_related("student").first()
+        )
+        # One answer for every unusable code (unknown, used, expired, or a deactivated account), so it
+        # can't tell anyone which codes or accounts exist.
+        if invite is None or invite.used_by_id or invite.expires_at < timezone.now() or not invite.student.is_active:
             raise ValidationError({"code": _("That code is not valid or has expired. Ask your child to make a new one.")})
-        if not invite.student.is_active:
-            raise ValidationError({"code": _("That account is not active.")})
         ParentLink.objects.get_or_create(parent=request.user, student=invite.student)
         invite.used_by = request.user
         invite.save(update_fields=["used_by"])
@@ -226,15 +223,6 @@ class ChildDetailView(APIView):
         student = self._student(request, student_id)
         ParentLink.objects.filter(parent=request.user, student=student).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class NotParent(BasePermission):
-    """Keeps parent accounts out of student spaces such as study-group chats."""
-
-    message = gettext_lazy("Study groups are for students and teachers.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and not request.user.is_parent
 
 
 def deny_parents(user):

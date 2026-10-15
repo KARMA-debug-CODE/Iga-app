@@ -2353,3 +2353,38 @@ tr:last-child td {
   cursor: pointer;
   list-style-position: outside;
 }
+
+/* "Confirm it's you" before a privileged action (StepUpDialog). */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(13, 21, 28, 0.55);
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  animation: modal-in 0.18s ease-out;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    animation: none;
+  }
+}

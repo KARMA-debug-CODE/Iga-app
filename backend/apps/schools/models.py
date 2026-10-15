@@ -7,6 +7,8 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 
+from apps.core.encryption import EncryptedJSONField, EncryptedTextField
+
 from .constants import DISTRICT_CHOICES
 
 # No 0/O or 1/I: codes are read aloud and copied from a board.
@@ -28,7 +30,8 @@ class School(models.Model):
     name = models.CharField(max_length=200)
     district = models.CharField(max_length=20, choices=DISTRICT_CHOICES)
     sector = models.CharField(max_length=80, blank=True)
-    phone = models.CharField(max_length=40, blank=True)
+    # Often the head teacher's own mobile number: encrypted in the database (FIELD_ENCRYPTION_KEYS).
+    phone = EncryptedTextField(max_length=40, blank=True)
     email = models.EmailField(blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
     # Students who enter it are approved straight away (it proves they were given it by the school).
@@ -95,7 +98,8 @@ class Payment(models.Model):
     currency = models.CharField(max_length=3)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
     provider_transaction_id = models.CharField(max_length=100, blank=True)
-    provider_data = models.JSONField(default=dict, blank=True)
+    # The provider's answer (it names the payer: phone number, email, card digits): encrypted in the database.
+    provider_data = EncryptedJSONField(default=dict, blank=True)
     period_start = models.DateTimeField(null=True, blank=True)
     period_end = models.DateTimeField(null=True, blank=True)
     note = models.CharField(max_length=300, blank=True)
