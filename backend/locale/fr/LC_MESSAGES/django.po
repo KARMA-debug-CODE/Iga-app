@@ -483,6 +483,18 @@ msgstr "Saisissez le code à 6 chiffres actuel de votre application d'authentifi
 msgid "Turn on two-factor authentication in your Iga profile before using the admin site."
 msgstr "Activez la vérification en deux étapes dans votre profil Iga avant d'utiliser le site d'administration."
 
+#: apps/core/errors.py:19
+msgid "This request is too large."
+msgstr "Cette requête est trop volumineuse."
+
+#: apps/core/errors.py:21
+msgid "This request has too many fields or files."
+msgstr "Cette requête contient trop de champs ou de fichiers."
+
+#: apps/core/errors.py:23
+msgid "Bad request."
+msgstr "Requête invalide."
+
 #: apps/core/permissions.py:40
 msgid "Only students can do this."
 msgstr "Seuls les élèves peuvent faire cela."
@@ -702,35 +714,35 @@ msgstr "Prestataire de paiement inconnu."
 msgid "Another school in this district already has this name."
 msgstr "Une autre école de ce district porte déjà ce nom."
 
-#: apps/schools/views.py:222
+#: apps/schools/views.py:221
 msgid "This payment belongs to another school."
 msgstr "Ce paiement appartient à une autre école."
 
-#: apps/schools/views.py:205
+#: apps/schools/views.py:204
 msgid "Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team."
 msgstr "Le paiement en ligne n'est pas encore disponible. Veuillez payer par virement bancaire et contacter l'équipe Iga."
 
-#: apps/schools/views.py:262
+#: apps/schools/views.py:261
 msgid "Test payments are switched off."
 msgstr "Les paiements de test sont désactivés."
 
-#: apps/schools/views.py:265
+#: apps/schools/views.py:264
 msgid "This payment can't be completed here."
 msgstr "Ce paiement ne peut pas être finalisé ici."
 
-#: apps/schools/views.py:94
+#: apps/schools/views.py:93
 msgid "School administrators change school through the Iga team."
 msgstr "Les administrateurs d'école changent d'école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:103
+#: apps/schools/views.py:102
 msgid "School administrators leave a school through the Iga team."
 msgstr "Les administrateurs d'école quittent une école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:389
+#: apps/schools/views.py:388
 msgid "Unknown action."
 msgstr "Action inconnue."
 
-#: apps/schools/views.py:384
+#: apps/schools/views.py:383
 msgid "Only a school waiting for verification, with no payments, can be rejected."
 msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
 

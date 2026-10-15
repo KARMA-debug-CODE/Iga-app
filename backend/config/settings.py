@@ -387,8 +387,18 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Iga <no-reply@iga.rw>
 # internal location after Django has checked access. Without nginx, Django streams them.
 PROTECTED_MEDIA_ACCEL = env_bool("PROTECTED_MEDIA_ACCEL", False)
 
-# Largest file a teacher may upload as a resource (nginx allows 25 MB per request).
+# Largest file a teacher may upload as a resource (nginx allows 25 MB per request, only on upload routes).
 UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
+
+# Request size limits. nginx refuses bigger bodies first (frontend/nginx.conf: 2 MB for the API, 25 MB on
+# upload routes); these also protect a deployment without it. A refused request is a JSON 413
+# (apps/core/errors.py). The body Django reads into memory (JSON, form fields; uploaded files excluded):
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("DATA_UPLOAD_MAX_MEMORY_SIZE", str(2 * 1024 * 1024)))
+# Uploaded files larger than this are written to a temporary file instead of being held in memory.
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("FILE_UPLOAD_MAX_MEMORY_SIZE", str(2 * 1024 * 1024)))
+# Form fields and files in one request (JSON bodies are limited by size only).
+DATA_UPLOAD_MAX_NUMBER_FIELDS = int(os.environ.get("DATA_UPLOAD_MAX_NUMBER_FIELDS", "1000"))
+DATA_UPLOAD_MAX_NUMBER_FILES = int(os.environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", "10"))
 
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).
