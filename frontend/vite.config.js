@@ -9,14 +9,14 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": backend,
-      "/media": backend,
       "/django-admin": backend,
       "/static": backend,
     },
   },
   preview: {
     port: 4173,
-    proxy: { "/api": backend, "/media": backend },
+    // Uploaded files have no /media URL: they come from the access-checked /api/files/ links.
+    proxy: { "/api": backend },
   },
   build: {
     rollupOptions: {

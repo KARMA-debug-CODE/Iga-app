@@ -511,51 +511,51 @@ msgstr "Seuls les administrateurs d'école approuvés peuvent faire cela."
 msgid "For your security, enter your password again to continue."
 msgstr "Pour votre sécurité, saisissez de nouveau votre mot de passe pour continuer."
 
-#: apps/core/uploads.py:106
+#: apps/core/uploads.py:107
 msgid "The file's contents don't match its type. Re-save it and try again."
 msgstr "Le contenu du fichier ne correspond pas à son type. Enregistrez-le à nouveau et réessayez."
 
-#: apps/core/uploads.py:347
+#: apps/core/uploads.py:348
 msgid "Documents with macros or ActiveX controls are not allowed. Save it as a normal document and try again."
 msgstr "Les documents avec des macros ou des contrôles ActiveX ne sont pas acceptés. Enregistrez-le comme un document ordinaire et réessayez."
 
-#: apps/core/uploads.py:132
+#: apps/core/uploads.py:133
 msgid "Images can't be checked on this server, so they can't be uploaded. Upload a PDF instead."
 msgstr "Les images ne peuvent pas être vérifiées sur ce serveur, elles ne peuvent donc pas être envoyées. Envoyez plutôt un PDF."
 
-#: apps/core/uploads.py:257
+#: apps/core/uploads.py:258
 msgid "PDFs can't be checked on this server, so they can't be uploaded."
 msgstr "Les PDF ne peuvent pas être vérifiés sur ce serveur, ils ne peuvent donc pas être envoyés."
 
-#: apps/core/uploads.py:261
+#: apps/core/uploads.py:262
 msgid "Password-protected PDFs can't be checked. Remove the password and try again."
 msgstr "Les PDF protégés par un mot de passe ne peuvent pas être vérifiés. Retirez le mot de passe et réessayez."
 
-#: apps/core/uploads.py:291
+#: apps/core/uploads.py:292
 msgid "This PDF contains scripts, embedded files or actions, which are not allowed. Print it to a new PDF and try again."
 msgstr "Ce PDF contient des scripts, des fichiers intégrés ou des actions, ce qui n'est pas accepté. Imprimez-le dans un nouveau PDF et réessayez."
 
-#: apps/core/uploads.py:442
+#: apps/core/uploads.py:443
 msgid "Only these file types can be uploaded here: %(types)s."
 msgstr "Seuls ces types de fichiers peuvent être envoyés ici : %(types)s."
 
-#: apps/core/uploads.py:445
+#: apps/core/uploads.py:446
 msgid "Files can be at most %(mb)s MB."
 msgstr "Les fichiers ne peuvent pas dépasser %(mb)s Mo."
 
-#: apps/core/uploads.py:142
-#: apps/core/uploads.py:177
+#: apps/core/uploads.py:143
+#: apps/core/uploads.py:178
 msgid "The image is too large: at most %(pixels)s million pixels."
 msgstr "L'image est trop grande : %(pixels)s millions de pixels au maximum."
 
-#: apps/core/uploads.py:269
-#: apps/core/uploads.py:322
-#: apps/core/uploads.py:280
-#: apps/core/uploads.py:284
+#: apps/core/uploads.py:270
+#: apps/core/uploads.py:323
+#: apps/core/uploads.py:281
+#: apps/core/uploads.py:285
 msgid "This document is too large when unpacked."
 msgstr "Ce document est trop volumineux une fois décompressé."
 
-#: apps/core/uploads.py:440
+#: apps/core/uploads.py:441
 msgid "Upload a PDF, image, audio/video or office document (%(types)s)."
 msgstr "Envoyez un PDF, une image, un fichier audio ou vidéo, ou un document bureautique (%(types)s)."
 
@@ -586,11 +586,15 @@ msgstr "Ce champ est obligatoire."
 msgid "Use at most %(n)s characters."
 msgstr "Utilisez au plus %(n)s caractères."
 
-#: apps/core/views.py:302
+#: apps/core/views.py:303
 msgid "You can't remove your own administrator role."
 msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
 
-#: apps/curriculum/serializers.py:141
+#: apps/curriculum/downloads.py:46
+msgid "This download link has expired. Go back and open the resource again."
+msgstr "Ce lien de téléchargement a expiré. Revenez en arrière et ouvrez à nouveau la ressource."
+
+#: apps/curriculum/serializers.py:143
 msgid "Provide a link or upload a file."
 msgstr "Donnez un lien ou envoyez un fichier."
 
@@ -638,7 +642,7 @@ msgstr "Choisissez %(options)s mois."
 msgid "Choose one of these currencies: %(options)s."
 msgstr "Choisissez l'une de ces devises : %(options)s."
 
-#: apps/schools/downloads.py:43
+#: apps/schools/downloads.py:40
 msgid "This download link has expired. Go back and open the paper again."
 msgstr "Ce lien de téléchargement a expiré. Revenez en arrière et ouvrez à nouveau l'épreuve."
 

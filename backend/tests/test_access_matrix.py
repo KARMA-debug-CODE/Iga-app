@@ -46,6 +46,7 @@ PUBLIC_ROUTES = {
     "api/schools/",
     "api/schools/districts/",
     "api/files/papers/{token}/",  # a signed, short-lived link checked inside
+    "api/files/resources/{token}/",  # the same, for teachers' uploaded resources
     "api/billing/webhooks/flutterwave/",  # signed by Flutterwave, checked inside
 }
 # Routes with an id that name shared catalogue content (no owner), so reading them is allowed.
@@ -56,6 +57,7 @@ CATALOGUE_ROUTES = {
     "api/simulations/{slug}/view/",
     "api/exam-papers/{pk}/",
     "api/files/papers/{token}/",
+    "api/files/resources/{token}/",
 }
 DENIED = {400, 401, 403, 404, 405}
 
@@ -202,6 +204,7 @@ def route_targets(w):
         "api/auth/parents/{parent_id}/": {"parent_id": w["parent_b"].id},
         "api/children/{student_id}/": {"student_id": w["student_b"].id},
         "api/files/papers/{token}/": {"token": "forged-token"},
+        "api/files/resources/{token}/": {"token": "forged-token"},
         "api/school/members/{user_id}/remove/": {"user_id": w["student_b"].id},
         "api/billing/payments/{reference}/": {"reference": w["payment_b"].reference},
         "api/billing/payments/{reference}/confirm/": {"reference": w["payment_b"].reference},

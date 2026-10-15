@@ -27,7 +27,8 @@ import zipfile
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
+from django.db.models import signals
 from django.db.models.fields.files import FieldFile
 from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
@@ -531,3 +532,55 @@ class SafeFileField(models.FileField):
     @cached_property
     def validators(self):
         return [*self.default_validators, *self._validators, UploadValidator(self.kinds)]
+
+    def contribute_to_class(self, cls, name, **kwargs):
+        super().contribute_to_class(cls, name, **kwargs)
+        if not cls._meta.abstract:
+            # A file no row uses any more (replaced, or its row deleted) is removed from the storage,
+            # so a rejected or withdrawn upload doesn't linger on disk.
+            signals.post_init.connect(_remember_stored_files, sender=cls, weak=False, dispatch_uid=f"iga-files-{cls._meta.label}")
+            signals.post_save.connect(_drop_replaced_files, sender=cls, weak=False, dispatch_uid=f"iga-files-{cls._meta.label}")
+            signals.post_delete.connect(_drop_deleted_files, sender=cls, weak=False, dispatch_uid=f"iga-files-{cls._meta.label}")
+
+
+def _safe_fields(instance):
+    return [f for f in instance._meta.concrete_fields if isinstance(f, SafeFileField)]
+
+
+def _stored_name(value):
+    """The storage name of a file already stored, or "" (nothing, or a new upload not saved yet)."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, FieldFile) and value._committed:
+        return value.name or ""
+    return ""
+
+
+def _remember_stored_files(sender, instance, **kwargs):
+    instance._iga_stored_files = {f.attname: _stored_name(instance.__dict__.get(f.attname)) for f in _safe_fields(instance)}
+
+
+def _drop_later(instance, field, name):
+    """Delete the stored file `name` once the transaction commits, unless another row still uses it."""
+    if not name:
+        return
+
+    def drop():
+        if not type(instance)._default_manager.filter(**{field.attname: name}).exists():
+            field.storage.delete(name)
+
+    transaction.on_commit(drop)
+
+
+def _drop_replaced_files(sender, instance, **kwargs):
+    stored = getattr(instance, "_iga_stored_files", {})
+    for field in _safe_fields(instance):
+        before, now = stored.get(field.attname), getattr(instance, field.attname).name or ""
+        if before and before != now:
+            _drop_later(instance, field, before)
+    _remember_stored_files(sender, instance)
+
+
+def _drop_deleted_files(sender, instance, **kwargs):
+    for field in _safe_fields(instance):
+        _drop_later(instance, field, getattr(instance, field.attname).name)
