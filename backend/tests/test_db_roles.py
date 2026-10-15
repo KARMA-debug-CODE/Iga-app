@@ -313,6 +313,31 @@ def test_tables_from_later_migrations_reach_the_app_for_rows_only(scratch):
             owner.execute("DROP TABLE later_feature")
 
 
+LEDGER = "schools_ledgerentry"
+
+
+def _ledger_privileges(world):
+    rows = _as_superuser(
+        world,
+        "SELECT p, has_table_privilege(%s, %s, p) FROM unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE']) p",
+        [world.app.name, LEDGER],
+    )
+    return {privilege for privilege, granted in rows if granted}
+
+
+@postgresql_only
+def test_the_app_role_may_only_add_and_read_money_ledger_entries(scratch):
+    """Defence in depth under the append-only trigger: the role Django runs as has no right to change
+    or remove ledger entries, from the first start (the migration) and after every later one (db_roles)."""
+    assert _ledger_privileges(scratch) == {"SELECT", "INSERT"}
+    assert scratch.manage("db_roles", url=scratch.superuser_url).returncode == 0
+    assert _ledger_privileges(scratch) == {"SELECT", "INSERT"}
+    with scratch.connect(scratch.app, autocommit=True) as app:
+        for statement in (f"UPDATE {LEDGER} SET note = 'x'", f"DELETE FROM {LEDGER}", f"TRUNCATE {LEDGER}"):
+            with pytest.raises(psycopg.errors.InsufficientPrivilege, match="permission denied"):
+                app.execute(statement)
+
+
 @postgresql_only
 def test_no_other_role_may_connect(scratch):
     stranger = Role(scratch.stranger, secrets.token_urlsafe(24), scratch.db)

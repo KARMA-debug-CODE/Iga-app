@@ -3,8 +3,8 @@
 On PostgreSQL a trigger refuses every UPDATE and DELETE on schools_ledgerentry, whoever the database
 user is (only someone who can drop or disable the trigger, i.e. the table's owner, gets past it, and
 that is a schema change). TRUNCATE is not blocked here, because the test suite empties tables that
-way; the role the app runs as has no TRUNCATE privilege (`manage.py db_roles`), and `verify_ledger`
-reports paid payments that have lost their entry.
+way; no role but the owner keeps UPDATE, DELETE or TRUNCATE on the table (revoked here, and again by
+`manage.py db_roles` on every start), and `verify_ledger` reports paid payments that have lost their entry.
 
 Payments already paid get their gross, fee and net, and one ledger entry each, oldest first.
 """
@@ -39,6 +39,37 @@ def drop_trigger(apps, schema_editor):
             """
 DROP TRIGGER IF EXISTS schools_ledgerentry_append_only ON schools_ledgerentry;
 DROP FUNCTION IF EXISTS schools_ledgerentry_append_only();
+""",
+            params=None,
+        )
+
+
+def revoke_changes(apps, schema_editor):
+    """Under the trigger, a second lock: no role but the table's owner keeps the right to change, remove or
+    empty entries (the app role gets UPDATE and DELETE on new tables by default; see apps/core/dbroles.py,
+    which revokes them again on every start)."""
+    if schema_editor.connection.vendor == "postgresql":
+        schema_editor.execute(
+            """
+DO $$
+DECLARE
+    holder oid;
+BEGIN
+    FOR holder IN
+        SELECT DISTINCT acl.grantee
+        FROM pg_class c, aclexplode(c.relacl) acl
+        WHERE c.oid = 'schools_ledgerentry'::regclass
+          AND acl.privilege_type IN ('UPDATE', 'DELETE', 'TRUNCATE')
+          AND acl.grantee <> c.relowner
+    LOOP
+        IF holder = 0 THEN
+            EXECUTE 'REVOKE UPDATE, DELETE, TRUNCATE ON schools_ledgerentry FROM PUBLIC';
+        ELSE
+            EXECUTE format('REVOKE UPDATE, DELETE, TRUNCATE ON schools_ledgerentry FROM %I', pg_get_userbyid(holder));
+        END IF;
+    END LOOP;
+END
+$$;
 """,
             params=None,
         )
@@ -107,5 +138,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(add_trigger, drop_trigger),
+        migrations.RunPython(revoke_changes, migrations.RunPython.noop),
         migrations.RunPython(backfill, migrations.RunPython.noop),
     ]
