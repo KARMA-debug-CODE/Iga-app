@@ -480,7 +480,8 @@ class AttemptListSerializer(serializers.ModelSerializer):
 
 class AnswerInputSerializer(serializers.Serializer):
     question = serializers.IntegerField()
-    choice_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list)
+    # A question has a handful of options; a longer list is a forged request.
+    choice_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list, max_length=50)
     text = serializers.CharField(required=False, allow_blank=True, default="", max_length=10000)
     numeric = serializers.FloatField(required=False, allow_null=True, default=None)
 
