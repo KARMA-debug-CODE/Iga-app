@@ -7,9 +7,9 @@ the name or the first bytes:
 - images are opened and re-encoded with Pillow, which drops metadata (a phone photo's GPS position,
   comments) and anything hidden around the picture (an HTML page or a ZIP glued to a PNG). Without
   Pillow, images are refused rather than stored unchecked;
-- PDFs must start and end like a PDF and hold no scripts, launch actions, embedded files or forms that
-  send data (also looked for inside compressed object streams); password-protected PDFs can't be
-  checked, so they are refused;
+- PDFs are parsed (pypdf) and every object in them is read, including those packed in compressed
+  object streams: none may hold scripts, launch actions, embedded files or forms that send data.
+  Password-protected PDFs can't be checked, so they are refused. Without pypdf, PDFs are refused;
 - office documents must be real ZIP packages of that format, without macros or ActiveX controls;
 - MP3 and MP4 files must have the frame or box structure of their format from start to end.
 
@@ -18,11 +18,11 @@ and nginx serves them with headers that stop them running scripts (frontend/ngin
 """
 
 import io
+import logging
 import os
 import re
 import uuid
 import zipfile
-import zlib
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -37,6 +37,14 @@ try:  # Pillow re-encodes images; without it, images are refused (see _check_ima
     from PIL import Image, ImageOps, ImageSequence
 except ImportError:  # pragma: no cover - Pillow is in requirements.txt
     Image = None
+try:  # pypdf reads every object of a PDF; without it, PDFs are refused (see _check_pdf).
+    from pypdf import PdfReader
+    from pypdf.errors import PyPdfError
+    from pypdf.generic import ArrayObject, DictionaryObject, NameObject, StreamObject, read_object
+except ImportError:  # pragma: no cover - pypdf is in requirements.txt
+    PdfReader = None
+# pypdf warns about every oddity of a damaged file; uploads are checked here, the log needn't list them.
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 EXTENSIONS = {
     "pdf": (".pdf",),
@@ -177,75 +185,117 @@ def _check_image(file, ext):
 
 # --- PDF ------------------------------------------------------------------
 
-# Names that make a PDF run code, open other programs or files, carry files, or send data somewhere.
+# Names that make a PDF run code, open other programs or files, carry files, or send data somewhere,
+# as dictionary keys (/JS, /EF ...) or values (/S /JavaScript, /Type /EmbeddedFile ...).
 PDF_FORBIDDEN = {
-    b"JavaScript",
-    b"JS",
-    b"Launch",
-    b"EmbeddedFile",
-    b"EmbeddedFiles",
-    b"RichMedia",
-    b"XFA",
-    b"ImportData",
-    b"SubmitForm",
-    b"GoToE",
+    "/JavaScript",
+    "/JS",
+    "/Launch",
+    "/EmbeddedFile",
+    "/EmbeddedFiles",
+    "/EF",
+    "/RichMedia",
+    "/XFA",
+    "/ImportData",
+    "/SubmitForm",
+    "/GoToE",
 }
-_PDF_NAME = re.compile(rb"/([A-Za-z0-9#_.+-]+)")
-_PDF_HEX = re.compile(rb"#([0-9A-Fa-f]{2})")
-_PDF_STREAM = re.compile(rb"stream\r?\n")
-# Decompressing every stream of a big PDF has a ceiling, so a crafted file can't use the server's memory.
-PDF_INFLATE_BUDGET = 256 * 1024 * 1024
+# Every "<number> <number> obj" written in the file, as a viewer repairing a damaged file finds them.
+_PDF_OBJECT = re.compile(rb"(?<![0-9])(\d{1,10})[ \t\r\n\f\x00]+(\d{1,5})[ \t\r\n\f\x00]+obj(?![A-Za-z0-9])")
+_PDF_SPACE = b" \t\r\n\f\x00"
+# Ceilings, so a crafted file can't keep a server process busy or use its memory.
+PDF_MAX_OBJECTS = 200_000
+PDF_UNPACK_BUDGET = 256 * 1024 * 1024
 
 
-def _pdf_names(data):
-    for match in _PDF_NAME.finditer(data):
-        name = match.group(1)
-        yield _PDF_HEX.sub(lambda m: bytes([int(m.group(1), 16)]), name) if b"#" in name else name
+class _ActivePdf(Exception):
+    pass
 
 
-def _inflated(view, start, budget):
-    """Yield the decompressed pieces of the Flate stream starting at `start`, at most `budget` bytes in all.
-    Input is fed 64 KB at a time, so a stream costs only its own length, however big the file is."""
-    inflater, position = zlib.decompressobj(), start
-    while not inflater.eof and position < len(view):
-        pending = view[position : position + 65536]
-        position += len(pending)
-        while pending:
-            try:
-                piece = inflater.decompress(pending, 1 << 20)
-            except zlib.error:
-                return  # not (or no longer) Flate data: images and fonts use other codecs
-            budget -= len(piece)
-            if budget < 0:
-                raise ValidationError(_("This document is too large when unpacked."))
-            yield piece
-            pending = inflater.unconsumed_tail
+def _pdf_walk(obj):
+    """Raise _ActivePdf if this object (with the dictionaries and arrays written inside it) names a forbidden thing."""
+    stack = [obj]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, DictionaryObject):  # streams' dictionaries too
+            for key, value in item.items():
+                if key in PDF_FORBIDDEN:
+                    raise _ActivePdf
+                stack.append(value)
+        elif isinstance(item, ArrayObject):
+            stack.extend(item)
+        elif isinstance(item, NameObject) and item in PDF_FORBIDDEN:
+            raise _ActivePdf
+
+
+def _pdf_object_at(data, position, reader):
+    while position < len(data) and data[position] in _PDF_SPACE:
+        position += 1
+    stream = io.BytesIO(data)
+    stream.seek(position)
+    return read_object(stream, reader)
+
+
+def _pdf_stream_members(stream_object, data, reader):
+    """The objects packed in a compressed object stream (/Type /ObjStm) whose unpacked bytes are `data`."""
+    count, first = int(stream_object["/N"]), int(stream_object["/First"])
+    header = data[:first].split()
+    for index in range(1, min(len(header), 2 * count), 2):
+        yield _pdf_object_at(data, first + int(header[index]), reader)
 
 
 def _check_pdf(file):
+    """Parse the PDF and refuse it if any object in it holds scripts, launch actions, embedded files or
+    forms that send data. Every object is read: those the cross-reference table points to, those a viewer
+    would find by scanning a damaged file, and those packed inside compressed object streams (any filter).
+    Only the PDF's structure is read, never its images or page contents, so a scanned paper doesn't trip
+    over bytes that happen to spell /JS."""
     data = _read_all(file)
-    if not re.match(rb"%PDF-[12]\.\d", data[:8]) or b"%%EOF" not in data[-2048:]:
+    if not re.match(rb"%PDF-[12]\.\d", data[:8]):
         raise _mismatch()
-    for name in _pdf_names(data):
-        if name == b"Encrypt":
+    if PdfReader is None:
+        raise ValidationError(_("PDFs can't be checked on this server, so they can't be uploaded."))
+    try:
+        reader = PdfReader(io.BytesIO(data), strict=False)
+        if reader.is_encrypted:
             raise ValidationError(_("Password-protected PDFs can't be checked. Remove the password and try again."))
-        if name in PDF_FORBIDDEN:
-            raise _forbidden_pdf()
-    # Object streams hide dictionaries inside compressed data: look inside every Flate-compressed stream.
-    view, remaining = memoryview(data), PDF_INFLATE_BUDGET
-    for match in _PDF_STREAM.finditer(data):
-        carry = b""
-        for piece in _inflated(view, match.end(), remaining):  # raises once the whole file passes the budget
-            remaining -= len(piece)
-            if any(name in PDF_FORBIDDEN for name in _pdf_names(carry + piece)):
-                raise _forbidden_pdf()
-            carry = piece[-64:]  # a name cut in two by the piece boundary
-
-
-def _forbidden_pdf():
-    return ValidationError(
-        _("This PDF contains scripts, embedded files or actions, which are not allowed. Print it to a new PDF and try again.")
-    )
+        if len(reader.pages) < 1:
+            raise _mismatch()
+        _pdf_walk(reader.trailer)
+        seen, budget = 0, PDF_UNPACK_BUDGET
+        for match in _PDF_OBJECT.finditer(data):
+            seen += 1
+            if seen > PDF_MAX_OBJECTS:
+                raise ValidationError(_("This document is too large when unpacked."))
+            try:
+                obj = _pdf_object_at(data, match.end(), reader)
+            except (PyPdfError, ValueError, KeyError, TypeError, IndexError):
+                continue  # not an object after all (bytes inside an image that look like one)
+            _pdf_walk(obj)
+            if isinstance(obj, StreamObject) and "/N" in obj and "/First" in obj:
+                try:
+                    unpacked = obj.get_data()  # any filter; pypdf also caps what one stream may unpack to
+                    budget -= len(unpacked)
+                    if budget < 0:
+                        raise ValidationError(_("This document is too large when unpacked."))
+                    for member in _pdf_stream_members(obj, unpacked, reader):
+                        seen += 1
+                        if seen > PDF_MAX_OBJECTS:
+                            raise ValidationError(_("This document is too large when unpacked."))
+                        _pdf_walk(member)
+                except (PyPdfError, ValueError, KeyError, TypeError, IndexError):
+                    if obj.get("/Type") == "/ObjStm":
+                        raise _mismatch() from None  # an object stream we can't read could hide anything
+    except _ActivePdf:
+        raise ValidationError(
+            _("This PDF contains scripts, embedded files or actions, which are not allowed. Print it to a new PDF and try again.")
+        ) from None
+    except ValidationError:
+        raise
+    except Exception:  # pypdf raises many kinds of errors for broken or hostile files
+        raise _mismatch() from None
+    finally:
+        file.seek(0)
 
 
 # --- Office documents -----------------------------------------------------
@@ -377,10 +427,11 @@ def _check_mp4(file):
 # --- The check every upload goes through ----------------------------------
 
 
-def check(file, kinds=RESOURCE_KINDS):
-    """Validate an uploaded file for a field taking `kinds`. Returns cleaned bytes for images, else None."""
+def check(file, kinds=RESOURCE_KINDS, name=None):
+    """Validate a file for a field taking `kinds` (its name is `name`, or the file's own). Returns the
+    cleaned bytes to store instead for images, else None."""
     upload = file.file if isinstance(file, FieldFile) else file  # a FieldFile wraps the upload
-    ext = os.path.splitext(getattr(file, "name", "") or "")[1].lower()
+    ext = os.path.splitext(name or getattr(file, "name", "") or "")[1].lower()
     kind = KIND_OF.get(ext)
     if kind not in kinds:
         allowed = sorted(e for k in kinds for e in EXTENSIONS[k])
@@ -410,6 +461,19 @@ def check(file, kinds=RESOURCE_KINDS):
     return None
 
 
+def _remember(upload, kinds, cleaned):
+    try:
+        upload._iga_checked = (tuple(kinds), cleaned)
+    except AttributeError:
+        pass
+
+
+def _checked(upload, kinds):
+    """The result of an earlier check of this very upload for these kinds, or None."""
+    done = getattr(upload, "_iga_checked", None)
+    return done if done and done[0] == tuple(kinds) else None
+
+
 @deconstructible
 class UploadValidator:
     """Model field validator: `check` for a field that takes the given kinds of file."""
@@ -421,12 +485,8 @@ class UploadValidator:
         if getattr(value, "_committed", False):
             return  # already stored: only new uploads are checked
         upload = value.file if isinstance(value, FieldFile) else value
-        cleaned = check(value, self.kinds)
         # Remember the result so saving doesn't check (and re-encode) the same upload twice.
-        try:
-            upload._iga_checked = (self.kinds, cleaned)
-        except AttributeError:
-            pass
+        _remember(upload, self.kinds, check(value, self.kinds))
 
     def __eq__(self, other):
         return isinstance(other, UploadValidator) and other.kinds == self.kinds
@@ -438,11 +498,26 @@ def validate_upload(file):
     return file
 
 
+class SafeFieldFile(FieldFile):
+    """Every way of storing a file in a SafeFileField ends here (a form or serializer saving the model,
+    or code calling instance.field.save(name, content)), so nothing reaches the storage unchecked."""
+
+    def save(self, name, content, save=True):
+        done = _checked(content, self.field.kinds)
+        cleaned = done[1] if done else check(content, self.field.kinds, name=name)
+        if cleaned is not None:
+            content = ContentFile(cleaned, name=name)
+        super().save(name, content, save)
+
+
 class SafeFileField(models.FileField):
     """A FileField that only stores files passing `check` for its `kinds`, images re-encoded.
 
-    The check runs as a validator (forms, the admin, DRF serializers) and again when the instance is saved,
-    so a code path that skips validation can't store an unchecked file."""
+    The check runs as a validator (forms, the admin, DRF serializers, for a clear error message) and again
+    when the file is written to the storage, so a code path that skips validation can't store an unchecked
+    file."""
+
+    attr_class = SafeFieldFile
 
     def __init__(self, *args, kinds=RESOURCE_KINDS, **kwargs):
         self.kinds = tuple(kinds)
@@ -456,13 +531,3 @@ class SafeFileField(models.FileField):
     @cached_property
     def validators(self):
         return [*self.default_validators, *self._validators, UploadValidator(self.kinds)]
-
-    def pre_save(self, model_instance, add):
-        file = getattr(model_instance, self.attname)
-        if file and not file._committed:
-            upload = file.file
-            checked = getattr(upload, "_iga_checked", None)
-            cleaned = checked[1] if checked and checked[0] == self.kinds else check(file, self.kinds)
-            if cleaned is not None:
-                file.file = ContentFile(cleaned, name=file.name)
-        return super().pre_save(model_instance, add)
