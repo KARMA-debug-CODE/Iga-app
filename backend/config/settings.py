@@ -276,6 +276,10 @@ PROTECTED_MEDIA_ACCEL = env_bool("PROTECTED_MEDIA_ACCEL", False)
 
 # Largest file a teacher may upload as a resource (nginx allows 25 MB per request).
 UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
+# Images are smaller: at most this many MB, and this many pixels in all (frames of an animation included),
+# so a small file that unpacks into a huge picture can't use the server's memory. See apps/core/uploads.py.
+UPLOAD_IMAGE_MAX_MB = int(os.environ.get("UPLOAD_IMAGE_MAX_MB", "5"))
+UPLOAD_IMAGE_MAX_PIXELS = int(os.environ.get("UPLOAD_IMAGE_MAX_PIXELS", "50000000"))
 
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).
