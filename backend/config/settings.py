@@ -218,12 +218,21 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 50,
     # Per-IP throttles only trust X-Forwarded-For entries added by our own proxies.
     "NUM_PROXIES": TRUSTED_PROXY_COUNT,
+    # Every view is limited (apps/core/throttles.py): its own scope when it has one, plus "anon" (per IP,
+    # visitors not signed in) and "user" (per signed-in user). Views with their own throttle_classes replace
+    # these with stricter ones. nginx adds per-IP limits in front (frontend/nginx.conf).
     "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.ScopedRateThrottle",
+        "apps.core.throttles.ScopedRateThrottle",
+        "apps.core.throttles.AnonRateThrottle",
+        "apps.core.throttles.UserRateThrottle",
     ],
     # Per-IP limits are generous because a whole school often shares one public IP;
     # "login" is per account and is what actually stops password guessing.
     "DEFAULT_THROTTLE_RATES": {
+        # Per IP: any request without a signed-in user (the backstop for endpoints with no scope).
+        "anon": os.environ.get("THROTTLE_ANON", "600/min"),
+        # Per signed-in user: any request (far above what a person does by hand).
+        "user": os.environ.get("THROTTLE_USER", "600/min"),
         # Per IP: sign-in, sign-up, password reset and 2FA requests together.
         "auth": os.environ.get("THROTTLE_AUTH", "300/min"),
         # Per account (the username or email typed): sign-in attempts. Repeated failures also lock
