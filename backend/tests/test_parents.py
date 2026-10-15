@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from apps.accounts.models import ParentInvite, ParentLink, User
+from apps.accounts.models import ParentInvite, ParentLink, User, parent_code_digest
 from apps.community.models import GroupMembership, StudyGroup
 from apps.curriculum.models import LessonProgress
 
@@ -54,7 +54,7 @@ def test_codes_are_single_use_and_expire(client_for, student, parent):
     assert client_for(other).post("/api/children/", {"code": code}, format="json").status_code == 400
 
     fresh = client_for(student).post("/api/auth/parent-code/").data["code"]
-    ParentInvite.objects.filter(code=fresh).update(expires_at=timezone.now() - timedelta(minutes=1))
+    ParentInvite.objects.filter(code_hash=parent_code_digest(fresh)).update(expires_at=timezone.now() - timedelta(minutes=1))
     assert client_for(other).post("/api/children/", {"code": fresh}, format="json").status_code == 400
 
 

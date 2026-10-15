@@ -33,15 +33,15 @@ def client_ip(request):
 
 
 def record(request, action, target, **details):
-    """Write an audit entry. `target` is a model instance."""
+    """Write an audit entry. `target` is a model instance, or None (e.g. a failed login for no known account)."""
     actor = getattr(request, "user", None)
     if actor is not None and not actor.is_authenticated:
         actor = None
     return AuditLog.objects.create(
         actor=actor,
         action=action,
-        target_type=target._meta.label_lower,
-        target_id=str(target.pk),
+        target_type=target._meta.label_lower if target is not None else "",
+        target_id=str(target.pk) if target is not None else "",
         details=details,
         ip_address=client_ip(request),
     )

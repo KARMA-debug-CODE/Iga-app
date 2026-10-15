@@ -13,6 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from apps.accounts.security import revoke_all_sessions
 from apps.assessments.models import Attempt, Question, Quiz
 from apps.assessments.serializers import AttemptListSerializer
 from apps.assessments.services import markable_answers, visible_quizzes
@@ -29,6 +30,7 @@ from . import audit
 from .constants import GRADES, LANGUAGES, ContentStatus
 from .models import AuditLog
 from .permissions import IsPlatformAdmin
+from .security_log import SECURITY_ACTIONS
 
 User = get_user_model()
 
@@ -282,6 +284,8 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         if serializer.instance == self.request.user and serializer.validated_data.get("role", "admin") != "admin":
             raise ValidationError(_("You can't remove your own administrator role."))
         user = serializer.save()
+        if before["is_active"] and not user.is_active:
+            revoke_all_sessions(user)  # a deactivated account is logged out everywhere, at once
         if before["teacher_approved"] != user.teacher_approved:
             # The Iga team's decision replaces any school's, and a withdrawal sticks.
             user.set_teacher_approval(user.teacher_approved)
@@ -411,6 +415,9 @@ def admin_audit(request):
     entries = AuditLog.objects.select_related("actor")
     if request.query_params.get("action"):
         entries = entries.filter(action=request.query_params["action"])
+    if request.query_params.get("security"):
+        # Sign-ins, lockouts, password and 2FA changes, refused and throttled requests...
+        entries = entries.filter(action__in=SECURITY_ACTIONS)
     return Response(
         [
             {
@@ -420,6 +427,7 @@ def admin_audit(request):
                 "action": e.action,
                 "target": f"{e.target_type}#{e.target_id}",
                 "details": e.details,
+                "ip": e.ip_address,
             }
             for e in entries[:200]
         ]

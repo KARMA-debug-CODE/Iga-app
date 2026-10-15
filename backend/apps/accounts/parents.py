@@ -24,7 +24,7 @@ from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import request_language
 from apps.curriculum.models import Lesson, LessonProgress, Subject
 
-from .models import ParentInvite, ParentLink
+from .models import ParentInvite, ParentLink, parent_code_digest
 
 INVITE_DAYS = 7
 # No 0/O or 1/I: easy to read over the phone.
@@ -34,7 +34,7 @@ ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 def new_code():
     while True:
         code = "".join(secrets.choice(ALPHABET) for _ in range(8))
-        if not ParentInvite.objects.filter(code=code).exists():
+        if not ParentInvite.objects.filter(code_hash=parent_code_digest(code)).exists():
             return code
 
 
@@ -160,10 +160,14 @@ class ParentCodeView(APIView):
     @transaction.atomic
     def post(self, request):
         ParentInvite.objects.filter(student=request.user, used_by__isnull=True).delete()
+        code = new_code()
         invite = ParentInvite.objects.create(
-            student=request.user, code=new_code(), expires_at=timezone.now() + timedelta(days=INVITE_DAYS)
+            student=request.user,
+            code_hash=parent_code_digest(code),
+            expires_at=timezone.now() + timedelta(days=INVITE_DAYS),
         )
-        return Response({"code": invite.code, "expires_at": invite.expires_at}, status=status.HTTP_201_CREATED)
+        # The only time the code is shown: only its hash is kept.
+        return Response({"code": code, "expires_at": invite.expires_at}, status=status.HTTP_201_CREATED)
 
 
 class MyParentsView(APIView):
@@ -199,12 +203,14 @@ class ChildrenView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        code = str(request.data.get("code", "")).strip().upper().replace(" ", "")
-        invite = ParentInvite.objects.select_for_update().filter(code=code).select_related("student").first()
-        if invite is None or invite.used_by_id or invite.expires_at < timezone.now():
+        code = str(request.data.get("code", ""))[:32]
+        invite = (
+            ParentInvite.objects.select_for_update().filter(code_hash=parent_code_digest(code)).select_related("student").first()
+        )
+        # One answer for every unusable code (unknown, used, expired, or a deactivated account), so it
+        # can't tell anyone which codes or accounts exist.
+        if invite is None or invite.used_by_id or invite.expires_at < timezone.now() or not invite.student.is_active:
             raise ValidationError({"code": _("That code is not valid or has expired. Ask your child to make a new one.")})
-        if not invite.student.is_active:
-            raise ValidationError({"code": _("That account is not active.")})
         ParentLink.objects.get_or_create(parent=request.user, student=invite.student)
         invite.used_by = request.user
         invite.save(update_fields=["used_by"])

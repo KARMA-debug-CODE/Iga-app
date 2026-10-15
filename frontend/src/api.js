@@ -7,7 +7,16 @@ import { currentLanguage, hasTranslation, translateNow } from "./i18n";
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
 // Auth endpoints where a 401 is the answer itself rather than an expired access token.
-const NO_REFRESH = new Set(["/auth/login/", "/auth/register/", "/auth/refresh/", "/auth/logout/"]);
+const NO_REFRESH = new Set([
+  "/auth/login/",
+  "/auth/register/",
+  "/auth/refresh/",
+  "/auth/logout/",
+  "/auth/password-reset/",
+  "/auth/password-reset/confirm/",
+]);
+// Security changes end every session, this one's access token included: the answer carries a new one.
+const ISSUES_ACCESS_TOKEN = new Set(["/auth/password/", "/auth/2fa/enable/", "/auth/2fa/disable/"]);
 
 let accessToken = null;
 let refreshing = null;
@@ -112,6 +121,10 @@ export async function api(path, { method = "GET", body, params, retry = true, si
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(res.status, data);
+  if (ISSUES_ACCESS_TOKEN.has(path) && data?.access) {
+    accessToken = data.access;
+    delete data.access; // kept in memory here only, never in page state
+  }
   return data;
 }
 

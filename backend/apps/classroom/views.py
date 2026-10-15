@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 
 from django.db.models import Count, Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers, status, viewsets
@@ -10,10 +11,12 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.accounts import enumeration
+from apps.accounts.models import User
 from apps.accounts.serializers import PublicUserSerializer
 from apps.assessments.models import Attempt
 from apps.assessments.services import finalize_if_expired, visible_quizzes
-from apps.core import audit
+from apps.core import audit, security_log
 from apps.core.permissions import IsTeacher
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
@@ -286,7 +289,15 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             rows = roster.parse(request.data.get("csv", ""))
         except roster.RosterError as exc:
             raise ValidationError({"csv": str(exc)})
+        # "Already used" answers about emails are limited per teacher, so the preview can't be used
+        # to find out which email addresses have an account.
+        emails = {row["email"].lower() for row in rows if row["email"]}
+        if emails:
+            enumeration.check_budget(request, request.user)
         ok = roster.check(rows)
+        in_use = User.objects.annotate(email_lower=Lower("email")).filter(email_lower__in=emails).count() if emails else 0
+        if in_use:
+            enumeration.spend(request, request.user, in_use)
         if not ok or not request.data.get("confirm"):
             return Response({"valid": ok, "rows": rows})
         created = roster.create_accounts(rows, classroom, request.user)
@@ -305,7 +316,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         if enrollment is None or not enrollment.student.is_student:
             raise ValidationError({"student": _("That student is not in this class.")})
         password = roster.reset_password(enrollment.student)
-        audit.record(request, "reset_student_password", enrollment.student, classroom=classroom.id)
+        security_log.event(
+            request, "reset_student_password", enrollment.student, classroom=classroom.id, other_sessions_ended=True
+        )
         return Response({"username": enrollment.student.username, "temporary_password": password})
 
     @action(detail=True, methods=["post"])

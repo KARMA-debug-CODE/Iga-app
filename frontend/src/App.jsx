@@ -42,6 +42,9 @@ const BillingReturn = schoolPage("BillingReturn");
 const DevCheckout = schoolPage("DevCheckout");
 const Receipt = schoolPage("Receipt");
 const SchoolHome = schoolPage("SchoolHome");
+const resetPage = (name) => lazy(() => import("./pages/PasswordReset").then((m) => ({ default: m[name] })));
+const ForgotPassword = resetPage("ForgotPassword");
+const ResetPassword = resetPage("ResetPassword");
 
 function RequireAuth({ children, teacher = false, admin = false, schoolAdmin = false }) {
   const { user, isTeacher, isAdmin } = useAuth();
@@ -111,6 +114,9 @@ export default function App() {
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
+            <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPassword />} />
+            {/* Open even when signed in: the link in the email may be opened on a shared computer. */}
+            <Route path="/reset-password" element={<ResetPassword />} />
             {!user && <Route path="/" element={<Landing />} />}
             <Route element={user ? <Layout /> : <RedirectToLogin />}>
               <Route path="/" element={page(<Dashboard />)} />

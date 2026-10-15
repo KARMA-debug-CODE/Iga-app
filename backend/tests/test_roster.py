@@ -92,6 +92,9 @@ def test_temporary_password_must_be_changed_first(client_for, teacher, classroom
         format="json",
     )
     assert changed.status_code == 200
+    # Every earlier session ended (whoever else knew the temporary password); this device got new tokens.
+    assert client.get("/api/dashboard/").status_code == 401
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {changed.data['access']}")
     assert client.get("/api/dashboard/").status_code == 200
 
 
