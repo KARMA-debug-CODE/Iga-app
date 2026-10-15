@@ -441,3 +441,60 @@ def test_the_same_bank_reference_cannot_be_recorded_twice(client_for, lycee, sta
     apade.refresh_from_db()
     assert lycee.paid_until == paid_until and apade.paid_until is None
     assert Payment.objects.get().external_reference == "BK 4471"
+
+
+# --- Settings that would give subscriptions away ------------------------------------------------
+
+
+def test_a_real_deployment_refuses_test_payments_unless_it_is_a_staging_server(settings):
+    from apps.schools import checks
+
+    settings.DEBUG, settings.HTTPS = False, True
+    settings.BILLING_ALLOW_TEST_PAYMENTS = False
+    settings.BILLING_DEV_MODE = True
+    settings.BILLING_PROVIDER = "flutterwave"
+    settings.FLUTTERWAVE_SECRET_KEY = "FLWSECK_TEST-0123456789abcdef-X"
+    assert [e.id for e in checks.billing_test_payments_check(None)] == ["iga.E010", "iga.E011"]
+    settings.BILLING_DEV_MODE = False
+    settings.FLUTTERWAVE_SECRET_KEY = "FLWSECK-0123456789abcdef-X"
+    assert checks.billing_test_payments_check(None) == []
+    settings.FLUTTERWAVE_SECRET_KEY = "FLWSECK_TEST-0123456789abcdef-X"
+    settings.BILLING_ALLOW_TEST_PAYMENTS = True  # a staging server, on purpose
+    assert checks.billing_test_payments_check(None) == []
+    settings.BILLING_ALLOW_TEST_PAYMENTS = False
+    settings.HTTPS = False  # a local trial over http://localhost
+    assert checks.billing_test_payments_check(None) == []
+
+
+def test_a_real_deployment_warns_about_a_missing_or_weak_webhook_secret(settings):
+    from apps.schools import checks
+
+    settings.DEBUG, settings.HTTPS = False, True
+    settings.BILLING_PROVIDER = "flutterwave"
+    for weak in ("", "change-me", "short"):
+        settings.FLUTTERWAVE_WEBHOOK_HASH = weak
+        assert [w.id for w in checks.billing_webhook_secret_check(None)] == ["iga.W010"], weak
+    settings.FLUTTERWAVE_WEBHOOK_HASH = "Zr8wq0C9hJ1eLmW4tYb7sKdNfVxP2aGu"
+    assert checks.billing_webhook_secret_check(None) == []
+    settings.BILLING_PROVIDER = ""  # bank transfers only: no webhooks to protect
+    settings.FLUTTERWAVE_WEBHOOK_HASH = ""
+    assert checks.billing_webhook_secret_check(None) == []
+
+
+def test_docker_passes_every_money_setting_to_the_backend():
+    """A key set in .env but never passed to the containers silently does nothing (the ledger's HMAC key was)."""
+    from pathlib import Path
+
+    compose = (Path(__file__).resolve().parents[2] / "docker-compose.yml").read_text()
+    backend_env = compose.split("environment: &backend-env", 1)[1].split("\n    volumes:", 1)[0]
+    for name in (
+        "SUBSCRIPTION_PRICE_USD",
+        "SUBSCRIPTION_PRICE_RWF",
+        "BILLING_PROVIDER",
+        "BILLING_DEV_MODE",
+        "BILLING_ALLOW_TEST_PAYMENTS",
+        "FLUTTERWAVE_SECRET_KEY",
+        "FLUTTERWAVE_WEBHOOK_HASH",
+        "LEDGER_HMAC_KEY",
+    ):
+        assert f"      {name}: ${{{name}:-" in backend_env, name
