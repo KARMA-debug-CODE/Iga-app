@@ -497,7 +497,7 @@ class PlatformManualPaymentView(APIView):
 class PlatformLedgerView(APIView):
     """A school's money ledger (GET), and refunds or corrections recorded as new entries (POST)."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def get(self, request, school_id):
         school = get_object_or_404(School, pk=school_id)
@@ -550,7 +550,7 @@ def _csv_cell(value):
 class PlatformLedgerExportView(APIView):
     """The whole money ledger as CSV, oldest first. ?school=<id>&since=YYYY-MM-DD&until=YYYY-MM-DD"""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def get(self, request):
         entries = LedgerEntry.objects.select_related("school", "payment", "corrects").order_by("sequence")

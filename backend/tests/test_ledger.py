@@ -174,6 +174,19 @@ def test_the_ledger_exports_as_csv_for_platform_admins_only(client_for, lycee, l
     assert AuditLog.objects.filter(action="export_ledger").count() == 2
 
 
+def test_refunds_corrections_and_exports_need_a_password_confirmed_recently(client_for, lycee, staff):
+    """A platform admin's session left open on a shared computer can't move money or take the ledger away."""
+    stale = client_for(staff, signed_in=False)
+    body = {"kind": "refund", "currency": "USD", "amount": "-200", "months": -1, "note": "Refund"}
+    for response in (
+        stale.post(f"/api/admin/schools/{lycee.id}/ledger/", body, format="json"),
+        stale.get(f"/api/admin/schools/{lycee.id}/ledger/"),
+        stale.get("/api/admin/ledger/export/"),
+    ):
+        assert response.status_code == 403 and response.data["code"] == "step_up_required"
+    assert not LedgerEntry.objects.exists() and not AuditLog.objects.filter(action="export_ledger").exists()
+
+
 # --- S32: corrections are new entries -------------------------------------------------------------
 
 
