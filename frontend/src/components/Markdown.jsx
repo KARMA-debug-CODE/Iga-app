@@ -10,6 +10,9 @@ import CodePlayground from "./CodePlayground";
 import PythonPlayground from "./PythonPlayground";
 import SimEmbed from "./SimEmbed";
 
+// A path on this site: "/x", but not "//host" or "/\host", which browsers read as another site.
+const SAME_SITE = /^\/(?![/\\])/;
+
 function codeBlockInfo(node) {
   const code = node?.children?.[0];
   if (!code || code.tagName !== "code") return null;
@@ -30,7 +33,9 @@ function codeBlockInfo(node) {
  *   ```python-run
  *   print("Muraho!")
  *   ```
- * Raw HTML in the Markdown is NOT rendered, so content can't inject scripts.
+ * Raw HTML in the Markdown is NOT rendered (it shows as text), so content can't inject scripts, and
+ * react-markdown drops unsafe link targets (javascript:, data:, vbscript: ...). With interactive={false},
+ * for text people write, pictures from other sites become links.
  */
 export default function Markdown({ children, sims = {}, interactive = true }) {
   return (
@@ -60,6 +65,22 @@ export default function Markdown({ children, sims = {}, interactive = true }) {
                 {kids}
               </a>
             );
+          },
+          img({ src = "", alt = "" }) {
+            // People's text (shared notes, Santa's answers, questions) shows no pictures from other sites:
+            // loading one would tell that site who is reading, and could put anything in front of a class.
+            // It becomes a link the reader may choose to open. Lessons, reviewed before they are published,
+            // may show pictures.
+            if (!interactive && !SAME_SITE.test(src)) {
+              return src ? (
+                <a href={src} target="_blank" rel="noopener noreferrer">
+                  {alt || src}
+                </a>
+              ) : (
+                alt
+              );
+            }
+            return <img src={src} alt={alt} loading="lazy" referrerPolicy="no-referrer" />;
           },
         }}
       >

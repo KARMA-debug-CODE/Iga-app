@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
 from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 from apps.core.utils import request_language, serializer_language
 from apps.schools import access
 from apps.schools.downloads import signed_download_url
@@ -482,10 +483,10 @@ class AttemptListSerializer(serializers.ModelSerializer):
 class AnswerInputSerializer(serializers.Serializer):
     question = serializers.IntegerField()
     choice_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list)
-    text = serializers.CharField(required=False, allow_blank=True, default="", max_length=10000)
+    text = CleanCharField(multiline=True, required=False, allow_blank=True, default="", max_length=10000)
     numeric = serializers.FloatField(required=False, allow_null=True, default=None)
 
 
 class MarkInputSerializer(serializers.Serializer):
     marks = serializers.DecimalField(max_digits=5, decimal_places=2)
-    feedback = serializers.CharField(required=False, allow_blank=True, default="", max_length=5000)
+    feedback = CleanCharField(multiline=True, required=False, allow_blank=True, default="", max_length=5000)

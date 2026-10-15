@@ -154,8 +154,10 @@ def test_behind_nginx_the_file_is_sent_from_the_internal_location(client_for, st
 
 
 def test_past_papers_get_the_same_safe_headers(client_for, student, subject):
-    paper = ExamPaper.objects.create(subject=subject, level="O", year=2024, title="Maths\n2024")
+    paper = ExamPaper.objects.create(subject=subject, level="O", year=2024, title="Maths 2024")
     paper.paper_file.save("paper.pdf", ContentFile(samples.pdf()))
+    # A title stored before titles were cleaned (apps/core/text.py) can't add a header line either.
+    ExamPaper.objects.filter(pk=paper.pk).update(title="Maths\r\n2024")
     link = client_for(student).get(f"/api/exam-papers/{paper.id}/").data["paper_link"].replace("http://testserver", "")
     response = client_for().get(link)
     assert response.status_code == 200

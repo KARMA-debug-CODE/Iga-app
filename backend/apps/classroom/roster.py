@@ -22,6 +22,7 @@ from django.utils.translation import gettext as _
 
 from apps.accounts.models import User
 from apps.accounts.security import revoke_all_sessions
+from apps.core.text import clean_text
 
 from .models import Enrollment
 
@@ -78,7 +79,7 @@ def _canonical(header):
 
 def parse(text):
     """Rows as dicts with first_name, last_name, username, email (and the CSV line number)."""
-    text = (text or "").lstrip("﻿").strip()
+    text = (text or "").lstrip("\ufeff").strip()
     if not text:
         raise RosterError(_("The list is empty."))
     try:
@@ -96,7 +97,8 @@ def parse(text):
         row = {"line": line, "first_name": "", "last_name": "", "username": "", "email": ""}
         for column, value in zip(header, values, strict=False):
             if column:
-                row[column] = value.strip()
+                # One line each, without invisible or control characters (apps/core/text.py).
+                row[column] = clean_text(value).strip()
         full_name = row.pop("name", "")
         if full_name and not row["first_name"]:
             first, _space, last = full_name.partition(" ")

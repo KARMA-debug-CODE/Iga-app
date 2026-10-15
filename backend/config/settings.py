@@ -385,6 +385,10 @@ UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
 UPLOAD_IMAGE_MAX_MB = int(os.environ.get("UPLOAD_IMAGE_MAX_MB", "5"))
 UPLOAD_IMAGE_MAX_PIXELS = int(os.environ.get("UPLOAD_IMAGE_MAX_PIXELS", "50000000"))
 
+# The longest text (a lesson, a shared note, a question) a text field without its own limit accepts.
+# Shorter fields keep their own limits. See apps/core/text.py.
+TEXT_MAX_CHARS = int(os.environ.get("TEXT_MAX_CHARS", "100000"))
+
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).
 EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"))
