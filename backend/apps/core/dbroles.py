@@ -7,7 +7,8 @@ the superuser in DATABASE_URL; docker compose's "migrate" service does it before
 - the owner role (DB_OWNER_URL, iga_owner in docker compose): owns every table, view and sequence in the
   public schema and may create new ones. `manage.py migrate` runs as it, nothing else does.
 - the app role (DB_APP_URL, iga_app; the running app's DATABASE_URL): may connect to this database and
-  SELECT, INSERT, UPDATE and DELETE rows (and use the sequences behind ids), nothing more. It cannot
+  SELECT, INSERT, UPDATE and DELETE rows (and use the sequences behind ids), nothing more; on the
+  append-only money ledger only SELECT and INSERT. It cannot
   create, alter, drop or truncate a table, create temporary tables, roles or databases, read server files
   or run programs, and it belongs to no other role. Tables that later migrations create get the same
   grants automatically (the owner's default privileges).
@@ -33,6 +34,9 @@ from psycopg import sql
 from .checks import KNOWN_LOCAL_SECRETS, real_deployment
 
 SCHEMA = "public"
+# Tables whose rows are only ever added: the app may read and insert, never update or delete (the money
+# ledger, which a trigger also guards; see apps/schools/migrations/0005_ledger_append_only.py).
+APPEND_ONLY_TABLES = ("schools_ledgerentry",)
 ROLE_NAME = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
 # Role attributes that give powers beyond reading and writing rows, as pg_roles columns.
 POWERS = {
@@ -205,6 +209,14 @@ def setup_roles(owner, app, using="default"):
                 sql.Identifier(SCHEMA), sql.Identifier(app.name)
             )
         )
+        for table in APPEND_ONLY_TABLES:
+            cursor.execute("SELECT to_regclass(%s)", [f"{SCHEMA}.{table}"])
+            if cursor.fetchone()[0] is not None:  # not created yet on the very first start: its migration revokes
+                cursor.execute(
+                    sql.SQL("REVOKE UPDATE, DELETE ON TABLE {} FROM {}").format(
+                        sql.Identifier(SCHEMA, table), sql.Identifier(app.name)
+                    )
+                )
         cursor.execute(sql.SQL("REVOKE ALL ON ALL SEQUENCES IN SCHEMA {} FROM PUBLIC").format(sql.Identifier(SCHEMA)))
         cursor.execute(
             sql.SQL("REVOKE ALL ON ALL SEQUENCES IN SCHEMA {} FROM {}").format(sql.Identifier(SCHEMA), sql.Identifier(app.name))
@@ -264,6 +276,14 @@ def _problems(cursor, owner, app, database):
     )
     if any(cursor.fetchone()):
         problems.append(f"{app.name} may create objects")
+    for table in APPEND_ONLY_TABLES:
+        cursor.execute(
+            "SELECT to_regclass(%s) IS NOT NULL AND (has_table_privilege(%s, to_regclass(%s), 'UPDATE') "
+            "OR has_table_privilege(%s, to_regclass(%s), 'DELETE'))",
+            [f"{SCHEMA}.{table}", app.name, f"{SCHEMA}.{table}", app.name, f"{SCHEMA}.{table}"],
+        )
+        if cursor.fetchone()[0]:
+            problems.append(f"{app.name} may change or delete rows of {table}")
     cursor.execute(
         "SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
         "WHERE n.nspname = %s AND c.relkind IN ('r', 'p', 'v', 'm', 'S') AND pg_get_userbyid(c.relowner) <> %s "

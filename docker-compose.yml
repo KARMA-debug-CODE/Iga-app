@@ -67,6 +67,9 @@ services:
       BILLING_DEV_MODE: ${BILLING_DEV_MODE:-false}
       FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY:-}
       FLUTTERWAVE_WEBHOOK_HASH: ${FLUTTERWAVE_WEBHOOK_HASH:-}
+      BILLING_ALLOW_TEST_PAYMENTS: ${BILLING_ALLOW_TEST_PAYMENTS:-false}
+      # Signs the money ledger's hash chain (see .env.docker.example). Once set, keep it.
+      LEDGER_HMAC_KEY: ${LEDGER_HMAC_KEY:-}
       CHECKOUT_SESSION_MINUTES: ${CHECKOUT_SESSION_MINUTES:-60}
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
       EMAIL_HOST: ${EMAIL_HOST:-}

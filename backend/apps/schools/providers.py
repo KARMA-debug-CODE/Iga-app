@@ -7,6 +7,7 @@ or a webhook body claims). `billing.apply_payment` does the rest, exactly once.
 
 from dataclasses import dataclass, field
 from datetime import timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.utils import timezone
@@ -21,6 +22,11 @@ class Verification:
     status: str  # "succeeded" | "failed" | "pending"
     transaction_id: str = ""
     data: dict = field(default_factory=dict)
+    # Why a successful transaction was refused: amount_mismatch | currency_mismatch | school_mismatch.
+    reason: str = ""
+    # From the provider's verified answer: what the payer was charged and the provider's fee.
+    gross: Decimal | None = None
+    fee: Decimal | None = None
 
 
 def return_url(payment):
@@ -50,6 +56,9 @@ class DevProvider:
         return f"/school/billing/dev-checkout?ref={payment.reference}"
 
     def verify(self, payment, transaction_id=""):
+        if not self.available():
+            # A test payment is never confirmed on a server where test payments are switched off.
+            return Verification("pending")
         outcome = (payment.provider_data or {}).get("dev_outcome")
         if outcome == "success":
             return Verification("succeeded", f"dev-{payment.reference}", {"dev_outcome": outcome})

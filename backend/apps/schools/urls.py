@@ -21,6 +21,8 @@ urlpatterns = [
     path("admin/schools/<id:school_id>/", views.PlatformSchoolDetailView.as_view(), name="admin-school"),
     path("admin/schools/<id:school_id>/payments/", views.PlatformManualPaymentView.as_view(), name="admin-school-payment"),
     path("admin/schools/<id:school_id>/members/", views.PlatformMembersView.as_view(), name="admin-school-members"),
+    path("admin/schools/<id:school_id>/ledger/", views.PlatformLedgerView.as_view(), name="admin-school-ledger"),
+    path("admin/ledger/export/", views.PlatformLedgerExportView.as_view(), name="admin-ledger-export"),
     path(
         "admin/schools/<id:school_id>/<str:action>/",
         views.PlatformSchoolActionView.as_view(),

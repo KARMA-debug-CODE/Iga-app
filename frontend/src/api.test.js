@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { api, ApiError, confirmIdentity, setAccessToken, setStepUpHandler } from "./api";
+import { api, ApiError, confirmIdentity, newIdempotencyKey, setAccessToken, setStepUpHandler } from "./api";
 
 function reply(status, body) {
   return Promise.resolve(new Response(body === undefined ? null : JSON.stringify(body), { status }));
@@ -59,6 +59,34 @@ describe("step-up for privileged actions", () => {
     setStepUpHandler(prompt);
     await expect(api("/admin/stats/")).rejects.toMatchObject({ status: 403 });
     expect(prompt).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("money actions", () => {
+  it("send the same Idempotency-Key again when retried after the password prompt", async () => {
+    const fetchMock = vi.fn((url, options) => {
+      if (url.endsWith("/auth/step-up/")) return reply(200, { access: "stepped-up" });
+      return options.headers.Authorization === "Bearer stepped-up" ? reply(201, { sequence: 7 }) : reply(403, STEP_UP);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    setStepUpHandler(() => confirmIdentity("pw"));
+    const key = newIdempotencyKey();
+    await api("/admin/schools/1/ledger/", { method: "POST", body: { kind: "refund" }, headers: { "Idempotency-Key": key } });
+    const sent = fetchMock.mock.calls.filter(([url]) => url.endsWith("/ledger/")).map(([, options]) => options.headers);
+    expect(sent).toHaveLength(2);
+    expect(sent.every((headers) => headers["Idempotency-Key"] === key)).toBe(true);
+  });
+
+  it("make a new key each time, in the form the server accepts", () => {
+    const keys = new Set(Array.from({ length: 50 }, newIdempotencyKey));
+    expect(keys.size).toBe(50);
+    expect([...keys].every((key) => /^[A-Za-z0-9_-]{8,80}$/.test(key))).toBe(true);
+  });
+
+  it("can download a file instead of reading JSON", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response("sequence,gross\n1,200.00\n", { status: 200 }))));
+    const blob = await api("/admin/ledger/export/", { as: "blob" });
+    expect(await blob.text()).toBe("sequence,gross\n1,200.00\n");
   });
 });
 

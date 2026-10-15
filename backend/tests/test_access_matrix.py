@@ -26,7 +26,7 @@ from apps.assessments.models import Answer, Attempt, Question, Quiz, QuizQuestio
 from apps.classroom.models import Assignment, Classroom, Enrollment
 from apps.community.models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
 from apps.curriculum.models import Lesson, LessonProgress, Resource
-from apps.schools.models import Payment
+from apps.schools.models import LedgerEntry, Payment
 
 from .conftest import add_mcq, make_school, make_user
 from .routes import api_routes, fill, view_methods
@@ -209,6 +209,7 @@ def route_targets(w):
         "api/admin/schools/{school_id}/": {"school_id": w["school_b"].id},
         "api/admin/schools/{school_id}/payments/": {"school_id": w["school_b"].id},
         "api/admin/schools/{school_id}/members/": {"school_id": w["school_b"].id},
+        "api/admin/schools/{school_id}/ledger/": {"school_id": w["school_b"].id},
         "api/admin/schools/{school_id}/{action}/": {"school_id": w["school_b"].id, "action": "suspend"},
         "api/subjects/{code}/": {"code": "mathematics"},
         "api/units/{pk}/": {"pk": w["draft_lesson_b"].unit_id},
@@ -319,6 +320,7 @@ def snapshot(w):
         "reports_b": sorted(MessageReport.objects.filter(message__group__created_by=sb).values_list("id", "resolved")),
         "parent_links_b": sorted(ParentLink.objects.filter(student=sb).values_list("parent_id", flat=True)),
         "payments_b": sorted(Payment.objects.filter(school=w["school_b"]).values_list("reference", "status", "provider_data")),
+        "ledger_b": sorted(LedgerEntry.objects.filter(school=w["school_b"]).values_list("sequence", "entry_hash")),
         "progress_b": sorted(LessonProgress.objects.filter(user=sb).values_list("lesson_id", flat=True)),
     }
     return rows
