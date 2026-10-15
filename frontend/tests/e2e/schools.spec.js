@@ -80,3 +80,37 @@ test("the Iga team verifies a new school", async ({ page }, testInfo) => {
   await login(page, "gsadmin", "GS Remera Catholique");
   await expect(page.locator(".code-display")).toBeVisible();
 });
+
+test("the Iga team records a bank transfer once and sees it in the money ledger and its export", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Recording a payment changes shared demo data, so it runs once.");
+  await login(page, "admin");
+  await page.goto("/admin");
+  await page.getByRole("tab", { name: "Schools" }).click();
+  await page.getByRole("button", { name: "Verified", exact: true }).click();
+  await page.getByRole("button", { name: /Lycée de Kigali/ }).click();
+  await expect(page.getByText("Money ledger")).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Provider fee", exact: true }).first()).toBeVisible();
+
+  const reference = `BK-E2E-${Date.now()}`;
+  const form = page.locator("form").filter({ hasText: /record a payment received outside the app/i });
+  await form.getByLabel(/how it was paid/i).fill("Bank of Kigali transfer");
+  await form.getByLabel(/bank or receipt reference/i).fill(reference);
+  await form.getByRole("button", { name: "Record" }).click();
+  const ledger = page.locator("table").filter({ hasText: "Charged" }).last();
+  await expect(ledger.getByRole("cell", { name: new RegExp(reference, "i") })).toBeVisible();
+
+  // The same transfer can't be recorded a second time.
+  await form.getByLabel(/how it was paid/i).fill("Bank of Kigali transfer");
+  await form.getByLabel(/bank or receipt reference/i).fill(reference.toLowerCase());
+  await form.getByRole("button", { name: "Record" }).click();
+  await expect(page.getByText(/already recorded/i)).toBeVisible();
+  await expect(ledger.getByRole("cell", { name: new RegExp(reference, "i") })).toHaveCount(1);
+
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: /export the ledger/i }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toMatch(/^iga-ledger-\d{4}-\d{2}-\d{2}\.csv$/);
+  const text = await (await file.createReadStream()).toArray().then((chunks) => Buffer.concat(chunks).toString());
+  expect(text.split("\n")[0]).toContain("sequence,recorded_at,kind");
+  expect(text).toContain(reference.toUpperCase());
+});

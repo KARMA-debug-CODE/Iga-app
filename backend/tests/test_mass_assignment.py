@@ -18,7 +18,7 @@ from apps.assessments.models import Answer, Attempt, Question, Quiz, QuizQuestio
 from apps.classroom.models import Assignment, Classroom, Enrollment
 from apps.community.models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
 from apps.curriculum.models import Lesson, LessonProgress, Resource
-from apps.schools.models import Payment, School
+from apps.schools.models import LedgerEntry, Payment, School
 
 from .conftest import add_mcq, make_school, make_user
 from .routes import api_routes, view_methods
@@ -196,6 +196,36 @@ def test_payments_take_the_server_price(client_for, w, settings):
     payment = Payment.objects.get(reference=data["reference"])
     assert payment.provider == "manual" and payment.status == "succeeded" and payment.reference != "TAMPERED-REF"
     assert payment.school == w["school"] and payment.created_by == w["admin"]
+
+
+def test_a_ledger_correction_sets_only_its_amount_months_and_note(client_for, w):
+    school = w["school"]
+    before = School.objects.get(pk=school.pk).paid_until
+    body = {
+        **w["bad"],
+        "school": w["other"].id,
+        "kind": "correction",
+        "currency": "USD",
+        "amount": "-5.00",
+        "months": 0,
+        "note": "Overcharged by 5",
+        "sequence": 1,
+        "net_amount": "999.00",
+        "entry_hash": "0" * 64,
+        "prev_hash": "f" * 64,
+        "actor_name": "someone-else",
+        "actor_user_id": w["victim"].id,
+    }
+    data = _ok(client_for(w["admin"]).post(f"/api/admin/schools/{school.id}/ledger/", body, format="json")).data
+    entry = LedgerEntry.objects.get(sequence=data["sequence"])
+    assert entry.school == school and entry.kind == "correction" and entry.gross_amount == Decimal("-5.00")
+    assert entry.net_amount == Decimal("-5.00") and entry.provider_fee == 0 and entry.months == 0
+    assert entry.actor_user_id == w["admin"].id and entry.actor_name == "iga" and entry.reference == ""
+    assert (
+        entry.prev_hash != "f" * 64 and entry.entry_hash != "0" * 64 and entry.created_at > timezone.now() - timedelta(minutes=1)
+    )
+    assert School.objects.get(pk=school.pk).paid_until == before
+    assert School.objects.get(pk=w["other"].pk).ledger_entries.count() == 0
 
 
 def test_choosing_a_school_cannot_approve_yourself(client_for, w):
@@ -430,6 +460,7 @@ TESTED = {
     "api/admin/schools/{school_id}/",
     "api/billing/checkout/",
     "api/admin/schools/{school_id}/payments/",
+    "api/admin/schools/{school_id}/ledger/",
     "api/my-school/",
     "api/lessons/",
     "api/lessons/{slug}/",

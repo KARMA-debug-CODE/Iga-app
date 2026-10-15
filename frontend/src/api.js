@@ -113,14 +113,18 @@ export async function refreshSession() {
   return refreshing;
 }
 
-export async function api(path, { method = "GET", body, params, retry = true, signal, stepUp = true } = {}) {
+/**
+ * `headers` adds request headers (an Idempotency-Key, for example); `as: "blob"` returns the body as a Blob
+ * (a file to download) instead of parsed JSON.
+ */
+export async function api(path, { method = "GET", body, params, retry = true, signal, stepUp = true, headers: extra, as } = {}) {
   let url = `${BASE}${path}`;
   if (params) {
     const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
     if ([...query].length) url += `?${query}`;
   }
   // The server answers in the reader's language (its own error messages included).
-  const headers = { "Accept-Language": currentLanguage() };
+  const headers = { ...extra, "Accept-Language": currentLanguage() };
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
@@ -141,10 +145,11 @@ export async function api(path, { method = "GET", body, params, retry = true, si
 
   if (res.status === 401 && retry && !NO_REFRESH.has(path)) {
     await refreshAfter401();
-    return api(path, { method, body, params, retry: false, signal, stepUp });
+    return api(path, { method, body, params, retry: false, signal, stepUp, headers: extra, as });
   }
 
   if (res.status === 204) return null;
+  if (as === "blob" && res.ok) return res.blob();
   const data = await res.json().catch(() => null);
   // Privileged actions need a password confirmed in the last few minutes: ask for it, then try once more.
   if (res.status === 403 && data?.code === "step_up_required" && stepUp && onStepUp) {
@@ -153,7 +158,7 @@ export async function api(path, { method = "GET", body, params, retry = true, si
     } catch {
       throw new ApiError(res.status, data);
     }
-    return api(path, { method, body, params, retry, signal, stepUp: false });
+    return api(path, { method, body, params, retry, signal, stepUp: false, headers: extra, as });
   }
   if (!res.ok) throw new ApiError(res.status, data);
   if (ISSUES_ACCESS_TOKEN.has(path) && data?.access) {
@@ -221,6 +226,23 @@ export async function readEvents(response, onEvent) {
     if (done) break;
   }
   flush(buffer);
+}
+
+/** A fresh key for one action, sent as Idempotency-Key, so a resent request (a double click, a retry) does nothing new. */
+export function newIdempotencyKey() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Save a Blob the API sent as a file on the user's device. */
+export function saveFile(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // DRF paginated responses have {results}; plain lists don't.
