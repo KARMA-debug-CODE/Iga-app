@@ -203,7 +203,8 @@ def test_production_refuses_to_start_without_a_real_key():
 def test_the_migrations_encrypt_and_hash_existing_rows():
     executor = MigrationExecutor(connection)
     before = [("accounts", "0012_password_reset_and_temporary_password_expiry"), ("schools", "0002_payment_checked_at")]
-    latest = [("accounts", "0014_store_refresh_tokens_unsigned"), ("schools", "0003_encrypt_phone_and_payment_data")]
+    # The newest migration of each app, so later ones (the money ledger's) are back in place after the test.
+    latest = [node for node in executor.loader.graph.leaf_nodes() if node[0] in ("accounts", "schools")]
     executor.migrate(before)
     signed = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJsZWdhY3kifQ.c2lnbmF0dXJl"
     try:

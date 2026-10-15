@@ -296,6 +296,7 @@ msgid "Marks must be between 0 and %(max)s."
 msgstr "La note doit être comprise entre 0 et %(max)s."
 
 #: apps/assessments/services.py:189
+#: apps/schools/billing.py:321
 msgid "Enter a number."
 msgstr "Saisissez un nombre."
 
@@ -547,6 +548,7 @@ msgstr "Saisissez un identifiant valide."
 
 #: apps/core/validation.py:74
 #: apps/core/validation.py:72
+#: apps/schools/views.py:602
 msgid "Enter a whole number."
 msgstr "Saisissez un nombre entier."
 
@@ -590,43 +592,87 @@ msgstr "Classe introuvable."
 msgid "This is part of the full Iga library. Ask your school to subscribe to unlock it."
 msgstr "Ce contenu fait partie de la bibliothèque complète d'Iga. Demandez à votre école de s'abonner pour le débloquer."
 
-#: apps/schools/billing.py:58
+#: apps/schools/billing.py:63
+msgid "Online payment isn't set up correctly yet. Please contact the Iga team."
+msgstr "Le paiement en ligne n'est pas encore correctement configuré. Veuillez contacter l'équipe Iga."
+
+#: apps/schools/billing.py:90
 msgid "Your school must be verified by the Iga team before it can subscribe."
 msgstr "Votre école doit être vérifiée par l'équipe Iga avant de pouvoir s'abonner."
 
-#: apps/schools/billing.py:117
+#: apps/schools/billing.py:205
+msgid "This request key was already used for a different request."
+msgstr "Cette clé de requête a déjà servi pour une autre requête."
+
+#: apps/schools/billing.py:218
+msgid "This reference was already recorded on %(date)s for %(school)s."
+msgstr "Cette référence a déjà été enregistrée le %(date)s pour %(school)s."
+
+#: apps/schools/billing.py:244
 msgid "Between 1 and 24 months."
 msgstr "Entre 1 et 24 mois."
 
-#: apps/schools/billing.py:119
+#: apps/schools/billing.py:247
 msgid "The amount can't be negative."
 msgstr "Le montant ne peut pas être négatif."
 
-#: apps/schools/billing.py:121
+#: apps/schools/billing.py:249
 msgid "Say how it was paid (bank reference, receipt number, or why it is free)."
 msgstr "Indiquez comment le paiement a été fait (référence bancaire, numéro de reçu, ou raison de la gratuité)."
 
-#: apps/schools/billing.py:42
+#: apps/schools/billing.py:318
+msgid "Choose a refund or a correction."
+msgstr "Choisissez un remboursement ou une correction."
+
+#: apps/schools/billing.py:323
+msgid "A refund is money paid back: enter it as a negative amount."
+msgstr "Un remboursement est de l'argent rendu : saisissez-le comme un montant négatif."
+
+#: apps/schools/billing.py:325
+msgid "The fee must be between 0 and the amount."
+msgstr "Les frais doivent être compris entre 0 et le montant."
+
+#: apps/schools/billing.py:327
+msgid "Between -24 and 24 months."
+msgstr "Entre -24 et 24 mois."
+
+#: apps/schools/billing.py:329
+msgid "A correction must change an amount or a number of months."
+msgstr "Une correction doit modifier un montant ou un nombre de mois."
+
+#: apps/schools/billing.py:331
+msgid "Say why (for example the refund reference or what was wrong)."
+msgstr "Indiquez pourquoi (par exemple la référence du remboursement ou ce qui était erroné)."
+
+#: apps/schools/billing.py:333
+msgid "That entry belongs to another school."
+msgstr "Cette écriture appartient à une autre école."
+
+#: apps/schools/billing.py:69
 msgid "Choose %(options)s months."
 msgstr "Choisissez %(options)s mois."
 
-#: apps/schools/billing.py:46
+#: apps/schools/billing.py:73
 msgid "Choose one of these currencies: %(options)s."
 msgstr "Choisissez l'une de ces devises : %(options)s."
+
+#: apps/schools/billing.py:356
+msgid "This school has no paid months to take back."
+msgstr "Cette école n'a pas de mois payés à retirer."
 
 #: apps/schools/downloads.py:43
 msgid "This download link has expired. Go back and open the paper again."
 msgstr "Ce lien de téléchargement a expiré. Revenez en arrière et ouvrez à nouveau l'épreuve."
 
-#: apps/schools/flutterwave.py:52
+#: apps/schools/flutterwave.py:57
 msgid "The payment service isn't answering right now. Please try again in a few minutes."
 msgstr "Le service de paiement ne répond pas pour le moment. Veuillez réessayer dans quelques minutes."
 
-#: apps/schools/flutterwave.py:124
+#: apps/schools/flutterwave.py:147
 msgid "%(app)s school subscription"
 msgstr "Abonnement scolaire %(app)s"
 
-#: apps/schools/flutterwave.py:125
+#: apps/schools/flutterwave.py:148
 msgid "%(school)s: %(months)s month(s)"
 msgstr "%(school)s : %(months)s mois"
 
@@ -706,48 +752,60 @@ msgstr "%(app)s : les élèves de %(school)s n'ont plus l'accès complet"
 msgid "%(school)s's %(app)s subscription ended on %(date)s. Students now only see the free lessons until the school renews."
 msgstr "L'abonnement %(app)s de %(school)s s'est terminé le %(date)s. Les élèves ne voient plus que les leçons gratuites jusqu'au renouvellement."
 
-#: apps/schools/providers.py:70
+#: apps/schools/providers.py:79
 msgid "Unknown payment provider."
 msgstr "Prestataire de paiement inconnu."
 
-#: apps/schools/serializers.py:164
+#: apps/schools/serializers.py:205
 msgid "Another school in this district already has this name."
 msgstr "Une autre école de ce district porte déjà ce nom."
 
-#: apps/schools/views.py:221
+#: apps/schools/views.py:252
 msgid "This payment belongs to another school."
 msgstr "Ce paiement appartient à une autre école."
 
-#: apps/schools/views.py:204
+#: apps/schools/views.py:235
 msgid "Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team."
 msgstr "Le paiement en ligne n'est pas encore disponible. Veuillez payer par virement bancaire et contacter l'équipe Iga."
 
-#: apps/schools/views.py:261
+#: apps/schools/views.py:292
 msgid "Test payments are switched off."
 msgstr "Les paiements de test sont désactivés."
 
-#: apps/schools/views.py:264
+#: apps/schools/views.py:295
 msgid "This payment can't be completed here."
 msgstr "Ce paiement ne peut pas être finalisé ici."
 
-#: apps/schools/views.py:93
+#: apps/schools/views.py:451
+msgid "Send a key of 8 to 80 letters, digits, - or _."
+msgstr "Envoyez une clé de 8 à 80 caractères : lettres, chiffres, - ou _."
+
+#: apps/schools/views.py:124
 msgid "School administrators change school through the Iga team."
 msgstr "Les administrateurs d'école changent d'école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:102
+#: apps/schools/views.py:133
 msgid "School administrators leave a school through the Iga team."
 msgstr "Les administrateurs d'école quittent une école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:388
+#: apps/schools/views.py:609
+msgid "Enter a date as YYYY-MM-DD."
+msgstr "Saisissez une date au format AAAA-MM-JJ."
+
+#: apps/schools/views.py:515
+msgid "No ledger entry has that number."
+msgstr "Aucune écriture du registre ne porte ce numéro."
+
+#: apps/schools/views.py:442
 msgid "Unknown action."
 msgstr "Action inconnue."
 
-#: apps/schools/views.py:383
+#: apps/schools/views.py:437
 msgid "Only a school waiting for verification, with no payments, can be rejected."
 msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
 
-#: apps/simulations/views.py:52
-#: apps/simulations/views.py:64
+#: apps/simulations/views.py:57
+#: apps/simulations/views.py:69
 msgid "Not found."
 msgstr "Introuvable."
 
