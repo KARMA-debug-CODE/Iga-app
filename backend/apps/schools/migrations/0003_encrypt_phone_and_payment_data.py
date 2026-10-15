@@ -16,11 +16,11 @@ def encrypt_phones(apps, schema_editor):
 
 def decrypt_phones(apps, schema_editor):
     School = apps.get_model("schools", "School")
-    table = schema_editor.quote_name(School._meta.db_table)
     rows = list(School.objects.exclude(phone="").values_list("pk", "phone"))
     with schema_editor.connection.cursor() as cursor:
         for pk, phone in rows:
-            cursor.execute(f"UPDATE {table} SET phone = %s WHERE id = %s", [phone[:40], pk])
+            # Constant SQL (tests/test_sql_safety.py): the plain value goes in as a parameter.
+            cursor.execute("UPDATE schools_school SET phone = %s WHERE id = %s", [phone[:40], pk])
 
 
 def encrypt_payment_data(apps, schema_editor):
@@ -32,13 +32,12 @@ def encrypt_payment_data(apps, schema_editor):
 
 def decrypt_payment_data(apps, schema_editor):
     Payment = apps.get_model("schools", "Payment")
-    table = schema_editor.quote_name(Payment._meta.db_table)
     rows = list(Payment.objects.exclude(provider_data__isnull=True).values_list("pk", "provider_data"))
     connection = schema_editor.connection
     with connection.cursor() as cursor:
         for pk, data in rows:
             key = Payment._meta.pk.get_db_prep_value(pk, connection)
-            cursor.execute(f"UPDATE {table} SET provider_data = %s WHERE id = %s", [json.dumps(data), key])
+            cursor.execute("UPDATE schools_payment SET provider_data = %s WHERE id = %s", [json.dumps(data), key])
 
 
 class Migration(migrations.Migration):

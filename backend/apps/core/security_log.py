@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 
+from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from django.views.csrf import csrf_failure as django_csrf_failure
@@ -37,6 +38,8 @@ SECURITY_ACTIONS = {
     "disable_2fa",
     "2fa_failed",
     "reauth_failed",
+    "step_up",
+    "step_up_failed",
     "email_in_use",
     "email_changed",
     "logout_everywhere",
@@ -104,11 +107,15 @@ def event(request, action, user=None, *, level=logging.INFO, audit_every=None, *
 
 
 def _loggable_path(request):
-    """The request path, or its URL pattern when the path carries a secret (a signed download link)."""
+    """The request path, or its URL pattern when the path carries a secret (a signed download link, or the
+    Django admin's secret address)."""
     path = getattr(request, "path", None)
     match = getattr(request, "resolver_match", None)
     if match is not None and any("token" in key or "secret" in key for key in match.kwargs):
         return "/" + match.route
+    admin_path = settings.ADMIN_PATH
+    if path and admin_path and path.startswith(f"/django-admin/{admin_path}/"):
+        return "/django-admin/<DJANGO_ADMIN_PATH>/" + path[len(f"/django-admin/{admin_path}/") :]
     return path
 
 

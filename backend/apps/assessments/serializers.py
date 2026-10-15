@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.core.utils import request_language, serializer_language
 from apps.schools import access
 from apps.schools.downloads import signed_download_url
@@ -20,7 +21,7 @@ class ChoiceWriteSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     """Teacher-facing: includes the answers. Never use this for students."""
 
     choices = ChoiceWriteSerializer(many=True, required=False)
@@ -272,7 +273,7 @@ class QuizSummarySerializer(serializers.ModelSerializer):
         }
 
 
-class QuizWriteSerializer(serializers.ModelSerializer):
+class QuizWriteSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     question_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
 
     class Meta:

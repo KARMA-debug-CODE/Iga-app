@@ -319,6 +319,32 @@ def manual_questions_q(prefix=""):
     )
 
 
+def _teaches_in_subject(user, student_ref, subject_ref):
+    """An active enrolment of the student in one of this teacher's current classes for that subject
+    (a class without a subject covers every subject). Students who moved grade are no longer counted."""
+    from apps.classroom.models import Enrollment
+
+    return Enrollment.objects.filter(
+        classroom__teacher=user,
+        classroom__archived=False,
+        active=True,
+        student=student_ref,
+    ).filter(Q(classroom__subject__isnull=True) | Q(classroom__subject=subject_ref))
+
+
+def attempts_visible_to(user):
+    """Attempts this user may read: their own; for a teacher, also every attempt at one of their own
+    assignments (moved students stay in the gradebook) and their current students' work in the class's
+    subject (the same rule as marking). Nobody else's."""
+    qs = Attempt.objects.select_related("quiz", "quiz__subject", "user")
+    if user.is_platform_admin:
+        return qs
+    if user.can_teach:
+        teaches = _teaches_in_subject(user, OuterRef("user"), OuterRef("quiz__subject"))
+        return qs.filter(Q(user=user) | Q(assignment__classroom__teacher=user) | Q(Exists(teaches)))
+    return qs.filter(user=user)
+
+
 def markable_answers(user):
     """Submitted written answers this teacher may mark.
 
@@ -329,13 +355,7 @@ def markable_answers(user):
     qs = Answer.objects.exclude(attempt__status=Attempt.Status.IN_PROGRESS).filter(manual_questions_q("question__"))
     if user.is_platform_admin:
         return qs
-    from apps.classroom.models import Enrollment
-
-    teaches_this = Enrollment.objects.filter(
-        classroom__teacher=user,
-        classroom__archived=False,
-        student=OuterRef("attempt__user"),
-    ).filter(Q(classroom__subject__isnull=True) | Q(classroom__subject=OuterRef("attempt__quiz__subject")))
+    teaches_this = _teaches_in_subject(user, OuterRef("attempt__user"), OuterRef("attempt__quiz__subject"))
     own_assignment = Q(attempt__assignment__classroom__teacher=user, attempt__assignment__classroom__archived=False)
     return qs.filter(own_assignment | Q(Exists(teaches_this)))
 

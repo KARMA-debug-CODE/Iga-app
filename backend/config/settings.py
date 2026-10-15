@@ -103,6 +103,8 @@ MIDDLEWARE = [
     # Answers (error messages included) in the reader's language: the app sends Accept-Language.
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # A NUL character in the URL or query string is a 400 (PostgreSQL can't store one).
+    "apps.core.middleware.RejectNulMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -201,6 +203,15 @@ REST_FRAMEWORK = {
         "apps.accounts.authentication.IgaJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    # DRF's parsers, refusing text with a NUL character (a 400 instead of a database error).
+    "DEFAULT_PARSER_CLASSES": [
+        "apps.core.parsers.JSONParser",
+        "apps.core.parsers.FormParser",
+        "apps.core.parsers.MultiPartParser",
+    ],
+    # JSON only in production: DRF's browsable HTML API is a development tool.
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
+    + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     # Refused (403) and throttled (429) requests are logged as security events.
     "EXCEPTION_HANDLER": "apps.core.security_log.exception_handler",
@@ -267,6 +278,10 @@ TEMPORARY_PASSWORD_DAYS = int(os.environ.get("TEMPORARY_PASSWORD_DAYS", "14"))
 # Answers saying "this email address is already used" per hour, per IP (sign-up) or per account
 # (profile, class roster) before every request with an email is refused until the hour is over.
 EMAIL_IN_USE_LIMIT = int(os.environ.get("EMAIL_IN_USE_LIMIT", "10"))
+
+# Privileged operations (the admin area, school membership and billing decisions, resetting a student's
+# password) need a password confirmed this recently: at sign-in or at POST /api/auth/step-up/.
+STEP_UP_MAX_AGE_SECONDS = int(os.environ.get("STEP_UP_MAX_AGE_SECONDS", "900"))
 
 # The refresh token lives in an httpOnly cookie scoped to the auth endpoints,
 # so page scripts never see it. The short-lived access token stays in memory.
@@ -370,11 +385,15 @@ UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
 # still accepted (covers slow mobile connections).
 EXAM_SUBMIT_GRACE_SECONDS = int(os.environ.get("EXAM_SUBMIT_GRACE_SECONDS", "30"))
 
-# The Django admin (/django-admin/) is for content managers. In production it is
-# off unless DJANGO_ADMIN_ENABLED=true, and staff must use two-factor login.
+# The Django admin is for content managers. In production it is off unless DJANGO_ADMIN_ENABLED=true AND
+# DJANGO_ADMIN_PATH is a long random secret (at least 16 letters, digits, - or _): it then lives at
+# /django-admin/<DJANGO_ADMIN_PATH>/. Staff must use two-factor login (always, when DEBUG is off).
 ADMIN_ENABLED = env_bool("DJANGO_ADMIN_ENABLED", DEBUG)
-ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", not DEBUG)
+ADMIN_PATH = os.environ.get("DJANGO_ADMIN_PATH", "").strip().strip("/")
+ADMIN_REQUIRE_2FA = env_bool("DJANGO_ADMIN_REQUIRE_2FA", False) if DEBUG else True
 ADMIN_LOGIN_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_ATTEMPTS_PER_MINUTE", "10"))
+# Per address too, so one machine can't try a password on many staff accounts.
+ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE", "30"))
 
 # --- Production hardening --------------------------------------------------
 

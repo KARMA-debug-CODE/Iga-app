@@ -16,6 +16,8 @@ from apps.schools.downloads import PaperDownloadView
 from apps.simulations.views import SimulationViewSet
 
 router = DefaultRouter()
+# The browsable list of every endpoint at /api/ is for development only.
+router.include_root_view = settings.DEBUG
 router.register("subjects", SubjectViewSet, basename="subject")
 router.register("units", UnitViewSet, basename="unit")
 router.register("lessons", LessonViewSet, basename="lesson")
@@ -39,7 +41,7 @@ api = [
     path("tutor/", include("apps.tutor.urls")),
     path("code/", include("apps.coderun.urls")),
     path("children/", parents.ChildrenView.as_view(), name="children"),
-    path("children/<int:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
+    path("children/<id:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
     path("health/", core_views.health, name="health"),
     path("meta/", core_views.meta, name="meta"),
     path("dashboard/", core_views.dashboard, name="dashboard"),
@@ -58,9 +60,11 @@ admin.site.site_title = settings.APP_NAME
 
 urlpatterns = [path("api/", include(api))]
 
-if settings.ADMIN_ENABLED:
+# Off unless enabled, and in production only at its secret path (see apps/core/admin_login.py).
+ADMIN_URL_PREFIX = admin_login.admin_url_prefix()
+if ADMIN_URL_PREFIX:
     admin_login.install()
-    urlpatterns.append(path("django-admin/", admin.site.urls))
+    urlpatterns.append(path(ADMIN_URL_PREFIX, admin.site.urls))
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

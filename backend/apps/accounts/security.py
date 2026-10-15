@@ -22,10 +22,15 @@ SESSION_VERSION_CLAIM = "sv"
 _dummy_hashes = {}
 
 
-def issue_refresh_token(user):
-    """A new refresh token (and, through it, access token) for the user's current session version."""
+def issue_refresh_token(user, auth_time=None):
+    """A new refresh token (and, through it, access token) for the user's current session version.
+
+    `auth_time` is when the user last gave their password (see stepup.py); the access token copies it.
+    """
     token = RefreshToken.for_user(user)
     token[SESSION_VERSION_CLAIM] = user.session_version
+    if auth_time is not None:
+        token["auth_time"] = auth_time
     return token
 
 

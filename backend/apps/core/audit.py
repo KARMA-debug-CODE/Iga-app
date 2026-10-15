@@ -33,7 +33,8 @@ def client_ip(request):
 
 
 def record(request, action, target, **details):
-    """Write an audit entry. `target` is a model instance, or None (e.g. a failed login for no known account)."""
+    """Write an audit entry. `target` is a model instance, or None for an event about no particular row
+    (for example a failed sign-in to an account that doesn't exist)."""
     actor = getattr(request, "user", None)
     if actor is not None and not actor.is_authenticated:
         actor = None

@@ -6,8 +6,10 @@ from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework.throttling import SimpleRateThrottle
+from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.accounts.models import User
+from apps.accounts.stepup import fresh_access_token
 from apps.assessments.models import Choice, Question, Quiz, QuizQuestion
 from apps.curriculum.models import Lesson, Subject, Unit
 from apps.schools.models import School
@@ -87,10 +89,14 @@ def admin_user(db):
 
 @pytest.fixture
 def client_for():
-    def _client(user=None):
+    """An API client for `user` as if they had just signed in, so privileged operations need no step-up.
+    signed_in=False gives a session whose access token came from a plain refresh (no recent sign-in)."""
+
+    def _client(user=None, signed_in=True):
         client = APIClient()
         if user is not None:
-            client.force_authenticate(user)
+            token = fresh_access_token(user) if signed_in else AccessToken.for_user(user)
+            client.force_authenticate(user, token=token)
         return client
 
     return _client

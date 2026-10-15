@@ -8,10 +8,8 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -20,8 +18,10 @@ from apps.classroom.models import Assignment
 from apps.classroom.views import assignment_status
 from apps.core import audit
 from apps.core.constants import ContentStatus
+from apps.core.permissions import IsParent, IsStudent
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import request_language
+from apps.core.validation import text_field
 from apps.curriculum.models import Lesson, LessonProgress, Subject
 
 from .models import ParentInvite, ParentLink, parent_code_digest
@@ -36,20 +36,6 @@ def new_code():
         code = "".join(secrets.choice(ALPHABET) for _ in range(8))
         if not ParentInvite.objects.filter(code_hash=parent_code_digest(code)).exists():
             return code
-
-
-class IsStudent(BasePermission):
-    message = gettext_lazy("Only students can do this.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_student
-
-
-class IsParent(BasePermission):
-    message = gettext_lazy("Only parent or guardian accounts can do this.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_parent
 
 
 def level_info(xp):
@@ -175,13 +161,17 @@ class MyParentsView(APIView):
 
     permission_classes = [IsStudent]
 
-    def get(self, request):
+    def get(self, request, parent_id=None):
+        if parent_id is not None:  # parents/<id>/ only removes a link
+            return self.http_method_not_allowed(request)
         links = ParentLink.objects.filter(student=request.user).select_related("parent")
         return Response(
             [{"id": link.parent_id, "name": link.parent.display_name, "linked_at": link.created_at} for link in links]
         )
 
-    def delete(self, request, parent_id):
+    def delete(self, request, parent_id=None):
+        if parent_id is None:  # parents/ lists them; removing needs one parent's id
+            return self.http_method_not_allowed(request)
         deleted, _created = ParentLink.objects.filter(student=request.user, parent_id=parent_id).delete()
         if not deleted:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -203,7 +193,8 @@ class ChildrenView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        code = str(request.data.get("code", ""))[:32]
+        # A string of at most 20 characters (400 otherwise); parent_code_digest ignores case and spaces.
+        code = text_field(request.data, "code", 20, required=False)
         invite = (
             ParentInvite.objects.select_for_update().filter(code_hash=parent_code_digest(code)).select_related("student").first()
         )
@@ -232,15 +223,6 @@ class ChildDetailView(APIView):
         student = self._student(request, student_id)
         ParentLink.objects.filter(parent=request.user, student=student).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class NotParent(BasePermission):
-    """Keeps parent accounts out of student spaces such as study-group chats."""
-
-    message = gettext_lazy("Study groups are for students and teachers.")
-
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and not request.user.is_parent
 
 
 def deny_parents(user):

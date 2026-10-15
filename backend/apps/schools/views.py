@@ -4,17 +4,16 @@ from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.core import audit
-from apps.core.permissions import IsPlatformAdmin
+from apps.core.permissions import IsPlatformAdmin, IsSchoolAdmin, RecentAuthentication
 from apps.core.throttles import JoinRateThrottle
 
 from . import billing, membership, notify, providers
@@ -109,14 +108,6 @@ class MySchoolView(APIView):
 # --- The school administrator's dashboard -------------------------------------------
 
 
-class IsSchoolAdmin(BasePermission):
-    message = gettext_lazy("Only approved school administrators can do this.")
-
-    def has_permission(self, request, view):
-        user = request.user
-        return bool(user and user.is_authenticated and user.managed_school is not None)
-
-
 def managed_school(request):
     return request.user.managed_school
 
@@ -159,7 +150,7 @@ class SchoolMembersView(APIView):
 
 
 class DecideMembersView(APIView):
-    permission_classes = [IsSchoolAdmin]
+    permission_classes = [IsSchoolAdmin, RecentAuthentication]
 
     def post(self, request):
         school = managed_school(request)
@@ -171,7 +162,7 @@ class DecideMembersView(APIView):
 
 
 class RemoveMemberView(APIView):
-    permission_classes = [IsSchoolAdmin]
+    permission_classes = [IsSchoolAdmin, RecentAuthentication]
 
     def post(self, request, user_id):
         school = managed_school(request)
@@ -181,7 +172,7 @@ class RemoveMemberView(APIView):
 
 
 class NewSchoolCodeView(APIView):
-    permission_classes = [IsSchoolAdmin]
+    permission_classes = [IsSchoolAdmin, RecentAuthentication]
 
     def post(self, request):
         return Response({"join_code": membership.regenerate_code(request.user, managed_school(request), request=request)})
@@ -201,7 +192,7 @@ class SchoolPaymentsView(APIView):
 class CheckoutView(APIView):
     """Start paying for N months: returns the provider's hosted checkout page to send the browser to."""
 
-    permission_classes = [IsSchoolAdmin]
+    permission_classes = [IsSchoolAdmin, RecentAuthentication]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "sensitive"
 
@@ -315,7 +306,7 @@ class FlutterwaveWebhookView(APIView):
 class PlatformSchoolsView(APIView):
     """All schools. ?status=pending|verified|suspended&q=name&subscription=active|unpaid"""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def get(self, request):
         qs = School.objects.annotate(
@@ -349,7 +340,7 @@ class PlatformSchoolsView(APIView):
 
 
 class PlatformSchoolDetailView(APIView):
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def get(self, request, school_id):
         school = get_object_or_404(School, pk=school_id)
@@ -369,7 +360,7 @@ class PlatformSchoolDetailView(APIView):
 class PlatformSchoolActionView(APIView):
     """POST verify | suspend | reinstate | reject (a pending registration that isn't a real school)."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def post(self, request, school_id, action):
         school = get_object_or_404(School, pk=school_id)
@@ -403,7 +394,7 @@ class PlatformSchoolActionView(APIView):
 class PlatformManualPaymentView(APIView):
     """Record money received outside the app (bank transfer, mobile money to the company, cash) or free months."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def post(self, request, school_id):
         school = get_object_or_404(School, pk=school_id)
@@ -428,11 +419,12 @@ class PlatformManualPaymentView(APIView):
 class PlatformMembersView(APIView):
     """Members of any school, for platform administrators (also approves pending school admins)."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
 
     def get(self, request, school_id):
         school = get_object_or_404(School, pk=school_id)
         qs = school.members.order_by("school_status", "role", "first_name")[:1000]
+        audit.record(request, "list_school_members", school)
         return Response(MemberSerializer(qs, many=True).data)
 
     def post(self, request, school_id):

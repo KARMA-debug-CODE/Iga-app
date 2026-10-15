@@ -14,11 +14,11 @@ def encrypt_totp_secrets(apps, schema_editor):
 
 def decrypt_totp_secrets(apps, schema_editor):
     User = apps.get_model("accounts", "User")
-    table = User._meta.db_table
     rows = list(User.objects.exclude(totp_secret="").values_list("pk", "totp_secret"))
     with schema_editor.connection.cursor() as cursor:
         for pk, secret in rows:
-            cursor.execute(f"UPDATE {table} SET totp_secret = %s WHERE id = %s", [secret, pk])
+            # Constant SQL (tests/test_sql_safety.py): the plain value goes in as a parameter.
+            cursor.execute("UPDATE accounts_user SET totp_secret = %s WHERE id = %s", [secret, pk])
 
 
 def hash_parent_codes(apps, schema_editor):

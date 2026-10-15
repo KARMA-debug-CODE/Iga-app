@@ -49,6 +49,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializer,
 )
+from .stepup import auth_time_of, signed_in_now
 from .throttles import (
     AuthIPThrottle,
     LoginIdentifierThrottle,
@@ -72,10 +73,11 @@ def _set_refresh_cookie(response, refresh_token):
     )
 
 
-def _session_response(user, status_code=status.HTTP_200_OK):
-    refresh = issue_refresh_token(user)
+def _session_response(user, status_code=status.HTTP_200_OK, auth_time=None):
+    refresh = issue_refresh_token(user, auth_time=auth_time)
+    access = refresh.access_token  # copies the session version and auth_time
     response = Response(
-        {"access": str(refresh.access_token), "user": UserSerializer(user).data},
+        {"access": str(access), "user": UserSerializer(user).data},
         status=status_code,
     )
     _set_refresh_cookie(response, refresh)
@@ -111,10 +113,13 @@ def cross_site_refusal(request):
     return Response({"detail": _("This request came from another site and was refused.")}, status=status.HTTP_403_FORBIDDEN)
 
 
-def _with_fresh_session(response, user):
-    """After a security change: end every other session, keep this device logged in with a new cookie."""
+def _with_fresh_session(request, response, user):
+    """After a security change: end every other session, keep this device logged in with a new cookie.
+
+    The new tokens keep this session's sign-in time (auth_time) unchanged, as a refresh does.
+    """
     revoke_all_sessions(user)
-    refresh = issue_refresh_token(user)
+    refresh = issue_refresh_token(user, auth_time=auth_time_of(request.auth))
     _set_refresh_cookie(response, refresh)
     if isinstance(response.data, dict):
         response.data["access"] = str(refresh.access_token)  # this device's old access token has just ended
@@ -136,7 +141,7 @@ class RegisterView(APIView):
             raise ValidationError(serializer.errors)
         user = serializer.save()
         security_log.event(request, "register", user, role=user.role)
-        return _session_response(user, status.HTTP_201_CREATED)
+        return _session_response(user, status.HTTP_201_CREATED, auth_time=signed_in_now())
 
 
 class LoginView(APIView):
@@ -200,7 +205,7 @@ class LoginView(APIView):
         lockout.succeed(keys)
         update_last_login(None, account)
         security_log.event(request, "login", account)
-        return _session_response(account)
+        return _session_response(account, auth_time=signed_in_now())
 
     @staticmethod
     def _failed(request, keys, identifier, account, reason, message, **extra):
@@ -243,7 +248,7 @@ class RefreshView(APIView):
                 response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.REFRESH_COOKIE_PATH)
             return response
         old.blacklist()  # rotation: each refresh token works exactly once
-        return _session_response(user)
+        return _session_response(user, auth_time=auth_time_of(old))
 
     @staticmethod
     def _handle_reuse(request, raw):
@@ -371,19 +376,20 @@ class ChangePasswordView(APIView):
         request.user.save(update_fields=["password", "must_change_password", "temporary_password_expires_at"])
         security_log.event(request, "change_password", request.user, other_sessions_ended=True)
         return _with_fresh_session(
-            Response({"detail": _("Password updated. You were logged out on other devices.")}), request.user
+            request, Response({"detail": _("Password updated. You were logged out on other devices.")}), request.user
         )
 
 
-def _second_check(request, user, passed, kind, purpose, wrong_answer):
+def _second_check(request, user, passed, kind, purpose, wrong_answer, event=None):
     """None when `passed()` is true; otherwise the answer to send.
 
-    For an account already signed in (changing its password, email or 2FA): wrong answers count
-    towards a lock for that account, like sign-in, so a stolen session can't be used to guess the
-    password or a 2FA code; each one is logged.
+    For an account already signed in (changing its password, email or 2FA, or stepping up for a
+    privileged operation): wrong answers count towards a lock for that account, like sign-in, so a
+    stolen session can't be used to guess the password or a 2FA code; each one is logged (as `event`,
+    by default 2fa_failed or reauth_failed).
     """
     keys = [(kind, f"user:{user.pk}")]
-    event = "2fa_failed" if kind == "otp" else "reauth_failed"
+    event = event or ("2fa_failed" if kind == "otp" else "reauth_failed")
     wait = lockout.check(keys)
     if wait:
         security_log.event(request, event, user, level=logging.WARNING, audit_every=600, purpose=purpose, locked=True)
@@ -459,7 +465,7 @@ class TwoFactorEnableView(APIView):
         user.totp_enabled = True
         user.save(update_fields=["totp_enabled"])
         security_log.event(request, "enable_2fa", user, other_sessions_ended=True)
-        return _with_fresh_session(Response(UserSerializer(user).data), user)
+        return _with_fresh_session(request, Response(UserSerializer(user).data), user)
 
 
 class TwoFactorDisableView(APIView):
@@ -481,7 +487,7 @@ class TwoFactorDisableView(APIView):
         user.totp_last_step = None
         user.save(update_fields=["totp_enabled", "totp_secret", "totp_last_step"])
         security_log.event(request, "disable_2fa", user, other_sessions_ended=True)
-        return _with_fresh_session(Response(UserSerializer(user).data), user)
+        return _with_fresh_session(request, Response(UserSerializer(user).data), user)
 
 
 class PasswordResetRequestView(APIView):
