@@ -13,13 +13,12 @@ from rest_framework import status
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin, IsSchoolAdmin, RecentAuthentication
-from apps.core.throttles import JoinRateThrottle
+from apps.core.throttles import JoinRateThrottle, ScopedRateThrottle
 
 from . import billing, membership, notify, providers, webhooks
 from .access import content_access

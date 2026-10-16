@@ -218,7 +218,7 @@ def test_media_root_must_stay_out_of_static_folders(settings, tmp_path):
     assert checks.media_root_check(None) == []
     for inside in (tmp_path / "static", tmp_path / "static" / "uploads", tmp_path):
         settings.MEDIA_ROOT = inside
-        assert [e.id for e in checks.media_root_check(None)] == ["iga.E010"]
+        assert [e.id for e in checks.media_root_check(None)] == ["iga.E013"]
     settings.MEDIA_ROOT = tmp_path / "media"
     settings.STATICFILES_DIRS = [("extra", tmp_path / "media" / "public")]
-    assert [e.id for e in checks.media_root_check(None)] == ["iga.E010"]
+    assert [e.id for e in checks.media_root_check(None)] == ["iga.E013"]

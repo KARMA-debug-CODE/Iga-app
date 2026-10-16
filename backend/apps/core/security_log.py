@@ -48,6 +48,7 @@ SECURITY_ACTIONS = {
     "permission_denied",
     "throttled",
     "cross_site_refused",
+    "request_too_large",
     "admin_login",
     "admin_login_failed",
 }

@@ -34,7 +34,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.{js,jsx}"],
+    // scripts/: the build's own checks (check-bundle.mjs).
+    include: ["src/**/*.test.{js,jsx}", "scripts/**/*.test.js"],
     setupFiles: ["./src/test-setup.js"],
   },
 });

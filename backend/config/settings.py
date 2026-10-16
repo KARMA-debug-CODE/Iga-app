@@ -7,6 +7,7 @@ See backend/.env.example for the full list.
 """
 
 import os
+import re
 from datetime import timedelta
 from decimal import Decimal
 from pathlib import Path
@@ -24,6 +25,23 @@ def env_list(name, default=""):
     return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
 
 
+def env_origins(name, default="", subdomain_wildcards=False):
+    """Origins (scheme://host[:port]) from the environment. Anything else, a "*" above all, would let other
+    sites in, so it stops the start. CSRF_TRUSTED_ORIGINS may use Django's https://*.example.rw form."""
+    origins = env_list(name, default)
+    for origin in origins:
+        scheme, _, host = origin.partition("://")
+        if subdomain_wildcards and host.startswith("*."):
+            host = host[2:]
+        if scheme not in ("http", "https") or not re.fullmatch(
+            r"[A-Za-z0-9.-]+(:[0-9]{1,5})?|\[[0-9A-Fa-f:.]+\](:[0-9]{1,5})?", host
+        ):
+            raise RuntimeError(
+                f"{name}: {origin!r} is not an origin such as https://iga.example.rw (no wildcards, paths or trailing slashes)."
+            )
+    return origins
+
+
 # Fail safe: production (gunicorn via wsgi.py) runs with DEBUG off unless told
 # otherwise. manage.py turns it on by default for local development.
 DEBUG = env_bool("DJANGO_DEBUG", False)
@@ -32,6 +50,7 @@ PLACEHOLDER_SECRETS = {
     "",
     "change-me-to-a-long-random-string",
     "dev-only-insecure-key-do-not-use-in-production",
+    "build-time-placeholder-only-used-for-collectstatic",  # the image build's, before it used a random one
 }
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if SECRET_KEY in PLACEHOLDER_SECRETS or len(SECRET_KEY) < 32:
@@ -97,6 +116,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Content-Security-Policy, Permissions-Policy and Cross-Origin-Resource-Policy on every answer.
+    "apps.core.middleware.SecurityHeadersMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -218,12 +239,21 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 50,
     # Per-IP throttles only trust X-Forwarded-For entries added by our own proxies.
     "NUM_PROXIES": TRUSTED_PROXY_COUNT,
+    # Every view is limited (apps/core/throttles.py): its own scope when it has one, plus "anon" (per IP,
+    # visitors not signed in) and "user" (per signed-in user). Views with their own throttle_classes replace
+    # these with stricter ones. nginx adds per-IP limits in front (frontend/nginx.conf).
     "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.ScopedRateThrottle",
+        "apps.core.throttles.ScopedRateThrottle",
+        "apps.core.throttles.AnonRateThrottle",
+        "apps.core.throttles.UserRateThrottle",
     ],
     # Per-IP limits are generous because a whole school often shares one public IP;
     # "login" is per account and is what actually stops password guessing.
     "DEFAULT_THROTTLE_RATES": {
+        # Per IP: any request without a signed-in user (the backstop for endpoints with no scope).
+        "anon": os.environ.get("THROTTLE_ANON", "600/min"),
+        # Per signed-in user: any request (far above what a person does by hand).
+        "user": os.environ.get("THROTTLE_USER", "600/min"),
         # Per IP: sign-in, sign-up, password reset and 2FA requests together.
         "auth": os.environ.get("THROTTLE_AUTH", "300/min"),
         # Per account (the username or email typed): sign-in attempts. Repeated failures also lock
@@ -295,9 +325,18 @@ REFRESH_COOKIE_SAMESITE = os.environ.get("REFRESH_COOKIE_SAMESITE", "Strict")
 # that user is ended. Within this window it is treated as two tabs refreshing at once.
 REFRESH_REUSE_GRACE_SECONDS = int(os.environ.get("REFRESH_REUSE_GRACE_SECONDS", "30"))
 
-CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+# Cross-origin access. nginx serves the app and the API from one origin, so a deployment needs none: other
+# sites get no CORS grant unless CORS_ALLOWED_ORIGINS lists them (only for an app served from another
+# origin). Never a wildcard, and only on the API. The Vite dev server's origins are trusted in development.
+DEV_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173" if DEBUG else ""
+CORS_ALLOWED_ORIGINS = env_origins("CORS_ALLOWED_ORIGINS", DEV_ORIGINS)
+CORS_ALLOWED_ORIGIN_REGEXES = []
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_URLS_REGEX = r"^/api/"
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+# Origins whose pages may send forms and cookie-authenticated requests (the Django admin, refresh and logout)
+# besides the site itself: the public https:// origin when a proxy changes the Host Django sees.
+CSRF_TRUSTED_ORIGINS = env_origins("CSRF_TRUSTED_ORIGINS", DEV_ORIGINS, subdomain_wildcards=True)
 # Django's own session and CSRF cookies only serve the Django admin: scoped to it, out of reach of
 # page scripts, never sent cross-site with a form, Secure under HTTPS (below), and admin sessions
 # end after DJANGO_ADMIN_SESSION_HOURS.
@@ -385,7 +424,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Iga <no-reply@iga.rw>
 # internal location after Django has checked access. Without nginx, Django streams them.
 PROTECTED_MEDIA_ACCEL = env_bool("PROTECTED_MEDIA_ACCEL", False)
 
-# Largest file a teacher may upload as a resource (nginx allows 25 MB per request).
+# Largest file a teacher may upload as a resource (nginx allows 25 MB per request, only on upload routes).
 UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
 # Images are smaller: at most this many MB, and this many pixels in all (frames of an animation included),
 # so a small file that unpacks into a huge picture can't use the server's memory. See apps/core/uploads.py.
@@ -395,6 +434,16 @@ UPLOAD_IMAGE_MAX_PIXELS = int(os.environ.get("UPLOAD_IMAGE_MAX_PIXELS", "5000000
 # The longest text (a lesson, a shared note, a question) a text field without its own limit accepts.
 # Shorter fields keep their own limits. See apps/core/text.py.
 TEXT_MAX_CHARS = int(os.environ.get("TEXT_MAX_CHARS", "100000"))
+
+# Request size limits. nginx refuses bigger bodies first (frontend/nginx.conf: 2 MB for the API, 25 MB on
+# upload routes); these also protect a deployment without it. A refused request is a JSON 413
+# (apps/core/errors.py). The body Django reads into memory (JSON, form fields; uploaded files excluded):
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("DATA_UPLOAD_MAX_MEMORY_SIZE", str(2 * 1024 * 1024)))
+# Uploaded files larger than this are written to a temporary file instead of being held in memory.
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("FILE_UPLOAD_MAX_MEMORY_SIZE", str(2 * 1024 * 1024)))
+# Form fields and files in one request (JSON bodies are limited by size only).
+DATA_UPLOAD_MAX_NUMBER_FIELDS = int(os.environ.get("DATA_UPLOAD_MAX_NUMBER_FIELDS", "1000"))
+DATA_UPLOAD_MAX_NUMBER_FILES = int(os.environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", "10"))
 
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).
@@ -416,14 +465,27 @@ ADMIN_LOGIN_IP_ATTEMPTS_PER_MINUTE = int(os.environ.get("ADMIN_LOGIN_IP_ATTEMPTS
 # docker-compose trial over plain http://localhost.
 HTTPS = env_bool("HTTPS", not DEBUG)
 if HTTPS:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # Behind a proxy (TRUSTED_PROXY_COUNT > 0: the bundled nginx, which sets X-Forwarded-Proto itself and
+    # takes the client's value only from proxies it trusts), believe its word for the scheme. With no proxy,
+    # anyone could send the header, so it is ignored and gunicorn's own scheme counts.
+    if TRUSTED_PROXY_COUNT > 0:
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # "preload" asks browsers to ship this site as HTTPS-only (hstspreload.org): a commitment for the whole
+    # domain and every subdomain that is slow to undo, so the owner opts in (HSTS_PRELOAD=true in .env).
+    SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", False)
+    if not SECURE_HSTS_PRELOAD:
+        # check --deploy's reminder about preload (security.W021): left off on purpose until the owner opts in.
+        SILENCED_SYSTEM_CHECKS = ["security.W021"]
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+# Django's defaults, written out: links to other sites carry no path, and no other window keeps a handle on ours.
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 
 LOGGING = {
     "version": 1,

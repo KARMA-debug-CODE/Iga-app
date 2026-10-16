@@ -114,7 +114,8 @@ def test_a_cross_site_post_cannot_log_someone_out(student):
         {"HTTP_REFERER": "http://testserver/learn"},
     ],
 )
-def test_same_site_and_trusted_origins_can_refresh(student, headers):
+def test_same_site_and_trusted_origins_can_refresh(student, headers, settings):
+    settings.CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]  # production trusts none unless listed
     client, _ = logged_in()
     assert client.post("/api/auth/refresh/", **headers).status_code == 200
 

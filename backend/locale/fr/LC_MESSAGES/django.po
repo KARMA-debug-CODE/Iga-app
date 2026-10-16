@@ -191,111 +191,111 @@ msgstr "Ce n'est pas votre classe."
 msgid "Give a list of accepted answers (text)."
 msgstr "Donnez une liste de réponses acceptées (texte)."
 
-#: apps/assessments/serializers.py:62
+#: apps/assessments/serializers.py:63
 msgid "Use at most 50 accepted answers of up to 200 characters each."
 msgstr "Utilisez au plus 50 réponses acceptées de 200 caractères maximum chacune."
 
-#: apps/assessments/serializers.py:303
+#: apps/assessments/serializers.py:304
 msgid "Only administrators can publish past papers."
 msgstr "Seuls les administrateurs peuvent publier des épreuves d'examen."
 
-#: apps/assessments/serializers.py:323
+#: apps/assessments/serializers.py:324
 msgid "A question appears twice."
 msgstr "Une question apparaît deux fois."
 
-#: apps/assessments/serializers.py:83
+#: apps/assessments/serializers.py:84
 msgid "Only administrators can add official past-paper questions."
 msgstr "Seuls les administrateurs peuvent ajouter des questions d'épreuves officielles."
 
-#: apps/assessments/serializers.py:108
+#: apps/assessments/serializers.py:109
 msgid "Students have already answered this question, so its answer can't change. Make a new question instead."
 msgstr "Des élèves ont déjà répondu à cette question : sa réponse ne peut plus changer. Créez plutôt une nouvelle question."
 
-#: apps/assessments/serializers.py:122
+#: apps/assessments/serializers.py:123
 msgid "Students have already answered this question, so its options can't change. Make a new question instead."
 msgstr "Des élèves ont déjà répondu à cette question : ses options ne peuvent plus changer. Créez plutôt une nouvelle question."
 
-#: apps/assessments/serializers.py:321
+#: apps/assessments/serializers.py:322
 msgid "Unknown or private questions: %(ids)s"
 msgstr "Questions inconnues ou privées : %(ids)s"
 
-#: apps/assessments/serializers.py:70
+#: apps/assessments/serializers.py:71
 msgid "Add at least two options."
 msgstr "Ajoutez au moins deux options."
 
-#: apps/assessments/serializers.py:73
+#: apps/assessments/serializers.py:74
 msgid "Mark at least one option as correct."
 msgstr "Indiquez au moins une option correcte."
 
-#: apps/assessments/serializers.py:75
+#: apps/assessments/serializers.py:76
 msgid "Only one option can be correct."
 msgstr "Une seule option peut être correcte."
 
-#: apps/assessments/serializers.py:77
+#: apps/assessments/serializers.py:78
 msgid "Multiple-choice questions need options."
 msgstr "Les questions à choix multiples ont besoin d'options."
 
-#: apps/assessments/serializers.py:81
+#: apps/assessments/serializers.py:82
 msgid "Numeric questions need an answer."
 msgstr "Les questions numériques ont besoin d'une réponse."
 
-#: apps/assessments/services.py:101
+#: apps/assessments/services.py:104
 msgid "This quiz has no questions yet."
 msgstr "Ce quiz n'a pas encore de questions."
 
-#: apps/assessments/services.py:146
-#: apps/tutor/services.py:244
+#: apps/assessments/services.py:149
+#: apps/tutor/services.py:247
 msgid "That question is not part of this attempt."
 msgstr "Cette question ne fait pas partie de cette tentative."
 
-#: apps/assessments/services.py:168
+#: apps/assessments/services.py:171
 msgid "You already checked this answer, so it can't be changed."
 msgstr "Vous avez déjà vérifié cette réponse : elle ne peut plus être modifiée."
 
-#: apps/assessments/services.py:234
+#: apps/assessments/services.py:237
 msgid "Answers are revealed after you submit in exam mode."
 msgstr "En mode examen, les réponses sont révélées après la remise."
 
-#: apps/assessments/services.py:303
+#: apps/assessments/services.py:306
 msgid "The student hasn't submitted yet."
 msgstr "L'élève n'a pas encore remis sa copie."
 
-#: apps/assessments/services.py:97
+#: apps/assessments/services.py:100
 msgid "You have used all your attempts for this quiz."
 msgstr "Vous avez utilisé toutes vos tentatives pour ce quiz."
 
-#: apps/assessments/services.py:134
-#: apps/assessments/services.py:154
+#: apps/assessments/services.py:137
+#: apps/assessments/services.py:157
 msgid "This attempt has already been submitted."
 msgstr "Cette tentative a déjà été remise."
 
-#: apps/assessments/services.py:137
+#: apps/assessments/services.py:140
 msgid "Time is up — your attempt was submitted automatically."
 msgstr "Le temps est écoulé : votre tentative a été remise automatiquement."
 
-#: apps/assessments/services.py:144
-#: apps/tutor/services.py:242
+#: apps/assessments/services.py:147
+#: apps/tutor/services.py:245
 msgid "Unknown question."
 msgstr "Question inconnue."
 
+#: apps/assessments/services.py:180
 #: apps/assessments/services.py:177
-#: apps/assessments/services.py:174
 msgid "Invalid option selected."
 msgstr "Option choisie non valide."
 
-#: apps/assessments/services.py:179
+#: apps/assessments/services.py:182
 msgid "Choose only one option."
 msgstr "Choisissez une seule option."
 
-#: apps/assessments/services.py:240
+#: apps/assessments/services.py:243
 msgid "Your teacher will mark this answer."
 msgstr "Votre enseignant corrigera cette réponse."
 
-#: apps/assessments/services.py:299
+#: apps/assessments/services.py:302
 msgid "Marks must be between 0 and %(max)s."
 msgstr "La note doit être comprise entre 0 et %(max)s."
 
-#: apps/assessments/services.py:189
+#: apps/assessments/services.py:192
 #: apps/schools/billing.py:321
 msgid "Enter a number."
 msgstr "Saisissez un nombre."
@@ -393,7 +393,7 @@ msgid "Quiz not found."
 msgstr "Quiz introuvable."
 
 #: apps/classroom/views.py:112
-#: apps/tutor/services.py:219
+#: apps/tutor/services.py:222
 msgid "Lesson not found."
 msgstr "Leçon introuvable."
 
@@ -484,6 +484,18 @@ msgstr "Saisissez le code à 6 chiffres actuel de votre application d'authentifi
 msgid "Turn on two-factor authentication in your Iga profile before using the admin site."
 msgstr "Activez la vérification en deux étapes dans votre profil Iga avant d'utiliser le site d'administration."
 
+#: apps/core/errors.py:19
+msgid "This request is too large."
+msgstr "Cette requête est trop volumineuse."
+
+#: apps/core/errors.py:21
+msgid "This request has too many fields or files."
+msgstr "Cette requête contient trop de champs ou de fichiers."
+
+#: apps/core/errors.py:23
+msgid "Bad request."
+msgstr "Requête invalide."
+
 #: apps/core/permissions.py:40
 msgid "Only students can do this."
 msgstr "Seuls les élèves peuvent faire cela."
@@ -572,7 +584,7 @@ msgstr "Saisissez un identifiant valide."
 
 #: apps/core/validation.py:80
 #: apps/core/validation.py:78
-#: apps/schools/views.py:603
+#: apps/schools/views.py:602
 msgid "Enter a whole number."
 msgstr "Saisissez un nombre entier."
 
@@ -784,51 +796,51 @@ msgstr "L'abonnement %(app)s de %(school)s s'est terminé le %(date)s. Les élè
 msgid "Unknown payment provider."
 msgstr "Prestataire de paiement inconnu."
 
-#: apps/schools/serializers.py:205
+#: apps/schools/serializers.py:206
 msgid "Another school in this district already has this name."
 msgstr "Une autre école de ce district porte déjà ce nom."
 
-#: apps/schools/views.py:253
+#: apps/schools/views.py:252
 msgid "This payment belongs to another school."
 msgstr "Ce paiement appartient à une autre école."
 
-#: apps/schools/views.py:236
+#: apps/schools/views.py:235
 msgid "Online payment isn't set up yet. Please pay by bank transfer and contact the Iga team."
 msgstr "Le paiement en ligne n'est pas encore disponible. Veuillez payer par virement bancaire et contacter l'équipe Iga."
 
-#: apps/schools/views.py:293
+#: apps/schools/views.py:292
 msgid "Test payments are switched off."
 msgstr "Les paiements de test sont désactivés."
 
-#: apps/schools/views.py:296
+#: apps/schools/views.py:295
 msgid "This payment can't be completed here."
 msgstr "Ce paiement ne peut pas être finalisé ici."
 
-#: apps/schools/views.py:452
+#: apps/schools/views.py:451
 msgid "Send a key of 8 to 80 letters, digits, - or _."
 msgstr "Envoyez une clé de 8 à 80 caractères : lettres, chiffres, - ou _."
 
-#: apps/schools/views.py:125
+#: apps/schools/views.py:124
 msgid "School administrators change school through the Iga team."
 msgstr "Les administrateurs d'école changent d'école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:134
+#: apps/schools/views.py:133
 msgid "School administrators leave a school through the Iga team."
 msgstr "Les administrateurs d'école quittent une école en passant par l'équipe Iga."
 
-#: apps/schools/views.py:610
+#: apps/schools/views.py:609
 msgid "Enter a date as YYYY-MM-DD."
 msgstr "Saisissez une date au format AAAA-MM-JJ."
 
-#: apps/schools/views.py:516
+#: apps/schools/views.py:515
 msgid "No ledger entry has that number."
 msgstr "Aucune écriture du registre ne porte ce numéro."
 
-#: apps/schools/views.py:443
+#: apps/schools/views.py:442
 msgid "Unknown action."
 msgstr "Action inconnue."
 
-#: apps/schools/views.py:438
+#: apps/schools/views.py:437
 msgid "Only a school waiting for verification, with no payments, can be rejected."
 msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
 
@@ -841,86 +853,86 @@ msgstr "Une simulation externe a besoin d'une adresse complète en https://."
 msgid "Not found."
 msgstr "Introuvable."
 
-#: apps/tutor/services.py:522
+#: apps/tutor/services.py:525
 msgid "Santa can't answer just now. Try again in a minute."
 msgstr "Santa ne peut pas répondre pour le moment. Réessayez dans une minute."
 
-#: apps/tutor/services.py:314
+#: apps/tutor/services.py:317
 msgid "Santa is switched off while you have an exam or timed test open (“%(quiz)s”). Submit it to use Santa again."
 msgstr "Santa est désactivé tant que vous avez un examen ou un test chronométré ouvert (« %(quiz)s »). Rendez-le pour utiliser à nouveau Santa."
 
-#: apps/tutor/services.py:515
+#: apps/tutor/services.py:518
 msgid "Santa's AI model is not installed on this school's server yet."
 msgstr "Le modèle d'IA de Santa n'est pas encore installé sur le serveur de cette école."
 
-#: apps/tutor/services.py:517
+#: apps/tutor/services.py:520
 msgid "Santa is still waking up. Ask again in a minute for a full answer."
 msgstr "Santa se réveille encore. Reposez votre question dans une minute pour avoir une réponse complète."
 
-#: apps/tutor/services.py:519
+#: apps/tutor/services.py:522
 msgid "Santa is helping many students right now. Ask again in a minute for a full answer."
 msgstr "Santa aide beaucoup d'élèves en ce moment. Reposez votre question dans une minute pour avoir une réponse complète."
 
-#: apps/tutor/services.py:521
+#: apps/tutor/services.py:524
 msgid "This is too long for Santa. Ask a shorter question, or start a new chat."
 msgstr "C'est trop long pour Santa. Posez une question plus courte, ou commencez une nouvelle discussion."
 
-#: apps/tutor/services.py:545
+#: apps/tutor/services.py:548
 msgid "If you feel unsafe or someone is hurting you, please talk to a trusted adult or a teacher today. In Rwanda you can call the free child helpline 116."
 msgstr "Si vous ne vous sentez pas en sécurité ou si quelqu'un vous fait du mal, parlez dès aujourd'hui à un adulte de confiance ou à un enseignant. Au Rwanda, vous pouvez appeler gratuitement la ligne d'aide à l'enfance 116."
 
-#: apps/tutor/services.py:99
+#: apps/tutor/services.py:100
 msgid "Must be a list of messages."
 msgstr "Doit être une liste de messages."
 
-#: apps/tutor/services.py:112
+#: apps/tutor/services.py:115
 msgid "The history must end with a reply from Santa."
 msgstr "L'historique doit se terminer par une réponse de Santa."
 
-#: apps/tutor/services.py:210
+#: apps/tutor/services.py:213
 msgid "Unknown subject."
 msgstr "Matière inconnue."
 
-#: apps/tutor/services.py:232
+#: apps/tutor/services.py:235
 msgid "Attempt not found."
 msgstr "Tentative introuvable."
 
-#: apps/tutor/services.py:237
+#: apps/tutor/services.py:240
 msgid "Santa is switched off during exams and timed tests. Good luck!"
 msgstr "Santa est désactivé pendant les examens et les tests chronométrés. Bonne chance !"
 
-#: apps/tutor/services.py:307
+#: apps/tutor/services.py:310
 msgid "Write a question for Santa."
 msgstr "Écrivez une question pour Santa."
 
-#: apps/tutor/services.py:530
+#: apps/tutor/services.py:533
 msgid "I couldn't find this in your lessons. Try other words, open the lesson on this topic, or ask your teacher."
 msgstr "Je n'ai pas trouvé cela dans vos leçons. Essayez d'autres mots, ouvrez la leçon sur ce sujet ou demandez à votre enseignant."
 
-#: apps/tutor/services.py:533
+#: apps/tutor/services.py:536
 msgid "Here is what your lessons say:"
 msgstr "Voici ce que disent vos leçons :"
 
-#: apps/tutor/services.py:595
+#: apps/tutor/services.py:598
 msgid "Santa is still answering your last question. Wait for it to finish, or stop it."
 msgstr "Santa répond encore à votre dernière question. Attendez la fin de la réponse ou arrêtez-la."
 
-#: apps/tutor/services.py:109
+#: apps/tutor/services.py:112
 msgid "Messages must alternate between the student and Santa."
 msgstr "Les messages doivent alterner entre l'élève et Santa."
 
-#: apps/tutor/services.py:309
+#: apps/tutor/services.py:312
 msgid "Please keep questions under %(n)s characters."
 msgstr "Veuillez limiter vos questions à %(n)s caractères."
 
-#: apps/tutor/services.py:647
+#: apps/tutor/services.py:650
 msgid "I can't help with that one. Ask about your lessons or a practice question, or ask your teacher."
 msgstr "Je ne peux pas vous aider sur ce point. Posez une question sur vos leçons ou sur un exercice, ou demandez à votre enseignant."
 
-#: apps/tutor/services.py:644
+#: apps/tutor/services.py:647
 msgid "(Santa ran out of space. Ask me to continue.)"
 msgstr "(Santa n'a plus de place. Demandez-moi de continuer.)"
 
-#: apps/tutor/services.py:632
+#: apps/tutor/services.py:635
 msgid "(Santa stopped before finishing. Ask again, or check your lessons.)"
 msgstr "(Santa s'est arrêté avant la fin. Reposez la question ou consultez vos leçons.)"

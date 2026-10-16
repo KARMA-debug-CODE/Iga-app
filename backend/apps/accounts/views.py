@@ -14,7 +14,6 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenBackendError, TokenError
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
@@ -26,6 +25,7 @@ from apps.classroom.services import follow_grade
 from apps.core import security_log
 from apps.core.audit import client_ip
 from apps.core.security_log import fingerprint
+from apps.core.throttles import ScopedRateThrottle
 
 from . import enumeration, lockout, password_reset
 from .authentication import PasswordChangeRequired

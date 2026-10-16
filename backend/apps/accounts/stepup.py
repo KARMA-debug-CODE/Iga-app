@@ -12,11 +12,11 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.core import security_log
+from apps.core.throttles import ScopedRateThrottle
 
 from .security import SESSION_VERSION_CLAIM, verify_totp
 from .throttles import AuthIPThrottle

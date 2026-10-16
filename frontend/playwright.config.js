@@ -34,7 +34,7 @@ export default defineConfig({
     {
       command: `cd ../backend && ${backendCmd}`,
       url: `http://127.0.0.1:${apiPort}/api/health/`,
-      env: { DATABASE_URL: "sqlite:///e2e.sqlite3", DJANGO_DEBUG: "true", THROTTLE_AUTH: "1000/min", THROTTLE_LOGIN: "1000/min" },
+      env: { DATABASE_URL: "sqlite:///e2e.sqlite3", DJANGO_DEBUG: "true", THROTTLE_AUTH: "1000/min", THROTTLE_LOGIN: "1000/min", THROTTLE_ANON: "10000/min", THROTTLE_USER: "10000/min" },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

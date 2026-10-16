@@ -128,7 +128,8 @@ class Scratch:
         env = {name: os.environ[name] for name in ("PATH", "HOME", "LANG", "TMPDIR") if name in os.environ}
         env.update(
             DJANGO_SETTINGS_MODULE="config.settings",
-            DJANGO_SECRET_KEY="db-roles-test-secret-key-that-is-long-enough-0123456789",
+            # A real deployment refuses a secret key written in the repository (iga.E002), so a fresh one.
+            DJANGO_SECRET_KEY=secrets.token_urlsafe(50),
             DJANGO_DEBUG="false",
             # Required with DEBUG off (encrypted fields): the key this test run uses, never one in the repository.
             FIELD_ENCRYPTION_KEYS=os.environ["FIELD_ENCRYPTION_KEYS"],

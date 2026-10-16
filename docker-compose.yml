@@ -1,14 +1,18 @@
 # Local trial of the production setup: PostgreSQL + Redis + Django (gunicorn) + nginx, plus Iga's code
-# runner for C++ and Java in the code playground, and Santa's model server (Iga's own AI tutor).
+# runner for C++ and Java in the code playground, and (optional) Santa's model server (Iga's own AI tutor).
 #   cp .env.docker.example .env      # then fill in DJANGO_SECRET_KEY (see the file)
-#   docker compose up --build        # the first start downloads Santa's model once (about 4.5 GB)
+#   docker compose up --build        # the app, without Santa's model (Santa answers from the lessons)
+#   docker compose --profile santa up --build -d   # with Santa's model (or COMPOSE_PROFILES=santa in .env);
+#                                                  # its first start downloads the model once (about 4.5 GB)
 #   docker compose exec backend python manage.py load_curriculum
 #   docker compose exec -e DJANGO_DEBUG=true backend python manage.py seed_demo   # optional demo accounts (local trial only)
 # Then open http://localhost:8080
 #
 # For a real deployment, use strong secrets in .env, serve over HTTPS and remove
 # HTTPS=false from .env (HTTPS defaults to on), and set a random CODE_RUNNER_TOKEN, SANTA_API_KEY,
-# POSTGRES_PASSWORD, POSTGRES_OWNER_PASSWORD and POSTGRES_APP_PASSWORD.
+# POSTGRES_PASSWORD, POSTGRES_OWNER_PASSWORD and POSTGRES_APP_PASSWORD. The defaults below are public:
+# with DJANGO_DEBUG off the backend refuses to start with them (check iga.E002) unless this is a local
+# trial (HTTPS=false and DJANGO_ALLOWED_HOSTS only localhost).
 services:
   # Three database roles: "iga" is the superuser, used only by the migrate service below to set up the
   # other two; iga_owner owns the tables and runs the migrations; iga_app, the only role the backend and
@@ -38,16 +42,21 @@ services:
       FIELD_ENCRYPTION_KEYS: ${FIELD_ENCRYPTION_KEYS:?Set FIELD_ENCRYPTION_KEYS in .env - see .env.docker.example}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      # nginx serves the app and the API from one origin, so no other site needs (or gets) CORS access.
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       # The app role: rows only (no superuser, no CREATE/ALTER/DROP/TRUNCATE, no new roles or databases).
       DATABASE_URL: postgres://iga_app:${POSTGRES_APP_PASSWORD:-iga-local-app}@db:5432/iga
       REDIS_URL: redis://redis:6379/0
       HTTPS: ${HTTPS:-true}
-      # nginx in front appends the client address to X-Forwarded-For.
+      SECURE_HSTS_PRELOAD: ${HSTS_PRELOAD:-false}
+      # Always 1 with the bundled nginx: nginx works out the client's address (NGINX_TRUSTED_PROXIES on the
+      # web service) and passes exactly that one in X-Forwarded-For.
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
       DJANGO_ADMIN_PATH: ${DJANGO_ADMIN_PATH:-}
-      # Santa, Iga's own AI tutor: the "santa" service below. Set SANTA_URL= (empty) in .env to run without
-      # the model; Santa then answers from the lessons only.
+      # Santa, Iga's own AI tutor: the "santa" service below, started only with the "santa" profile. Without
+      # it the host "santa" doesn't resolve and the app says the model is not installed; Santa then answers
+      # from the lessons only (as it does with SANTA_URL= (empty) in .env).
       SANTA_URL: ${SANTA_URL-http://santa:8080}
       SANTA_API_KEY: ${SANTA_API_KEY:-iga-local-santa}
       SANTA_MAX_TOKENS: ${SANTA_MAX_TOKENS:-600}
@@ -83,8 +92,9 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Iga <no-reply@iga.rw>}
+      # gunicorn (backend/gunicorn.conf.py has the rest): processes, and threads per process, so slow calls
+      # (Santa's answers, C++/Java runs) don't hold up other requests.
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
-      # Threads per worker, so slow calls (Santa's answers, C++/Java runs) don't hold up other requests.
       GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
     volumes:
       - media:/app/media
@@ -153,8 +163,11 @@ services:
   # server set SANTA_MODEL=google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0 and SANTA_MEMORY_LIMIT=5g in .env.
   # Once the model is downloaded, SANTA_OFFLINE=true keeps it from ever going online. README: "Santa".
   # The image is the CPU build for amd64 and arm64, and checks itself (HEALTHCHECK on :8080/health).
+  # Optional: it starts only with `docker compose --profile santa up` (or COMPOSE_PROFILES=santa in .env), so
+  # the rest of the app starts even where its image or model can't be downloaded.
   santa:
     image: ghcr.io/ggml-org/llama.cpp:server-b11151
+    profiles: [santa]
     restart: unless-stopped
     command:
       - -hf
@@ -198,6 +211,35 @@ services:
     build: ./frontend
     ports:
       - "8080:80"
+    # nginx's settings: frontend/nginx/defaults.envsh has every one and its default (empty = the default).
+    environment:
+      # Who may say who the client is: empty = nobody (the client is whoever connects), "cloudflare", and/or
+      # your load balancer's addresses. docs/CLOUDFLARE.md.
+      NGINX_TRUSTED_PROXIES: ${NGINX_TRUSTED_PROXIES:-}
+      NGINX_REAL_IP_HEADER: ${NGINX_REAL_IP_HEADER:-}
+      # true = drop requests that didn't come through those proxies.
+      NGINX_ONLY_FROM_TRUSTED_PROXIES: ${NGINX_ONLY_FROM_TRUSTED_PROXIES:-false}
+      # HTTPS (as for Django): redirect plain HTTP and send HSTS. HTTPS=false only for the local trial.
+      NGINX_FORCE_HTTPS: ${HTTPS:-true}
+      NGINX_HSTS_PRELOAD: ${HSTS_PRELOAD:-false}
+      # The app's Content-Security-Policy (empty = the default in frontend/nginx/defaults.envsh).
+      NGINX_CSP: ${NGINX_CSP:-}
+      # Per-address rate limits: sign-in and the like, costly routes (Santa, C++/Java runs, payments), the rest.
+      NGINX_RATE_AUTH: ${NGINX_RATE_AUTH:-}
+      NGINX_BURST_AUTH: ${NGINX_BURST_AUTH:-}
+      NGINX_RATE_COSTLY: ${NGINX_RATE_COSTLY:-}
+      NGINX_BURST_COSTLY: ${NGINX_BURST_COSTLY:-}
+      NGINX_RATE_API: ${NGINX_RATE_API:-}
+      NGINX_BURST_API: ${NGINX_BURST_API:-}
+      NGINX_CONN_PER_IP: ${NGINX_CONN_PER_IP:-}
+      NGINX_CONN_PER_IP_TUTOR: ${NGINX_CONN_PER_IP_TUTOR:-}
+      # Slow clients and request sizes.
+      NGINX_CLIENT_HEADER_TIMEOUT: ${NGINX_CLIENT_HEADER_TIMEOUT:-}
+      NGINX_CLIENT_BODY_TIMEOUT: ${NGINX_CLIENT_BODY_TIMEOUT:-}
+      NGINX_SEND_TIMEOUT: ${NGINX_SEND_TIMEOUT:-}
+      NGINX_KEEPALIVE_TIMEOUT: ${NGINX_KEEPALIVE_TIMEOUT:-}
+      NGINX_MAX_BODY_API: ${NGINX_MAX_BODY_API:-}
+      NGINX_MAX_BODY_UPLOAD: ${NGINX_MAX_BODY_UPLOAD:-}
     volumes:
       - media:/srv/media:ro
     depends_on:

@@ -61,6 +61,9 @@ admin.site.site_title = settings.APP_NAME
 
 urlpatterns = [path("api/", include(api))]
 
+# Requests refused before a view runs (a body over the size limits, ...) get a JSON answer.
+handler400 = "apps.core.errors.bad_request"
+
 # Off unless enabled, and in production only at its secret path (see apps/core/admin_login.py).
 ADMIN_URL_PREFIX = admin_login.admin_url_prefix()
 if ADMIN_URL_PREFIX:

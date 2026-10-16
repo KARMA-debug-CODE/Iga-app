@@ -1,0 +1,50 @@
+# Defaults for the web image's settings (docker-compose.yml and .env.docker.example document them). The image's
+# entrypoint reads this file before it fills in ../nginx.conf, so any of these can be set in the environment.
+# Rates are per client address. A whole school often shares one public address, so they are generous:
+# they stop floods from one address, while Django's own limits (per account and per signed-in user) do
+# the precise work. Raise them for a big school behind one address; only an upstream network service
+# (Cloudflare, docs/CLOUDFLARE.md) can absorb attacks from many addresses.
+
+# Sign-in, sign-up, password reset, 2FA, step-up and password changes (and the Django admin).
+: "${NGINX_RATE_AUTH:=30r/m}"
+: "${NGINX_BURST_AUTH:=40}"
+# Costly routes: Santa's answers, C++/Java runs, payments.
+: "${NGINX_RATE_COSTLY:=60r/m}"
+: "${NGINX_BURST_COSTLY:=30}"
+# Every other API request.
+: "${NGINX_RATE_API:=30r/s}"
+: "${NGINX_BURST_API:=300}"
+# Requests in progress at once from one address (idle keep-alive connections don't count), and for
+# Santa, whose answers stream for up to a few minutes each.
+: "${NGINX_CONN_PER_IP:=200}"
+: "${NGINX_CONN_PER_IP_TUTOR:=20}"
+# Slow clients: the most time between two reads of the request line and headers (whole), of the body, and
+# of the answer, and how long an idle keep-alive connection stays open.
+: "${NGINX_CLIENT_HEADER_TIMEOUT:=10s}"
+: "${NGINX_CLIENT_BODY_TIMEOUT:=15s}"
+: "${NGINX_SEND_TIMEOUT:=30s}"
+: "${NGINX_KEEPALIVE_TIMEOUT:=20s}"
+# Request bodies: JSON API requests (Django refuses more than DATA_UPLOAD_MAX_MEMORY_SIZE, 2 MB, too) and
+# upload routes (resources, the Django admin's past papers; Django allows UPLOAD_MAX_MB, 20 MB, per file).
+: "${NGINX_MAX_BODY_API:=2m}"
+: "${NGINX_MAX_BODY_UPLOAD:=25m}"
+# HTTPS: "true" redirects plain HTTP to HTTPS and sends HSTS (as Django does with HTTPS on). The local
+# trial over http://localhost sets it to false (HTTPS=false in .env).
+: "${NGINX_FORCE_HTTPS:=true}"
+: "${NGINX_HSTS_MAX_AGE:=31536000}"
+# true adds "preload" to HSTS (with SECURE_HSTS_PRELOAD=true for Django): only once every subdomain is HTTPS.
+: "${NGINX_HSTS_PRELOAD:=false}"
+
+# The app's Content-Security-Policy: its own scripts only ('wasm-unsafe-eval' lets Python and SQL compile their
+# WebAssembly; no eval of JavaScript, no inline scripts); GeoGebra's loader and the files it fetches; frames only
+# for the HTML playground's preview (this site) and the PhET and GeoGebra labs; the API on this site; no plugins,
+# no <base>, forms only to this site, and no other site may frame the app. Styles allow 'unsafe-inline' for the
+# style attributes that maths (KaTeX), the code editor and the labs set. Replace it only to add a host.
+: "${NGINX_CSP:=default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.geogebra.org https://cdn.geogebra.org; style-src 'self' 'unsafe-inline' https://www.geogebra.org https://cdn.geogebra.org; img-src 'self' data: blob: https://www.geogebra.org https://cdn.geogebra.org; font-src 'self' data: https://www.geogebra.org https://cdn.geogebra.org; connect-src 'self' https://www.geogebra.org https://cdn.geogebra.org; frame-src 'self' https://phet.colorado.edu https://www.geogebra.org; worker-src 'self'; media-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'}"
+
+export NGINX_CSP NGINX_RATE_AUTH NGINX_BURST_AUTH NGINX_RATE_COSTLY NGINX_BURST_COSTLY NGINX_RATE_API NGINX_BURST_API \
+    NGINX_CONN_PER_IP NGINX_CONN_PER_IP_TUTOR NGINX_CLIENT_HEADER_TIMEOUT NGINX_CLIENT_BODY_TIMEOUT \
+    NGINX_SEND_TIMEOUT NGINX_KEEPALIVE_TIMEOUT NGINX_MAX_BODY_API NGINX_MAX_BODY_UPLOAD NGINX_FORCE_HTTPS \
+    NGINX_HSTS_MAX_AGE NGINX_HSTS_PRELOAD
+# Only these NGINX_ variables are filled in; nginx's own ($host, $remote_addr, ...) are left alone.
+export NGINX_ENVSUBST_FILTER="^NGINX_"

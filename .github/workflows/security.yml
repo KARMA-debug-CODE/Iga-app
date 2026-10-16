@@ -1,0 +1,82 @@
+name: Security
+
+# Known vulnerabilities in Iga's dependencies and images, and secrets in the git history. Runs on every
+# change and every Monday, so an advisory published after a release still turns this red.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependencies:
+    name: Dependencies (pip-audit, npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pip install "pip-audit>=2.10,<3"
+      # The backend as the image installs it (requirements.txt resolved to today's versions), plus the
+      # development tools. PyPI's advisories carry no severity, so any known vulnerability fails the job.
+      # An accepted one is skipped with --ignore-vuln <ID> and a comment saying why.
+      - name: Python (backend)
+        run: pip-audit --strict -r backend/requirements.txt -r backend/requirements-dev.txt
+      # The frontend's locked versions: high or critical fails; lower ones are listed, and Dependabot
+      # (.github/dependabot.yml) opens the upgrades. The code runner has no third-party Python packages.
+      - name: npm (frontend)
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+  images:
+    name: Images (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the images Iga ships, from freshly pulled bases
+        run: |
+          docker build --pull -q -t iga-backend:scan backend
+          docker build --pull -q -t iga-web:scan frontend
+      # OS packages and libraries with a fixed version available: high or critical fails.
+      - name: Scan the backend and web images
+        run: |
+          for image in iga-backend:scan iga-web:scan; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.67.2 image \
+              --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress "$image"
+          done
+      # Images Iga runs as they are published (the database, Redis), and the code runner (official GCC and
+      # OpenJDK images, programs run as unprivileged users without new privileges or network): reported
+      # here for the next rebuild, not failed, as only their publishers can fix them.
+      - name: Report the other images
+        run: |
+          docker build --pull -q -t iga-coderunner:scan coderunner
+          for image in iga-coderunner:scan postgres:16-alpine redis:7-alpine; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.67.2 image \
+              --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 0 --no-progress "$image"
+          done
+
+  secrets:
+    name: Secrets in the git history (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Every commit, with gitleaks' default rules; .gitleaks.toml lists the test suite's made-up values.
+      # As the checkout's owner, so git trusts the folder inside the container.
+      - run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.28.0 \
+            git /repo --config /repo/.gitleaks.toml --redact --no-banner --log-opts="--all"

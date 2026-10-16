@@ -10,6 +10,7 @@ class CoreConfig(AppConfig):
 
         from . import (
             checks,  # noqa: F401  (registers Iga's system checks)
+            platform_checks,  # noqa: F401  (registers the platform's system checks)
             text,
         )
         from .converters import IdConverter

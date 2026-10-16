@@ -606,7 +606,7 @@ def answer(prepared, stream=False):
     try:
         yield {"type": "start"}
         known = llm.cached_health()
-        if not llm.installed():
+        if not llm.installed() or known == "not_installed":
             fallback = "not_installed"
         elif known in ("loading", "unreachable"):
             fallback = "loading" if known == "loading" else "unavailable"

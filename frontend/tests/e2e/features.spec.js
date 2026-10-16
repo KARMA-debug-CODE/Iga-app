@@ -225,6 +225,29 @@ test("Python asks for input in the console like a real interpreter, and indents 
   await expect(console_).toContainText(/0\s+2\s+4/);
 });
 
+test("the HTML playground shows the page and runs its scripts in a sandboxed preview", async ({ page }) => {
+  await login(page, "aline");
+  await page.goto("/playground");
+  const editor = page.getByLabel(/code editor/i).first();
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.press("Delete");
+  await page.keyboard.insertText(
+    '<h1 id="title">Muraho</h1><p id="out"></p>' +
+      "<script>document.getElementById('out').textContent = 'answer ' + (6 * 7);" +
+      "try { document.cookie; localStorage.length; document.getElementById('out').textContent += ' with storage'; } catch (e) {}</script>",
+  );
+  await page.getByRole("button", { name: /^run$/i }).click();
+  const preview = page.frameLocator('iframe[title="Preview"]');
+  await expect(preview.locator("#title")).toHaveText("Muraho");
+  // The script ran, and the sandbox kept it away from Iga's storage.
+  await expect(preview.locator("#out")).toHaveText("answer 42");
+  // Running again shows the new version.
+  await page.keyboard.insertText("<p id=\"again\">again</p>");
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(preview.locator("#again")).toHaveText("again");
+});
+
 test("Python programs can't use the student's session or the app's offline data", async ({ page }) => {
   // Lessons' "python-run" blocks are written by teachers and run in a worker with the app's origin: a
   // program must not be able to ask the API for a new session with the student's cookie, read the

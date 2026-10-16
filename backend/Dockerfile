@@ -11,9 +11,9 @@ RUN pip install -r requirements.txt
 
 COPY . .
 # collectstatic needs settings to load; production settings refuse short keys and a missing field
-# encryption key, so the build uses a long placeholder and a throwaway random key. The real keys come
-# from the environment when the container runs.
-RUN DJANGO_DEBUG=false DJANGO_SECRET_KEY=build-time-placeholder-only-used-for-collectstatic \
+# encryption key, so the build uses throwaway random ones (never a fixed value: anything written here is
+# public). The real keys come from the environment when the container runs.
+RUN DJANGO_DEBUG=false DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')" \
     FIELD_ENCRYPTION_KEYS="$(python -c 'import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')" \
     python manage.py collectstatic --noinput \
     && useradd --create-home --uid 1000 iga \
@@ -27,4 +27,5 @@ EXPOSE 8000
 # owner role, so here (as the app role, which may not change the schema) this only runs the system checks
 # that stop a misconfigured production start. Load content once with:
 #   docker compose exec backend python manage.py load_curriculum
-CMD ["sh", "-c", "python manage.py migrate --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} --threads ${GUNICORN_THREADS:-4} --timeout 60 --access-logfile -"]
+# gunicorn's settings (workers, threads, timeouts, request caps) are in gunicorn.conf.py.
+CMD ["sh", "-c", "python manage.py migrate --noinput && exec gunicorn config.wsgi:application"]
