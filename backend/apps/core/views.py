@@ -20,7 +20,9 @@ from apps.assessments.services import attempts_visible_to, markable_answers, vis
 from apps.classroom.models import Assignment, Classroom
 from apps.classroom.views import AssignmentSerializer, assignment_statuses
 from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 from apps.core.utils import request_language
+from apps.curriculum.downloads import signed_resource_url
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject, localized_lesson_titles
 from apps.curriculum.views import visible_lessons
 from apps.schools.access import has_premium
@@ -317,7 +319,7 @@ class ReviewDecisionSerializer(serializers.Serializer):
     id = serializers.IntegerField(min_value=1)
     # A real true/false: the text "false" must not approve anything.
     approve = serializers.BooleanField()
-    note = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+    note = CleanCharField(max_length=500, required=False, allow_blank=True, default="")
 
 
 class ReviewViewSet(viewsets.ViewSet):
@@ -367,7 +369,8 @@ class ReviewViewSet(viewsets.ViewSet):
                         "grade": r.grade,
                         "author": r.uploaded_by.display_name if r.uploaded_by else None,
                         "updated_at": r.created_at,
-                        "url": r.url,
+                        # An uploaded file opens through a signed, access-checked link.
+                        "url": r.url or (signed_resource_url(request, r, request.user) if r.file else ""),
                     }
                     for r in resources
                 ],

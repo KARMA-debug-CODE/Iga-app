@@ -5,6 +5,8 @@ A "real deployment" is DEBUG off with HTTPS on. A local `docker compose` trial o
 http://localhost (HTTPS=false) may keep the well-known local secrets and demo accounts.
 """
 
+from pathlib import Path
+
 from django.conf import settings
 from django.core.checks import Error, Tags, Warning, register
 from django.db import DatabaseError
@@ -139,5 +141,34 @@ def demo_accounts_check(app_configs, databases=None, **kwargs):
             + ".",
             hint="Run: python manage.py remove_demo_accounts (it deactivates them).",
             id="iga.E003",
+        )
+    ]
+
+
+def _served_folders():
+    """Folders whose files Django (whitenoise) serves to anyone as static files."""
+    folders = [settings.STATIC_ROOT, getattr(settings, "WHITENOISE_ROOT", None)]
+    for entry in getattr(settings, "STATICFILES_DIRS", []):
+        folders.append(entry[1] if isinstance(entry, (list, tuple)) else entry)
+    return [Path(folder).resolve() for folder in folders if folder]
+
+
+@register()
+def media_root_check(app_configs, **kwargs):
+    """Uploads must stay out of every folder served as static files, where they would be public and
+    skip the access checks and safe headers of apps/core/media.py."""
+    if not settings.MEDIA_ROOT:
+        return [Error("MEDIA_ROOT is not set.", hint="Point MEDIA_ROOT at a folder of its own for uploads.", id="iga.E010")]
+    media = Path(settings.MEDIA_ROOT).resolve()
+    clashes = [
+        str(folder) for folder in _served_folders() if media == folder or folder in media.parents or media in folder.parents
+    ]
+    if not clashes:
+        return []
+    return [
+        Error(
+            f"MEDIA_ROOT ({media}) overlaps a folder served as static files: {', '.join(clashes)}.",
+            hint="Keep uploads in a folder of their own, outside STATIC_ROOT, STATICFILES_DIRS and WHITENOISE_ROOT.",
+            id="iga.E010",
         )
     ]

@@ -329,6 +329,14 @@ def test_checkout_ignores_a_clients_amount_plan_and_duration(client_for, lycee, 
     assert lycee.paid_until is None
 
 
+@pytest.mark.parametrize("link", ["javascript:alert(document.domain)", "data:text/html,x", "http://checkout.example/pay"])
+def test_a_checkout_link_that_is_not_https_never_reaches_the_browser(client_for, lycee_admin, fw, link):
+    # The browser goes to whatever page the provider names: it must be an https page.
+    fw["responses"]["/payments"] = {"status": "success", "data": {"link": link}}
+    start = client_for(lycee_admin).post("/api/billing/checkout/", {"months": 1, "currency": "USD"}, format="json")
+    assert start.status_code >= 500 and "checkout_url" not in start.data
+
+
 @pytest.mark.parametrize(
     "body",
     [

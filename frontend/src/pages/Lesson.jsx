@@ -10,6 +10,7 @@ import SimEmbed from "../components/SimEmbed";
 import TutorPanel from "../components/TutorPanel";
 import { Loader, useToast } from "../components/ui";
 import { useApi } from "../hooks";
+import { safeUrl } from "../safeUrl";
 import { LANGUAGES, useI18n } from "../i18n";
 
 export default function Lesson() {
@@ -87,9 +88,9 @@ export default function Lesson() {
             </div>
             {lesson.summary && <p className="alert">{lesson.summary}</p>}
 
-            {lesson.video_url && (
+            {safeUrl(lesson.video_url) && (
               <div className="sim-frame">
-                <a className="sim-placeholder" href={lesson.video_url} target="_blank" rel="noopener noreferrer">
+                <a className="sim-placeholder" href={safeUrl(lesson.video_url)} target="_blank" rel="noopener noreferrer">
                   <Icon name="video" size={36} strokeWidth={1.6} /> {t("learn.watchVideo")}
                 </a>
               </div>

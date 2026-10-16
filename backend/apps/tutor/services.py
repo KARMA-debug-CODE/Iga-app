@@ -29,6 +29,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 
 from apps.assessments import services as assessment_services
 from apps.assessments.models import Attempt, Question, Quiz
+from apps.core.text import clean_text
 from apps.curriculum.models import Subject
 from apps.curriculum.views import visible_lessons
 from apps.schools import access
@@ -135,7 +136,7 @@ def clean_history(history, user=None):
         role = item.get("role") if isinstance(item, dict) else None
         content = item.get("content") if isinstance(item, dict) else None
         expected = "user" if i % 2 == 0 else "assistant"
-        if role != expected or not isinstance(content, str) or not content.strip():
+        if role != expected or not isinstance(content, str) or not clean_text(content, multiline=True).strip():
             raise ValidationError({"history": _("Messages must alternate between the student and Santa.")})
         cleaned.append({"role": role, "content": content})
     if cleaned and cleaned[-1]["role"] != "assistant":
@@ -147,7 +148,12 @@ def clean_history(history, user=None):
         kept = [pair for pair in pairs if genuine(pair[1]["content"])]
         dropped = len(pairs) - len(kept)
         cleaned = [message for pair in kept for message in pair]
-    cleaned = [{"role": m["role"], "content": guard.neutralise(m["content"])[:HISTORY_MESSAGE_CHARS]} for m in cleaned]
+    # Checked against the log as Santa wrote them, then cleaned: invisible "tag" letters and direction marks
+    # could hide instructions for the model (clean_text), and no turn may pose as the app (guard.py).
+    cleaned = [
+        {"role": m["role"], "content": guard.neutralise(clean_text(m["content"], multiline=True))[:HISTORY_MESSAGE_CHARS]}
+        for m in cleaned
+    ]
     while len(cleaned) > 2 and sum(len(m["content"]) for m in cleaned) > HISTORY_CHARS:
         cleaned = cleaned[2:]
     return cleaned, dropped

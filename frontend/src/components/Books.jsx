@@ -1,6 +1,7 @@
 // Books for a lesson or a unit: the official REB textbook first, then free open textbooks.
 // They are links to the publishers' own sites, so they need internet (they are not saved offline).
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 import { Icon } from "./Icon";
 
 // Licences that books.json repeats, shown in the reader's language; any other licence is shown as written.
@@ -46,7 +47,7 @@ export default function BookList({ books, unit }) {
           ].filter(Boolean);
           return (
             <li key={book.id}>
-              <a className="list-link" href={book.file_url || book.url} target="_blank" rel="noopener noreferrer">
+              <a className="list-link" href={safeUrl(book.file_url || book.url)} target="_blank" rel="noopener noreferrer">
                 <div className="icon-tile">
                   <Icon name={icon(book)} size={22} />
                 </div>

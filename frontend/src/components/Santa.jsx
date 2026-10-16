@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { api, ApiError, apiStream, NetworkError, readEvents } from "../api";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import { sitePath } from "../safeUrl";
 import { Icon } from "./Icon";
 import Markdown from "./Markdown";
 
@@ -287,7 +288,7 @@ function Answer({ message }) {
             <ul>
               {message.sources.map((source) => (
                 <li key={source.slug}>
-                  <Link to={source.url || `/lessons/${source.slug}`}>
+                  <Link to={sitePath(source.url) || `/lessons/${encodeURIComponent(source.slug)}`}>
                     <Icon name="book" size={14} />
                     {source.title}
                   </Link>

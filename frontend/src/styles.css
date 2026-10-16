@@ -1039,6 +1039,11 @@ tr:last-child td {
   overflow-wrap: break-word;
 }
 
+/* Notes, questions and Santa's answers: nothing in them (maths moved with \kern, say) paints outside. */
+.prose-people {
+  contain: paint;
+}
+
 .prose > :first-child {
   margin-top: 0;
 }

@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core import security_log
+from apps.core.text import CleanCharField
 from apps.schools import access
 
 from . import services
@@ -19,7 +20,7 @@ MAX_HISTORY_CONTENT = 20_000
 
 
 class AskSerializer(serializers.Serializer):
-    message = serializers.CharField(max_length=services.MAX_MESSAGE_CHARS, trim_whitespace=True)
+    message = CleanCharField(multiline=True, max_length=services.MAX_MESSAGE_CHARS, trim_whitespace=True)
     history = serializers.ListField(child=serializers.DictField(), required=False, default=list, max_length=MAX_HISTORY_ITEMS)
     lesson = serializers.SlugField(required=False, allow_blank=True)
     attempt = serializers.IntegerField(required=False, allow_null=True)
