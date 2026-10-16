@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
 from apps.core.serializers import SaveChangedFieldsMixin
-from apps.core.text import CleanCharField
+from apps.core.text import CleanCharField, clean_text
 from apps.core.utils import request_language, serializer_language
 from apps.schools import access
 from apps.schools.downloads import signed_download_url
@@ -57,7 +57,8 @@ class QuestionSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
             return []
         if not isinstance(value, list) or not all(isinstance(a, str) for a in value):
             raise serializers.ValidationError(_("Give a list of accepted answers (text)."))
-        cleaned = [a.strip() for a in value if a.strip()]
+        # Each one line, normalised, without invisible characters (apps/core/text.py).
+        cleaned = [a for a in (clean_text(a).strip() for a in value) if a]
         if len(cleaned) > 50 or any(len(a) > 200 for a in cleaned):
             raise serializers.ValidationError(_("Use at most 50 accepted answers of up to 200 characters each."))
         return cleaned

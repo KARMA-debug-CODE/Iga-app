@@ -173,3 +173,67 @@ def test_links_people_give_must_be_web_addresses(client_for, teacher, subject, u
     assert client.post("/api/resources/", resource, format="json").status_code == 400
     lesson = {"unit": unit.id, "slug": "video", "title": "Video", "body": "x", "video_url": url}
     assert client.post("/api/lessons/", lesson, format="json").status_code == 400
+
+
+def test_short_answers_match_however_the_accent_was_typed(student, subject, quiz_factory):
+    # Student answers are stored as NFC; an accepted answer typed as e + accent (or saved before answers
+    # were cleaned, or with an invisible character pasted in) must still match them.
+    from apps.assessments import services
+    from apps.assessments.models import Answer, Attempt
+
+    attempt = Attempt.objects.create(user=student, quiz=quiz_factory())
+    question = Question.objects.create(
+        subject=subject, grade="S2", type=Question.Type.SHORT, prompt="?", accepted_answers=["Café", f"H{ZWSP}2O"]
+    )
+    for typed in ("café", "h2o"):
+        answer = Answer.objects.create(attempt=attempt, question=question, text_answer=typed)
+        assert services.score_answer(answer)[0] is True, typed
+        answer.delete()
+
+
+def test_accepted_answers_are_cleaned(client_for, teacher, subject):
+    payload = {
+        "subject": subject.id,
+        "grade": "S2",
+        "type": "short",
+        "prompt": "Boisson ?",
+        "accepted_answers": ["Café", f"{ZWSP}{BOM}", f"th{RLO}é\n"],
+    }
+    response = client_for(teacher).post("/api/questions/", payload, format="json")
+    assert response.status_code == 201, response.data
+    assert Question.objects.get().accepted_answers == ["Café", "thé"]
+
+
+def test_santa_history_is_cleaned(student):
+    from apps.tutor.services import clean_history
+
+    history = [{"role": "user", "content": f"Hi{TAG_A}{TAG_A}{ZWSP}"}, {"role": "assistant", "content": f"Muraho{RLO}!"}]
+    assert clean_history(history) == [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Muraho!"}]
+
+
+def test_every_cleaned_field_is_a_text_field():
+    from django.apps import apps
+    from django.db import models
+
+    from apps.core.text import CLEANED_FIELDS
+
+    for label, names in CLEANED_FIELDS.items():
+        for name in names:
+            field = apps.get_model(label)._meta.get_field(name)
+            assert isinstance(field, models.CharField | models.TextField), (label, name)
+
+
+def test_an_invisible_character_does_not_make_a_bank_reference_new(client_for):
+    # Recorded bank transfers are unique by reference: "BK<zero-width space>4471" is the transfer "BK4471".
+    from apps.schools.models import Payment
+
+    from .conftest import make_school, make_user
+
+    lycee = make_school("Lycee de Kigali", "Nyarugenge")
+    client = client_for(make_user("staff", role="admin"))
+    url = f"/api/admin/schools/{lycee.id}/payments/"
+    body = {"months": 1, "amount": "200", "currency": "USD", "note": f"Bank{ZWSP} of Kigali{RLO}", "external_reference": "BK4471"}
+    assert client.post(url, body, format="json").status_code == 201
+    again = client.post(url, {**body, "external_reference": f"BK{ZWSP}44{SHY}71"}, format="json")
+    assert again.status_code == 400 and "external_reference" in again.data
+    assert Payment.objects.get().note == "Bank of Kigali"

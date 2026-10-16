@@ -27,6 +27,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 
 from apps.assessments import services as assessment_services
 from apps.assessments.models import Attempt, Question, Quiz
+from apps.core.text import clean_text
 from apps.curriculum.models import Subject
 from apps.curriculum.views import visible_lessons
 from apps.schools import access
@@ -104,6 +105,8 @@ def clean_history(history):
     for i, item in enumerate(history):
         role = item.get("role") if isinstance(item, dict) else None
         content = item.get("content") if isinstance(item, dict) else None
+        # Invisible "tag" letters and direction marks could hide instructions for the model.
+        content = clean_text(content, multiline=True)
         expected = "user" if i % 2 == 0 else "assistant"
         if role != expected or not isinstance(content, str) or not content.strip():
             raise ValidationError({"history": _("Messages must alternate between the student and Santa.")})
