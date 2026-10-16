@@ -14,6 +14,7 @@ import json
 import os
 import shutil
 import socket
+import ssl
 import subprocess
 import tempfile
 import time
@@ -21,6 +22,7 @@ import unittest
 import urllib.error
 import urllib.request
 import uuid
+import warnings
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FRONTEND = os.path.dirname(os.path.dirname(HERE))
@@ -31,7 +33,14 @@ STUB_IMAGE = os.environ.get("NGINX_TEST_STUB_IMAGE", "python:3.12-slim")
 JSON_TYPE = "application/json; charset=utf-8"
 
 _containers = []
-_opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+class _NoRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None  # the test looks at the redirect itself
+
+
+_opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirects())
 HTML = SUBNET = GATEWAY = None
 
 
@@ -97,6 +106,7 @@ class Nginx:
     """The web image's nginx with these settings (NGINX_* environment variables), on a free local port."""
 
     def __init__(self, extra_args=(), **env):
+        env = {"NGINX_FORCE_HTTPS": "false", **env}  # plain HTTP, as in the local trial, unless a test says otherwise
         args = ["run", "-d", "--network", NETWORK, "-p", "127.0.0.1::80", "-v", f"{HTML}:/usr/share/nginx/html:ro"]
         for name, value in env.items():
             args += ["-e", f"{name}={value}"]
@@ -111,11 +121,16 @@ class Nginx:
                 raise RuntimeError("nginx did not start:\n" + self.logs())
             time.sleep(0.2)
 
-    def request(self, path, method="GET", body=None, headers=None, timeout=30):
+    def request(self, path, method="GET", body=None, headers=None, timeout=30, base=None, context=None):
         data = body.encode() if isinstance(body, str) else body
-        request = urllib.request.Request(self.base + path, data=data, method=method, headers=headers or {})
+        request = urllib.request.Request((base or self.base) + path, data=data, method=method, headers=headers or {})
+        opener = _opener
+        if context is not None:
+            opener = urllib.request.build_opener(
+                urllib.request.ProxyHandler({}), _NoRedirects(), urllib.request.HTTPSHandler(context=context)
+            )
         try:
-            with _opener.open(request, timeout=timeout) as response:
+            with opener.open(request, timeout=timeout) as response:
                 return Response(response.status, response.headers, response.read())
         except urllib.error.HTTPError as error:
             return Response(error.code, error.headers, error.read())
@@ -311,6 +326,96 @@ class RequestSize(unittest.TestCase):
 
     def test_the_app_takes_no_bodies(self):
         self.assertEqual(self.post("/", 64 * 1024).status, 413)
+
+
+class Https(unittest.TestCase):
+    """S34: plain HTTP is redirected and HSTS sent when HTTPS is on; the scheme comes only from trusted proxies."""
+
+    def test_plain_http_is_redirected_except_lets_encrypt_checks(self):
+        nginx = Nginx(NGINX_FORCE_HTTPS="true")
+        response = nginx.request("/lessons/the-cell?lang=fr")
+        self.assertEqual(response.status, 301)
+        self.assertEqual(response.header("Location"), "https://127.0.0.1/lessons/the-cell?lang=fr")
+        self.assertEqual(nginx.request("/api/meta/").status, 301)
+        self.assertIsNone(response.header("Strict-Transport-Security"))  # never over plain HTTP
+        self.assertEqual(nginx.request("/.well-known/acme-challenge/token").status, 404)  # served, not redirected
+
+    def test_a_client_claiming_https_is_not_believed(self):
+        nginx = Nginx(NGINX_FORCE_HTTPS="true")
+        self.assertEqual(nginx.request("/", headers={"X-Forwarded-Proto": "https"}).status, 301)
+        relaxed = Nginx(NGINX_FORCE_HTTPS="false")
+        seen = relaxed.request("/api/meta/", headers={"X-Forwarded-Proto": "https"}).json()["headers"]
+        self.assertEqual(seen["x-forwarded-proto"], "http")
+
+    def test_behind_a_trusted_proxy_that_terminated_tls(self):
+        nginx = Nginx(NGINX_FORCE_HTTPS="true", NGINX_TRUSTED_PROXIES=SUBNET)
+        page = nginx.request("/", headers={"X-Forwarded-Proto": "https"})
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.header("Strict-Transport-Security"), "max-age=31536000; includeSubDomains")
+        seen = nginx.request("/api/meta/", headers={"X-Forwarded-Proto": "https"}).json()["headers"]
+        self.assertEqual(seen["x-forwarded-proto"], "https")  # so Django doesn't redirect in a loop
+        self.assertEqual(nginx.request("/", headers={"X-Forwarded-Proto": "http"}).status, 301)
+
+    def test_preload_only_when_asked(self):
+        nginx = Nginx(NGINX_FORCE_HTTPS="true", NGINX_HSTS_PRELOAD="true", NGINX_TRUSTED_PROXIES=SUBNET)
+        page = nginx.request("/", headers={"X-Forwarded-Proto": "https"})
+        self.assertEqual(page.header("Strict-Transport-Security"), "max-age=31536000; includeSubDomains; preload")
+
+    def test_the_local_trial_over_http(self):
+        nginx = Nginx(NGINX_FORCE_HTTPS="false")
+        page = nginx.request("/")
+        self.assertEqual(page.status, 200)
+        self.assertIsNone(page.header("Strict-Transport-Security"))
+
+    def test_nginx_serves_https_itself_with_the_example_tls_conf(self):
+        tls = tempfile.mkdtemp(prefix="iga-nginx-tls-")
+        try:
+            os.makedirs(os.path.join(tls, "conf"))
+            os.makedirs(os.path.join(tls, "certs"))
+            shutil.copy(os.path.join(FRONTEND, "nginx", "tls.conf.example"), os.path.join(tls, "conf", "tls.conf"))
+            certs = os.path.join(tls, "certs")
+            subprocess.run(
+                ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=localhost",
+                 "-addext", "subjectAltName=IP:127.0.0.1,DNS:localhost",
+                 "-keyout", os.path.join(certs, "privkey.pem"), "-out", os.path.join(certs, "fullchain.pem")],
+                check=True, capture_output=True,
+            )  # fmt: skip
+            for root, dirs, names in os.walk(tls):
+                for name in dirs:
+                    os.chmod(os.path.join(root, name), 0o755)
+                for name in names:
+                    os.chmod(os.path.join(root, name), 0o644)
+            os.chmod(tls, 0o755)
+            nginx = Nginx(
+                extra_args=[
+                    "-p",
+                    "127.0.0.1::443",
+                    "-v",
+                    f"{tls}/conf:/etc/nginx/iga/tls:ro",
+                    "-v",
+                    f"{certs}:/etc/nginx/certs:ro",
+                ],
+                NGINX_FORCE_HTTPS="true",
+            )
+            https_port = docker("port", nginx.id, "443/tcp").splitlines()[0].rsplit(":", 1)[1]
+            context = ssl.create_default_context(cafile=os.path.join(certs, "fullchain.pem"))
+            page = nginx.request("/", base=f"https://127.0.0.1:{https_port}", context=context)
+            self.assertEqual(page.status, 200)
+            self.assertEqual(page.header("Strict-Transport-Security"), "max-age=31536000; includeSubDomains")
+            seen = nginx.request("/api/meta/", base=f"https://127.0.0.1:{https_port}", context=context).json()
+            self.assertEqual(seen["headers"]["x-forwarded-proto"], "https")
+            self.assertEqual(nginx.request("/").status, 301)  # port 80 sends browsers to HTTPS
+            # Old protocols are refused.
+            old = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            old.load_verify_locations(os.path.join(certs, "fullchain.pem"))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                old.minimum_version = ssl.TLSVersion.TLSv1
+                old.maximum_version = ssl.TLSVersion.TLSv1_1
+            with self.assertRaises((ssl.SSLError, ConnectionError, urllib.error.URLError)):
+                nginx.request("/", base=f"https://127.0.0.1:{https_port}", context=old)
+        finally:
+            shutil.rmtree(tls, ignore_errors=True)
 
 
 def _all_logs(container):

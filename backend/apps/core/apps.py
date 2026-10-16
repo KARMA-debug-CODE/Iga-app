@@ -8,7 +8,7 @@ class CoreConfig(AppConfig):
     def ready(self):
         from django.urls import register_converter
 
-        from . import checks  # noqa: F401  (registers Iga's system checks)
+        from . import checks, platform_checks  # noqa: F401  (registers Iga's system checks)
         from .converters import IdConverter
 
         register_converter(IdConverter, "id")

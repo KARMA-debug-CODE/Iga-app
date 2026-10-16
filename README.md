@@ -103,6 +103,13 @@ This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx s
 
 nginx limits requests per client address (strictly for sign-in and account changes, tightly for Santa, C++/Java runs and payments, generously for the rest; `NGINX_RATE_*`) and answers a flood with a JSON 429; Django adds its own limits per account and per user. Behind a load balancer or Cloudflare, tell nginx which proxies may name the client (`NGINX_TRUSTED_PROXIES`), or every student would share the proxy's address: see [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md), which also covers the DDoS protection only such a network can give. `python3 frontend/tests/nginx/test_nginx.py` tests the nginx layer (needs Docker).
 
+### HTTPS
+
+A real deployment runs over HTTPS only: leave `HTTPS=false` out of `.env` and nginx redirects plain HTTP to HTTPS and sends HSTS (a year, with subdomains), Django redirects too, marks every cookie `Secure` and sends HSTS on the API, and `manage.py check --deploy` is clean (`docker compose exec backend python manage.py check --deploy`). HSTS `preload` is a commitment for the whole domain, so it is off until you set `HSTS_PRELOAD=true`. Two ways to get the certificate:
+
+- **Behind Cloudflare or a load balancer that terminates HTTPS:** tell nginx which proxies to trust (`NGINX_TRUSTED_PROXIES=cloudflare`, or your load balancer's addresses). nginx then believes their `X-Forwarded-Proto`, so Django knows the visitor used HTTPS; from anyone else the header is ignored. See [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md).
+- **nginx with your own certificate** (Let's Encrypt or Cloudflare's Origin CA): copy [`frontend/nginx/tls.conf.example`](frontend/nginx/tls.conf.example) to `tls/tls.conf`, put `fullchain.pem` and `privkey.pem` in `certs/`, and mount both with the `docker-compose.override.yml` shown in that file (it also publishes ports 80 and 443). nginx answers on 443 with TLS 1.2 and 1.3 only, and on 80 redirects everything except Let's Encrypt's checks.
+
 ## Santa, Iga's own AI tutor
 
 Santa is Iga's learning assistant. Its "brain" is an open language model that runs on the school's (or Iga's) own server with [llama.cpp](https://github.com/ggml-org/llama.cpp): no outside AI service is called and no question leaves the server. In `docker-compose.yml` it is the `santa` service (`ghcr.io/ggml-org/llama.cpp:server-b11151`, the CPU build for amd64 and arm64), reachable only by Django on an internal network and protected by `SANTA_API_KEY`.

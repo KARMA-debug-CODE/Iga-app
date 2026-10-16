@@ -40,10 +40,13 @@ services:
       FIELD_ENCRYPTION_KEYS: ${FIELD_ENCRYPTION_KEYS:?Set FIELD_ENCRYPTION_KEYS in .env - see .env.docker.example}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      # nginx serves the app and the API from one origin, so no other site needs (or gets) CORS access.
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       # The app role: rows only (no superuser, no CREATE/ALTER/DROP/TRUNCATE, no new roles or databases).
       DATABASE_URL: postgres://iga_app:${POSTGRES_APP_PASSWORD:-iga-local-app}@db:5432/iga
       REDIS_URL: redis://redis:6379/0
       HTTPS: ${HTTPS:-true}
+      SECURE_HSTS_PRELOAD: ${HSTS_PRELOAD:-false}
       # Always 1 with the bundled nginx: nginx works out the client's address (NGINX_TRUSTED_PROXIES on the
       # web service) and passes exactly that one in X-Forwarded-For.
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
@@ -209,6 +212,9 @@ services:
       NGINX_REAL_IP_HEADER: ${NGINX_REAL_IP_HEADER:-}
       # true = drop requests that didn't come through those proxies.
       NGINX_ONLY_FROM_TRUSTED_PROXIES: ${NGINX_ONLY_FROM_TRUSTED_PROXIES:-false}
+      # HTTPS (as for Django): redirect plain HTTP and send HSTS. HTTPS=false only for the local trial.
+      NGINX_FORCE_HTTPS: ${HTTPS:-true}
+      NGINX_HSTS_PRELOAD: ${HSTS_PRELOAD:-false}
       # Per-address rate limits: sign-in and the like, costly routes (Santa, C++/Java runs, payments), the rest.
       NGINX_RATE_AUTH: ${NGINX_RATE_AUTH:-}
       NGINX_BURST_AUTH: ${NGINX_BURST_AUTH:-}
