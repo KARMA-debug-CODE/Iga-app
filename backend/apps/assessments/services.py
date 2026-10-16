@@ -19,6 +19,7 @@ from django.utils.translation import gettext as _
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.core.constants import ContentStatus
+from apps.core.text import clean_text
 from apps.gamification import services as gamification
 
 from .models import Answer, Attempt, Question, Quiz
@@ -62,7 +63,9 @@ def _q(value):
 
 
 def normalise_text(value):
-    value = re.sub(r"\s+", " ", (value or "").strip().lower())
+    # NFC, without invisible characters (apps/core/text.py), so "café" typed as e + accent, or an accepted
+    # answer saved before text was cleaned, still matches.
+    value = re.sub(r"\s+", " ", clean_text(value or "").strip().lower())
     return value.rstrip(".")
 
 

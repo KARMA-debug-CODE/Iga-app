@@ -49,68 +49,68 @@ msgstr "Quelqu'un (vous, espérons-le) a demandé à réinitialiser le mot de pa
 msgid "Open this link to choose a new password. It works once, for %(minutes)s minutes:"
 msgstr "Ouvrez ce lien pour choisir un nouveau mot de passe. Il ne fonctionne qu'une fois, pendant %(minutes)s minutes :"
 
-#: apps/accounts/serializers.py:103
+#: apps/accounts/serializers.py:104
 msgid "Unknown grade."
 msgstr "Niveau inconnu."
 
-#: apps/accounts/serializers.py:127
+#: apps/accounts/serializers.py:128
 msgid "An account with this email already exists."
 msgstr "Un compte existe déjà avec cette adresse e-mail."
 
-#: apps/accounts/serializers.py:230
+#: apps/accounts/serializers.py:231
 msgid "Usernames can't contain @. Use letters, numbers, dots or dashes."
 msgstr "Un nom d'utilisateur ne peut pas contenir @. Utilisez des lettres, des chiffres, des points ou des tirets."
 
-#: apps/accounts/serializers.py:232
+#: apps/accounts/serializers.py:233
 msgid "That username is taken."
 msgstr "Ce nom d'utilisateur est déjà pris."
 
-#: apps/accounts/serializers.py:239
+#: apps/accounts/serializers.py:240
 msgid "This email address already has an account. If it's yours, log in or reset your password."
 msgstr "Cette adresse e-mail a déjà un compte. Si c'est la vôtre, connectez-vous ou réinitialisez votre mot de passe."
 
-#: apps/accounts/serializers.py:109
+#: apps/accounts/serializers.py:110
 msgid "Only students in S4–S6 choose a combination."
 msgstr "Seuls les élèves de S4–S6 choisissent une combinaison."
 
-#: apps/accounts/serializers.py:119
-#: apps/accounts/serializers.py:195
+#: apps/accounts/serializers.py:120
+#: apps/accounts/serializers.py:196
 msgid "School administrators need an email address for receipts and reminders."
 msgstr "Les administrateurs d'école ont besoin d'une adresse e-mail pour les reçus et les rappels."
 
-#: apps/accounts/serializers.py:187
+#: apps/accounts/serializers.py:188
 msgid "Students must choose their grade (S1–S6)."
 msgstr "Les élèves doivent choisir leur niveau (S1–S6)."
 
-#: apps/accounts/serializers.py:191
+#: apps/accounts/serializers.py:192
 msgid "Parents don't join a school; link to your child instead."
 msgstr "Les parents ne rejoignent pas d'école : reliez plutôt votre compte à celui de votre enfant."
 
-#: apps/accounts/serializers.py:218
+#: apps/accounts/serializers.py:219
 msgid "That school has already been registered and is waiting for the Iga team. If you run it, contact the Iga team."
 msgstr "Cette école a déjà été inscrite et attend la vérification de l'équipe Iga. Si vous la dirigez, contactez l'équipe Iga."
 
-#: apps/accounts/serializers.py:284
+#: apps/accounts/serializers.py:285
 msgid "Choose a password different from the current one."
 msgstr "Choisissez un mot de passe différent de l'actuel."
 
-#: apps/accounts/serializers.py:198
+#: apps/accounts/serializers.py:199
 msgid "Choose your school, or register a new one (not both)."
 msgstr "Choisissez votre école ou inscrivez-en une nouvelle (pas les deux)."
 
-#: apps/accounts/serializers.py:201
+#: apps/accounts/serializers.py:202
 msgid "School administrators are approved by the Iga team or an existing administrator."
 msgstr "Les administrateurs d'école sont approuvés par l'équipe Iga ou par un administrateur existant."
 
-#: apps/accounts/serializers.py:204
+#: apps/accounts/serializers.py:205
 msgid "Only school administrators register schools."
 msgstr "Seuls les administrateurs d'école peuvent inscrire une école."
 
-#: apps/accounts/serializers.py:214
+#: apps/accounts/serializers.py:215
 msgid "That school is already on Iga. Choose it from the list instead."
 msgstr "Cette école est déjà sur Iga. Choisissez-la plutôt dans la liste."
 
-#: apps/accounts/serializers.py:259
+#: apps/accounts/serializers.py:260
 msgid "That school has just been registered. Choose it from the list."
 msgstr "Cette école vient d'être inscrite. Choisissez-la dans la liste."
 
@@ -187,55 +187,55 @@ msgstr "Mot de passe incorrect."
 msgid "That is not your class."
 msgstr "Ce n'est pas votre classe."
 
-#: apps/assessments/serializers.py:58
+#: apps/assessments/serializers.py:59
 msgid "Give a list of accepted answers (text)."
 msgstr "Donnez une liste de réponses acceptées (texte)."
 
-#: apps/assessments/serializers.py:61
+#: apps/assessments/serializers.py:62
 msgid "Use at most 50 accepted answers of up to 200 characters each."
 msgstr "Utilisez au plus 50 réponses acceptées de 200 caractères maximum chacune."
 
-#: apps/assessments/serializers.py:302
+#: apps/assessments/serializers.py:303
 msgid "Only administrators can publish past papers."
 msgstr "Seuls les administrateurs peuvent publier des épreuves d'examen."
 
-#: apps/assessments/serializers.py:322
+#: apps/assessments/serializers.py:323
 msgid "A question appears twice."
 msgstr "Une question apparaît deux fois."
 
-#: apps/assessments/serializers.py:82
+#: apps/assessments/serializers.py:83
 msgid "Only administrators can add official past-paper questions."
 msgstr "Seuls les administrateurs peuvent ajouter des questions d'épreuves officielles."
 
-#: apps/assessments/serializers.py:107
+#: apps/assessments/serializers.py:108
 msgid "Students have already answered this question, so its answer can't change. Make a new question instead."
 msgstr "Des élèves ont déjà répondu à cette question : sa réponse ne peut plus changer. Créez plutôt une nouvelle question."
 
-#: apps/assessments/serializers.py:121
+#: apps/assessments/serializers.py:122
 msgid "Students have already answered this question, so its options can't change. Make a new question instead."
 msgstr "Des élèves ont déjà répondu à cette question : ses options ne peuvent plus changer. Créez plutôt une nouvelle question."
 
-#: apps/assessments/serializers.py:320
+#: apps/assessments/serializers.py:321
 msgid "Unknown or private questions: %(ids)s"
 msgstr "Questions inconnues ou privées : %(ids)s"
 
-#: apps/assessments/serializers.py:69
+#: apps/assessments/serializers.py:70
 msgid "Add at least two options."
 msgstr "Ajoutez au moins deux options."
 
-#: apps/assessments/serializers.py:72
+#: apps/assessments/serializers.py:73
 msgid "Mark at least one option as correct."
 msgstr "Indiquez au moins une option correcte."
 
-#: apps/assessments/serializers.py:74
+#: apps/assessments/serializers.py:75
 msgid "Only one option can be correct."
 msgstr "Une seule option peut être correcte."
 
-#: apps/assessments/serializers.py:76
+#: apps/assessments/serializers.py:77
 msgid "Multiple-choice questions need options."
 msgstr "Les questions à choix multiples ont besoin d'options."
 
-#: apps/assessments/serializers.py:80
+#: apps/assessments/serializers.py:81
 msgid "Numeric questions need an answer."
 msgstr "Les questions numériques ont besoin d'une réponse."
 
@@ -328,51 +328,51 @@ msgstr "Ce n'est pas votre tentative."
 msgid "Students have started this quiz; duplicate it to change the questions."
 msgstr "Des élèves ont commencé ce quiz ; dupliquez-le pour en changer les questions."
 
-#: apps/classroom/roster.py:83
+#: apps/classroom/roster.py:84
 msgid "The list is empty."
 msgstr "La liste est vide."
 
-#: apps/classroom/roster.py:91
+#: apps/classroom/roster.py:92
 msgid "The first row must name the columns, e.g. first_name,last_name (username and email are optional)."
 msgstr "La première ligne doit nommer les colonnes, par exemple first_name,last_name (username et email sont facultatifs)."
 
-#: apps/classroom/roster.py:108
+#: apps/classroom/roster.py:110
 msgid "No students found under the header row."
 msgstr "Aucun élève trouvé sous la ligne d'en-tête."
 
-#: apps/classroom/roster.py:106
+#: apps/classroom/roster.py:108
 msgid "Import at most %(n)s students at a time."
 msgstr "Importez au plus %(n)s élèves à la fois."
 
-#: apps/classroom/roster.py:120
+#: apps/classroom/roster.py:122
 msgid "First name is missing."
 msgstr "Le prénom manque."
 
-#: apps/classroom/roster.py:122
+#: apps/classroom/roster.py:124
 msgid "Name is too long."
 msgstr "Le nom est trop long."
 
-#: apps/classroom/roster.py:129
+#: apps/classroom/roster.py:131
 msgid "Usernames can't contain @."
 msgstr "Un nom d'utilisateur ne peut pas contenir @."
 
-#: apps/classroom/roster.py:131
+#: apps/classroom/roster.py:133
 msgid "That username is already taken."
 msgstr "Ce nom d'utilisateur est déjà pris."
 
-#: apps/classroom/roster.py:133
+#: apps/classroom/roster.py:135
 msgid "That username appears twice in the list."
 msgstr "Ce nom d'utilisateur apparaît deux fois dans la liste."
 
-#: apps/classroom/roster.py:127
+#: apps/classroom/roster.py:129
 msgid "Usernames may use letters, numbers and . _ - only."
 msgstr "Un nom d'utilisateur ne peut contenir que des lettres, des chiffres et . _ -"
 
-#: apps/classroom/roster.py:145
+#: apps/classroom/roster.py:147
 msgid "That email is already used by another account."
 msgstr "Cette adresse e-mail est déjà utilisée par un autre compte."
 
-#: apps/classroom/roster.py:147
+#: apps/classroom/roster.py:149
 msgid "That email address isn't valid."
 msgstr "Cette adresse e-mail n'est pas valide."
 
@@ -431,43 +431,43 @@ msgstr "Le serveur d'exécution du code ne répond pas. Réessayez dans une minu
 msgid "The code runner could not run this program. Please tell an administrator."
 msgstr "Le serveur d'exécution du code n'a pas pu lancer ce programme. Prévenez un administrateur."
 
-#: apps/community/views.py:140
+#: apps/community/views.py:141
 msgid "Join the group first."
 msgstr "Rejoignez d'abord le groupe."
 
-#: apps/community/views.py:158
+#: apps/community/views.py:159
 msgid "Only the group owner can edit the group."
 msgstr "Seul le créateur du groupe peut le modifier."
 
-#: apps/community/views.py:163
+#: apps/community/views.py:164
 msgid "Only the group owner can delete the group."
 msgstr "Seul le créateur du groupe peut le supprimer."
 
-#: apps/community/views.py:191
+#: apps/community/views.py:192
 msgid "This group is private; ask a member for the code."
 msgstr "Ce groupe est privé ; demandez le code à un membre."
 
-#: apps/community/views.py:269
+#: apps/community/views.py:270
 msgid "You are not in this group."
 msgstr "Vous n'êtes pas dans ce groupe."
 
-#: apps/community/views.py:277
+#: apps/community/views.py:278
 msgid "Thanks — a moderator will review this message."
 msgstr "Merci, un modérateur examinera ce message."
 
-#: apps/community/views.py:283
+#: apps/community/views.py:284
 msgid "Only moderators can hide messages."
 msgstr "Seuls les modérateurs peuvent masquer des messages."
 
-#: apps/community/views.py:181
+#: apps/community/views.py:182
 msgid "This group is full."
 msgstr "Ce groupe est complet."
 
-#: apps/community/views.py:199
+#: apps/community/views.py:200
 msgid "No group has that code."
 msgstr "Aucun groupe n'a ce code."
 
-#: apps/community/views.py:246
+#: apps/community/views.py:247
 msgid "Write something first."
 msgstr "Écrivez d'abord quelque chose."
 
@@ -512,51 +512,91 @@ msgstr "Seuls les administrateurs d'école approuvés peuvent faire cela."
 msgid "For your security, enter your password again to continue."
 msgstr "Pour votre sécurité, saisissez de nouveau votre mot de passe pour continuer."
 
-#: apps/core/uploads.py:73
+#: apps/core/uploads.py:107
 msgid "The file's contents don't match its type. Re-save it and try again."
 msgstr "Le contenu du fichier ne correspond pas à son type. Enregistrez-le à nouveau et réessayez."
 
-#: apps/core/uploads.py:63
-msgid "Upload a PDF, image, audio/video or office document (%(types)s)."
-msgstr "Envoyez un PDF, une image, un fichier audio ou vidéo, ou un document bureautique (%(types)s)."
+#: apps/core/uploads.py:348
+msgid "Documents with macros or ActiveX controls are not allowed. Save it as a normal document and try again."
+msgstr "Les documents avec des macros ou des contrôles ActiveX ne sont pas acceptés. Enregistrez-le comme un document ordinaire et réessayez."
 
-#: apps/core/uploads.py:67
+#: apps/core/uploads.py:133
+msgid "Images can't be checked on this server, so they can't be uploaded. Upload a PDF instead."
+msgstr "Les images ne peuvent pas être vérifiées sur ce serveur, elles ne peuvent donc pas être envoyées. Envoyez plutôt un PDF."
+
+#: apps/core/uploads.py:258
+msgid "PDFs can't be checked on this server, so they can't be uploaded."
+msgstr "Les PDF ne peuvent pas être vérifiés sur ce serveur, ils ne peuvent donc pas être envoyés."
+
+#: apps/core/uploads.py:262
+msgid "Password-protected PDFs can't be checked. Remove the password and try again."
+msgstr "Les PDF protégés par un mot de passe ne peuvent pas être vérifiés. Retirez le mot de passe et réessayez."
+
+#: apps/core/uploads.py:292
+msgid "This PDF contains scripts, embedded files or actions, which are not allowed. Print it to a new PDF and try again."
+msgstr "Ce PDF contient des scripts, des fichiers intégrés ou des actions, ce qui n'est pas accepté. Imprimez-le dans un nouveau PDF et réessayez."
+
+#: apps/core/uploads.py:443
+msgid "Only these file types can be uploaded here: %(types)s."
+msgstr "Seuls ces types de fichiers peuvent être envoyés ici : %(types)s."
+
+#: apps/core/uploads.py:446
 msgid "Files can be at most %(mb)s MB."
 msgstr "Les fichiers ne peuvent pas dépasser %(mb)s Mo."
 
-#: apps/core/validation.py:18
+#: apps/core/uploads.py:143
+#: apps/core/uploads.py:178
+msgid "The image is too large: at most %(pixels)s million pixels."
+msgstr "L'image est trop grande : %(pixels)s millions de pixels au maximum."
+
+#: apps/core/uploads.py:270
+#: apps/core/uploads.py:323
+#: apps/core/uploads.py:281
+#: apps/core/uploads.py:285
+msgid "This document is too large when unpacked."
+msgstr "Ce document est trop volumineux une fois décompressé."
+
+#: apps/core/uploads.py:441
+msgid "Upload a PDF, image, audio/video or office document (%(types)s)."
+msgstr "Envoyez un PDF, une image, un fichier audio ou vidéo, ou un document bureautique (%(types)s)."
+
+#: apps/core/validation.py:24
 msgid "The request contains a character that is not allowed."
 msgstr "La requête contient un caractère non autorisé."
 
-#: apps/core/validation.py:46
 #: apps/core/validation.py:52
-#: apps/core/validation.py:50
+#: apps/core/validation.py:58
+#: apps/core/validation.py:56
 msgid "Enter a valid id."
 msgstr "Saisissez un identifiant valide."
 
-#: apps/core/validation.py:74
-#: apps/core/validation.py:72
+#: apps/core/validation.py:80
+#: apps/core/validation.py:78
 #: apps/schools/views.py:603
 msgid "Enter a whole number."
 msgstr "Saisissez un nombre entier."
 
-#: apps/core/validation.py:84
+#: apps/core/validation.py:91
 msgid "Enter text."
 msgstr "Saisissez du texte."
 
-#: apps/core/validation.py:89
+#: apps/core/validation.py:96
 msgid "This field is required."
 msgstr "Ce champ est obligatoire."
 
-#: apps/core/validation.py:91
+#: apps/core/validation.py:98
 msgid "Use at most %(n)s characters."
 msgstr "Utilisez au plus %(n)s caractères."
 
-#: apps/core/views.py:302
+#: apps/core/views.py:304
 msgid "You can't remove your own administrator role."
 msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
 
-#: apps/curriculum/serializers.py:141
+#: apps/curriculum/downloads.py:46
+msgid "This download link has expired. Go back and open the resource again."
+msgstr "Ce lien de téléchargement a expiré. Revenez en arrière et ouvrez à nouveau la ressource."
+
+#: apps/curriculum/serializers.py:143
 msgid "Provide a link or upload a file."
 msgstr "Donnez un lien ou envoyez un fichier."
 
@@ -648,7 +688,7 @@ msgstr "Choisissez l'une de ces devises : %(options)s."
 msgid "This school has no paid months to take back."
 msgstr "Cette école n'a pas de mois payés à retirer."
 
-#: apps/schools/downloads.py:43
+#: apps/schools/downloads.py:40
 msgid "This download link has expired. Go back and open the paper again."
 msgstr "Ce lien de téléchargement a expiré. Revenez en arrière et ouvrez à nouveau l'épreuve."
 
@@ -791,6 +831,10 @@ msgstr "Action inconnue."
 #: apps/schools/views.py:438
 msgid "Only a school waiting for verification, with no payments, can be rejected."
 msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
+
+#: apps/simulations/models.py:61
+msgid "An external simulation needs a full https:// address."
+msgstr "Une simulation externe a besoin d'une adresse complète en https://."
 
 #: apps/simulations/views.py:57
 #: apps/simulations/views.py:69

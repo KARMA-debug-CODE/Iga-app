@@ -1,7 +1,20 @@
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+def https_address(value):
+    """`value` if it is an https address with a host, else None. Simulations are framed with scripts
+    allowed (frontend/src/components/SimEmbed.jsx), so javascript:, data: and plain http never are."""
+    value = (value or "").strip()
+    try:
+        parts = urlsplit(value)
+    except ValueError:
+        return None
+    return value if parts.scheme == "https" and parts.hostname else None
 
 
 class Simulation(models.Model):
@@ -42,6 +55,11 @@ class Simulation(models.Model):
 
     GEOGEBRA_APPS = {"graphing", "geometry", "3d", "classic", "scientific", "suite"}
 
+    def clean(self):
+        super().clean()
+        if self.provider == self.Provider.EXTERNAL and not https_address(self.provider_id):
+            raise ValidationError({"provider_id": _("An external simulation needs a full https:// address.")})
+
     def embed_url(self, lang="en"):
         if self.provider == self.Provider.PHET:
             name = quote(self.provider_id)
@@ -52,7 +70,7 @@ class Simulation(models.Model):
                 return None  # rendered client-side with the GeoGebra deploy script
             return f"https://www.geogebra.org/material/iframe/id/{quote(self.provider_id)}"
         if self.provider == self.Provider.EXTERNAL:
-            return self.provider_id
+            return https_address(self.provider_id)
         return None
 
 

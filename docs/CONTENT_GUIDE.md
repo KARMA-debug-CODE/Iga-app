@@ -56,7 +56,7 @@ Embed a live HTML/CSS/JS editor (for ICT lessons):
 <h1>Hello</h1>
 ```
 
-Run real Python in the browser (it works offline once loaded; `input()` is supported):
+Run real Python in the browser (it works offline once loaded; `input()` is supported). Programs have no network access, so they can't download data or packages:
 
 ```python-run
 name = input("Your name? ")
@@ -188,7 +188,7 @@ run the checker before a pilot.
 | `builtin` | `projectile`, `grapher`, `ohms`, `market` | Our own React labs in `frontend/src/sims/`; work offline |
 | `phet` | the sim's name in its PhET URL, e.g. `circuit-construction-kit-dc` | Embedded as `https://phet.colorado.edu/sims/html/<name>/latest/<name>_all.html?locale=…`, in French when the student reads in French (PhET falls back to English where a translation is missing) |
 | `geogebra` | `graphing`, `geometry`, `3d`, `scientific`, or a GeoGebra material ID | Apps load via GeoGebra's official deploy script |
-| `external` | a full `https://` URL | Must allow embedding in an iframe |
+| `external` | a full `https://` URL of another site | Must allow embedding in an iframe; anything else (`http:`, `javascript:`, a page of Iga itself) is refused and never framed |
 
 Give each entry a French title in `title_fr` (and `description_fr` / `learning_goals_fr` when it has a description or goals); French readers see those, and the English texts otherwise.
 

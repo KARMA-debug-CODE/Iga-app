@@ -5,6 +5,12 @@
 // what the student types in the console. This uses JavaScript Promise Integration (JSPI, in current
 // Chrome, Edge and Android browsers). Where the browser lacks it, input() reads the lines typed in the
 // Input box before Run instead.
+//
+// Programs may come from lessons other people wrote, so once Pyodide has loaded, the worker loses the
+// network, the offline caches and the power to start other workers (lockdown.js), and refuses to run
+// anything if that fails.
+
+import { lockDown } from "./lockdown.js";
 
 let runtime = null;
 let stdinLines = [];
@@ -69,6 +75,8 @@ function load() {
     // Without JSPI, input() reads the lines typed in the "Input" box; EOF after the last line.
     pyodide.setStdin({ stdin: () => (stdinLines.length ? stdinLines.shift() : null) });
     pyodide.runPython(PRELUDE);
+    const reachable = lockDown(self);
+    if (reachable.length) throw new Error(`this browser would let programs use ${reachable.join(", ")}`);
     return pyodide;
   })();
   return runtime;

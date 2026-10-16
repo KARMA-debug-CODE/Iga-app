@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from apps.core.constants import A_LEVEL_GRADES, GRADE_CODES
 from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 from apps.schools.access import content_access
 from apps.schools.constants import DISTRICTS
 from apps.schools.membership import choose_school
@@ -139,9 +140,9 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
 
 class NewSchoolSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=200)
+    name = CleanCharField(max_length=200)
     district = serializers.ChoiceField(choices=DISTRICTS)
-    sector = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    sector = CleanCharField(max_length=80, required=False, allow_blank=True)
     phone = serializers.CharField(max_length=40)
     email = serializers.EmailField(required=False, allow_blank=True)
 

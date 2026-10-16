@@ -5,13 +5,14 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.text import CleanCharField
 from apps.schools import access
 
 from . import services
 
 
 class AskSerializer(serializers.Serializer):
-    message = serializers.CharField(max_length=services.MAX_MESSAGE_CHARS, trim_whitespace=True)
+    message = CleanCharField(multiline=True, max_length=services.MAX_MESSAGE_CHARS, trim_whitespace=True)
     history = serializers.ListField(child=serializers.DictField(), required=False, default=list)
     lesson = serializers.SlugField(required=False, allow_blank=True)
     attempt = serializers.IntegerField(required=False, allow_null=True)

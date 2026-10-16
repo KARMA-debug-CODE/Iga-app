@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from apps.accounts.models import User
 from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 
 from .constants import PROVINCE_OF
 from .models import LedgerEntry, Payment, School
@@ -232,9 +233,9 @@ class ManualPaymentSerializer(serializers.Serializer):
     months = serializers.IntegerField(min_value=1, max_value=24)
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0)
     currency = serializers.ChoiceField(choices=["USD", "RWF"])
-    note = serializers.CharField(max_length=300)
+    note = CleanCharField(max_length=300)
     # The bank transfer or receipt number: the same one can only be recorded once.
-    external_reference = serializers.CharField(max_length=100, required=False, allow_blank=True, default="")
+    external_reference = CleanCharField(max_length=100, required=False, allow_blank=True, default="")
 
 
 class CorrectionSerializer(serializers.Serializer):
@@ -246,4 +247,4 @@ class CorrectionSerializer(serializers.Serializer):
     provider_fee = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False, default=0)
     months = serializers.IntegerField(min_value=-24, max_value=24, required=False, default=0)
     corrects = serializers.IntegerField(min_value=1, required=False, allow_null=True)
-    note = serializers.CharField(max_length=300)
+    note = CleanCharField(max_length=300)

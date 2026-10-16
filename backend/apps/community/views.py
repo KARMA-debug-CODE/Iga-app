@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from apps.core import audit
 from apps.core.permissions import IsPlatformAdmin, NotParent, RecentAuthentication
 from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
 from apps.core.validation import text_field
@@ -82,7 +83,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class SharedNoteSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.short_name", read_only=True, default=None)
-    body = serializers.CharField(max_length=20000)
+    body = CleanCharField(multiline=True, max_length=20000)
 
     class Meta:
         model = SharedNote
@@ -241,7 +242,7 @@ class StudyGroupViewSet(viewsets.ModelViewSet):
         return Response({"messages": MessageSerializer(fresh, many=True).data, "hidden_ids": list(hidden)})
 
     def _post_message(self, request, group):
-        body = text_field(request.data, "body", MAX_MESSAGE_CHARS, required=False)
+        body = text_field(request.data, "body", MAX_MESSAGE_CHARS, required=False, multiline=True)
         if not body:
             raise ValidationError({"body": _("Write something first.")})
         message = Message.objects.create(group=group, author=request.user, body=body)
