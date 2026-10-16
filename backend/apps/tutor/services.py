@@ -34,7 +34,7 @@ from apps.curriculum.models import Subject
 from apps.curriculum.views import visible_lessons
 from apps.schools import access
 
-from . import calculator, guard, llm, retrieval
+from . import calculator, guard, llm, retrieval, usage
 from .models import TutorExchange
 
 log = logging.getLogger(__name__)
@@ -51,9 +51,6 @@ QUESTION_CHARS = 2500
 STUDENT_ANSWER_CHARS = 1000
 PASSAGE_CHARS = 2800
 OPEN_LESSON_CHARS = 2000
-# The history and the student's turn together (about 2,800 tokens at 3 characters a token, which French
-# and maths need): lesson passages get less room, and old turns are dropped, when a question is long.
-TURN_CHARS = 8400
 MIN_PASSAGE_CHARS = 800
 MAX_TOOL_ROUNDS = 3
 FALLBACK_PASSAGES = 3
@@ -390,6 +387,13 @@ def compose(context, message, own, others, suspicious=False):
     return "\n\n".join(parts)
 
 
+def turn_chars():
+    """The room for the history and the student's turn together, in characters: SANTA_MAX_INPUT_TOKENS (2,800
+    by default) at 3 characters a token, which French and maths need. Lesson passages get less room, and old
+    turns are dropped, when a question is long."""
+    return max(2 * MIN_PASSAGE_CHARS, settings.SANTA_MAX_INPUT_TOKENS * usage.CHARS_PER_TOKEN)
+
+
 def prepare(user, message, history=None, lesson_slug=None, attempt_id=None, question_id=None, lang=None, subject_code=None):
     """Check a question and gather what Santa may see. Raises DRF errors (400, 403, 404)."""
     message = (message or "").strip()
@@ -408,11 +412,12 @@ def prepare(user, message, history=None, lesson_slug=None, attempt_id=None, ques
     if context.question is not None:
         query += "\n" + context.question.prompt
     subject = context.subject or (context.attempt.quiz.subject if context.attempt else None)
+    room = turn_chars()
     used = sum(len(m["content"]) for m in history) + len(context.text) + len(message)
-    while history and used > TURN_CHARS - MIN_PASSAGE_CHARS:
+    while history and used > room - MIN_PASSAGE_CHARS:
         used -= len(history[0]["content"]) + len(history[1]["content"])
         history = history[2:]
-    budget = max(MIN_PASSAGE_CHARS, min(PASSAGE_CHARS, TURN_CHARS - used))
+    budget = max(MIN_PASSAGE_CHARS, min(PASSAGE_CHARS, room - used))
     own, others = retrieval.search(
         user,
         query,
@@ -427,17 +432,21 @@ def prepare(user, message, history=None, lesson_slug=None, attempt_id=None, ques
 
 
 def status(user):
-    """What the app shows: {enabled, reason, state, exam}.
+    """What the app shows: {enabled, reason, state, exam, allowance}.
 
     state: "ready", "loading" (the model is starting), "unavailable" (its server isn't answering),
-    "not_installed" (Santa answers from the lessons only), or "exam" (switched off by an open exam)."""
+    "not_installed" (Santa answers from the lessons only), or "exam" (switched off by an open exam).
+    allowance: what is left of the student's allowances (usage.Allowance.public)."""
     if not access.has_premium(user):
-        return {"enabled": False, "reason": "subscription_required", "state": "", "exam": None}
+        return {"enabled": False, "reason": "subscription_required", "state": "", "exam": None, "allowance": None}
+    left = usage.allowance(user).public()
     exam = open_exam(user)
     if exam is not None:
-        return {"enabled": True, "reason": "", "state": "exam", "exam": {"attempt": exam.pk, "quiz": exam.quiz.title}}
+        exam = {"attempt": exam.pk, "quiz": exam.quiz.title}
+        return {"enabled": True, "reason": "", "state": "exam", "exam": exam, "allowance": left}
     health = llm.health()
-    return {"enabled": True, "reason": "", "state": "unavailable" if health == "unreachable" else health, "exam": None}
+    state = "unavailable" if health == "unreachable" else health
+    return {"enabled": True, "reason": "", "state": state, "exam": None, "allowance": left}
 
 
 # --- Answering ------------------------------------------------------------------------------
@@ -562,10 +571,15 @@ def _ask_model(prepared, stream, deadline, answer, tools):
     ]
     tools = [calculator.TOOL] if tools else None
     for round_number in range(MAX_TOOL_ROUNDS + 1):
+        # SANTA_MAX_TOKENS is for the whole answer, calculator rounds included.
+        room = settings.SANTA_MAX_TOKENS - answer.completion_tokens
+        if room <= 0:
+            answer.finish = "length"
+            return
         payload = {
             "model": settings.SANTA_MODEL_NAME,
             "messages": messages,
-            "max_tokens": settings.SANTA_MAX_TOKENS,
+            "max_tokens": room,
             "temperature": settings.SANTA_TEMPERATURE,
         }
         # The last round offers no tools, so the model has to answer.
@@ -641,6 +655,12 @@ def _fallback_note(reason):
         return _("Santa is helping many students right now. Ask again in a minute for a full answer.")
     if reason == "too_long":
         return _("This is too long for Santa. Ask a shorter question, or start a new chat.")
+    if reason == usage.DAY:
+        return _("You have used today's questions for Santa's AI. It can answer fully again tomorrow.")
+    if reason == usage.MONTH:
+        return _("You have used this month's questions for Santa's AI. It can answer fully again next month.")
+    if reason == usage.SCHOOL:
+        return _("Your school has used today's time with Santa's AI. It can answer fully again tomorrow.")
     return _("Santa can't answer just now. Try again in a minute.")
 
 
@@ -703,9 +723,11 @@ def _take_model_slot(seconds):
 def answer(prepared, stream=False):
     """Santa's answer, as events: {"type": "start"}, then {"type": "delta", "text"} pieces (and
     {"type": "tool", ...} when the calculator was used, {"type": "ping"} to keep the line open), and at the end
-    {"type": "done", "reply", "sources", "fallback", "tools"}; or one {"type": "error", "code", "detail"}.
+    {"type": "done", "reply", "sources", "fallback", "tools", "allowance"}; or one {"type": "error", "code", "detail"}.
 
-    The exchange is logged when the answer ends, also when the student stops it half-way."""
+    When one of the student's allowances (usage.py) is used up, the answer is made of lesson passages, with a
+    note saying why. The exchange is logged, and counted, when the answer ends, also when the student stops it
+    half-way."""
     user = prepared.context.user
     # Longer than an answer can last: the time limit, plus a last wait for a model server gone silent.
     seconds = int(settings.SANTA_TIMEOUT_SECONDS) + llm.STREAM_READ_TIMEOUT + 15
@@ -731,9 +753,11 @@ def answer(prepared, stream=False):
         elif known in ("loading", "unreachable"):
             fallback = "loading" if known == "loading" else "unavailable"
         else:
-            slot = _take_model_slot(seconds)
-            if slot is None:
-                fallback = "busy"
+            fallback = usage.allowance(user).reached or None
+            if fallback is None:
+                slot = _take_model_slot(seconds)
+                if slot is None:
+                    fallback = "busy"
         passages = prepared.own, prepared.others  # all of them, for an answer from the lessons
         if fallback is None:
             try:
@@ -784,7 +808,15 @@ def answer(prepared, stream=False):
         yield from result.emit(_safety_note(prepared, result.text))
         _log(prepared, result, fallback, blocked)
         logged = True
-        yield {"type": "done", "reply": result.text, "sources": sources, "fallback": fallback, "tools": result.tools}
+        left = usage.allowance(user).public()
+        yield {
+            "type": "done",
+            "reply": result.text,
+            "sources": sources,
+            "fallback": fallback,
+            "tools": result.tools,
+            "allowance": left,
+        }
     finally:
         if not logged:  # stopped by the student, or the connection dropped
             result.finish = result.finish if result.finish.startswith("error") else "stopped"
@@ -797,6 +829,17 @@ def answer(prepared, stream=False):
 def _log(prepared, result, fallback, blocked=False):
     context = prepared.context
     flags = prepared.flags + (["prompt_leak"] if blocked else [])
+    if fallback is None:
+        # The model answered (perhaps stopped half-way, before its server said how many tokens it used: then
+        # they are estimated from the text, so stopping early doesn't make an answer free).
+        sent = len(SYSTEM_PROMPT) + sum(len(m["content"]) for m in prepared.history) + len(prepared.prompt)
+        usage.record(
+            context.user,
+            input_tokens=result.prompt_tokens or usage.estimate_tokens(sent),
+            output_tokens=result.completion_tokens or usage.estimate_tokens(len(result.text)),
+        )
+    elif fallback in (usage.DAY, usage.MONTH, usage.SCHOOL):
+        usage.record(context.user, limited=True)
     TutorExchange.objects.create(
         user=context.user,
         lesson=context.lesson,
@@ -814,7 +857,7 @@ def _log(prepared, result, fallback, blocked=False):
 
 
 def ask(user, message, **kwargs):
-    """Santa's whole answer at once: {"reply", "sources", "fallback", "tools"} (or {"error", "detail"})."""
+    """Santa's whole answer at once: {"reply", "sources", "fallback", "tools", "allowance"} (or {"error", "detail"})."""
     prepared = prepare(user, message, **kwargs)
     events = answer(prepared, stream=False)
     try:
@@ -822,7 +865,7 @@ def ask(user, message, **kwargs):
             if event["type"] == "error":
                 return {"error": event["code"], "detail": event["detail"]}
             if event["type"] == "done":
-                return {key: event[key] for key in ("reply", "sources", "fallback", "tools")}
+                return {key: event[key] for key in ("reply", "sources", "fallback", "tools", "allowance")}
     finally:
         events.close()  # frees this student's turn and the model slot now
     return {"error": "no_answer", "detail": ""}

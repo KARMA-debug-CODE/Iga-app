@@ -221,7 +221,10 @@ def said(user, *replies):
 
 def test_status_reports_each_state(client_for, student, santa, settings):
     client = client_for(student)
-    assert client.get("/api/tutor/status/").data == {"enabled": True, "reason": "", "state": "ready", "exam": None}
+    data = client.get("/api/tutor/status/").data
+    left = data.pop("allowance")
+    assert data == {"enabled": True, "reason": "", "state": "ready", "exam": None}
+    assert left["questions_left_today"] == settings.SANTA_USER_DAILY_QUESTIONS and left["reached"] == ""
 
     cache.clear()
     santa.loading = True
@@ -232,7 +235,9 @@ def test_status_reports_each_state(client_for, student, santa, settings):
     assert client.get("/api/tutor/status/").data["state"] == "unavailable"
 
     settings.SANTA_URL = ""
-    assert client.get("/api/tutor/status/").data == {"enabled": True, "reason": "", "state": "not_installed", "exam": None}
+    data = client.get("/api/tutor/status/").data
+    data.pop("allowance")
+    assert data == {"enabled": True, "reason": "", "state": "not_installed", "exam": None}
 
 
 def test_status_says_when_an_exam_switches_santa_off(client_for, student, subject, unit, santa):
@@ -408,7 +413,7 @@ def test_long_questions_leave_less_room_for_lesson_passages(student, unit):
     assert sum(len(p.text) for p in tight.others) <= services.MIN_PASSAGE_CHARS
     assert len(tight.history) < len(history)  # old turns make way
     written = sum(len(m["content"]) for m in tight.history) + len(tight.prompt)
-    assert written <= services.TURN_CHARS + 500  # what is left is labels around the passages
+    assert written <= services.turn_chars() + 500  # what is left is labels around the passages
 
 
 def test_a_long_answer_says_it_ran_out_of_space(client_for, student, santa):

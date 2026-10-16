@@ -69,7 +69,7 @@ class TutorStatusView(APIView):
 
 
 class TutorAskView(APIView):
-    """Santa's whole answer as JSON: {reply, sources, fallback, tools}."""
+    """Santa's whole answer as JSON: {reply, sources, fallback, tools, allowance}."""
 
     throttle_scope = "tutor"
 
@@ -81,7 +81,7 @@ class TutorAskView(APIView):
                 if event["type"] == "error":
                     return Response({"detail": event["detail"], "code": event["code"]}, status=status.HTTP_429_TOO_MANY_REQUESTS)
                 if event["type"] == "done":
-                    return Response({key: event[key] for key in ("reply", "sources", "fallback", "tools")})
+                    return Response({key: event[key] for key in ("reply", "sources", "fallback", "tools", "allowance")})
         finally:
             events.close()  # frees this student's turn and the model slot now
         return Response(status=status.HTTP_502_BAD_GATEWAY)

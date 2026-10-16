@@ -29,3 +29,28 @@ class TutorExchange(models.Model):
 
     def __str__(self):
         return f"{self.user} · {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class SantaUsage(models.Model):
+    """How much one student used Santa's model on one day: what the allowances count (apps/tutor/usage.py).
+
+    `school` is the student's school when they last asked that day, for the per-school budget."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="santa_usage")
+    school = models.ForeignKey("schools.School", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    day = models.DateField()
+    # Questions the model answered, and the tokens they took (as the model server reported them, or estimated
+    # from the text when an answer was stopped before the server said).
+    questions = models.PositiveIntegerField(default=0)
+    input_tokens = models.PositiveBigIntegerField(default=0)
+    output_tokens = models.PositiveBigIntegerField(default=0)
+    # Questions answered from the lessons because an allowance was used up.
+    limited = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-day"]
+        constraints = [models.UniqueConstraint(fields=["user", "day"], name="santa_usage_one_row_per_day")]
+        indexes = [models.Index(fields=["school", "day"]), models.Index(fields=["day"])]
+
+    def __str__(self):
+        return f"{self.user} · {self.day}"

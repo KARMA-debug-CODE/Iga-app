@@ -308,7 +308,7 @@ def test_the_longest_request_still_fits_the_budget(client_for, student, unit, sa
     assert response.status_code == 200
     body = santa.calls[-1]["body"]
     turn_chars = sum(len(m["content"]) for m in body["messages"][1:])
-    assert turn_chars <= services.TURN_CHARS + 1000  # labels, the reminder and the note
+    assert turn_chars <= services.turn_chars() + 1000  # labels, the reminder and the note
     assert body["max_tokens"] == 600
 
 

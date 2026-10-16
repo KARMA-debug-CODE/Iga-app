@@ -28,6 +28,7 @@ from apps.curriculum.views import visible_lessons
 from apps.schools.access import has_premium
 from apps.schools.views import revenue_summary
 from apps.simulations.models import Simulation, SimulationView
+from apps.tutor import usage as santa_usage
 
 from . import admin_login, audit
 from .constants import GRADES, LANGUAGES, ContentStatus
@@ -434,6 +435,8 @@ def admin_stats(request):
             },
             "popular_lessons": [{"title": r["lesson__title"], "count": r["n"]} for r in popular_lessons],
             "popular_simulations": [{"title": r["simulation__title"], "count": r["n"]} for r in popular_sims],
+            # The costly services: Santa's model and the code runner, with their limits.
+            "santa": santa_usage.summary(),
             # The Django admin's secret address (None when it is off), for the Admin page's link.
             "django_admin_url": f"/{admin_prefix}" if (admin_prefix := admin_login.admin_url_prefix()) else None,
         }
