@@ -386,6 +386,19 @@ test("C++ and Java run on the code runner and wait for answers in the console", 
   await expect(page.locator(".console")).toContainText("Muraho, Eric!");
 });
 
+test("C++ says when the student has used today's time on the code runner", async ({ page }) => {
+  const detail =
+    "You have used today's time on the code runner. C++ and Java can run again tomorrow; Python, SQL and web pages still run in your browser.";
+  await page.route("**/api/code/status/", (route) => route.fulfill({ json: { enabled: true, languages: ["cpp", "java"] } }));
+  await page.route("**/api/code/run/", (route) => route.fulfill({ status: 429, json: { detail, code: "daily_limit" } }));
+  await login(page, "aline");
+  await page.goto("/playground");
+  await page.getByRole("tab", { name: /c\+\+/i }).click();
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(page.locator(".console")).toContainText("used today's time on the code runner");
+  await expect(page.getByRole("button", { name: /^run$/i })).toBeEnabled(); // nothing left running
+});
+
 test("C++ and Java say when the server has no code runner", async ({ page }) => {
   await login(page, "aline");
   await page.goto("/playground");
