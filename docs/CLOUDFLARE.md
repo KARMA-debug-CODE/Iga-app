@@ -105,11 +105,11 @@ Cloudflare caches common static file types by default and never caches API answe
 | `/api/*`, `/django-admin/*`, `/protected-media/*` | **Bypass cache** |
 | `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest` | Respect origin (not cached for long), so a new release reaches students at once |
 
-Never use "Cache Everything" on `/api/`: Cloudflare would serve one student's answers, marks or profile to another. Uploaded media (`/media/`) can follow the origin's 7 days.
+Never use "Cache Everything" on `/api/`: Cloudflare would serve one student's answers, marks or profile to another. Uploaded files have no public address (`/media/` answers 404): they come from access-checked `/api/files/` links marked `private, no-store`, so they are never cached either.
 
 ## 9. Cloudflare features to leave off
 
-Iga's Content-Security-Policy allows only the app's own scripts, so Cloudflare features that inject scripts into pages would be blocked (and they would change what the policy protects): leave **Rocket Loader**, **Email Address Obfuscation**, **Zaraz** and **Web Analytics automatic setup** off. **Automatic HTTPS Rewrites**, **HTTP/3**, **Brotli** and **0-RTT** (keep off: 0-RTT requests can be replayed) are safe to choose as you like.
+Iga's Content-Security-Policy allows only the app's own scripts, so Cloudflare features that inject scripts into pages would be blocked (and they would change what the policy protects): leave **Rocket Loader**, **Email Address Obfuscation**, **Zaraz** and **Web Analytics automatic setup** off. **Automatic HTTPS Rewrites**, **HTTP/3** and **Brotli** are safe to choose as you like. Keep **0-RTT** off: 0-RTT requests can be replayed.
 
 ## 10. Honest limits
 
