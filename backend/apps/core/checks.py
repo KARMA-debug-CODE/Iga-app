@@ -2,7 +2,8 @@
 starts serving. An Error stops `migrate`, so a real deployment with one of these mistakes doesn't start.
 
 A "real deployment" is DEBUG off with HTTPS on. A local `docker compose` trial over plain
-http://localhost (HTTPS=false) may keep the well-known local secrets and demo accounts.
+http://localhost (HTTPS=false) may keep the demo accounts. Secrets are stricter: with DEBUG off, only a local
+trial (plain HTTP, reachable only as localhost) may keep the well-known local secrets (see local_trial()).
 """
 
 from pathlib import Path
@@ -11,7 +12,8 @@ from django.conf import settings
 from django.core.checks import Error, Tags, Warning, register
 from django.db import DatabaseError
 
-# The local-trial values from docker-compose.yml and the docs: public, so never acceptable for real.
+# The local-trial values from docker-compose.yml and the docs, and every other value the repository has
+# ever used as a secret (the build's, the tests'): public, so never acceptable for real.
 KNOWN_LOCAL_SECRETS = {
     "",
     "iga",
@@ -21,14 +23,58 @@ KNOWN_LOCAL_SECRETS = {
     "iga-local-santa",
     "iga-local-code-runner",
     "a-shared-secret",
+    "a-long-random-string",
     "change-me",
+    "change-me-to-a-long-random-string",
     "password",
     "postgres",
+    "local-only-change-me-0f8e7c2b9a",
+    "dev-only-insecure-key-do-not-use-in-production",
+    "build-time-placeholder-only-used-for-collectstatic",
+    "test-only-secret-key-that-is-long-enough-1234567890",
+    "db-roles-test-secret-key-that-is-long-enough-0123456789",
 }
+# Words that mark an example or placeholder rather than a secret someone generated.
+PLACEHOLDER_WORDS = (
+    "change-me",
+    "changeme",
+    "replace",
+    "placeholder",
+    "example",
+    "your-",
+    "a-long-random",
+    "local-only",
+    "...",
+    "<",
+    "xxxx",
+)
+# Shared secrets between Iga's own services (Santa's model server, the code runner) are generated, so long.
+MIN_SHARED_SECRET_LENGTH = 16
+# Hosts that only reach this machine: `docker compose up` for a look at Iga, or the test client.
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "[::1]", "::1", "testserver"}
 
 
 def real_deployment():
     return not settings.DEBUG and settings.HTTPS
+
+
+def local_trial():
+    """DEBUG off over plain HTTP, answering only to local names: a trial on one's own machine. A server
+    with a name or an address of its own (DJANGO_ALLOWED_HOSTS) is not, even without HTTPS."""
+    return not settings.HTTPS and all(host.lower() in LOCAL_HOSTS for host in settings.ALLOWED_HOSTS)
+
+
+def public_secret(value, min_length=0):
+    """Is `value` a secret everyone can know: a published value, an example, too short, or not random?"""
+    value = value or ""
+    lowered = value.lower()
+    return (
+        value in KNOWN_LOCAL_SECRETS
+        or lowered.startswith(("dev-only", "test-only"))
+        or any(word in lowered for word in PLACEHOLDER_WORDS)
+        or len(value) < min_length
+        or len(set(value)) < 6
+    )
 
 
 @register()
@@ -57,22 +103,33 @@ def admin_site_check(app_configs, **kwargs):
 
 @register()
 def default_credentials_check(app_configs, **kwargs):
-    """A real deployment must not run with the secrets every copy of the code knows."""
-    if not real_deployment():
+    """With DEBUG off, Iga must not run with a secret every copy of the code knows (docker-compose.yml's
+    local defaults, the docs' examples), with a placeholder, or with a short one. Only a local trial may."""
+    if settings.DEBUG or local_trial():
         return []
     errors = []
-    if settings.SANTA_URL and settings.SANTA_API_KEY in KNOWN_LOCAL_SECRETS:
+    if public_secret(settings.SECRET_KEY, 32):
+        errors.append(("DJANGO_SECRET_KEY", "signing sessions and links"))
+    if settings.SANTA_URL and public_secret(settings.SANTA_API_KEY, MIN_SHARED_SECRET_LENGTH):
         errors.append(("SANTA_API_KEY", "Santa's model server"))
-    if settings.CODE_RUNNER_URL and settings.CODE_RUNNER_TOKEN in KNOWN_LOCAL_SECRETS:
+    if settings.CODE_RUNNER_URL and public_secret(settings.CODE_RUNNER_TOKEN, MIN_SHARED_SECRET_LENGTH):
         errors.append(("CODE_RUNNER_TOKEN", "the code runner"))
     database = settings.DATABASES["default"]
     if database.get("ENGINE", "").endswith("postgresql") and database.get("PASSWORD", "") in KNOWN_LOCAL_SECRETS - {""}:
         errors.append(("POSTGRES_PASSWORD / DATABASE_URL", "the database"))
+    if settings.BILLING_PROVIDER == "flutterwave":
+        # Unset values are iga.W010's business, a test key iga.E011's.
+        if settings.FLUTTERWAVE_SECRET_KEY and public_secret(settings.FLUTTERWAVE_SECRET_KEY):
+            errors.append(("FLUTTERWAVE_SECRET_KEY", "Flutterwave"))
+        if settings.FLUTTERWAVE_WEBHOOK_HASH and public_secret(settings.FLUTTERWAVE_WEBHOOK_HASH):
+            errors.append(("FLUTTERWAVE_WEBHOOK_HASH", "Flutterwave's webhooks"))
+    if settings.LEDGER_HMAC_KEY and public_secret(settings.LEDGER_HMAC_KEY, MIN_SHARED_SECRET_LENGTH):
+        errors.append(("LEDGER_HMAC_KEY", "the money ledger"))
     return [
         Error(
-            f"{name} for {what} is a well-known default value.",
+            f"{name} for {what} is a well-known, placeholder or short value.",
             hint='Set a long random value (python -c "import secrets; print(secrets.token_urlsafe(32))") '
-            "in .env. HTTPS=false is only for a local trial on http://localhost.",
+            "in .env. Only a local trial (HTTPS=false, DJANGO_ALLOWED_HOSTS=localhost) may keep the local defaults.",
             id="iga.E002",
         )
         for name, what in errors

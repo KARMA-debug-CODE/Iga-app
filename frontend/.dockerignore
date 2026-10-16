@@ -9,3 +9,5 @@ public/runtimes
 .env
 .env.*
 *.local
+*.pem
+*.key

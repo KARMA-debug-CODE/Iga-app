@@ -50,6 +50,7 @@ PLACEHOLDER_SECRETS = {
     "",
     "change-me-to-a-long-random-string",
     "dev-only-insecure-key-do-not-use-in-production",
+    "build-time-placeholder-only-used-for-collectstatic",  # the image build's, before it used a random one
 }
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if SECRET_KEY in PLACEHOLDER_SECRETS or len(SECRET_KEY) < 32:

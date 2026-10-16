@@ -3,6 +3,7 @@
 import importlib
 import io
 import os
+import secrets
 import subprocess
 import sys
 from pathlib import Path
@@ -185,6 +186,7 @@ def test_default_secrets_block_a_real_deployment(settings):
     db = ["POSTGRES_PASSWORD"] if known_db_password else []
 
     settings.HTTPS = True
+    settings.SECRET_KEY = secrets.token_urlsafe(50)  # the deployment's own, not the suite's public one
     settings.SANTA_URL = "http://santa:8080"
     settings.SANTA_API_KEY = "iga-local-santa"
     settings.CODE_RUNNER_URL = "http://coderunner:2000"

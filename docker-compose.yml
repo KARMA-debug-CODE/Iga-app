@@ -10,7 +10,9 @@
 #
 # For a real deployment, use strong secrets in .env, serve over HTTPS and remove
 # HTTPS=false from .env (HTTPS defaults to on), and set a random CODE_RUNNER_TOKEN, SANTA_API_KEY,
-# POSTGRES_PASSWORD, POSTGRES_OWNER_PASSWORD and POSTGRES_APP_PASSWORD.
+# POSTGRES_PASSWORD, POSTGRES_OWNER_PASSWORD and POSTGRES_APP_PASSWORD. The defaults below are public:
+# with DJANGO_DEBUG off the backend refuses to start with them (check iga.E002) unless this is a local
+# trial (HTTPS=false and DJANGO_ALLOWED_HOSTS only localhost).
 services:
   # Three database roles: "iga" is the superuser, used only by the migrate service below to set up the
   # other two; iga_owner owns the tables and runs the migrations; iga_app, the only role the backend and
