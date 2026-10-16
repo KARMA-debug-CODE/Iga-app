@@ -58,3 +58,26 @@ def test_nginx_runs_a_maintained_stable_line():
     match = re.search(r"^FROM nginx:1\.(\d+)-alpine", (REPO / "frontend" / "Dockerfile").read_text(), re.M)
     minor = int(match.group(1))
     assert minor % 2 == 0 and minor >= 30  # 1.27 (mainline, end of life) shipped critical OpenSSL CVEs
+
+
+def check_ids(text):
+    """{check id: [functions using it]} for one checks module."""
+    found = {}
+    for function in re.split(r"\n@register", text)[1:]:
+        name = re.search(r"def (\w+)", function).group(1)
+        for check_id in set(re.findall(r'id="(iga\.[EW]\d{3})"', function)):
+            found.setdefault(check_id, []).append(name)
+    return found
+
+
+def test_every_system_check_has_its_own_id():
+    """Silencing a check (SILENCED_SYSTEM_CHECKS) or reading its id in the docs must name one problem only:
+    two streams once both picked iga.E010 (billing's test payments and the uploads folder)."""
+    owners = {}
+    for path in sorted((REPO / "backend" / "apps").rglob("*checks.py")):
+        for check_id, names in check_ids(path.read_text()).items():
+            owners.setdefault(check_id, []).extend(names)
+    assert len(owners) >= 10
+    assert {check_id: names for check_id, names in owners.items() if len(names) > 1} == {}
+    clash = '\n@register()\ndef a():\n    Error("x", id="iga.E010")\n\n@register()\ndef b():\n    Error("y", id="iga.E010")\n'
+    assert check_ids(clash) == {"iga.E010": ["a", "b"]}

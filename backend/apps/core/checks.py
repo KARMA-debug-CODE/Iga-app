@@ -215,7 +215,7 @@ def media_root_check(app_configs, **kwargs):
     """Uploads must stay out of every folder served as static files, where they would be public and
     skip the access checks and safe headers of apps/core/media.py."""
     if not settings.MEDIA_ROOT:
-        return [Error("MEDIA_ROOT is not set.", hint="Point MEDIA_ROOT at a folder of its own for uploads.", id="iga.E010")]
+        return [Error("MEDIA_ROOT is not set.", hint="Point MEDIA_ROOT at a folder of its own for uploads.", id="iga.E013")]
     media = Path(settings.MEDIA_ROOT).resolve()
     clashes = [
         str(folder) for folder in _served_folders() if media == folder or folder in media.parents or media in folder.parents
@@ -226,6 +226,6 @@ def media_root_check(app_configs, **kwargs):
         Error(
             f"MEDIA_ROOT ({media}) overlaps a folder served as static files: {', '.join(clashes)}.",
             hint="Keep uploads in a folder of their own, outside STATIC_ROOT, STATICFILES_DIRS and WHITENOISE_ROOT.",
-            id="iga.E010",
+            id="iga.E013",
         )
     ]
