@@ -105,6 +105,10 @@ This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx s
 
 nginx limits requests per client address (strictly for sign-in and account changes, tightly for Santa, C++/Java runs and payments, generously for the rest; `NGINX_RATE_*`) and answers a flood with a JSON 429; Django adds its own limits per account and per user. Behind a load balancer or Cloudflare, tell nginx which proxies may name the client (`NGINX_TRUSTED_PROXIES`), or every student would share the proxy's address: see [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md), which also covers the DDoS protection only such a network can give. `python3 frontend/tests/nginx/test_nginx.py` tests the nginx layer (needs Docker).
 
+### Secrets
+
+Every key and password lives in `.env` on the server (git and every image build ignore `.env` files and key files). The defaults in `docker-compose.yml` (`iga-local-...`) are public, like the examples in the docs: as soon as `DJANGO_ALLOWED_HOSTS` names a real server or HTTPS is on, Iga refuses to start with any of them, or with a short or placeholder secret, for the secret key, the database passwords, `CODE_RUNNER_TOKEN`, `SANTA_API_KEY`, the Flutterwave keys and `LEDGER_HMAC_KEY` (check `iga.E002`; `docker compose logs migrate` says which). Generate each with `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`. CI scans dependencies, images and every commit for known vulnerabilities and secrets (`.github/workflows/security.yml`), and Dependabot proposes upgrades.
+
 ### HTTPS
 
 A real deployment runs over HTTPS only: leave `HTTPS=false` out of `.env` and nginx redirects plain HTTP to HTTPS and sends HSTS (a year, with subdomains), Django redirects too, marks every cookie `Secure` and sends HSTS on the API, and `manage.py check --deploy` is clean (`docker compose exec backend python manage.py check --deploy`). HSTS `preload` is a commitment for the whole domain, so it is off until you set `HSTS_PRELOAD=true`. Two ways to get the certificate:
