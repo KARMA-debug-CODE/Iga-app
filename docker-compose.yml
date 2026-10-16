@@ -64,6 +64,9 @@ services:
       # C++ and Java in the code playground. Set CODE_RUNNER_URL= (empty) in .env to switch them off.
       CODE_RUNNER_URL: ${CODE_RUNNER_URL-http://coderunner:2000}
       CODE_RUNNER_TOKEN: ${CODE_RUNNER_TOKEN:-iga-local-code-runner}
+      CODE_RUNNER_ACCESS: ${CODE_RUNNER_ACCESS:-signed_in}
+      CODE_RUNNER_DAILY_RUNS: ${CODE_RUNNER_DAILY_RUNS:-300}
+      CODE_RUNNER_DAILY_CPU_SECONDS: ${CODE_RUNNER_DAILY_CPU_SECONDS:-900}
       # Protected past-paper files are sent by nginx after Django checks access.
       PROTECTED_MEDIA_ACCEL: "true"
       # Uploads are checked by their contents; size limits (see .env.docker.example).
