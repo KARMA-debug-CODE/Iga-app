@@ -425,6 +425,14 @@ PROTECTED_MEDIA_ACCEL = env_bool("PROTECTED_MEDIA_ACCEL", False)
 
 # Largest file a teacher may upload as a resource (nginx allows 25 MB per request, only on upload routes).
 UPLOAD_MAX_MB = int(os.environ.get("UPLOAD_MAX_MB", "20"))
+# Images are smaller: at most this many MB, and this many pixels in all (frames of an animation included),
+# so a small file that unpacks into a huge picture can't use the server's memory. See apps/core/uploads.py.
+UPLOAD_IMAGE_MAX_MB = int(os.environ.get("UPLOAD_IMAGE_MAX_MB", "5"))
+UPLOAD_IMAGE_MAX_PIXELS = int(os.environ.get("UPLOAD_IMAGE_MAX_PIXELS", "50000000"))
+
+# The longest text (a lesson, a shared note, a question) a text field without its own limit accepts.
+# Shorter fields keep their own limits. See apps/core/text.py.
+TEXT_MAX_CHARS = int(os.environ.get("TEXT_MAX_CHARS", "100000"))
 
 # Request size limits. nginx refuses bigger bodies first (frontend/nginx.conf: 2 MB for the API, 25 MB on
 # upload routes); these also protect a deployment without it. A refused request is a JSON 413

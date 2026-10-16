@@ -2,20 +2,17 @@
 
 Browsers open these as plain links (no Authorization header), so the API hands out a signed,
 short-lived URL instead of a public /media path. The file is re-checked against the user's
-access when the link is opened. Behind nginx the file itself is sent with X-Accel-Redirect from
-an internal location; without nginx (development) Django streams it.
+access when the link is opened, then sent by apps/core/media.py (X-Accel-Redirect behind nginx).
 """
 
-import mimetypes
-import os
-
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import Http404
 from django.utils.translation import gettext as _
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
+
+from apps.core.media import file_response
 
 from . import access
 
@@ -53,14 +50,4 @@ class PaperDownloadView(APIView):
         file = paper.paper_file if data["k"] == "paper" else paper.marking_guide_file
         if not file:
             raise Http404
-        filename = f"{paper.title or 'paper'}{os.path.splitext(file.name)[1]}".replace('"', "")
-        content_type = mimetypes.guess_type(file.name)[0] or "application/octet-stream"
-        if settings.PROTECTED_MEDIA_ACCEL:
-            response = HttpResponse(content_type=content_type)
-            response["X-Accel-Redirect"] = f"/protected-media/{file.name}"
-        else:
-            response = FileResponse(file.open("rb"), content_type=content_type)
-        response["Content-Disposition"] = f'inline; filename="{filename}"'
-        response["Cache-Control"] = "private, no-store"
-        response["X-Content-Type-Options"] = "nosniff"
-        return response
+        return file_response(file, paper.title or "paper")

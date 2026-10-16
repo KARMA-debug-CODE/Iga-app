@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
@@ -10,6 +9,7 @@ from apps.classroom.views import AssignmentViewSet, ClassroomViewSet
 from apps.community.views import MessageViewSet, ModerationViewSet, StudyGroupViewSet
 from apps.core import admin_login
 from apps.core import views as core_views
+from apps.curriculum.downloads import ResourceDownloadView
 from apps.curriculum.views import LessonViewSet, ResourceViewSet, SubjectViewSet, UnitViewSet
 from apps.gamification import views as gamification_views
 from apps.schools.downloads import PaperDownloadView
@@ -51,6 +51,7 @@ api = [
     path("admin/stats/", core_views.admin_stats, name="admin-stats"),
     path("admin/audit/", core_views.admin_audit, name="admin-audit"),
     path("files/papers/<str:token>/", PaperDownloadView.as_view(), name="paper-download"),
+    path("files/resources/<str:token>/", ResourceDownloadView.as_view(), name="resource-download"),
     path("", include("apps.schools.urls")),
     path("", include(router.urls)),
 ]
@@ -69,5 +70,5 @@ if ADMIN_URL_PREFIX:
     admin_login.install()
     urlpatterns.append(path(ADMIN_URL_PREFIX, admin.site.urls))
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Uploaded files have no public URL, not even in development: they are sent by the access-checked
+# views under api/files/ (apps/core/media.py).

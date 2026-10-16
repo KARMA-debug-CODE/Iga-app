@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, results } from "../api";
 import { useAuth } from "../auth";
+import { downloadCsv } from "../csv";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, scoreClass, Tabs } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
@@ -189,18 +190,6 @@ function Report({ id }) {
       )}
     </Loader>
   );
-}
-
-function downloadCsv(filename, rows) {
-  const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const text = rows.map((r) => r.map(escape).join(",")).join("\r\n");
-  const url = URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/csv;charset=utf-8" }));
-  const a = Object.assign(document.createElement("a"), {
-    href: url,
-    download: filename,
-  });
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 function RosterImport({ classroom, onCreated }) {

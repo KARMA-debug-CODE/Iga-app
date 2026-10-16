@@ -10,6 +10,14 @@ import CodePlayground from "./CodePlayground";
 import PythonPlayground from "./PythonPlayground";
 import SimEmbed from "./SimEmbed";
 
+// A path on this site: "/x", but not "//host" or "/\host", which browsers read as another site.
+const SAME_SITE = /^\/(?![/\\])/;
+// KaTeX: sizes people give (\rule{2000em}{2000em}) are capped, so maths can't cover the page; links
+// (\href, \url) and HTML commands stay off (trust is false by default).
+const KATEX = { throwOnError: false, strict: "ignore", maxSize: 20 };
+// Another site or app: a scheme ("https:", "mailto:"), "//host" or "/\host".
+const OTHER_SITE = /^(?:[a-z][a-z0-9+.-]*:|\/[/\\])/i;
+
 function codeBlockInfo(node) {
   const code = node?.children?.[0];
   if (!code || code.tagName !== "code") return null;
@@ -30,14 +38,18 @@ function codeBlockInfo(node) {
  *   ```python-run
  *   print("Muraho!")
  *   ```
- * Raw HTML in the Markdown is NOT rendered, so content can't inject scripts.
+ * Raw HTML in the Markdown is NOT rendered (it shows as text), so content can't inject scripts, and
+ * react-markdown drops unsafe link targets (javascript:, data:, vbscript: ...). With interactive={false},
+ * for text people write, pictures from other sites become links.
  */
 export default function Markdown({ children, sims = {}, interactive = true }) {
   return (
-    <div className="prose">
+    // People's text is also kept inside its own box (styles.css: .prose-people), so a far \kern can't
+    // paint over the page around it.
+    <div className={interactive ? "prose" : "prose prose-people"}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath, remarkNoBreakSpaces]}
-        rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: "ignore" }]]}
+        rehypePlugins={[[rehypeKatex, KATEX]]}
         components={{
           pre({ node, children: kids }) {
             const info = codeBlockInfo(node);
@@ -54,12 +66,29 @@ export default function Markdown({ children, sims = {}, interactive = true }) {
             return <pre>{kids}</pre>;
           },
           a({ href = "", children: kids }) {
-            const external = /^https?:\/\//.test(href);
+            // Links out open in a new tab that can't reach or redirect this page.
+            const external = OTHER_SITE.test(href);
             return (
               <a href={href} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                 {kids}
               </a>
             );
+          },
+          img({ src = "", alt = "" }) {
+            // People's text (shared notes, Santa's answers, questions) shows no pictures from other sites:
+            // loading one would tell that site who is reading, and could put anything in front of a class.
+            // It becomes a link the reader may choose to open. Lessons, reviewed before they are published,
+            // may show pictures.
+            if (!interactive && !SAME_SITE.test(src)) {
+              return src ? (
+                <a href={src} target="_blank" rel="noopener noreferrer">
+                  {alt || src}
+                </a>
+              ) : (
+                alt
+              );
+            }
+            return <img src={src} alt={alt} loading="lazy" referrerPolicy="no-referrer" />;
           },
         }}
       >

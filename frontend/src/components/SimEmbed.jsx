@@ -2,6 +2,7 @@ import { Suspense, useEffect, useId, useRef, useState } from "react";
 
 import { api } from "../api";
 import { translateNow, useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 import { BUILTIN_SIMS } from "../sims/registry";
 import ErrorBoundary from "./ErrorBoundary";
 import { Icon } from "./Icon";
@@ -12,9 +13,17 @@ function useSimulation(slug, initial, lang) {
   const [error, setError] = useState(null);
   useEffect(() => {
     if (initial || !slug) return;
-    api(`/simulations/${slug}/`, { params: { lang } }).then(setSim).catch(setError);
+    // The slug comes from a lesson's text: it names one simulation, never another API path ("../auth").
+    api(`/simulations/${encodeURIComponent(slug)}/`, { params: { lang } }).then(setSim).catch(setError);
   }, [slug, initial, lang]);
   return { sim: sim || initial, error };
+}
+
+// The frame may run scripts with its own origin's storage (PhET and GeoGebra need both), so it only
+// shows an https page on another site: with this site's origin, allow-same-origin would undo the sandbox.
+export function frameUrl(value) {
+  const url = safeUrl(value, { httpsOnly: true });
+  return url && new URL(url, window.location.origin).origin !== window.location.origin ? url : undefined;
 }
 
 let ggbScript = null;
@@ -92,7 +101,7 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
   useEffect(() => {
     if (!sim || recorded.current || !(launched || isBuiltin)) return;
     recorded.current = true;
-    api(`/simulations/${sim.slug}/view/`, { method: "POST" }).catch(() => {});
+    api(`/simulations/${encodeURIComponent(sim.slug)}/view/`, { method: "POST" }).catch(() => {});
   }, [sim, launched, isBuiltin]);
 
   if (error) return <div className="alert alert-error">{t("sim.notFound", { slug })}</div>;
@@ -117,7 +126,7 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
     );
   }
 
-  const embedUrl = sim.embed_url;
+  const embedUrl = frameUrl(sim.embed_url);
   const attribution = sim.provider === "phet" ? t("labs.attributionPhet") : sim.provider === "geogebra" ? t("labs.attributionGeogebra") : sim.provider_label;
 
   return (
@@ -131,8 +140,10 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
             <Icon name="play" size={16} /> {t("labs.launch")}
           </button>
         </div>
-      ) : sim.provider === "geogebra" && !embedUrl ? (
+      ) : sim.provider === "geogebra" && !sim.embed_url ? (
         <GeoGebraApp app={sim.provider_id} />
+      ) : !embedUrl ? (
+        <div className="alert alert-error">{t("sim.notFound", { slug: sim.slug })}</div>
       ) : (
         <iframe
           src={embedUrl}

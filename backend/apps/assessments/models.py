@@ -5,6 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.core.constants import GRADES, LEVELS, ContentStatus
+from apps.core.uploads import PAPER_KINDS, RandomName, SafeFileField
 
 
 class Question(models.Model):
@@ -132,9 +133,10 @@ class ExamPaper(models.Model):
     )
     source_note = models.CharField(max_length=300, blank=True, help_text="Where this paper came from")
     paper_url = models.URLField(blank=True)
-    paper_file = models.FileField(upload_to="exam_papers/", blank=True)
+    # PDFs only, under random names; served only through apps/schools/downloads.py after an access check.
+    paper_file = SafeFileField(upload_to=RandomName("exam_papers"), kinds=PAPER_KINDS, blank=True)
     marking_guide_url = models.URLField(blank=True)
-    marking_guide_file = models.FileField(upload_to="exam_papers/marking/", blank=True)
+    marking_guide_file = SafeFileField(upload_to=RandomName("exam_papers/marking"), kinds=PAPER_KINDS, blank=True)
     quiz = models.OneToOneField(Quiz, null=True, blank=True, on_delete=models.SET_NULL, related_name="exam_paper")
     created_at = models.DateTimeField(auto_now_add=True)
 

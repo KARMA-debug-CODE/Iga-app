@@ -8,7 +8,12 @@ class CoreConfig(AppConfig):
     def ready(self):
         from django.urls import register_converter
 
-        from . import checks, platform_checks  # noqa: F401  (registers Iga's system checks)
+        from . import (
+            checks,  # noqa: F401  (registers Iga's system checks)
+            platform_checks,  # noqa: F401  (registers the platform's system checks)
+            text,
+        )
         from .converters import IdConverter
 
         register_converter(IdConverter, "id")
+        text.install()  # people's text is cleaned before it is stored
