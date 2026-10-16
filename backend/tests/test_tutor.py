@@ -210,6 +210,12 @@ def last_prompt(santa):
     return santa.calls[-1]["body"]["messages"][-1]["content"]
 
 
+def said(user, *replies):
+    """Log answers as Santa's, so the browser may send them back as earlier turns."""
+    for reply in replies:
+        TutorExchange.objects.create(user=user, message="earlier", reply=reply, model="santa", stop_reason="stop")
+
+
 # --- Status ---------------------------------------------------------------------------------
 
 
@@ -260,7 +266,8 @@ def test_plain_answer_from_a_lesson(client_for, student, gradient_lesson, santa)
     assert "Santa, Iga's learning assistant" in system["content"]
     # Everything about this request is in the student's turn; the system prompt stays the same for the cache.
     assert "rise over run" in turn["content"] and "Reply in English" in turn["content"]
-    assert turn["content"].endswith("What is the gradient?")
+    assert "<student_message>\nWhat is the gradient?\n</student_message>" in turn["content"]
+    assert turn["content"].endswith(services.REMINDER)  # the app has the last word, not the student
 
     exchange = TutorExchange.objects.get()
     assert exchange.lesson == gradient_lesson and exchange.model == "santa"
@@ -366,6 +373,7 @@ def test_a_question_too_long_for_the_model_is_asked_again_with_less(client_for, 
     santa.too_long = 1
     santa.script = [{"content": "The membrane controls what goes in and out."}]
     history = [{"role": "user", "content": "Hello"}, {"role": "assistant", "content": "Hello! What shall we study?"}]
+    said(student, "Hello! What shall we study?")
     response = ask(client_for(student), message="cell membrane gradient", history=history)
     assert response.data["reply"] == "The membrane controls what goes in and out."
     first, second = (c["body"] for c in santa.calls)
@@ -393,6 +401,7 @@ def test_long_questions_leave_less_room_for_lesson_passages(student, unit):
         )
     question = "How does photosynthesis make glucose? " + "Please explain every step. " * 70
     history = [{"role": "user", "content": "x" * 1400}, {"role": "assistant", "content": "y" * 1400}] * 2
+    said(student, "y" * 1400)
     roomy = services.prepare(student, "How does photosynthesis make glucose?")
     tight = services.prepare(student, question[: services.MAX_MESSAGE_CHARS], history=history)
     assert sum(len(p.text) for p in roomy.others) > services.MIN_PASSAGE_CHARS
@@ -746,10 +755,12 @@ def test_history_must_alternate_and_is_trimmed(client_for, student, santa):
     bad = [{"role": "assistant", "content": "hi"}, {"role": "assistant", "content": "again"}]
     assert ask(client_for(student), history=bad).status_code == 400
     good = [{"role": "user", "content": "What is a cell?"}, {"role": "assistant", "content": "The unit of life."}]
+    said(student, "The unit of life.")
     assert ask(client_for(student), message="More?", history=good).status_code == 200
     assert [m["role"] for m in santa.calls[-1]["body"]["messages"]] == ["system", "user", "assistant", "user"]
     # Old turns that don't fit Santa's memory are left out, a question and its answer together.
     long = [{"role": "user" if i % 2 == 0 else "assistant", "content": f"turn {i} " + "x" * 1400} for i in range(6)]
+    said(student, *(m["content"] for m in long[1::2]))
     ask(client_for(student), message="And now?", history=long)
     sent = santa.calls[-1]["body"]["messages"][1:-1]
     assert sent[0]["content"].startswith("turn 4") and len(sent) == 2

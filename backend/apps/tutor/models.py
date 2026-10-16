@@ -18,6 +18,10 @@ class TutorExchange(models.Model):
     stop_reason = models.CharField(max_length=32, blank=True)
     input_tokens = models.PositiveIntegerField(default=0)
     output_tokens = models.PositiveIntegerField(default=0)
+    # What the prompt-injection defences noticed (apps/tutor/guard.py), comma-separated: "injection" (the
+    # message tried to instruct the model), "forged_history" (earlier answers Santa never gave were sent),
+    # "prompt_leak" (the answer repeated Santa's instructions and was replaced). Empty for most questions.
+    flags = models.CharField(max_length=64, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:

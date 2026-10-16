@@ -1,23 +1,38 @@
 import json
+import logging
 
 from django.http import StreamingHttpResponse
+from django.utils.translation import gettext as _
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core import security_log
 from apps.schools import access
 
 from . import services
 
+# The most earlier messages a request may carry (the server reads only the last MAX_HISTORY_MESSAGES).
+MAX_HISTORY_ITEMS = 50
+# Santa's longest answers (a full answer plus notes, or lesson passages) are far shorter than this.
+MAX_HISTORY_CONTENT = 20_000
+
 
 class AskSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=services.MAX_MESSAGE_CHARS, trim_whitespace=True)
-    history = serializers.ListField(child=serializers.DictField(), required=False, default=list)
+    history = serializers.ListField(child=serializers.DictField(), required=False, default=list, max_length=MAX_HISTORY_ITEMS)
     lesson = serializers.SlugField(required=False, allow_blank=True)
     attempt = serializers.IntegerField(required=False, allow_null=True)
     question = serializers.IntegerField(required=False, allow_null=True)
     lang = serializers.ChoiceField(choices=list(services.LANGUAGE_NAMES), required=False)
     subject = serializers.SlugField(required=False, allow_blank=True)
+
+    def validate_history(self, value):
+        for item in value:
+            content = item.get("content")
+            if isinstance(content, str) and len(content) > MAX_HISTORY_CONTENT:
+                raise serializers.ValidationError(_("A message in the history is too long."))
+        return value
 
 
 def _prepare(request):
@@ -26,7 +41,7 @@ def _prepare(request):
     data = AskSerializer(data=request.data)
     data.is_valid(raise_exception=True)
     v = data.validated_data
-    return services.prepare(
+    prepared = services.prepare(
         request.user,
         v["message"],
         history=v.get("history"),
@@ -36,6 +51,15 @@ def _prepare(request):
         lang=v.get("lang"),
         subject_code=v.get("subject") or None,
     )
+    # Attempts to steer Santa are security events (at most one audit entry per student and kind in 10 minutes;
+    # every question is in Santa's exchange log, flagged, for safeguarding review).
+    if prepared.suspicious:
+        security_log.event(request, "santa_injection", request.user, level=logging.WARNING, audit_every=600)
+    if prepared.forged:
+        security_log.event(
+            request, "santa_forged_history", request.user, level=logging.WARNING, audit_every=600, dropped=prepared.forged
+        )
+    return prepared
 
 
 class TutorStatusView(APIView):

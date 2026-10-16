@@ -50,6 +50,8 @@ SECURITY_ACTIONS = {
     "cross_site_refused",
     "admin_login",
     "admin_login_failed",
+    "santa_injection",
+    "santa_forged_history",
 }
 
 # Never logged, whatever a caller passes in `details`.
