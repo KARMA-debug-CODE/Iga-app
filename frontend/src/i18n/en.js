@@ -357,6 +357,7 @@ export default {
   "tutor.state.exam.text": "You have an exam or timed test open (“{quiz}”). Submit it to use Santa again. Good luck!",
   "tutor.left.today": "{n} of {total} questions for Santa's AI left today",
   "tutor.left.month": "{n} left this month",
+  "tutor.left.monthOnly": "{n} of {total} questions for Santa's AI left this month",
   "tutor.left.time": "{percent}% of your Santa time left",
   "tutor.limit.limit_day": "You've used today's questions for Santa's AI",
   "tutor.limit.limit_day.text": "Until tomorrow, Santa answers with passages from your lessons.",

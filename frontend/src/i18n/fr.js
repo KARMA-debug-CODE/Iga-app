@@ -357,6 +357,8 @@ export default {
   "tutor.left.today": "Encore {n} questions sur {total} pour l'IA de Santa aujourd'hui",
   "tutor.left.today.one": "Encore {n} question sur {total} pour l'IA de Santa aujourd'hui",
   "tutor.left.month": "{n} pour le reste du mois",
+  "tutor.left.monthOnly": "Encore {n} questions sur {total} pour l'IA de Santa ce mois-ci",
+  "tutor.left.monthOnly.one": "Encore {n} question sur {total} pour l'IA de Santa ce mois-ci",
   "tutor.left.time": "Il vous reste {percent} % de votre temps avec Santa",
   "tutor.limit.limit_day": "Vous avez utilisé les questions d'aujourd'hui pour l'IA de Santa",
   "tutor.limit.limit_day.text": "Jusqu'à demain, Santa répond avec des passages de vos leçons.",

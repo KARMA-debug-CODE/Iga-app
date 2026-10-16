@@ -36,6 +36,11 @@ describe("SantaAllowance", () => {
     expect(text).toContain("12 of 60 questions for Santa's AI left today · 5 left this month · 20% of your Santa time left");
   });
 
+  it("shows the month alone when there is no daily limit", () => {
+    const monthly = { ...LEFT, questions_left_today: null, questions_per_day: null, questions_left_month: 40 };
+    expect(html(monthly)).toContain("40 of 800 questions for Santa's AI left this month");
+  });
+
   it("says nothing when there is no limit", () => {
     const none = { ...LEFT, questions_left_today: null, questions_per_day: null, questions_left_month: null, time_left_percent: null };
     expect(html(none)).toBe("");

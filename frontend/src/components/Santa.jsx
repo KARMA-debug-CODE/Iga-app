@@ -443,7 +443,8 @@ export function SantaAllowance({ allowance }) {
   }
   const parts = [];
   if (today != null) parts.push(t("tutor.left.today", { n: today, total: perDay }));
-  if (month != null && (today == null || month < today)) parts.push(t("tutor.left.month", { n: month }));
+  if (month != null && today == null) parts.push(t("tutor.left.monthOnly", { n: month, total: allowance.questions_per_month }));
+  else if (month != null && month < today) parts.push(t("tutor.left.month", { n: month }));
   const time = allowance.time_left_percent;
   if (time != null && time < 50) parts.push(t("tutor.left.time", { percent: time }));
   if (!parts.length) return null;
