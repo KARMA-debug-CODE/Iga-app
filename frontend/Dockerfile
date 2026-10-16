@@ -1,5 +1,7 @@
 # nginx with Iga's configuration only: the tests of the nginx layer build this stage alone (no npm needed).
-FROM nginx:1.27-alpine AS web-base
+# nginx's stable line (even minor version), kept current by Dependabot; 1.27 was end-of-life with unpatched
+# OpenSSL and other Alpine packages (critical and high CVEs).
+FROM nginx:1.30-alpine AS web-base
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 # A template: the entrypoint fills in the NGINX_* settings (defaults in nginx/defaults.envsh) at start.
 COPY nginx.conf /etc/nginx/templates/default.conf.template
