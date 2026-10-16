@@ -34,7 +34,7 @@ export function SantaMark({ size = 24 }) {
 
 // --- Status -----------------------------------------------------------------------------------
 
-const OFF = { enabled: false, reason: "", state: "", exam: null };
+const OFF = { enabled: false, reason: "", state: "", exam: null, allowance: null };
 // How long a status answer is reused. "ready" rarely changes; a model waking up does, and an exam ends when
 // the student submits it, so those are asked again soon (an exam on the next page that needs it).
 const STATUS_MS = { ready: 120_000, exam: 0 };
@@ -43,7 +43,20 @@ const statuses = new Map(); // user and access -> { promise, value, at }
 
 function normalStatus(s) {
   const enabled = Boolean(s?.enabled);
-  return { enabled, reason: s?.reason || "", state: s?.state || (enabled ? "ready" : ""), exam: s?.exam || null };
+  return {
+    enabled,
+    reason: s?.reason || "",
+    state: s?.state || (enabled ? "ready" : ""),
+    exam: s?.exam || null,
+    allowance: s?.allowance || null,
+  };
+}
+
+/** After an answer, the remembered status of this user shows what is left of their allowance. */
+function noteAllowance(userId, allowance) {
+  for (const [key, entry] of statuses) {
+    if (key.startsWith(`${userId}:`) && entry.value) entry.value = { ...entry.value, allowance };
+  }
 }
 
 function freshStatus(key) {
@@ -71,10 +84,11 @@ function askStatus(key) {
 }
 
 /**
- * Santa's status for this user: `{ enabled, reason, state, exam, loading, retry }`.
+ * Santa's status for this user: `{ enabled, reason, state, exam, allowance, loading, retry }`.
  * enabled is false when the school hasn't subscribed (reason "subscription_required") or the server couldn't
  * be asked (reason "unreachable"). state: "ready", "loading" (the model is waking up), "unavailable" (its
  * server isn't answering), "not_installed" (answers come from the lessons) or "exam" (`exam` says which).
+ * allowance: what is left of the student's questions for Santa's model (see SantaAllowance).
  */
 export function useTutorStatus() {
   const { user } = useAuth();
@@ -130,7 +144,9 @@ const plainText = (text) =>
  */
 export function useSantaChat({ scope, lang, initial = [] }) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [messages, setMessages] = useState(initial);
+  const [allowance, setAllowance] = useState(null); // from the last answer: what is left today
   const [phase, setPhase] = useState(""); // "" | "waiting" (no text yet) | "writing"
   const [error, setError] = useState(null);
   const [announcement, setAnnouncement] = useState("");
@@ -199,6 +215,10 @@ export function useSantaChat({ scope, lang, initial = [] }) {
     if (conversation.current !== mine) return true;
 
     if (done) {
+      if (done.allowance) {
+        setAllowance(done.allowance);
+        if (user) noteAllowance(user.id, done.allowance);
+      }
       update({
         content: done.reply,
         sources: done.sources || [],
@@ -234,7 +254,7 @@ export function useSantaChat({ scope, lang, initial = [] }) {
     setAnnouncement("");
   }
 
-  return { messages, phase, busy: phase !== "", error, announcement, send, stop, reset };
+  return { messages, phase, busy: phase !== "", error, announcement, allowance, send, stop, reset };
 }
 
 /** Keeps the newest message in view while Santa writes. */
@@ -400,6 +420,34 @@ export function SantaForm({ id, chat, value, onChange, multiline = false, inputR
       </button>
     </form>
   );
+}
+
+/**
+ * What is left of the student's questions for Santa's AI (`allowance` from the status or the last answer):
+ * a quiet line while there is some, and a note when one is used up (Santa then answers from the lessons).
+ */
+export function SantaAllowance({ allowance }) {
+  const { t } = useI18n();
+  if (!allowance) return null;
+  const { reached, questions_left_today: today, questions_per_day: perDay, questions_left_month: month } = allowance;
+  if (reached) {
+    return (
+      <div className="alert alert-info santa-state santa-allowance" role="note">
+        <Icon name="hourglass" />
+        <div>
+          <strong>{t(`tutor.limit.${reached}`)}</strong>
+          <p>{t(`tutor.limit.${reached}.text`)}</p>
+        </div>
+      </div>
+    );
+  }
+  const parts = [];
+  if (today != null) parts.push(t("tutor.left.today", { n: today, total: perDay }));
+  if (month != null && (today == null || month < today)) parts.push(t("tutor.left.month", { n: month }));
+  const time = allowance.time_left_percent;
+  if (time != null && time < 50) parts.push(t("tutor.left.time", { percent: time }));
+  if (!parts.length) return null;
+  return <p className="small muted santa-allowance">{parts.join(" · ")}</p>;
 }
 
 /** The honest note shown with every conversation. */

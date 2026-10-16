@@ -6,6 +6,10 @@ test("admin sees platform stats and the audit log", async ({ page }) => {
   await login(page, "admin");
   await page.goto("/admin");
   await expect(page.getByText(/active this week/i)).toBeVisible();
+  // The costly services: Santa's AI and the code runner, with their limits.
+  const costly = page.locator(".costly-services");
+  await expect(costly.getByRole("heading", { name: "Santa's AI" })).toBeVisible();
+  await expect(costly.getByText("Questions per student per day")).toBeVisible();
   await page.getByRole("tab", { name: /audit log/i }).click();
   await expect(page.locator("table")).toBeVisible();
 });
