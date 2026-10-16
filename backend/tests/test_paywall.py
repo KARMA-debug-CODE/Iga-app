@@ -294,6 +294,7 @@ def test_tutor_needs_a_subscription(client_for, apade_student):
         "reason": "subscription_required",
         "state": "",
         "exam": None,
+        "allowance": None,
     }
     for path in ("/api/tutor/ask/", "/api/tutor/stream/"):
         response = client.post(path, {"message": "help"}, format="json")

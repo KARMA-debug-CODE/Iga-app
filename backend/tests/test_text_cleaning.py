@@ -208,7 +208,8 @@ def test_santa_history_is_cleaned(student):
     from apps.tutor.services import clean_history
 
     history = [{"role": "user", "content": f"Hi{TAG_A}{TAG_A}{ZWSP}"}, {"role": "assistant", "content": f"Muraho{RLO}!"}]
-    assert clean_history(history) == [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Muraho!"}]
+    turns, dropped = clean_history(history)
+    assert turns == [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Muraho!"}] and dropped == 0
 
 
 def test_every_cleaned_field_is_a_text_field():

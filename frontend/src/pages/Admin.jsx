@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api, newIdempotencyKey, results, saveFile } from "../api";
 import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
-import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
+import { formatDate, formatDay, formatMoney, formatNumber, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 import { safeUrl } from "../safeUrl";
 
@@ -14,6 +14,86 @@ const ROLE_KEYS = { student: "auth.student", teacher: "auth.teacher", parent: "a
 function tOr(t, key, fallback) {
   const text = t(key);
   return text === key ? fallback : text;
+}
+
+/** Santa's AI and the code runner, the costly services: use today and over 30 days, and their limits. */
+function CostlyServices({ santa, runner }) {
+  const { t, lang } = useI18n();
+  const n = (value) => formatNumber(value, lang);
+  const limit = (value) => (value ? n(value) : t("admin.limit.none"));
+  const rows = (period) => [
+    ["admin.santa.questions", n(period.questions)],
+    ["admin.santa.tokens", `${n(period.input_tokens)} / ${n(period.output_tokens)}`],
+    ["admin.santa.students", n(period.students)],
+    ["admin.santa.limited", n(period.limited)],
+  ];
+  return (
+    <div className="card costly-services">
+      <h3>{t("admin.santa.title")}</h3>
+      <div className="grid-2">
+        {[
+          ["admin.santa.today", santa.today],
+          ["admin.santa.last30", santa.last_30_days],
+        ].map(([label, period]) => (
+          <div key={label}>
+            <h4>{t(label)}</h4>
+            <ul className="list">
+              {rows(period).map(([key, value]) => (
+                <li key={key} className="spread">
+                  <span>{t(key)}</span>
+                  <strong>{value}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      {santa.top_schools_today.length > 0 && (
+        <>
+          <h4>{t("admin.santa.topSchools")}</h4>
+          <ol>
+            {santa.top_schools_today.map((school) => (
+              <li key={school.school}>
+                {school.school}{" "}
+                <span className="muted small">
+                  {t("admin.santa.schoolUse", { questions: n(school.questions), tokens: n(school.tokens), students: n(school.students) })}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+      <h4>{t("admin.santa.limits")}</h4>
+      <ul className="list">
+        {Object.entries(santa.limits).map(([key, value]) => (
+          <li key={key} className="spread">
+            <span>{t(`admin.limit.${key}`)}</span>
+            <strong>{limit(value)}</strong>
+          </li>
+        ))}
+      </ul>
+      {runner && (
+        <>
+          <h3 style={{ marginTop: 16 }}>{t("admin.runner.title")}</h3>
+          <ul className="list">
+            {[
+              ["admin.runner.runs", n(runner.today.runs)],
+              ["admin.runner.cpu", n(runner.today.cpu_seconds)],
+              ["admin.runner.students", n(runner.today.students)],
+              ["admin.runner.limited", n(runner.today.limited)],
+              ["admin.runner.dailyRuns", limit(runner.limits.daily_runs)],
+              ["admin.runner.dailyCpu", limit(runner.limits.daily_cpu_seconds)],
+            ].map(([key, value]) => (
+              <li key={key} className="spread">
+                <span>{t(key)}</span>
+                <strong>{value}</strong>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
 }
 
 function Stats({ state }) {
@@ -80,6 +160,7 @@ function Stats({ state }) {
                 ))}
               </ol>
             </div>
+            {s.santa && <CostlyServices santa={s.santa} runner={s.code_runner} />}
             <div className="card">
               <h3>{t("admin.popularLabs")}</h3>
               <ol>

@@ -123,6 +123,40 @@ test("Santa page: waking up, answers from the lessons, and Stop gives the questi
   await expect(page.getByRole("button", { name: /^send$/i })).toBeVisible();
 });
 
+test("Santa page shows what is left of the student's questions, and says when today's are used up", async ({ page }) => {
+  const left = (n, reached = "") => ({
+    questions_left_today: n,
+    questions_per_day: 60,
+    questions_left_month: 700,
+    questions_per_month: 800,
+    time_left_percent: 80,
+    reached,
+  });
+  await page.route("**/api/tutor/status/", (route) => route.fulfill({ json: { ...READY, allowance: left(1) } }));
+  const answers = [
+    santaStream("A cell is the basic unit of life.", { allowance: left(0) }),
+    santaStream("*You have used today's questions for Santa's AI. It can answer fully again tomorrow.* Here is what your lessons say:", {
+      fallback: "limit_day",
+      allowance: left(0, "limit_day"),
+    }),
+  ];
+  await page.route("**/api/tutor/stream/", (route) => route.fulfill(answers.shift()));
+
+  await login(page, "aline");
+  await page.goto("/ask");
+  await expect(page.getByText("1 of 60 questions for Santa's AI left today")).toBeVisible();
+  const box = page.getByLabel(/type your question/i);
+  await box.fill("What is a cell?");
+  await box.press("Enter");
+  await expect(page.locator(".santa-answer").getByText(/basic unit of life/)).toBeVisible();
+  await expect(page.getByText("0 of 60 questions for Santa's AI left today")).toBeVisible();
+  await box.fill("And a tissue?");
+  await box.press("Enter");
+  const note = page.getByRole("note").filter({ hasText: /used today's questions for santa's ai/i });
+  await expect(note).toContainText(/until tomorrow, santa answers with passages from your lessons/i);
+  await expect(page.locator(".santa-answer").last().getByText(/here is what your lessons say/i)).toBeVisible();
+});
+
 test("Santa page is switched off while an exam is open", async ({ page }) => {
   await page.route("**/api/tutor/status/", (route) =>
     route.fulfill({ json: { ...READY, state: "exam", exam: { attempt: 12345, quiz: "Linear graphs test" } } }),
@@ -373,6 +407,19 @@ test("C++ and Java run on the code runner and wait for answers in the console", 
   await page.getByLabel("Your answer").fill("Eric");
   await page.getByLabel("Your answer").press("Enter");
   await expect(page.locator(".console")).toContainText("Muraho, Eric!");
+});
+
+test("C++ says when the student has used today's time on the code runner", async ({ page }) => {
+  const detail =
+    "You have used today's time on the code runner. C++ and Java can run again tomorrow; Python, SQL and web pages still run in your browser.";
+  await page.route("**/api/code/status/", (route) => route.fulfill({ json: { enabled: true, languages: ["cpp", "java"] } }));
+  await page.route("**/api/code/run/", (route) => route.fulfill({ status: 429, json: { detail, code: "daily_limit" } }));
+  await login(page, "aline");
+  await page.goto("/playground");
+  await page.getByRole("tab", { name: /c\+\+/i }).click();
+  await page.getByRole("button", { name: /^run$/i }).click();
+  await expect(page.locator(".console")).toContainText("used today's time on the code runner");
+  await expect(page.getByRole("button", { name: /^run$/i })).toBeEnabled(); // nothing left running
 });
 
 test("C++ and Java say when the server has no code runner", async ({ page }) => {

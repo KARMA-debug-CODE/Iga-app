@@ -368,6 +368,20 @@ SANTA_TIMEOUT_SECONDS = float(os.environ.get("SANTA_TIMEOUT_SECONDS", "150"))
 # Answers written at the same time (match llama-server -np). Each holds a web-server thread while it
 # streams; when all are busy, Santa answers from the lessons and asks the student to try again soon.
 SANTA_PARALLEL = int(os.environ.get("SANTA_PARALLEL", "4"))
+# The most one question may send the model besides its fixed system prompt, in tokens (counted as 3
+# characters each): the history, the context and lesson passages are cut to fit. With the system prompt
+# (about 1,000 tokens) and SANTA_MAX_TOKENS it must fit one llama-server slot (-c / -np: 4,096 by default).
+# SANTA_MAX_TOKENS is for the whole answer, calculator rounds included.
+SANTA_MAX_INPUT_TOKENS = int(os.environ.get("SANTA_MAX_INPUT_TOKENS", "2800"))
+# Santa's allowances (0 = no limit), counted per day (Kigali time) and per calendar month. Questions the
+# model answers count; answers made of lesson passages don't. When one is used up, Santa answers from the
+# lessons and says so, and the student sees what is left (apps/tutor/usage.py).
+SANTA_USER_DAILY_QUESTIONS = int(os.environ.get("SANTA_USER_DAILY_QUESTIONS", "60"))
+SANTA_USER_MONTHLY_QUESTIONS = int(os.environ.get("SANTA_USER_MONTHLY_QUESTIONS", "800"))
+SANTA_USER_DAILY_TOKENS = int(os.environ.get("SANTA_USER_DAILY_TOKENS", "250000"))
+SANTA_USER_MONTHLY_TOKENS = int(os.environ.get("SANTA_USER_MONTHLY_TOKENS", "3000000"))
+# All the members of one school together, per day: so one school can't use up a shared server.
+SANTA_SCHOOL_DAILY_TOKENS = int(os.environ.get("SANTA_SCHOOL_DAILY_TOKENS", "20000000"))
 
 # --- Code runner (C++ and Java in the playground) ---------------------------
 # Iga's code runner (the coderunner/ folder), reachable only from Django; empty = C++ and Java are off.
@@ -376,6 +390,13 @@ CODE_RUNNER_URL = os.environ.get("CODE_RUNNER_URL", "").strip()
 CODE_RUNNER_TOKEN = os.environ.get("CODE_RUNNER_TOKEN", "").strip()
 # Compiling (up to 30 s) plus running until the program ends or asks for input (up to 10 s), plus a margin.
 CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "45"))
+# Who may run C++ and Java: "signed_in" (every signed-in user, like the other playgrounds) or "subscribed"
+# (members of a subscribed school, and platform admins).
+CODE_RUNNER_ACCESS = os.environ.get("CODE_RUNNER_ACCESS", "signed_in").strip().lower()
+# Per user and day (Kigali time; 0 = no limit): programs started, and CPU seconds used compiling and running
+# them, as measured by the code runner. A run that starts under the limit may finish over it.
+CODE_RUNNER_DAILY_RUNS = int(os.environ.get("CODE_RUNNER_DAILY_RUNS", "300"))
+CODE_RUNNER_DAILY_CPU_SECONDS = int(os.environ.get("CODE_RUNNER_DAILY_CPU_SECONDS", "900"))
 
 # --- School subscriptions -------------------------------------------------
 # Each school pays a flat monthly price for all its members. Prices per currency:

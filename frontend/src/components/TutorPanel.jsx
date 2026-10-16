@@ -2,7 +2,17 @@ import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "../i18n";
 import { Icon } from "./Icon";
-import { SantaForm, SantaLog, SantaMark, SantaNote, SantaState, useSantaChat, useScrollToEnd, useTutorStatus } from "./Santa";
+import {
+  SantaAllowance,
+  SantaForm,
+  SantaLog,
+  SantaMark,
+  SantaNote,
+  SantaState,
+  useSantaChat,
+  useScrollToEnd,
+  useTutorStatus,
+} from "./Santa";
 import { ErrorMessage } from "./ui";
 
 export { useTutorStatus };
@@ -80,6 +90,7 @@ export default function TutorPanel({ lesson, attempt, question, starters = [], l
             </div>
           )}
           <ErrorMessage error={chat.error} />
+          <SantaAllowance allowance={chat.allowance || status.allowance} />
           <div style={{ marginTop: 8 }}>
             <SantaForm id={id} chat={chat} value={input} onChange={setInput} inputRef={box} placeholder={t("tutor.placeholder")} />
           </div>

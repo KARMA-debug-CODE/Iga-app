@@ -51,6 +51,9 @@ SECURITY_ACTIONS = {
     "request_too_large",
     "admin_login",
     "admin_login_failed",
+    "santa_injection",
+    "santa_forged_history",
+    "code_run_limit",
 }
 
 # Never logged, whatever a caller passes in `details`.
