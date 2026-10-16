@@ -258,6 +258,28 @@ test("Python programs can't use the student's session or the app's offline data"
   await expect(console_).toContainText("10");
 });
 
+test("HTML and JavaScript previews can't reach the page, the session or its storage", async ({ page }) => {
+  // Lessons' "playground" blocks run as soon as the lesson opens, in a sandboxed frame with no origin of
+  // its own: their scripts must not touch the app, its cookies or storage, or get a session from the API.
+  await login(page, "aline");
+  await page.goto("/playground");
+  const editor = page.getByLabel("Code editor", { exact: true });
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.press("Delete");
+  await page.keyboard.insertText(
+    '<p id="out">running</p><script>(async () => { const r = []; ' +
+      'try { r.push("parent:" + (parent.document ? "open" : "blocked")); } catch { r.push("parent:blocked"); } ' +
+      'try { localStorage.getItem("iga.user"); r.push("storage:open"); } catch { r.push("storage:blocked"); } ' +
+      'try { r.push("cookie:" + (document.cookie ? "open" : "blocked")); } catch { r.push("cookie:blocked"); } ' +
+      'try { const res = await fetch("/api/auth/refresh/", { method: "POST", credentials: "include" }); r.push("refresh:" + res.status); } catch { r.push("refresh:blocked"); } ' +
+      'document.getElementById("out").textContent = r.join(" "); })();</script>',
+  );
+  await page.getByRole("button", { name: /^run$/i }).click();
+  const out = page.frameLocator('iframe[title="Preview"]').locator("#out");
+  await expect(out).toHaveText("parent:blocked storage:blocked cookie:blocked refresh:blocked", { timeout: 15_000 });
+});
+
 test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
   await login(page, "aline");
   await page.goto("/playground");
