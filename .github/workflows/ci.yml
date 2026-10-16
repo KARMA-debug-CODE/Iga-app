@@ -63,6 +63,14 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  nginx:
+    name: nginx (rate limits, client addresses, request limits, HTTPS, headers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Builds the web image's nginx stage and tests it next to a stub backend (Docker and Python only).
+      - run: python3 frontend/tests/nginx/test_nginx.py
+
   e2e:
     name: End-to-end (Playwright)
     needs: [backend, frontend]

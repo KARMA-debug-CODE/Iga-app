@@ -44,7 +44,8 @@ services:
       DATABASE_URL: postgres://iga_app:${POSTGRES_APP_PASSWORD:-iga-local-app}@db:5432/iga
       REDIS_URL: redis://redis:6379/0
       HTTPS: ${HTTPS:-true}
-      # nginx in front appends the client address to X-Forwarded-For.
+      # Always 1 with the bundled nginx: nginx works out the client's address (NGINX_TRUSTED_PROXIES on the
+      # web service) and passes exactly that one in X-Forwarded-For.
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
       DJANGO_ADMIN_PATH: ${DJANGO_ADMIN_PATH:-}
@@ -199,6 +200,23 @@ services:
     build: ./frontend
     ports:
       - "8080:80"
+    # nginx's settings: frontend/nginx/defaults.envsh has every one and its default (empty = the default).
+    environment:
+      # Who may say who the client is: empty = nobody (the client is whoever connects), "cloudflare", and/or
+      # your load balancer's addresses. docs/CLOUDFLARE.md.
+      NGINX_TRUSTED_PROXIES: ${NGINX_TRUSTED_PROXIES:-}
+      NGINX_REAL_IP_HEADER: ${NGINX_REAL_IP_HEADER:-}
+      # true = drop requests that didn't come through those proxies.
+      NGINX_ONLY_FROM_TRUSTED_PROXIES: ${NGINX_ONLY_FROM_TRUSTED_PROXIES:-false}
+      # Per-address rate limits: sign-in and the like, costly routes (Santa, C++/Java runs, payments), the rest.
+      NGINX_RATE_AUTH: ${NGINX_RATE_AUTH:-}
+      NGINX_BURST_AUTH: ${NGINX_BURST_AUTH:-}
+      NGINX_RATE_COSTLY: ${NGINX_RATE_COSTLY:-}
+      NGINX_BURST_COSTLY: ${NGINX_BURST_COSTLY:-}
+      NGINX_RATE_API: ${NGINX_RATE_API:-}
+      NGINX_BURST_API: ${NGINX_BURST_API:-}
+      NGINX_CONN_PER_IP: ${NGINX_CONN_PER_IP:-}
+      NGINX_CONN_PER_IP_TUTOR: ${NGINX_CONN_PER_IP_TUTOR:-}
     volumes:
       - media:/srv/media:ro
     depends_on:
