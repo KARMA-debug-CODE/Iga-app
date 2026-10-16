@@ -1,7 +1,9 @@
 # Local trial of the production setup: PostgreSQL + Redis + Django (gunicorn) + nginx, plus Iga's code
-# runner for C++ and Java in the code playground, and Santa's model server (Iga's own AI tutor).
+# runner for C++ and Java in the code playground, and (optional) Santa's model server (Iga's own AI tutor).
 #   cp .env.docker.example .env      # then fill in DJANGO_SECRET_KEY (see the file)
-#   docker compose up --build        # the first start downloads Santa's model once (about 4.5 GB)
+#   docker compose up --build        # the app, without Santa's model (Santa answers from the lessons)
+#   docker compose --profile santa up --build -d   # with Santa's model (or COMPOSE_PROFILES=santa in .env);
+#                                                  # its first start downloads the model once (about 4.5 GB)
 #   docker compose exec backend python manage.py load_curriculum
 #   docker compose exec -e DJANGO_DEBUG=true backend python manage.py seed_demo   # optional demo accounts (local trial only)
 # Then open http://localhost:8080
@@ -46,8 +48,9 @@ services:
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       DJANGO_ADMIN_ENABLED: ${DJANGO_ADMIN_ENABLED:-false}
       DJANGO_ADMIN_PATH: ${DJANGO_ADMIN_PATH:-}
-      # Santa, Iga's own AI tutor: the "santa" service below. Set SANTA_URL= (empty) in .env to run without
-      # the model; Santa then answers from the lessons only.
+      # Santa, Iga's own AI tutor: the "santa" service below, started only with the "santa" profile. Without
+      # it the host "santa" doesn't resolve and the app says the model is not installed; Santa then answers
+      # from the lessons only (as it does with SANTA_URL= (empty) in .env).
       SANTA_URL: ${SANTA_URL-http://santa:8080}
       SANTA_API_KEY: ${SANTA_API_KEY:-iga-local-santa}
       SANTA_MAX_TOKENS: ${SANTA_MAX_TOKENS:-600}
@@ -148,8 +151,11 @@ services:
   # server set SANTA_MODEL=google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0 and SANTA_MEMORY_LIMIT=5g in .env.
   # Once the model is downloaded, SANTA_OFFLINE=true keeps it from ever going online. README: "Santa".
   # The image is the CPU build for amd64 and arm64, and checks itself (HEALTHCHECK on :8080/health).
+  # Optional: it starts only with `docker compose --profile santa up` (or COMPOSE_PROFILES=santa in .env), so
+  # the rest of the app starts even where its image or model can't be downloaded.
   santa:
     image: ghcr.io/ggml-org/llama.cpp:server-b11151
+    profiles: [santa]
     restart: unless-stopped
     command:
       - -hf

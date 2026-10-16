@@ -103,14 +103,14 @@ The integrity rules live in `apps/assessments/services.py`:
 
 ## Santa, the AI tutor
 
-Santa's model runs on our own infrastructure: llama.cpp's `llama-server` (the `santa` Compose service) with an open model, Gemma 4 E4B by default. Django is its only client, on an internal Docker network, with a shared API key (`SANTA_API_KEY`); no port is published and no question goes to an outside AI service. The code is in `apps/tutor/`:
+Santa's model runs on our own infrastructure: llama.cpp's `llama-server` (the `santa` Compose service, optional: it starts only with the `santa` profile, and without it the app reports the model as not installed) with an open model, Gemma 4 E4B by default. Django is its only client, on an internal Docker network, with a shared API key (`SANTA_API_KEY`); no port is published and no question goes to an outside AI service. The code is in `apps/tutor/`:
 
 | Module | Job |
 |---|---|
 | `services.py` | Checks access and builds the context (the rules below), writes the fixed system prompt and the student's turn, runs up to 3 calculator rounds, falls back to lesson passages, adds the child-helpline line when a message sounds unsafe, logs the exchange |
 | `retrieval.py` | BM25 over every published lesson, cut into passages at its headings, in English and French. Built in each process's memory on first use and rebuilt when a lesson, translation, unit or subject changes (a version in the shared cache) or every 15 minutes. The open lesson comes first; the student's grade and subject rank higher, lessons two or more years ahead lower; only lessons the student may read are quoted |
 | `calculator.py` | The `calculate` tool: an `ast` whitelist of numbers, `+ - * / ** %`, brackets and a few maths functions, worked out with exact fractions where possible, with limits on length, size and exponents. Nothing reaches `eval` or `exec` |
-| `llm.py` | The OpenAI-compatible client (`POST /v1/chat/completions`, standard library only): plain and streamed answers (`data:` chunks, `:` pings ignored, `[DONE]`), tool calls, `GET /health`, and one error per problem: not installed, loading (503 "Loading model"), unreachable, timeout, bad reply, tools rejected (Santa then asks again without the calculator), too long for a slot (Santa then asks again with no history and one passage) |
+| `llm.py` | The OpenAI-compatible client (`POST /v1/chat/completions`, standard library only): plain and streamed answers (`data:` chunks, `:` pings ignored, `[DONE]`), tool calls, `GET /health`, and one error per problem: not installed (no `SANTA_URL`, or its host doesn't resolve), loading (503 "Loading model"), unreachable, timeout, bad reply, tools rejected (Santa then asks again without the calculator), too long for a slot (Santa then asks again with no history and one passage) |
 
 The rules:
 

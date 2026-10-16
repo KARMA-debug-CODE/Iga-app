@@ -484,6 +484,21 @@ def test_an_unreachable_model_answers_from_the_lessons(client_for, student, biol
     assert llm.cached_health() == "unreachable"
 
 
+def test_a_model_server_whose_host_does_not_resolve_is_not_installed(client_for, student, biology, settings):
+    """docker compose starts the santa service only with the "santa" profile; without it the host name
+    "santa" doesn't resolve, and the app says the model is not installed, not that it isn't answering."""
+    settings.SANTA_URL = "http://santa.invalid:8080"  # .invalid never resolves (RFC 2606)
+    client = client_for(student)
+    assert client.get("/api/tutor/status/").data["state"] == "not_installed"
+    cache.clear()
+    response = ask(client, message="cell membrane")
+    assert response.data["fallback"] == "not_installed" and "not installed" in response.data["reply"]
+    assert llm.cached_health() == "not_installed"
+    # Known from the cache: the next answer doesn't even try the model server.
+    events, _ = stream(client, message="cell membrane")
+    assert events[-1]["fallback"] == "not_installed"
+
+
 def test_a_slow_model_times_out_and_answers_from_the_lessons(client_for, student, biology, santa, settings):
     settings.SANTA_TIMEOUT_SECONDS = 1
     santa.delay = 2.5
