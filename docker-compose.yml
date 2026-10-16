@@ -82,8 +82,9 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Iga <no-reply@iga.rw>}
+      # gunicorn (backend/gunicorn.conf.py has the rest): processes, and threads per process, so slow calls
+      # (Santa's answers, C++/Java runs) don't hold up other requests.
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
-      # Threads per worker, so slow calls (Santa's answers, C++/Java runs) don't hold up other requests.
       GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
     volumes:
       - media:/app/media
@@ -217,6 +218,13 @@ services:
       NGINX_BURST_API: ${NGINX_BURST_API:-}
       NGINX_CONN_PER_IP: ${NGINX_CONN_PER_IP:-}
       NGINX_CONN_PER_IP_TUTOR: ${NGINX_CONN_PER_IP_TUTOR:-}
+      # Slow clients and request sizes.
+      NGINX_CLIENT_HEADER_TIMEOUT: ${NGINX_CLIENT_HEADER_TIMEOUT:-}
+      NGINX_CLIENT_BODY_TIMEOUT: ${NGINX_CLIENT_BODY_TIMEOUT:-}
+      NGINX_SEND_TIMEOUT: ${NGINX_SEND_TIMEOUT:-}
+      NGINX_KEEPALIVE_TIMEOUT: ${NGINX_KEEPALIVE_TIMEOUT:-}
+      NGINX_MAX_BODY_API: ${NGINX_MAX_BODY_API:-}
+      NGINX_MAX_BODY_UPLOAD: ${NGINX_MAX_BODY_UPLOAD:-}
     volumes:
       - media:/srv/media:ro
     depends_on:

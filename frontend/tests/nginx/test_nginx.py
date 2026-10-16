@@ -13,6 +13,7 @@ import http.client
 import json
 import os
 import shutil
+import socket
 import subprocess
 import tempfile
 import time
@@ -237,6 +238,79 @@ class ClientAddress(unittest.TestCase):
         _containers.append(container)
         self.assertEqual(docker("wait", container), "1")
         self.assertIn("is not an address", _all_logs(container))
+
+
+def _seconds_until_closed(nginx, first_bytes, limit=40):
+    """Send `first_bytes`, then nothing: how long until nginx gives up on this connection."""
+    sock = socket.create_connection((nginx.host, nginx.port))
+    sock.settimeout(limit)
+    started = time.monotonic()
+    sock.sendall(first_bytes)
+    try:
+        while sock.recv(4096):
+            pass
+    except (TimeoutError, ConnectionResetError):
+        pass
+    finally:
+        sock.close()
+    return time.monotonic() - started
+
+
+class SlowClients(unittest.TestCase):
+    """S9: a client that sends its request (or reads its answer) slowly can't hold a connection for long."""
+
+    def test_slow_headers_slow_bodies_and_idle_connections_are_dropped(self):
+        nginx = Nginx()  # the defaults: 10 s for the headers, 15 s between two reads of a body, 20 s idle
+        cases = {
+            "headers": b"GET /api/meta/ HTTP/1.1\r\nHost: localhost\r\n",
+            "body": b"POST /api/meta/ HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n"
+            b"Content-Length: 1000\r\n\r\n{",
+            "idle": b"GET /sw.js HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        }
+        with concurrent.futures.ThreadPoolExecutor(len(cases)) as pool:
+            held = dict(zip(cases, pool.map(lambda data: _seconds_until_closed(nginx, data), cases.values()), strict=True))
+        # nginx's own default would have been 60 s for headers and bodies, and 65 s for idle connections.
+        self.assertTrue(9 <= held["headers"] <= 13, held)
+        self.assertTrue(14 <= held["body"] <= 18, held)
+        self.assertTrue(19 <= held["idle"] <= 23, held)
+
+    def test_the_server_does_not_say_its_version(self):
+        self.assertEqual(Nginx().request("/").header("Server"), "nginx")
+
+
+class RequestSize(unittest.TestCase):
+    """S22: bodies are small by default and larger only on upload routes; a bigger one never reaches Django."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.nginx = Nginx()
+
+    def post(self, path, size, **headers):
+        return self.nginx.request(path, "POST", b"x" * size, {"Content-Type": "application/octet-stream", **headers})
+
+    def test_json_api_bodies_are_capped_at_2_mb(self):
+        accepted = self.post("/api/lessons/", 1_500_000)
+        self.assertEqual((accepted.status, accepted.json()["body_bytes"]), (200, 1_500_000))
+        refused = self.post("/api/lessons/", 3 * 1024 * 1024)
+        self.assertEqual(refused.status, 413)
+        self.assertEqual(refused.header("Content-Type"), JSON_TYPE)
+        self.assertEqual(refused.json(), {"detail": "This request is too large."})
+        french = self.post("/api/tutor/ask/", 3 * 1024 * 1024, **{"Accept-Language": "fr-FR,fr;q=0.9"})
+        self.assertEqual(french.json(), {"detail": "Cette requête est trop volumineuse."})
+
+    def test_sign_in_bodies_are_tiny(self):
+        self.assertEqual(self.post("/api/auth/login/", 10_000).status, 200)
+        self.assertEqual(self.post("/api/auth/login/", 100_000).status, 413)
+
+    def test_only_upload_routes_take_files(self):
+        self.assertEqual(self.post("/api/resources/", 10 * 1024 * 1024).status, 200)
+        self.assertEqual(self.post("/api/resources/7/", 10 * 1024 * 1024).status, 200)
+        self.assertEqual(self.post("/django-admin/secret/assessments/exampaper/add/", 10 * 1024 * 1024).status, 200)
+        self.assertEqual(self.post("/api/resources/", 30 * 1024 * 1024).status, 413)
+        self.assertEqual(self.post("/api/classes/1/import_roster/", 10 * 1024 * 1024).status, 413)
+
+    def test_the_app_takes_no_bodies(self):
+        self.assertEqual(self.post("/", 64 * 1024).status, 413)
 
 
 def _all_logs(container):
