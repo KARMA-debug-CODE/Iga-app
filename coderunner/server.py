@@ -6,15 +6,19 @@ file-size and output limits, and is killed with everything it started when it en
 
 A session runs until the program finishes or waits for keyboard input. The program's stdin is a pipe;
 when every thread of the program is blocked reading it (seen in /proc/<pid>/task/*/syscall) and nothing is
-left in the pipe, the session pauses and returns the output so far. The student's answer is then written to
-the pipe and the program continues.
+left in the pipe, the session pauses and returns the output so far. Every process of the slot is then
+stopped (SIGSTOP), so nothing it started can use the CPU while the student thinks. The student's answer is
+written to the pipe, the processes continue (SIGCONT) and the program goes on.
+
+Each step result says how much CPU time the step used ("cpu_ms": compiling, and the program with every
+process it started, as the kernel counts it), so Django can keep each student's daily CPU allowance.
 
 API (JSON over HTTP, header "Authorization: Bearer <CODE_RUNNER_TOKEN>"):
     GET  /health                          -> {"ok": true, "languages": [...], "slots": n, "busy": n}
     POST /run    {"language", "code"}     -> step result
     POST /input  {"session", "text"}      -> step result
     POST /stop   {"session"}              -> {"stopped": true}
-Step result: {"session", "state": "waiting"|"finished", "output": [{"stream", "text"}],
+Step result: {"session", "state": "waiting"|"finished", "output": [{"stream", "text"}], "cpu_ms",
               "verdict": "ok"|"compile_error"|"runtime_error"|"time_limit"|"output_limit"|"busy", "exit_code", "signal"}
 """
 
@@ -49,6 +53,7 @@ RUN_CPU_SECONDS = 10  # CPU time for the whole program
 IDLE_SECONDS = float(os.environ.get("CODE_RUNNER_IDLE_SECONDS", "120"))  # waiting for the student's answer
 SESSION_SECONDS = 600
 READ_SYSCALL = {"x86_64": 0, "aarch64": 63}.get(platform.machine())
+CLOCK_TICKS = os.sysconf("SC_CLK_TCK")
 
 JVM = ["-Xmx256m", "-Xss16m", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-XX:CICompilerCount=1",
        "-XX:ReservedCodeCacheSize=32m", "-XX:MaxMetaspaceSize=128m", "-XX:CompressedClassSpaceSize=64m",
@@ -105,7 +110,7 @@ def limited(cmd, limits):
     ]
 
 
-def _pids_of(uid):
+def _pids_of(uid, zombies=False):
     pids = []
     for pid in os.listdir("/proc"):
         if not pid.isdigit():
@@ -113,11 +118,32 @@ def _pids_of(uid):
         try:
             with open(f"/proc/{pid}/status") as status:
                 fields = dict(line.split(":", 1) for line in status if ":" in line)
-            if int(fields["Uid"].split()[0]) == uid and fields["State"].split()[0] != "Z":
+            if int(fields["Uid"].split()[0]) == uid and (zombies or fields["State"].split()[0] != "Z"):
                 pids.append(int(pid))
         except (OSError, KeyError, ValueError, IndexError):
             pass
     return pids
+
+
+def cpu_of(pids):
+    """CPU seconds the processes have used, with the children they have waited for (/proc/<pid>/stat)."""
+    total = 0
+    for pid in pids:
+        try:
+            with open(f"/proc/{pid}/stat") as stat:
+                fields = stat.read().rsplit(")", 1)[1].split()
+            total += sum(int(value) for value in fields[11:15])  # utime, stime, cutime, cstime
+        except (OSError, ValueError, IndexError):
+            pass
+    return total / CLOCK_TICKS
+
+
+def signal_user(uid, sig):
+    for pid in _pids_of(uid):
+        try:
+            os.kill(pid, sig)
+        except OSError:
+            pass
 
 
 def kill_user(uid):
@@ -153,6 +179,12 @@ class Session:
         self.proc = None
         self.stdin_w = self.stdin_r = None
         self.finished = False
+        self.paused = False
+        # CPU seconds: of processes that have ended and been waited for (the compiler, the program), the
+        # highest total seen so far, and how much of it the steps have reported.
+        self.cpu_done = 0.0
+        self.cpu_seen = 0.0
+        self.cpu_reported = 0.0
 
     # --- files and processes -------------------------------------------------------------------------
     def prepare(self):
@@ -181,18 +213,55 @@ class Session:
             close_fds=True,
         )
 
+    def reap(self, proc, timeout):
+        """Wait up to `timeout` seconds (None: as long as it takes) for `proc` to end, and add the CPU time it
+        and the children it waited for used. False while it is still running."""
+        deadline = None if timeout is None else time.monotonic() + timeout
+        while proc.returncode is None:
+            try:
+                pid, status, usage = os.wait4(proc.pid, 0 if deadline is None else os.WNOHANG)
+            except ChildProcessError:
+                break
+            if pid:
+                proc.returncode = os.waitstatus_to_exitcode(status)
+                self.cpu_done += usage.ru_utime + usage.ru_stime
+                break
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.02)
+        return True
+
+    def take_cpu_ms(self):
+        """CPU milliseconds used since the last step: the processes that ended, and those still alive."""
+        self.cpu_seen = max(self.cpu_seen, self.cpu_done + cpu_of(_pids_of(self.uid, zombies=True)))
+        ms = int((self.cpu_seen - self.cpu_reported) * 1000)
+        self.cpu_reported += ms / 1000
+        return ms
+
     def compile(self):
         """Returns None when it compiled, else the compiler's messages."""
         proc = self.popen(self.spec["compile"](self.file_name, self.main_class), self.spec["compile_limits"], subprocess.DEVNULL)
-        try:
-            out, err = proc.communicate(timeout=COMPILE_SECONDS)
-        except subprocess.TimeoutExpired:
+        out, err = [], []
+        readers = [
+            threading.Thread(target=lambda pipe=pipe, into=into: into.append(pipe.read()), daemon=True)
+            for pipe, into in ((proc.stdout, out), (proc.stderr, err))
+        ]
+        for reader in readers:
+            reader.start()
+        in_time = self.reap(proc, COMPILE_SECONDS)
+        if not in_time:
             self.kill_group(proc)
-            proc.communicate()
+            self.reap(proc, None)
+        for reader in readers:
+            reader.join(5)
+        for pipe, reader in zip((proc.stdout, proc.stderr), readers):
+            if not reader.is_alive():
+                pipe.close()
+        if not in_time:
             return "Compiling took too long."
         if proc.returncode == 0:
             return None
-        text = (err or b"").decode("utf-8", "replace") + (out or b"").decode("utf-8", "replace")
+        text = b"".join(err).decode("utf-8", "replace") + b"".join(out).decode("utf-8", "replace")
         return text[:OUTPUT_LIMIT] or f"The compiler stopped (code {proc.returncode})."
 
     def start(self):
@@ -241,7 +310,7 @@ class Session:
         return [{"stream": s, "text": d.decode("utf-8", "replace")} for s, d in merged]
 
     def kill_group(self, proc):
-        if proc and proc.poll() is None:
+        if proc and proc.returncode is None:  # not waited for yet, so its process group is still its own
             try:
                 os.killpg(proc.pid, signal.SIGKILL)
             except OSError:
@@ -250,7 +319,7 @@ class Session:
     def cleanup(self):
         self.finished = True
         self.kill_group(self.proc)
-        kill_user(self.uid)
+        kill_user(self.uid)  # stopped (paused) processes die too
         for fd in (self.stdin_w, self.stdin_r):
             if fd is not None:
                 try:
@@ -283,24 +352,48 @@ class Session:
                 return True
         return False
 
+    def _output_pending(self):
+        total = 0
+        for pipe in (self.proc.stdout, self.proc.stderr):
+            try:
+                total += struct.unpack("i", fcntl.ioctl(pipe.fileno(), termios.FIONREAD, struct.pack("i", 0)))[0]
+            except (OSError, ValueError):
+                pass
+        return total
+
+    def pause(self):
+        """Stop every process of the slot while the program waits for the student's answer."""
+        signal_user(self.uid, signal.SIGSTOP)
+        self.paused = True
+        # Let the reader threads collect what the program wrote before it asked.
+        deadline = time.monotonic() + 0.5
+        while self._output_pending() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        time.sleep(0.02)
+
+    def resume(self):
+        if self.paused:
+            signal_user(self.uid, signal.SIGCONT)
+            self.paused = False
+
     def step(self):
         """Run until the program ends, waits for input, or hits a limit."""
         deadline = time.monotonic() + STEP_SECONDS
         while True:
-            code = self.proc.poll()
-            if code is not None:
+            if self.reap(self.proc, 0):
                 time.sleep(0.05)  # let the reader threads collect the last output
-                return self._finished(code)
+                return self._finished(self.proc.returncode)
             if self.truncated:
                 self.kill_group(self.proc)
-                self.proc.wait()
+                self.reap(self.proc, None)
                 return self._finished(self.proc.returncode, verdict="output_limit")
             if self.waiting_for_input():
+                self.pause()
                 self.touched = time.monotonic()
-                return {"session": self.id, "state": "waiting", "output": self.take_output()}
+                return {"session": self.id, "state": "waiting", "output": self.take_output(), "cpu_ms": self.take_cpu_ms()}
             if time.monotonic() > deadline:
                 self.kill_group(self.proc)
-                self.proc.wait()
+                self.reap(self.proc, None)
                 return self._finished(self.proc.returncode, verdict="time_limit")
             time.sleep(0.02)
 
@@ -316,10 +409,20 @@ class Session:
                 verdict = "ok"
             else:
                 verdict = "runtime_error"
+        cpu_ms = self.take_cpu_ms()  # with anything the program left running, before it is killed
         self.cleanup()
-        return {"session": self.id, "state": "finished", "output": output, "verdict": verdict, "exit_code": code, "signal": sig}
+        return {
+            "session": self.id,
+            "state": "finished",
+            "output": output,
+            "verdict": verdict,
+            "exit_code": code,
+            "signal": sig,
+            "cpu_ms": cpu_ms,
+        }
 
     def send(self, text):
+        self.resume()
         os.write(self.stdin_w, (text + "\n").encode("utf-8"))
 
 
@@ -350,14 +453,18 @@ class Runner:
                 session.prepare()
                 errors = session.compile()
                 if errors is not None:
+                    cpu_ms = session.take_cpu_ms()
                     session.cleanup()
                     return {"session": session.id, "state": "finished", "verdict": "compile_error",
-                            "output": [{"stream": "compile", "text": errors}], "exit_code": None, "signal": None}
+                            "output": [{"stream": "compile", "text": errors}], "exit_code": None, "signal": None,
+                            "cpu_ms": cpu_ms}
                 session.start()
                 result = session.step()
             except Exception as exc:  # never leave a slot taken
+                cpu_ms = session.take_cpu_ms()
                 session.cleanup()
-                result = {"session": session.id, "state": "finished", "verdict": "error", "output": [], "message": str(exc)}
+                result = {"session": session.id, "state": "finished", "verdict": "error", "output": [], "message": str(exc),
+                          "cpu_ms": cpu_ms}
             finally:
                 if session.finished:
                     self._forget(session)
@@ -374,7 +481,9 @@ class Runner:
                 session.send(text)
                 result = session.step()
             except OSError:  # the program closed its input or ended meanwhile
-                result = session._finished(session.proc.wait())
+                session.resume()
+                session.reap(session.proc, None)
+                result = session._finished(session.proc.returncode)
             if session.finished:
                 self._forget(session)
             return result

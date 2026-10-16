@@ -97,6 +97,30 @@ class CppTests(unittest.TestCase):
         self.assertEqual(result["state"], "finished")
         self.assertEqual(RUNNER.busy(), 0)  # the slot is free again and nothing is left running
 
+    def test_cpu_time_is_reported(self):
+        quick = RUNNER.run("cpp", "int main(){ return 0; }")
+        busy = RUNNER.run("cpp", "#include <ctime>\nint main(){ while (clock() < CLOCKS_PER_SEC) {} }")
+        self.assertEqual(busy["verdict"], "ok")
+        # Compiling counts too, so both used some; the busy one about a second more.
+        self.assertGreater(quick["cpu_ms"], 0)
+        self.assertGreaterEqual(busy["cpu_ms"] - quick["cpu_ms"], 700)
+        self.assertLess(busy["cpu_ms"], 20_000)
+
+    def test_nothing_runs_while_the_program_waits_for_an_answer(self):
+        # A child that burns the CPU in the background while the program waits for input.
+        code = (
+            "#include <iostream>\n#include <string>\n#include <unistd.h>\n"
+            "int main(){ if (fork() == 0) { volatile unsigned long x = 0; for (;;) x++; }\n"
+            "std::string s; std::cin >> s; std::cout << \"got \" << s << std::endl; }"
+        )
+        first = RUNNER.run("cpp", code)
+        self.assertEqual(first["state"], "waiting")
+        time.sleep(1.5)  # the student thinks; the child is stopped meanwhile
+        last = RUNNER.send_input(first["session"], "x")
+        self.assertEqual((last["verdict"], text(last)), ("ok", "got x\n"))
+        self.assertLess(last["cpu_ms"], 1000)  # not the 1.5 s the child would have burnt
+        self.assertEqual(RUNNER.busy(), 0)
+
     def test_programs_run_as_unprivileged_slot_users(self):
         result = RUNNER.run("cpp", '#include <cstdio>\n#include <unistd.h>\nint main(){ printf("%d\\n", (int)getuid()); }')
         self.assertGreater(int(text(result).strip()), 2000)
