@@ -225,6 +225,39 @@ test("Python asks for input in the console like a real interpreter, and indents 
   await expect(console_).toContainText(/0\s+2\s+4/);
 });
 
+test("Python programs can't use the student's session or the app's offline data", async ({ page }) => {
+  // Lessons' "python-run" blocks are written by teachers and run in a worker with the app's origin: a
+  // program must not be able to ask the API for a new session with the student's cookie, read the
+  // offline caches, or start a fresh worker that has those powers again.
+  await login(page, "aline");
+  await page.goto("/playground");
+  await page.getByRole("tab", { name: /python/i }).click();
+  const console_ = page.locator(".console");
+  const editor = page.getByLabel("Python code editor");
+
+  async function runLine(line) {
+    await editor.click();
+    await page.keyboard.press("ControlOrMeta+a");
+    await page.keyboard.press("Delete");
+    await page.keyboard.insertText(line);
+    await page.getByRole("button", { name: /^run$/i }).click();
+  }
+
+  const names = '"fetch", "XMLHttpRequest", "WebSocket", "EventSource", "Worker", "SharedWorker", "caches", "indexedDB"';
+  await runLine(`import js; print("reachable:", [n for n in (${names}) if getattr(js, n, None) is not None] or "none")`);
+  await expect(console_).toContainText("reachable: none", { timeout: 45_000 });
+
+  await runLine(
+    'import js; from pyodide.ffi import to_js; r = await js.fetch("/api/auth/refresh/", to_js({"method": "POST", "credentials": "include"}, dict_converter=js.Object.fromEntries)); print("refresh", r.status)',
+  );
+  await expect(console_).toContainText(/(AttributeError|TypeError)/);
+  await expect(console_).not.toContainText("refresh 200");
+
+  // Ordinary programs still run.
+  await runLine("print(sum(range(5)))");
+  await expect(console_).toContainText("10");
+});
+
 test("SQL runs in the browser: tables, joins and errors", async ({ page }) => {
   await login(page, "aline");
   await page.goto("/playground");
