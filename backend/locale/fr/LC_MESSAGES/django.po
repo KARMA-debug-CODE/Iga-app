@@ -406,28 +406,32 @@ msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
 msgid "That student is not in this class."
 msgstr "Cet élève n'est pas dans cette classe."
 
-#: apps/coderun/views.py:29
+#: apps/coderun/views.py:49
+msgid "You have used today's time on the code runner. C++ and Java can run again tomorrow; Python, SQL and web pages still run in your browser."
+msgstr "Vous avez utilisé le temps d'aujourd'hui sur le serveur d'exécution du code. C++ et Java pourront de nouveau s'exécuter demain ; Python, SQL et les pages web continuent de fonctionner dans votre navigateur."
+
+#: apps/coderun/views.py:32
 msgid "C++ and Java are not switched on for this server yet."
 msgstr "C++ et Java ne sont pas encore activés sur ce serveur."
 
-#: apps/coderun/views.py:58
-#: apps/coderun/views.py:101
+#: apps/coderun/views.py:80
+#: apps/coderun/views.py:134
 msgid "This program has already finished. Press Run to start it again."
 msgstr "Ce programme est déjà terminé. Appuyez sur Exécuter pour le relancer."
 
-#: apps/coderun/views.py:63
+#: apps/coderun/views.py:85
 msgid "Many students are running programs right now. Try again in a few seconds."
 msgstr "Beaucoup d'élèves exécutent des programmes en ce moment. Réessayez dans quelques secondes."
 
-#: apps/coderun/views.py:41
+#: apps/coderun/views.py:63
 msgid "Your last program is still running. Wait for it to finish."
 msgstr "Votre programme précédent est encore en cours d'exécution. Attendez qu'il se termine."
 
-#: apps/coderun/views.py:47
+#: apps/coderun/views.py:69
 msgid "The code runner is not answering. Try again in a minute."
 msgstr "Le serveur d'exécution du code ne répond pas. Réessayez dans une minute."
 
-#: apps/coderun/views.py:53
+#: apps/coderun/views.py:75
 msgid "The code runner could not run this program. Please tell an administrator."
 msgstr "Le serveur d'exécution du code n'a pas pu lancer ce programme. Prévenez un administrateur."
 
@@ -588,7 +592,7 @@ msgstr "Ce champ est obligatoire."
 msgid "Use at most %(n)s characters."
 msgstr "Utilisez au plus %(n)s caractères."
 
-#: apps/core/views.py:305
+#: apps/core/views.py:306
 msgid "You can't remove your own administrator role."
 msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
 
