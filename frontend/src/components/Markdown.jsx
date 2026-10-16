@@ -12,6 +12,9 @@ import SimEmbed from "./SimEmbed";
 
 // A path on this site: "/x", but not "//host" or "/\host", which browsers read as another site.
 const SAME_SITE = /^\/(?![/\\])/;
+// KaTeX: sizes people give (\rule{2000em}{2000em}) are capped, so maths can't cover the page; links
+// (\href, \url) and HTML commands stay off (trust is false by default).
+const KATEX = { throwOnError: false, strict: "ignore", maxSize: 20 };
 // Another site or app: a scheme ("https:", "mailto:"), "//host" or "/\host".
 const OTHER_SITE = /^(?:[a-z][a-z0-9+.-]*:|\/[/\\])/i;
 
@@ -41,10 +44,12 @@ function codeBlockInfo(node) {
  */
 export default function Markdown({ children, sims = {}, interactive = true }) {
   return (
-    <div className="prose">
+    // People's text is also kept inside its own box (styles.css: .prose-people), so a far \kern can't
+    // paint over the page around it.
+    <div className={interactive ? "prose" : "prose prose-people"}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath, remarkNoBreakSpaces]}
-        rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: "ignore" }]]}
+        rehypePlugins={[[rehypeKatex, KATEX]]}
         components={{
           pre({ node, children: kids }) {
             const info = codeBlockInfo(node);

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../api", () => ({ api: vi.fn(() => Promise.resolve({})) }));
 
+import { api } from "../api";
 import SimEmbed, { frameUrl } from "./SimEmbed";
 
 const sim = (embed_url) => ({ slug: "lab", title: "Lab", provider: "external", provider_id: "x", embed_url });
@@ -29,4 +30,9 @@ describe("simulation frames", () => {
     expect(box.querySelector("iframe")).toBeNull();
     expect(box.querySelector(".alert-error")).not.toBeNull();
   });
+});
+
+it("asks the API for the simulation a lesson names, never another path", () => {
+  render(<SimEmbed slug="../auth/me" />);
+  expect(api).toHaveBeenCalledWith("/simulations/..%2Fauth%2Fme/", expect.anything());
 });

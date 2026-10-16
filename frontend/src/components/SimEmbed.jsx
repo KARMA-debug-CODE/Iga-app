@@ -13,7 +13,8 @@ function useSimulation(slug, initial, lang) {
   const [error, setError] = useState(null);
   useEffect(() => {
     if (initial || !slug) return;
-    api(`/simulations/${slug}/`, { params: { lang } }).then(setSim).catch(setError);
+    // The slug comes from a lesson's text: it names one simulation, never another API path ("../auth").
+    api(`/simulations/${encodeURIComponent(slug)}/`, { params: { lang } }).then(setSim).catch(setError);
   }, [slug, initial, lang]);
   return { sim: sim || initial, error };
 }
@@ -100,7 +101,7 @@ export default function SimEmbed({ slug, sim: initial, autoLaunch = false }) {
   useEffect(() => {
     if (!sim || recorded.current || !(launched || isBuiltin)) return;
     recorded.current = true;
-    api(`/simulations/${sim.slug}/view/`, { method: "POST" }).catch(() => {});
+    api(`/simulations/${encodeURIComponent(sim.slug)}/view/`, { method: "POST" }).catch(() => {});
   }, [sim, launched, isBuiltin]);
 
   if (error) return <div className="alert alert-error">{t("sim.notFound", { slug })}</div>;

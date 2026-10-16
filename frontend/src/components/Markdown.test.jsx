@@ -73,6 +73,17 @@ describe("Markdown from people", () => {
     expect(show("![x](/\\tracker.example/p.png)").querySelector("img").getAttribute("src")).toBe("/%5Ctracker.example/p.png");
   });
 
+  it("keeps maths from covering the page", () => {
+    // A giant \rule (or a far \kern) in a shared note could paint over the rest of the group page.
+    const box = show("$\\rule{2000em}{2000em}$");
+    const rule = box.querySelector(".rule");
+    expect(rule).not.toBeNull();
+    for (const size of [rule.style.borderRightWidth, rule.style.borderTopWidth]) expect(parseFloat(size)).toBeLessThanOrEqual(20);
+    // And people's text can't paint outside its own box (styles.css: .prose-people).
+    expect(box.querySelector(".prose").classList.contains("prose-people")).toBe(true);
+    expect(show("x", true).querySelector(".prose").classList.contains("prose-people")).toBe(false);
+  });
+
   it("does not turn maths into links", () => {
     const box = show("$\\href{javascript:alert(1)}{click}$ and $\\url{javascript:alert(2)}$");
     expect(box.querySelector("a")).toBeNull();
