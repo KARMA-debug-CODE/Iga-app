@@ -154,7 +154,8 @@ class FlutterwaveProvider:
         }
         body = _request("POST", "/payments", payload)
         link = (body.get("data") or {}).get("link") if body.get("status") == "success" else None
-        if not link:
+        # The browser is sent to this page: only ever an https address (never javascript: or data:).
+        if not isinstance(link, str) or not link.startswith("https://"):
             log.warning("Flutterwave refused checkout for %s: %s", payment.reference, body.get("message"))
             raise ProviderUnavailable(body.get("message") or ProviderUnavailable.default_detail)
         return link

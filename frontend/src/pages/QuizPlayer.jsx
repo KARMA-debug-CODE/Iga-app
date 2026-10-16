@@ -9,6 +9,7 @@ import { LockedNotice } from "../components/Locked";
 import { ErrorMessage, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 import { useStartQuiz } from "./Practice";
 
 const CHOICE_TYPES = ["mcq", "multi", "true_false"];
@@ -230,7 +231,7 @@ function Results({ attempt }) {
             <Icon name="refresh" size={16} /> {t("quiz.tryAgain")}
           </button>
           {attempt.quiz.marking_guide_link && (
-            <a className="btn btn-secondary" href={attempt.quiz.marking_guide_link} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-secondary" href={safeUrl(attempt.quiz.marking_guide_link)} target="_blank" rel="noopener noreferrer">
               {t("practice.markingGuide")}
             </a>
           )}

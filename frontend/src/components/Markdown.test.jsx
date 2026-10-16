@@ -37,11 +37,22 @@ describe("Markdown from people", () => {
     }
   });
 
-  it("opens other sites in a new tab without giving them this page", () => {
-    const link = show("[REB](https://www.reb.rw/)").querySelector("a");
-    expect(link.getAttribute("href")).toBe("https://www.reb.rw/");
-    expect(link.getAttribute("target")).toBe("_blank");
-    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+  it.each(["https://www.reb.rw/", "//www.reb.rw/", "HTTP://www.reb.rw/", "mailto:info@reb.rw"])(
+    "opens %s in a new tab without giving it this page",
+    (href) => {
+      const link = show(`[REB](${href})`).querySelector("a");
+      expect(link.getAttribute("href")).toBe(href);
+      expect(link.getAttribute("target")).toBe("_blank");
+      expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+    },
+  );
+
+  it("keeps links to this site's pages in the same tab", () => {
+    for (const href of ["/lessons/forces", "#answer", "lessons/forces"]) {
+      const link = show(`[here](${href})`).querySelector("a");
+      expect(link.getAttribute("href")).toBe(href);
+      expect(link.getAttribute("target")).toBeNull();
+    }
   });
 
   it.each(["https://tracker.example/pixel.png", "//tracker.example/p.png", "http://10.0.0.1/a.png"])(

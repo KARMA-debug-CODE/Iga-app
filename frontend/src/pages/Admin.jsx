@@ -6,6 +6,7 @@ import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
 import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 
 const ROLE_KEYS = { student: "auth.student", teacher: "auth.teacher", parent: "auth.parent", school_admin: "auth.schoolAdmin", admin: "auth.admin" };
 
@@ -195,7 +196,7 @@ function Review() {
                   </div>
                   {item.type === "lesson" && <Link to={`/lessons/${item.slug}`}>{t("teach.preview")} →</Link>}
                   {item.url && (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <a href={safeUrl(item.url)} target="_blank" rel="noopener noreferrer">
                       {item.url}
                     </a>
                   )}

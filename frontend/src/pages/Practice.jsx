@@ -8,6 +8,7 @@ import { LockBadge, LockedNotice } from "../components/Locked";
 import { Empty, ErrorMessage, GradeChips, Loader, scoreClass, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 import { SubjectSelect } from "./Labs";
 
 export function useStartQuiz() {
@@ -157,12 +158,12 @@ function PastPapers({ subject }) {
                       </button>
                     )}
                     {p.paper_link && (
-                      <a className="btn btn-sm btn-secondary" href={p.paper_link} target="_blank" rel="noopener noreferrer">
+                      <a className="btn btn-sm btn-secondary" href={safeUrl(p.paper_link)} target="_blank" rel="noopener noreferrer">
                         <Icon name="file" size={16} /> {t("practice.openPaper")}
                       </a>
                     )}
                     {p.marking_guide_link && (
-                      <a className="btn btn-sm btn-secondary" href={p.marking_guide_link} target="_blank" rel="noopener noreferrer">
+                      <a className="btn btn-sm btn-secondary" href={safeUrl(p.marking_guide_link)} target="_blank" rel="noopener noreferrer">
                         <Icon name="fileCheck" size={16} /> {t("practice.markingGuide")}
                       </a>
                     )}

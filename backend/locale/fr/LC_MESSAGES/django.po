@@ -832,6 +832,10 @@ msgstr "Action inconnue."
 msgid "Only a school waiting for verification, with no payments, can be rejected."
 msgstr "Seule une école en attente de vérification, sans aucun paiement, peut être refusée."
 
+#: apps/simulations/models.py:61
+msgid "An external simulation needs a full https:// address."
+msgstr "Une simulation externe a besoin d'une adresse complète en https://."
+
 #: apps/simulations/views.py:57
 #: apps/simulations/views.py:69
 msgid "Not found."

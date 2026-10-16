@@ -12,6 +12,8 @@ import SimEmbed from "./SimEmbed";
 
 // A path on this site: "/x", but not "//host" or "/\host", which browsers read as another site.
 const SAME_SITE = /^\/(?![/\\])/;
+// Another site or app: a scheme ("https:", "mailto:"), "//host" or "/\host".
+const OTHER_SITE = /^(?:[a-z][a-z0-9+.-]*:|\/[/\\])/i;
 
 function codeBlockInfo(node) {
   const code = node?.children?.[0];
@@ -59,7 +61,8 @@ export default function Markdown({ children, sims = {}, interactive = true }) {
             return <pre>{kids}</pre>;
           },
           a({ href = "", children: kids }) {
-            const external = /^https?:\/\//.test(href);
+            // Links out open in a new tab that can't reach or redirect this page.
+            const external = OTHER_SITE.test(href);
             return (
               <a href={href} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                 {kids}
