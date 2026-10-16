@@ -82,10 +82,12 @@ cd backend && pytest                 # 429 API tests (SQLite by default; set DAT
 cd backend && ruff check .           # lint
 cd frontend && npm test              # 158 unit tests: calculator, lab maths, Santa's stream reader, the no-emoji guard
 cd frontend && npm run lint
-cd frontend && npx playwright test   # 33 end-to-end journeys × (mobile + desktop) against the real API
+cd frontend && npx playwright test   # end-to-end journeys × (mobile + desktop) against the real API
+python3 frontend/tests/nginx/test_nginx.py   # the nginx layer: rate limits, client addresses, sizes, HTTPS, headers (Docker)
+cd frontend && npx playwright test -c playwright.docker.config.js   # the Docker stack in a browser, CSP on (below)
 ```
 
-The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.
+The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. The `playwright.docker.config.js` run instead uses the production build behind the real nginx on http://localhost:8080 (start the Docker stack first, with the curriculum and demo accounts loaded): it signs in, opens a lesson with maths, the labs, the Python, SQL and HTML playgrounds, Santa and the calculator, and fails on any Content-Security-Policy violation. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.
 
 ## Production-like run with Docker
 

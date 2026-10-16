@@ -35,7 +35,14 @@
 # true adds "preload" to HSTS (with SECURE_HSTS_PRELOAD=true for Django): only once every subdomain is HTTPS.
 : "${NGINX_HSTS_PRELOAD:=false}"
 
-export NGINX_RATE_AUTH NGINX_BURST_AUTH NGINX_RATE_COSTLY NGINX_BURST_COSTLY NGINX_RATE_API NGINX_BURST_API \
+# The app's Content-Security-Policy: its own scripts only ('wasm-unsafe-eval' lets Python and SQL compile their
+# WebAssembly; no eval of JavaScript, no inline scripts); GeoGebra's loader and the files it fetches; frames only
+# for the HTML playground's preview (this site) and the PhET and GeoGebra labs; the API on this site; no plugins,
+# no <base>, forms only to this site, and no other site may frame the app. Styles allow 'unsafe-inline' for the
+# style attributes that maths (KaTeX), the code editor and the labs set. Replace it only to add a host.
+: "${NGINX_CSP:=default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.geogebra.org https://cdn.geogebra.org; style-src 'self' 'unsafe-inline' https://www.geogebra.org https://cdn.geogebra.org; img-src 'self' data: blob: https://www.geogebra.org https://cdn.geogebra.org; font-src 'self' data: https://www.geogebra.org https://cdn.geogebra.org; connect-src 'self' https://www.geogebra.org https://cdn.geogebra.org; frame-src 'self' https://phet.colorado.edu https://www.geogebra.org; worker-src 'self'; media-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'}"
+
+export NGINX_CSP NGINX_RATE_AUTH NGINX_BURST_AUTH NGINX_RATE_COSTLY NGINX_BURST_COSTLY NGINX_RATE_API NGINX_BURST_API \
     NGINX_CONN_PER_IP NGINX_CONN_PER_IP_TUTOR NGINX_CLIENT_HEADER_TIMEOUT NGINX_CLIENT_BODY_TIMEOUT \
     NGINX_SEND_TIMEOUT NGINX_KEEPALIVE_TIMEOUT NGINX_MAX_BODY_API NGINX_MAX_BODY_UPLOAD NGINX_FORCE_HTTPS \
     NGINX_HSTS_MAX_AGE NGINX_HSTS_PRELOAD

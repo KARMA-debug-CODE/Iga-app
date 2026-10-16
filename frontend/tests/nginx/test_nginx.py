@@ -66,10 +66,14 @@ def setUpModule():
     # A stand-in for the built app.
     HTML = tempfile.mkdtemp(prefix="iga-nginx-html-")
     os.makedirs(os.path.join(HTML, "assets"))
+    os.makedirs(os.path.join(HTML, "pyodide"))
     files = {
         "index.html": "<!doctype html><title>Iga</title><div id=root></div>",
         "assets/app-1234.js": "console.log('app');",
+        "assets/pyodide.worker-1234.js": "importScripts();",
+        "pyodide/pyodide.mjs": "export {};",
         "sw.js": "self.addEventListener('fetch', () => {});",
+        "playground-frame.html": "<!doctype html><title>Preview</title>",
     }
     for name, text in files.items():
         with open(os.path.join(HTML, name), "w") as f:
@@ -416,6 +420,75 @@ class Https(unittest.TestCase):
                 nginx.request("/", base=f"https://127.0.0.1:{https_port}", context=old)
         finally:
             shutil.rmtree(tls, ignore_errors=True)
+
+
+class SecurityHeaders(unittest.TestCase):
+    """S41: the app's pages and files carry a strict Content-Security-Policy and the other security headers."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.nginx = Nginx(**LOW_LIMITS)
+
+    def test_the_app_and_its_files_have_the_policy(self):
+        for path in [
+            "/",
+            "/lessons/the-cell",
+            "/assets/app-1234.js",
+            "/assets/pyodide.worker-1234.js",
+            "/pyodide/pyodide.mjs",
+            "/sw.js",
+        ]:
+            response = self.nginx.request(path)
+            self.assertEqual(response.status, 200, path)
+            policy = response.header("Content-Security-Policy")
+            directives = dict(d.strip().split(" ", 1) for d in policy.split(";") if " " in d.strip())
+            self.assertEqual(directives["default-src"], "'self'", path)
+            # Scripts: this site, WebAssembly compilation for Python/SQL, and GeoGebra's loader; never inline or eval.
+            self.assertEqual(
+                directives["script-src"], "'self' 'wasm-unsafe-eval' https://www.geogebra.org https://cdn.geogebra.org", path
+            )
+            self.assertEqual(directives["frame-src"], "'self' https://phet.colorado.edu https://www.geogebra.org", path)
+            self.assertEqual(directives["frame-ancestors"], "'none'", path)
+            self.assertEqual(directives["object-src"], "'none'", path)
+            self.assertEqual(directives["base-uri"], "'self'", path)
+            self.assertEqual(directives["form-action"], "'self'", path)
+            self.assertEqual(directives["connect-src"].split()[0], "'self'", path)
+            for name, value in {
+                "X-Frame-Options": "DENY",
+                "X-Content-Type-Options": "nosniff",
+                "Referrer-Policy": "strict-origin-when-cross-origin",
+                "Cross-Origin-Opener-Policy": "same-origin",
+                "Cross-Origin-Resource-Policy": "same-origin",
+            }.items():
+                self.assertEqual(response.header(name), value, f"{path} {name}")
+            self.assertIn("camera=()", response.header("Permissions-Policy"), path)
+
+    def test_the_playground_preview_has_its_own_sandboxed_policy(self):
+        response = self.nginx.request("/playground-frame.html")
+        policy = response.header("Content-Security-Policy")
+        self.assertTrue(policy.startswith("sandbox allow-scripts allow-modals;"), policy)
+        self.assertIn("frame-ancestors 'self'", policy)
+        self.assertEqual(response.header("X-Frame-Options"), "SAMEORIGIN")
+
+    def test_nginx_refusals_have_headers_too(self):
+        refused = None
+        for _ in range(10):
+            refused = self.nginx.post_json("/api/auth/login/")
+        self.assertEqual(refused.status, 429)
+        self.assertEqual(refused.header("Content-Security-Policy"), "default-src 'none'; frame-ancestors 'none'")
+        self.assertEqual(refused.header("X-Frame-Options"), "DENY")
+        too_large = self.nginx.request("/api/lessons/", "POST", b"x" * (3 * 1024 * 1024))
+        self.assertEqual(too_large.header("Content-Security-Policy"), "default-src 'none'; frame-ancestors 'none'")
+
+    def test_django_sets_its_own_on_the_api(self):
+        # nginx adds none of its own to Django's answers (Django sends a stricter policy for JSON).
+        response = self.nginx.request("/api/meta/")
+        self.assertIsNone(response.header("Content-Security-Policy"))
+        self.assertIsNone(response.header("X-Frame-Options"))
+
+    def test_the_policy_can_be_replaced(self):
+        nginx = Nginx(NGINX_CSP="default-src 'self'; frame-ancestors 'none'")
+        self.assertEqual(nginx.request("/").header("Content-Security-Policy"), "default-src 'self'; frame-ancestors 'none'")
 
 
 def _all_logs(container):

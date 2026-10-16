@@ -215,6 +215,8 @@ services:
       # HTTPS (as for Django): redirect plain HTTP and send HSTS. HTTPS=false only for the local trial.
       NGINX_FORCE_HTTPS: ${HTTPS:-true}
       NGINX_HSTS_PRELOAD: ${HSTS_PRELOAD:-false}
+      # The app's Content-Security-Policy (empty = the default in frontend/nginx/defaults.envsh).
+      NGINX_CSP: ${NGINX_CSP:-}
       # Per-address rate limits: sign-in and the like, costly routes (Santa, C++/Java runs, payments), the rest.
       NGINX_RATE_AUTH: ${NGINX_RATE_AUTH:-}
       NGINX_BURST_AUTH: ${NGINX_BURST_AUTH:-}
