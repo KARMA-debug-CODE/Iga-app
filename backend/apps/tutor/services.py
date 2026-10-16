@@ -451,20 +451,31 @@ class _Answer:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     after_tool: bool = False
+    sent: int = 0  # how much of `text` has been passed on
 
     @property
     def text(self):
         return "".join(self.parts)
 
-    def emit(self, text):
+    def add(self, text):
         if not text:
             return
         if self.after_tool and self.parts and not self.text[-1:].isspace():
             self.parts.append("\n\n")
-            yield {"type": "delta", "text": "\n\n"}
         self.after_tool = False
         self.parts.append(text)
-        yield {"type": "delta", "text": text}
+
+    def release(self, hold=0):
+        """Pass on the text not passed on yet, but the last `hold` characters."""
+        whole = self.text
+        end = max(self.sent, len(whole) - hold)
+        if end > self.sent:
+            yield {"type": "delta", "text": whole[self.sent : end]}
+            self.sent = end
+
+    def emit(self, text):
+        self.add(text)
+        yield from self.release()
 
 
 class PromptLeak(Exception):
@@ -472,10 +483,13 @@ class PromptLeak(Exception):
 
 
 def _model_text(answer, text):
-    """Pass on text from the model, stopping it as soon as it repeats the system prompt."""
-    yield from answer.emit(text)
-    if text and LEAKS(answer.text[-(len(text) + 4 * guard.LEAK_WINDOW) :]):
+    """Pass on text from the model, stopping it as soon as it repeats the system prompt. The end that could be
+    the start of such a copy waits for the next piece (guard.LeakCheck.held), so none of a copy is passed on."""
+    answer.add(text)
+    recent = answer.text[-(len(text or "") + 4 * guard.LEAK_WINDOW) :]
+    if text and LEAKS(recent):
         raise PromptLeak
+    yield from answer.release(hold=LEAKS.held(recent))
 
 
 def _round(payload, stream, deadline, answer):
@@ -584,6 +598,7 @@ def _ask_model(prepared, stream, deadline, answer, tools):
                 ],
             }
         )
+        yield from answer.release()  # the model's words before it used the calculator are complete
         for call in calls:
             name, expression, result = _run_tool(call)
             answer.tools.append({"expression": expression, "result": result})

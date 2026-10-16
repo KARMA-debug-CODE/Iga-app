@@ -21,7 +21,8 @@ uses several layers, each of which helps on its own:
 5. Earlier turns come from the browser, so a reply "from Santa" is believed only when Santa really wrote
    it for this student (services.clean_history checks the exchange log).
 6. The model has one tool, a side-effect-free calculator, with a few calls per round and a few rounds.
-7. An answer that repeats the system prompt is replaced by a refusal (`LeakCheck`).
+7. An answer that repeats the system prompt is replaced by a refusal (`LeakCheck`); while an answer is
+   streamed, the end that could be the start of such a copy waits, so none of it reaches the student.
 """
 
 import re
@@ -144,14 +145,43 @@ def _squash(text):
     return re.sub(r"[^a-z0-9]+", " ", unicodedata.normalize("NFKD", text.lower())).strip()
 
 
+def _counts(char):
+    """True for a character that is a letter or digit once squashed (so it counts towards a window)."""
+    return char.isalnum() and (char.isascii() or unicodedata.normalize("NFKD", char)[:1].isascii())
+
+
 class LeakCheck:
     """Finds a run of LEAK_WINDOW characters (letters and digits, spacing and punctuation ignored) of the
     system prompt in an answer. Common phrases are much shorter, so an ordinary answer never trips it."""
 
     def __init__(self, secret_text):
-        squashed = _squash(secret_text)
-        self.windows = {squashed[i : i + LEAK_WINDOW] for i in range(max(0, len(squashed) - LEAK_WINDOW + 1))}
+        self.squashed = _squash(secret_text)
+        self.windows = {self.squashed[i : i + LEAK_WINDOW] for i in range(max(0, len(self.squashed) - LEAK_WINDOW + 1))}
 
     def __call__(self, answer):
         squashed = _squash(answer or "")
         return any(squashed[i : i + LEAK_WINDOW] in self.windows for i in range(max(0, len(squashed) - LEAK_WINDOW + 1)))
+
+    def held(self, text):
+        """How many characters at the end of `text` (an answer being written) to hold back: the longest end of it
+        that is also a piece of the system prompt, which may be the start of a copy. Passing on only the rest
+        means no part of a copy reaches the student before it is caught. In an ordinary answer this is a few
+        letters (the end of a common word), so the text still appears as it is written."""
+        tail = text[-4 * LEAK_WINDOW :]
+        squashed = _squash(tail)
+        # A piece of a piece is a piece, so the longest matching end can be found by halving.
+        low, high = 0, min(len(squashed), LEAK_WINDOW)
+        while low < high:
+            middle = (low + high + 1) // 2
+            if squashed[-middle:] in self.squashed:
+                low = middle
+            else:
+                high = middle - 1
+        if not low:
+            return 0
+        letters = 0
+        for i in range(len(tail) - 1, -1, -1):
+            letters += _counts(tail[i])
+            if letters >= low:
+                return len(tail) - i
+        return len(tail)

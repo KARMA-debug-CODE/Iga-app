@@ -330,13 +330,35 @@ def test_an_answer_that_repeats_the_system_prompt_is_replaced(client_for, studen
     if streamed:
         events, _ = stream(client, message=message)
         done = events[-1]
-        assert not any("AFTER THE LEAK" in e.get("text", "") for e in events)  # stopped as soon as it was seen
+        sent = "".join(e["text"] for e in events if e["type"] == "delta")
+        assert "AFTER THE LEAK" not in sent  # stopped as soon as it was seen
+        # The end that could start a copy is held back while the answer is written, so not even the first
+        # words of the system prompt reached the browser before the copy was caught.
+        assert "You are Santa" not in sent and "Iga's learning assistant" not in sent
+        assert sent.startswith("Of course!")
     else:
         done = ask(client, message=message).data
     assert done["reply"].startswith("I can't share how I'm set up")
     assert services.SYSTEM_PROMPT[100:160] not in done["reply"] and done["sources"] == []
     exchange = TutorExchange.objects.get()
     assert exchange.stop_reason == "blocked:prompt_leak" and exchange.flags == "injection,prompt_leak"
+
+
+def test_only_the_end_that_could_start_a_copy_is_held_back():
+    leaks = services.LEAKS
+    for ordinary in ("Let's work it out step by step: 3 rides at 500 FRW cost 1500 FRW.", "Good question! Think about the"):
+        assert leaks.held(ordinary) < 15  # the end of a common word or two
+    start = services.SYSTEM_PROMPT[:50]
+    assert len(start) <= leaks.held("Here it is: " + start) <= len("Here it is: " + start)
+
+
+@pytest.mark.parametrize("pieces", [1, 4])
+def test_a_streamed_answer_still_arrives_as_it_is_written(client_for, student, santa, pieces):  # noqa: F811
+    reply = "Photosynthesis happens in the leaves. Light, water and carbon dioxide make glucose and oxygen. " * pieces
+    santa.script = [{"content": reply}]
+    events, _ = stream(client_for(student), message="photosynthesis")
+    deltas = [e["text"] for e in events if e["type"] == "delta"]
+    assert "".join(deltas) == reply and len(deltas) > 10 * pieces
 
 
 def test_the_refusal_is_in_french_too(client_for, student, santa):  # noqa: F811
