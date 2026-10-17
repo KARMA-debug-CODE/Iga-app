@@ -197,6 +197,7 @@ docker-compose.yml       PostgreSQL + Redis + backend + nginx + code runner + Sa
 
 ## Documentation
 
+- [Deployment](docs/DEPLOYMENT.md): a step-by-step checklist to put Iga on a real server (domain, HTTPS, secrets, first admin, email, backups, monitoring)
 - [Architecture](docs/ARCHITECTURE.md): components, data model, API, security and scaling
 - [Content guide](docs/CONTENT_GUIDE.md): how teachers and editors add lessons, translations, quizzes and exam papers
 - [School subscriptions](docs/SUBSCRIPTIONS.md): how schools join and pay, what's free, setting up Flutterwave, reminders
