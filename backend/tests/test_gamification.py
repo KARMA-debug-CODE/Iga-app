@@ -103,3 +103,42 @@ def test_streak_shown_lapses_after_a_missed_day(client_for, student):
     student.save()
     assert client_for(student).get("/api/auth/me/").data["streak_days"] == 0
     assert client_for(student).get("/api/dashboard/").data["streak_days"] == 0
+
+
+# --- What an action earned, for the app to celebrate ---------------------------------
+
+
+def test_completing_a_lesson_reports_new_badges_once(client_for, student, lesson):
+    client = client_for(student)
+    first = client.post(f"/api/lessons/{lesson.slug}/complete/").data
+    assert first["rewards"] == {"level": None, "badges": ["first-lesson"]}
+    again = client.post(f"/api/lessons/{lesson.slug}/complete/").data
+    assert again["rewards"] == {"level": None, "badges": []}
+
+
+def test_completing_a_lesson_reports_a_new_level(client_for, student, lesson):
+    services.award_xp(student, 95, "test")  # 5 XP short of level 2
+    services.award_badge(student, "first-lesson")
+    data = client_for(student).post(f"/api/lessons/{lesson.slug}/complete/").data
+    assert data["rewards"] == {"level": 2, "badges": []}
+
+
+def test_submitting_a_quiz_reports_level_and_badges(client_for, student, quiz_factory):
+    from .test_assessment_rules import answer_all_correctly, start
+
+    services.award_xp(student, 90, "test")
+    client = client_for(student)
+    attempt = start(client, quiz_factory())
+    answer_all_correctly(client, attempt)
+    data = client.post(f"/api/attempts/{attempt['id']}/submit/").data
+    assert data["percentage"] == 100
+    assert data["rewards"] == {"level": 2, "badges": ["quiz-whiz"]}
+    # Submitting again changes nothing, so there is nothing new to celebrate.
+    assert client.post(f"/api/attempts/{attempt['id']}/submit/").data["rewards"] == {"level": None, "badges": []}
+
+
+def test_rewards_list_badges_in_a_stable_order(student):
+    before = services.rewards_snapshot(student)
+    services.award_badge(student, "team-player")
+    services.award_badge(student, "first-lesson")
+    assert services.rewards_since(student, before) == {"level": None, "badges": ["first-lesson", "team-player"]}

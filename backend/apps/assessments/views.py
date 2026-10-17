@@ -13,6 +13,7 @@ from apps.core.constants import ContentStatus
 from apps.core.permissions import IsTeacher, IsTeacherOrReadOnly
 from apps.core.utils import request_language
 from apps.core.validation import id_param, int_param, parse_id
+from apps.gamification import services as gamification
 from apps.schools import access
 
 from . import services
@@ -290,8 +291,11 @@ class AttemptViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
         attempt = self._own_attempt(needs_access=False)  # finishing is always allowed
+        before = gamification.rewards_snapshot(request.user)
         attempt = services.submit_attempt(attempt)
-        return Response(AttemptSerializer(attempt, context={"request": request}).data)
+        data = AttemptSerializer(attempt, context={"request": request}).data
+        data["rewards"] = gamification.rewards_since(request.user, before)  # a new level or badge to celebrate
+        return Response(data)
 
 
 class MarkingViewSet(viewsets.ViewSet):

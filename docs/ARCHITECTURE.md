@@ -136,7 +136,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET/POST children/` · `GET/DELETE children/{id}/` | parent | Link with a code; read-only progress report |
 | `GET subjects/?grade=` · `GET subjects/{code}/?grade=&lang=` | user | Subjects with progress; units and lessons |
 | `GET units/?subject=&grade=` | user | Unit picker for authoring |
-| `GET lessons/{slug}/?lang=` · `POST lessons/{slug}/complete/` | user | Lesson with sims, resources, quizzes, prev/next |
+| `GET lessons/{slug}/?lang=` · `POST lessons/{slug}/complete/` | user | Lesson with sims, resources, quizzes, prev/next; completing says the XP gained and `rewards` (a new level, new badge codes) for the app to celebrate |
 | `POST/PATCH lessons/` | teacher | Author lessons (non-admins → review) |
 | `GET/POST resources/` | user / teacher | Textbooks, guides, notes, links |
 | `GET simulations/?subject=&grade=&q=` · `POST simulations/{slug}/view/` | user | Lab library |
@@ -145,7 +145,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET quizzes/{id}/analytics/?classroom=` | teacher | Results analysis: histogram, per-question difficulty, discrimination, option counts |
 | `POST/PATCH quizzes/` | teacher | Quiz builder |
 | `GET exam-papers/?level=&year=&subject=` · `GET exam-papers/years/` | user | Past-paper library |
-| `GET attempts/{id}/` · `POST attempts/{id}/{answer,check,submit}/` | owner | Taking a quiz |
+| `GET attempts/{id}/` · `POST attempts/{id}/{answer,check,submit}/` | owner | Taking a quiz; `submit` also returns `rewards` (a new level, new badge codes) |
 | `GET marking/` · `POST marking/{answer_id}/mark/` | teacher | Marking queue |
 | `GET/POST classes/` · `POST classes/join/` · `GET classes/{id}/report/` | user / teacher | Classes and gradebook |
 | `POST classes/{id}/import_roster/` · `POST classes/{id}/reset_password/` | teacher | Create student accounts from CSV (preview, then confirm); temporary passwords |
