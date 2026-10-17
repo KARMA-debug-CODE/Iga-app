@@ -39,8 +39,9 @@ export function usePresence(show, ms = MOTION_MS.base) {
     const timer = setTimeout(() => set(false, false), ms);
     return () => clearTimeout(timer);
   }, [show, ms]);
-  // The first render after `show` turns true is already mounted (no frame without it).
-  return show ? { mounted: true, leaving: false } : state;
+  // No render lags behind `show`: it is mounted as soon as it is shown, and leaving as soon as it is hidden.
+  if (show) return { mounted: true, leaving: false };
+  return state.mounted ? { mounted: true, leaving: !prefersReducedMotion() } : state;
 }
 
 /**

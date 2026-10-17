@@ -264,7 +264,7 @@
   display: block;
   height: 12px;
   border-radius: 6px;
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--border) 70%, var(--surface));
 }
 
 .sk-title {
@@ -340,9 +340,10 @@
   position: relative;
 }
 
-/* Added from JS only where the browser can animate --ring-fill (elsewhere the ring is simply full). */
+/* Added from JS only where the browser can animate --ring-fill (elsewhere the ring is simply full).
+   In step with the number counting up in the middle (useCountUp: 700ms, ease-out cubic). */
 .score-ring.is-filling {
-  animation: motion-ring-fill 900ms var(--ease-out) var(--motion-fast) backwards;
+  animation: motion-ring-fill 700ms cubic-bezier(0.33, 1, 0.68, 1) backwards;
 }
 
 /* ---------- Alerts, feedback and dialogs ---------- */
@@ -359,11 +360,14 @@
 /* ---------- Celebrations (components/Celebrate.jsx): a ring and rays in the flag's colours ---------- */
 
 @keyframes burst-ring {
-  from {
-    opacity: 0.9;
-    transform: scale(0.35);
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
   }
-  to {
+  15% {
+    opacity: 1;
+  }
+  100% {
     opacity: 0;
     transform: scale(1);
   }
@@ -372,14 +376,17 @@
 @keyframes burst-ray {
   0% {
     opacity: 0;
-    transform: translateY(6px) scaleY(0.3);
+    transform: translateY(8px) scaleY(0.3);
   }
-  25% {
+  20% {
+    opacity: 1;
+  }
+  70% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: translateY(-10px) scaleY(1);
+    transform: translateY(-12px) scaleY(1);
   }
 }
 
@@ -388,28 +395,33 @@
   left: 50%;
   top: 50%;
   width: var(--burst-size, 96px);
+  max-width: none; /* wider than the icon it surrounds */
   height: var(--burst-size, 96px);
   transform: translate(-50%, -50%);
   overflow: visible;
   pointer-events: none;
 }
 
+/* Strokes keep their width in pixels whatever the burst's size. */
 .burst-ring {
   fill: none;
   stroke: var(--yellow);
-  stroke-width: 2.5;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: burst-ring 700ms var(--ease-out) forwards;
-}
-
-.burst-ray {
-  stroke-width: 4;
-  stroke-linecap: round;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
-  animation: burst-ray 650ms var(--ease-out) forwards;
+  animation: burst-ring 800ms var(--ease-out) forwards;
+}
+
+.burst-ray {
+  stroke-width: 3px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: burst-ray 800ms var(--ease-out) forwards;
 }
 
 .burst > g:nth-of-type(even) .burst-ray {
@@ -462,6 +474,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: max-content;
   max-width: calc(100vw - 2 * var(--gutter));
   padding: 6px 18px 6px 6px;
   border-radius: 999px;

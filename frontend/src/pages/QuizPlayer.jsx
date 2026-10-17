@@ -215,7 +215,7 @@ function ScoreRing({ pct, celebrate }) {
   return (
     <div className={`score-ring ${canFillRing ? "is-filling" : ""}`} style={{ "--pct": pct ?? 0 }}>
       <div>{pct != null ? <CountUp value={Math.round(pct)} format={(n) => `${n}%`} /> : "…"}</div>
-      {celebrate && <Burst size={220} />}
+      {celebrate && <Burst size={280} />}
     </div>
   );
 }

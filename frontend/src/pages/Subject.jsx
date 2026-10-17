@@ -67,7 +67,7 @@ function SubjectSkeleton() {
   return (
     <Skeleton>
       <span className="sk" style={{ width: 160, marginBottom: 16 }} />
-      <div className="sk-row skeleton" style={{ marginBottom: 18 }}>
+      <div className="sk-row" style={{ marginBottom: 18 }}>
         <span className="sk sk-tile" style={{ width: 56, height: 56 }} />
         <span className="sk-lines">
           <span className="sk sk-title" style={{ height: 26, width: "45%" }} />
