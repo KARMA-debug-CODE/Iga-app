@@ -18,7 +18,12 @@ RUN DJANGO_DEBUG=false DJANGO_SECRET_KEY="$(python -c 'import secrets; print(sec
     python manage.py collectstatic --noinput \
     && useradd --create-home --uid 1000 iga \
     && mkdir -p /app/media \
-    && chown -R iga /app/media
+    && chown -R iga /app/media \
+    # Maintenance mode's switch (`manage.py maintenance on`): a marker file this non-root user writes and
+    # nginx reads, on a volume docker compose shares between them (MAINTENANCE_FILE=/srv/maintenance/on).
+    # 1777 (sticky, like /tmp) so the volume stays writable whichever container first initialises it.
+    && mkdir -p /srv/maintenance \
+    && chmod 1777 /srv/maintenance
 
 USER iga
 EXPOSE 8000

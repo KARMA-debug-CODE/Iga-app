@@ -102,12 +102,37 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Iga <no-reply@iga.rw>}
+      # Messages from the contact form are emailed here (and kept in Admin -> Messages). Empty: kept only.
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      # Legal pages and privacy (see .env.docker.example). Set real values and, once a lawyer has approved
+      # the Terms and Privacy Policy, LEGAL_DRAFT_NOTICE=false to hide the "draft" note.
+      LEGAL_VERSION: ${LEGAL_VERSION:-2026-10-17}
+      LEGAL_DRAFT_NOTICE: ${LEGAL_DRAFT_NOTICE:-true}
+      LEGAL_ENTITY_NAME: ${LEGAL_ENTITY_NAME:-Iga}
+      LEGAL_ENTITY_ADDRESS: ${LEGAL_ENTITY_ADDRESS:-Kigali, Rwanda}
+      PRIVACY_CONTACT_EMAIL: ${PRIVACY_CONTACT_EMAIL:-privacy@iga.rw}
+      DATA_HOSTING_LOCATION: ${DATA_HOSTING_LOCATION:-Rwanda}
+      # Retention and the account-deletion grace, shown in the Privacy Policy (days; 0 = keep for ever).
+      ACCOUNT_DELETION_GRACE_DAYS: ${ACCOUNT_DELETION_GRACE_DAYS:-14}
+      SANTA_LOG_RETENTION_DAYS: ${SANTA_LOG_RETENTION_DAYS:-365}
+      AUDIT_LOG_RETENTION_DAYS: ${AUDIT_LOG_RETENTION_DAYS:-730}
+      USAGE_RETENTION_DAYS: ${USAGE_RETENTION_DAYS:-400}
+      CONTACT_RETENTION_DAYS: ${CONTACT_RETENTION_DAYS:-730}
+      # Matches the backup service's retention, for the Privacy Policy's "how long we keep backups".
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      # Maintenance mode. MAINTENANCE_MODE=true (plus NGINX_MAINTENANCE on the web service) turns it on by
+      # restart; `manage.py maintenance on|off` writes/removes the marker file on the shared volume below,
+      # which both Django and nginx read, with no restart.
+      MAINTENANCE_MODE: ${MAINTENANCE_MODE:-false}
+      MAINTENANCE_FILE: /srv/maintenance/on
       # gunicorn (backend/gunicorn.conf.py has the rest): processes, and threads per process, so slow calls
       # (Santa's answers, C++/Java runs) don't hold up other requests.
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
       GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
     volumes:
       - media:/app/media
+      # The maintenance-mode marker, shared with nginx (the web service mounts the same volume).
+      - maintenance:/srv/maintenance
     networks: [default, coderunner, santa]
     depends_on:
       migrate:
@@ -290,8 +315,14 @@ services:
       NGINX_KEEPALIVE_TIMEOUT: ${NGINX_KEEPALIVE_TIMEOUT:-}
       NGINX_MAX_BODY_API: ${NGINX_MAX_BODY_API:-}
       NGINX_MAX_BODY_UPLOAD: ${NGINX_MAX_BODY_UPLOAD:-}
+      # Maintenance mode. "true" shows the "back soon" page (503) to everyone but the Iga team, by restart;
+      # `manage.py maintenance on|off` (no restart) toggles it through the shared marker file below, which
+      # nginx also reads. The matching MAINTENANCE_MODE on the backend makes Django refuse the API too.
+      NGINX_MAINTENANCE: ${MAINTENANCE_MODE:-false}
     volumes:
       - media:/srv/media:ro
+      # The maintenance-mode marker the backend writes (`manage.py maintenance on`); nginx reads it.
+      - maintenance:/srv/maintenance:ro
     depends_on:
       - backend
 
@@ -301,6 +332,8 @@ volumes:
   santa-models:
   # Daily database and media backups (the "backup" service). Copy this off the server, encrypted.
   backups:
+  # Maintenance mode's marker file: the backend writes it (`manage.py maintenance on`), nginx reads it.
+  maintenance:
 
 networks:
   default: {}
