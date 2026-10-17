@@ -26,6 +26,8 @@ from apps.core.utils import request_language
 from apps.curriculum.downloads import signed_resource_url
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject, localized_lesson_titles
 from apps.curriculum.views import visible_lessons
+from apps.planner import services as planner_services
+from apps.review import services as review_services
 from apps.schools.access import has_premium
 from apps.schools.views import revenue_summary
 from apps.simulations.models import Simulation, SimulationView
@@ -171,6 +173,8 @@ def dashboard(request):
     data["continue_learning"] = _continue_learning(user, request_language(request))
     data["lessons_completed"] = LessonProgress.objects.filter(user=user).count()
     data["badges_earned"] = user.badges.count()
+    data["reviews_due"] = review_services.due_count(user)
+    data["planner"] = planner_services.dashboard_summary(user, request_language(request))
     return Response(data)
 
 

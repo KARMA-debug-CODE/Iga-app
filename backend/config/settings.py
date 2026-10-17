@@ -112,6 +112,9 @@ INSTALLED_APPS = [
     "apps.tutor",
     "apps.coderun",
     "apps.schools",
+    "apps.review",
+    "apps.planner",
+    "apps.notes",
 ]
 
 MIDDLEWARE = [
