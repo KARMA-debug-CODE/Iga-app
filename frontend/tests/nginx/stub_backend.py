@@ -13,6 +13,11 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
     def _answer(self):
+        # A test asks for a failed backend (nginx then shows its own error page): drop the connection with
+        # no answer, which nginx reports as 502.
+        if self.headers.get("X-Stub-Drop"):
+            self.close_connection = True
+            return
         length = int(self.headers.get("Content-Length") or 0)
         received = 0
         while received < length:

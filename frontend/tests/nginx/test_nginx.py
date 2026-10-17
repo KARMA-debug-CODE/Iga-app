@@ -78,6 +78,10 @@ def setUpModule():
     for name, text in files.items():
         with open(os.path.join(HTML, name), "w") as f:
             f.write(text)
+    # The self-contained error pages, as the build copies them from public/errors/ into dist/errors/.
+    os.makedirs(os.path.join(HTML, "errors"))
+    for name in ("500.html", "maintenance.html"):
+        shutil.copy(os.path.join(FRONTEND, "public", "errors", name), os.path.join(HTML, "errors", name))
     os.chmod(HTML, 0o755)
     for root, dirs, names in os.walk(HTML):
         for d in dirs:
@@ -489,6 +493,72 @@ class SecurityHeaders(unittest.TestCase):
     def test_the_policy_can_be_replaced(self):
         nginx = Nginx(NGINX_CSP="default-src 'self'; frame-ancestors 'none'")
         self.assertEqual(nginx.request("/").header("Content-Security-Policy"), "default-src 'self'; frame-ancestors 'none'")
+
+
+class FriendlyErrors(unittest.TestCase):
+    """When Django can't be reached: the app's own routes and files still load from nginx; a browser that hits
+    a proxied page gets the self-contained 500 page; the API answers a JSON 503 the app can read."""
+
+    DROP = {"X-Stub-Drop": "1"}  # the stub drops the connection, so nginx reports the backend as down (502)
+
+    def test_the_api_answers_a_json_503_when_the_backend_is_down(self):
+        nginx = Nginx()
+        down = nginx.request("/api/meta/", headers=self.DROP)
+        self.assertEqual(down.status, 503)
+        self.assertEqual(down.header("Content-Type"), JSON_TYPE)
+        self.assertEqual(down.json()["code"], "unavailable")
+        self.assertGreater(int(down.header("Retry-After")), 0)
+        self.assertEqual(down.header("Cache-Control"), "no-store")
+        # In the reader's language, and with no CSP that could run anything.
+        french = nginx.request("/api/meta/", headers={**self.DROP, "Accept-Language": "fr"})
+        self.assertIn("ne répond pas", french.json()["detail"])
+        self.assertEqual(french.header("Content-Security-Policy"), "default-src 'none'; frame-ancestors 'none'")
+
+    def test_a_proxied_page_shows_the_self_contained_500_page(self):
+        # robots.txt is proxied but not an /api/ route, so a browser hitting it while Django is down gets the
+        # HTML page, keeping the real 5xx code (not turned into a 200).
+        down = Nginx().request("/robots.txt", headers=self.DROP)
+        self.assertGreaterEqual(down.status, 500)
+        self.assertIn(b"Something went wrong", down.body)
+        self.assertIn(b"lang=\"fr\"", down.body)  # the French half is in the same page
+        self.assertNotIn(b"<script", down.body)  # it must work when the app's scripts can't load
+
+    def test_the_app_shell_and_its_files_do_not_need_the_backend(self):
+        nginx = Nginx()
+        # The single-page app and its hashed assets are static, so they load even with Django down.
+        self.assertEqual(nginx.request("/learn").status, 200)
+        self.assertEqual(nginx.request("/assets/app-1234.js").status, 200)
+
+
+class Maintenance(unittest.TestCase):
+    """Maintenance mode (NGINX_MAINTENANCE, or the shared file): the app's pages answer the "back soon" page
+    with 503 for everyone but the Iga team; /team and the app's files stay open so the team can sign in."""
+
+    def test_off_by_default(self):
+        self.assertEqual(Nginx().request("/learn").status, 200)
+
+    def test_the_app_answers_the_back_soon_page_with_503(self):
+        nginx = Nginx(NGINX_MAINTENANCE="true")
+        page = nginx.request("/learn")
+        self.assertEqual(page.status, 503)
+        self.assertIn(b"Back soon", page.body)
+        self.assertIn(b"Nous revenons vite", page.body)  # French in the same page
+        self.assertEqual(page.header("Cache-Control"), "no-store")
+
+    def test_the_team_passes_with_its_cookie_and_through_team(self):
+        nginx = Nginx(NGINX_MAINTENANCE="true")
+        # /team always serves the app, so the team can reach the sign-in during maintenance.
+        self.assertEqual(nginx.request("/team").status, 200)
+        # The iga_team cookie (Django gives it to platform admins) lets the app's pages through.
+        passed = nginx.request("/learn", headers={"Cookie": "iga_team=1"})
+        self.assertEqual(passed.status, 200)
+        # The app's files load regardless, so the shell can run.
+        self.assertEqual(nginx.request("/assets/app-1234.js").status, 200)
+
+    def test_nginx_still_forwards_the_api_during_maintenance(self):
+        # nginx is only a hint; Django decides who may use the API during maintenance (apps/core/maintenance.py).
+        nginx = Nginx(NGINX_MAINTENANCE="true")
+        self.assertEqual(nginx.request("/api/meta/").status, 200)
 
 
 def _all_logs(container):
