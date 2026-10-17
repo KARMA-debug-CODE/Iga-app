@@ -34,6 +34,9 @@
 : "${NGINX_HSTS_MAX_AGE:=31536000}"
 # true adds "preload" to HSTS (with SECURE_HSTS_PRELOAD=true for Django): only once every subdomain is HTTPS.
 : "${NGINX_HSTS_PRELOAD:=false}"
+# Maintenance mode: "true" answers the app's pages with the "back soon" page (503), except for the Iga team. The
+# usual switch is the file /srv/maintenance/on (`manage.py maintenance on`); this is the environment's.
+: "${NGINX_MAINTENANCE:=false}"
 
 # The app's Content-Security-Policy: its own scripts only ('wasm-unsafe-eval' lets Python and SQL compile their
 # WebAssembly; no eval of JavaScript, no inline scripts); GeoGebra's loader and the files it fetches; frames only
@@ -45,6 +48,6 @@
 export NGINX_CSP NGINX_RATE_AUTH NGINX_BURST_AUTH NGINX_RATE_COSTLY NGINX_BURST_COSTLY NGINX_RATE_API NGINX_BURST_API \
     NGINX_CONN_PER_IP NGINX_CONN_PER_IP_TUTOR NGINX_CLIENT_HEADER_TIMEOUT NGINX_CLIENT_BODY_TIMEOUT \
     NGINX_SEND_TIMEOUT NGINX_KEEPALIVE_TIMEOUT NGINX_MAX_BODY_API NGINX_MAX_BODY_UPLOAD NGINX_FORCE_HTTPS \
-    NGINX_HSTS_MAX_AGE NGINX_HSTS_PRELOAD
+    NGINX_HSTS_MAX_AGE NGINX_HSTS_PRELOAD NGINX_MAINTENANCE
 # Only these NGINX_ variables are filled in; nginx's own ($host, $remote_addr, ...) are left alone.
 export NGINX_ENVSUBST_FILTER="^NGINX_"
