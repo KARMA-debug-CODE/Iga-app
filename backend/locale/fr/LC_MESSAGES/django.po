@@ -312,11 +312,11 @@ msgstr "Cette question ne fait pas partie de cette tentative."
 msgid "You already checked this answer, so it can't be changed."
 msgstr "Vous avez déjà vérifié cette réponse : elle ne peut plus être modifiée."
 
-#: apps/assessments/services.py:237
+#: apps/assessments/services.py:258
 msgid "Answers are revealed after you submit in exam mode."
 msgstr "En mode examen, les réponses sont révélées après la remise."
 
-#: apps/assessments/services.py:306
+#: apps/assessments/services.py:329
 msgid "The student hasn't submitted yet."
 msgstr "L'élève n'a pas encore remis sa copie."
 
@@ -347,11 +347,11 @@ msgstr "Option choisie non valide."
 msgid "Choose only one option."
 msgstr "Choisissez une seule option."
 
-#: apps/assessments/services.py:243
+#: apps/assessments/services.py:264
 msgid "Your teacher will mark this answer."
 msgstr "Votre enseignant corrigera cette réponse."
 
-#: apps/assessments/services.py:302
+#: apps/assessments/services.py:325
 msgid "Marks must be between 0 and %(max)s."
 msgstr "La note doit être comprise entre 0 et %(max)s."
 
@@ -360,31 +360,31 @@ msgstr "La note doit être comprise entre 0 et %(max)s."
 msgid "Enter a number."
 msgstr "Saisissez un nombre."
 
-#: apps/assessments/views.py:69
+#: apps/assessments/views.py:70
 msgid "You can only change questions you wrote."
 msgstr "Vous ne pouvez modifier que les questions que vous avez écrites."
 
-#: apps/assessments/views.py:83
+#: apps/assessments/views.py:84
 msgid "Students have already answered this question; archive the quiz instead."
 msgstr "Des élèves ont déjà répondu à cette question ; archivez plutôt le quiz."
 
-#: apps/assessments/views.py:147
+#: apps/assessments/views.py:148
 msgid "You can only edit quizzes you created."
 msgstr "Vous ne pouvez modifier que les quiz que vous avez créés."
 
-#: apps/assessments/views.py:172
+#: apps/assessments/views.py:173
 msgid "You can only delete quizzes you created."
 msgstr "Vous ne pouvez supprimer que les quiz que vous avez créés."
 
-#: apps/assessments/views.py:195
+#: apps/assessments/views.py:196
 msgid "This quiz is no longer available."
 msgstr "Ce quiz n'est plus disponible."
 
-#: apps/assessments/views.py:266
+#: apps/assessments/views.py:267
 msgid "This is not your attempt."
 msgstr "Ce n'est pas votre tentative."
 
-#: apps/assessments/views.py:154
+#: apps/assessments/views.py:155
 msgid "Students have started this quiz; duplicate it to change the questions."
 msgstr "Des élèves ont commencé ce quiz ; dupliquez-le pour en changer les questions."
 
@@ -676,7 +676,7 @@ msgstr "Ce champ est obligatoire."
 msgid "Use at most %(n)s characters."
 msgstr "Utilisez au plus %(n)s caractères."
 
-#: apps/core/views.py:306
+#: apps/core/views.py:310
 msgid "You can't remove your own administrator role."
 msgstr "Vous ne pouvez pas retirer votre propre rôle d'administrateur."
 
@@ -692,17 +692,33 @@ msgstr "Donnez un lien ou envoyez un fichier."
 msgid "You can only edit lessons you wrote."
 msgstr "Vous ne pouvez modifier que les leçons que vous avez écrites."
 
-#: apps/curriculum/views.py:259
+#: apps/curriculum/views.py:264
 msgid "You can only edit resources you uploaded."
 msgstr "Vous ne pouvez modifier que les ressources que vous avez envoyées."
 
-#: apps/curriculum/views.py:266
+#: apps/curriculum/views.py:271
 msgid "You can only delete resources you uploaded."
 msgstr "Vous ne pouvez supprimer que les ressources que vous avez envoyées."
 
 #: apps/gamification/views.py:52
 msgid "Class not found."
 msgstr "Classe introuvable."
+
+#: apps/planner/serializers.py:30
+msgid "Choose a date in the future."
+msgstr "Choisissez une date dans le futur."
+
+#: apps/planner/serializers.py:32
+msgid "That date is too far away."
+msgstr "Cette date est trop lointaine."
+
+#: apps/planner/serializers.py:37
+msgid "Give the exam a name."
+msgstr "Donnez un nom à l'examen."
+
+#: apps/planner/views.py:52
+msgid "You can track up to %(n)s exam dates."
+msgstr "Vous pouvez suivre jusqu'à %(n)s dates d'examen."
 
 #: apps/schools/access.py:26
 msgid "This is part of the full Iga library. Ask your school to subscribe to unlock it."
