@@ -288,7 +288,7 @@ function Answer({ message }) {
   const { t } = useI18n();
   const tools = (message.tools || []).filter((tool) => tool.result && !tool.result.startsWith("error"));
   return (
-    <div className="santa-answer">
+    <div className={`santa-answer ${message.content ? "" : "is-thinking"}`}>
       <SantaMark size={26} />
       <div className="bubble santa-bubble">
         {message.content ? <Markdown interactive={false}>{message.content}</Markdown> : <Typing />}

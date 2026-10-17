@@ -775,6 +775,8 @@ export default {
   "badge.streak-3.desc": "Learned 3 days in a row",
   "badge.streak-7.name": "Unstoppable",
   "badge.streak-7.desc": "Learned 7 days in a row",
+  "celebrate.level": "Level {level} reached",
+  "celebrate.badge": "New badge: {name}",
 
   "a11y.home": "Iga home",
   "a11y.mainNav": "Main",

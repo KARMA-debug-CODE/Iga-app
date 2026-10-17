@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
-import { GradeChips, Loader } from "../components/ui";
+import { GradeChips, Loader, SkeletonCards } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 import { SubjectGrid } from "./Dashboard";
@@ -21,7 +21,7 @@ export default function Subjects() {
       </div>
       <GradeChips value={grade} onChange={(g) => setParams({ grade: g })} />
       <div style={{ marginTop: 16 }}>
-        <Loader state={state}>
+        <Loader state={state} skeleton={<SkeletonCards count={8} progress />}>
           {(list) => <SubjectGrid subjects={list} grade={grade} headingLevel={2} />}
         </Loader>
       </div>

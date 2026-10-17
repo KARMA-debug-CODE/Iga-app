@@ -45,7 +45,7 @@ function QuizGrid({ subject, grade }) {
           const list = results(data);
           if (!list.length) return <Empty icon="practice">—</Empty>;
           return (
-            <div className="grid">
+            <div className="grid stagger">
               {list.map((q) => {
                 const pct = q.my_best != null && q.total_marks ? Math.round((q.my_best / q.total_marks) * 100) : null;
                 return (

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import Markdown from "../components/Markdown";
 import BookList from "../components/Books";
+import { Burst, useCelebrations } from "../components/Celebrate";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge, LockedNotice } from "../components/Locked";
 import SimEmbed from "../components/SimEmbed";
@@ -20,14 +21,18 @@ export default function Lesson() {
   const [readLang, setReadLang] = useState(null);
   const state = useApi(`/lessons/${slug}/`, { params: { lang: readLang || lang } });
   const [toast, showToast] = useToast();
+  const [celebration, celebrate] = useCelebrations();
   const [busy, setBusy] = useState(false);
+  const [justDone, setJustDone] = useState(null); // the lesson just marked complete, for its burst
 
   async function complete() {
     setBusy(true);
     try {
       const res = await api(`/lessons/${slug}/complete/`, { method: "POST" });
       state.setData((d) => ({ ...d, completed: true }));
+      setJustDone(slug);
       if (res.xp_gained) showToast(t("learn.xpGained", { n: res.xp_gained }));
+      celebrate(res.rewards);
     } finally {
       setBusy(false);
     }
@@ -51,6 +56,7 @@ export default function Lesson() {
         return (
           <article style={{ maxWidth: 820 }}>
             {toast}
+            {celebration}
             <div className="breadcrumb">
               <Link to={`/learn/${lesson.subject.code}?grade=${lesson.unit.grade}`} className="with-icon">
                 <SubjectIcon name={lesson.subject.icon} size={16} /> {lesson.subject.name}
@@ -135,7 +141,15 @@ export default function Lesson() {
               <div className="card section" style={{ textAlign: "center" }}>
                 {lesson.completed ? (
                   <strong className="with-icon" style={{ color: "var(--success)" }}>
-                    <Icon name="ok" /> {t("learn.completed")}
+                    {justDone === slug ? (
+                      <span className="celebrate">
+                        <Icon name="ok" />
+                        <Burst size={72} />
+                      </span>
+                    ) : (
+                      <Icon name="ok" />
+                    )}{" "}
+                    {t("learn.completed")}
                   </strong>
                 ) : (
                   <button className="btn btn-success" onClick={complete} disabled={busy}>

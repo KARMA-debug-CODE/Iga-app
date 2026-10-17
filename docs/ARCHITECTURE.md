@@ -33,6 +33,7 @@
 ```
 
 - **Frontend:** React 19 + React Router, built with Vite. Pages are code-split, so the first load is about 95 KB gzipped. KaTeX and the Markdown pipeline load only with lesson pages.
+- **Motion:** movement and feedback only, never a change of layout or colours. The duration and easing tokens (`--motion-*`, `--ease-*`) are in `src/styles.css`; the rules are in `src/motion.css` and move only `transform` and `opacity` (the score ring's fill is the one small repaint); `src/motion.js` has the few hooks (an element that animates out before it goes, a number that counts up once per visit, a slide when the side menu's column comes or goes). Pages fade and rise in, lists stagger in, cards lift, buttons press, the tab underline and the menu slide, the main lists show skeletons while they load, and a finished lesson, a good quiz score, a new level or badge get a short SVG burst (the server says what was earned: `rewards`). Nothing waits for an animation before a click works, and with `prefers-reduced-motion` nothing moves (one rule at the end of `motion.css`; `src/motion-css.test.js` checks both, and `tests/e2e/motion.spec.js` checks it in a browser).
 - **Backend:** Django 5.2 LTS + Django REST Framework. It's a modular monolith: one Django app per domain, each with its own models, services and API. The vision's "auto-marking service" is the `assessments/services.py` module. It can be split into its own service later without changing the API.
 - **Database:** PostgreSQL in production; SQLite for local development and quick tests. The test suite passes on both.
 - **Content as files:** lessons, quizzes and papers live in `backend/content/` and are imported idempotently. Teachers can also author in the app; that content goes through admin review.
@@ -136,7 +137,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET/POST children/` · `GET/DELETE children/{id}/` | parent | Link with a code; read-only progress report |
 | `GET subjects/?grade=` · `GET subjects/{code}/?grade=&lang=` | user | Subjects with progress; units and lessons |
 | `GET units/?subject=&grade=` | user | Unit picker for authoring |
-| `GET lessons/{slug}/?lang=` · `POST lessons/{slug}/complete/` | user | Lesson with sims, resources, quizzes, prev/next |
+| `GET lessons/{slug}/?lang=` · `POST lessons/{slug}/complete/` | user | Lesson with sims, resources, quizzes, prev/next; completing says the XP gained and `rewards` (a new level, new badge codes) for the app to celebrate |
 | `POST/PATCH lessons/` | teacher | Author lessons (non-admins → review) |
 | `GET/POST resources/` | user / teacher | Textbooks, guides, notes, links |
 | `GET simulations/?subject=&grade=&q=` · `POST simulations/{slug}/view/` | user | Lab library |
@@ -145,7 +146,7 @@ All endpoints are under `/api/`. Lists are paginated where large (`?page=`). Eve
 | `GET quizzes/{id}/analytics/?classroom=` | teacher | Results analysis: histogram, per-question difficulty, discrimination, option counts |
 | `POST/PATCH quizzes/` | teacher | Quiz builder |
 | `GET exam-papers/?level=&year=&subject=` · `GET exam-papers/years/` | user | Past-paper library |
-| `GET attempts/{id}/` · `POST attempts/{id}/{answer,check,submit}/` | owner | Taking a quiz |
+| `GET attempts/{id}/` · `POST attempts/{id}/{answer,check,submit}/` | owner | Taking a quiz; `submit` also returns `rewards` (a new level, new badge codes) |
 | `GET marking/` · `POST marking/{answer_id}/mark/` | teacher | Marking queue |
 | `GET/POST classes/` · `POST classes/join/` · `GET classes/{id}/report/` | user / teacher | Classes and gradebook |
 | `POST classes/{id}/import_roster/` · `POST classes/{id}/reset_password/` | teacher | Create student accounts from CSV (preview, then confirm); temporary passwords |

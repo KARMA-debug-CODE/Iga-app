@@ -220,9 +220,14 @@ class LessonViewSet(
     def complete(self, request, slug=None):
         lesson = self.get_object()
         require(request.user, lesson)  # no XP for lessons the student can't open
+        before = gamification.rewards_snapshot(request.user)
         _obj, created = LessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
         xp = gamification.on_lesson_completed(request.user, lesson) if created else 0
-        return Response({"completed": True, "xp_gained": xp, "xp": request.user.xp}, status=status.HTTP_200_OK)
+        # A new level or badge, for the app to celebrate.
+        rewards = gamification.rewards_since(request.user, before) if created else gamification.no_rewards()
+        return Response(
+            {"completed": True, "xp_gained": xp, "xp": request.user.xp, "rewards": rewards}, status=status.HTTP_200_OK
+        )
 
 
 class ResourceViewSet(viewsets.ModelViewSet):

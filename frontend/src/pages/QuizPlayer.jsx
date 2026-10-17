@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { api } from "../api";
+import { Burst, useCelebrations } from "../components/Celebrate";
 import { Icon, SubjectIcon } from "../components/Icon";
 import Markdown from "../components/Markdown";
 import TutorPanel from "../components/TutorPanel";
 import { LockedNotice } from "../components/Locked";
-import { ErrorMessage, Loader } from "../components/ui";
+import { CountUp, ErrorMessage, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 import { safeUrl } from "../safeUrl";
@@ -204,7 +205,22 @@ function SolutionPanel({ question, answer }) {
   );
 }
 
-function Results({ attempt }) {
+// From this score up a quiz just finished gets a burst around its ring (the same line as a green score pill).
+const GOOD_SCORE = 75;
+
+// The ring fills from empty where the browser can animate its fill (CSS @property), and is simply full elsewhere.
+const canFillRing = typeof CSS !== "undefined" && typeof CSS.registerProperty === "function";
+
+function ScoreRing({ pct, celebrate }) {
+  return (
+    <div className={`score-ring ${canFillRing ? "is-filling" : ""}`} style={{ "--pct": pct ?? 0 }}>
+      <div>{pct != null ? <CountUp value={Math.round(pct)} format={(n) => `${n}%`} /> : "…"}</div>
+      {celebrate && <Burst size={280} />}
+    </div>
+  );
+}
+
+function Results({ attempt, fresh = false }) {
   const { t } = useI18n();
   const { start, busy, error } = useStartQuiz();
   const pct = attempt.percentage;
@@ -215,9 +231,7 @@ function Results({ attempt }) {
           <SubjectIcon name={attempt.quiz.subject.icon} size={16} /> {attempt.quiz.subject.name} · {attempt.quiz.grade}
         </span>
         <h1 style={{ margin: "6px 0 16px" }}>{attempt.quiz.title}</h1>
-        <div className="score-ring" style={{ "--pct": pct ?? 0 }}>
-          <div>{pct != null ? `${Math.round(pct)}%` : "…"}</div>
-        </div>
+        <ScoreRing pct={pct} celebrate={fresh && pct != null && pct >= GOOD_SCORE} />
         <p style={{ marginTop: 12 }}>
           {t("quiz.yourScore")}: <strong>{Number(attempt.score ?? 0)}</strong> / {Number(attempt.max_score)}
         </p>
@@ -391,8 +405,8 @@ function Player({ initial, onFinished }) {
         }
       }
       try {
-        await api(`/attempts/${attempt.id}/submit/`, { method: "POST" });
-        onFinished(force ? t("quiz.timeUp") : null);
+        const done = await api(`/attempts/${attempt.id}/submit/`, { method: "POST" });
+        onFinished(force ? t("quiz.timeUp") : null, done?.rewards);
       } catch (e) {
         if (closedByServer(e)) return;
         setError(e);
@@ -512,25 +526,32 @@ export default function QuizPlayer() {
   const { id } = useParams();
   const state = useApi(`/attempts/${id}/`, {}, [id]);
   const [notice, setNotice] = useState(null);
+  const [freshId, setFreshId] = useState(null); // finished here just now, rather than an old attempt opened again
+  const [celebration, celebrate] = useCelebrations();
   const finished = useCallback(
-    (message) => {
+    (message, rewards) => {
       if (message) setNotice(message);
+      setFreshId(id);
+      celebrate(rewards);
       state.reload();
     },
-    [state],
+    [state, celebrate, id],
   );
   return (
-    <Loader state={state}>
-      {(attempt) =>
-        attempt.status === "in_progress" ? (
-          <Player key={attempt.id} initial={attempt} onFinished={finished} />
-        ) : (
-          <>
-            {notice && <div className="alert alert-warn quiz-shell" style={{ marginBottom: 12 }}>{notice}</div>}
-            <Results attempt={attempt} />
-          </>
-        )
-      }
-    </Loader>
+    <>
+      {celebration}
+      <Loader state={state}>
+        {(attempt) =>
+          attempt.status === "in_progress" ? (
+            <Player key={attempt.id} initial={attempt} onFinished={finished} />
+          ) : (
+            <>
+              {notice && <div className="alert alert-warn quiz-shell" style={{ marginBottom: 12 }}>{notice}</div>}
+              <Results attempt={attempt} fresh={String(attempt.id) === freshId} />
+            </>
+          )
+        }
+      </Loader>
+    </>
   );
 }

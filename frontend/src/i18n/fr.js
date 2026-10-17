@@ -776,6 +776,8 @@ export default {
   "badge.streak-3.desc": "3 jours d'apprentissage d'affilée",
   "badge.streak-7.name": "Inarrêtable",
   "badge.streak-7.desc": "7 jours d'apprentissage d'affilée",
+  "celebrate.level": "Niveau {level} atteint",
+  "celebrate.badge": "Nouveau badge : {name}",
 
   "a11y.home": "Accueil Iga",
   "a11y.mainNav": "Navigation principale",
