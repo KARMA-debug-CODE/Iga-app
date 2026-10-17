@@ -56,6 +56,9 @@ api = [
     path("files/resources/<str:token>/", ResourceDownloadView.as_view(), name="resource-download"),
     path("", include("apps.schools.urls")),
     path("", include("apps.website.urls")),
+    path("", include("apps.review.urls")),
+    path("", include("apps.planner.urls")),
+    path("", include("apps.notes.urls")),
     path("", include(router.urls)),
 ]
 

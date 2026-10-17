@@ -440,6 +440,48 @@ def test_rewards_are_decided_by_the_server(client_for, w):
     assert data["xp"] < 1000 and LessonProgress.objects.filter(user=w["student"], lesson=lesson).count() == 1
 
 
+def test_study_feature_writes_decide_owner_and_grading_on_the_server(client_for, w):
+    from apps.notes.models import LessonBookmark, LessonNote
+    from apps.planner.models import ExamDate, StudyPlan
+    from apps.review.models import ReviewItem
+
+    student = w["student"]
+    lesson = Lesson.objects.create(unit=w["unit"], slug="study-lesson", title="Study", body="x", status="published", is_free=True)
+    client = client_for(student)
+
+    # Study plan: the weekly goal is stored; the owner is the requester, whatever ids are in the body.
+    _ok(client.put("/api/planner/", {**w["bad"], "weekly_goal_lessons": 4}, format="json"))
+    assert StudyPlan.objects.get(user=student).weekly_goal_lessons == 4
+    assert not StudyPlan.objects.exclude(user=student).exists()
+
+    # Exam date: only title and date are taken; the owner is the requester and the id is server-chosen.
+    date = (timezone.localdate() + timedelta(days=100)).isoformat()
+    data = _ok(client.post("/api/planner/exams/", {**w["bad"], "title": "Mock", "date": date}, format="json")).data
+    exam = ExamDate.objects.get(pk=data["id"])
+    assert exam.user == student and exam.id != 999999 and exam.title == "Mock"
+
+    # Bookmark and note: the owner is the requester.
+    data = _ok(client.post("/api/bookmarks/", {**w["bad"], "lesson": lesson.slug}, format="json")).data
+    assert LessonBookmark.objects.get(pk=data["id"]).user == student
+    data = _ok(client.post("/api/notes/", {**w["bad"], "lesson": lesson.slug, "body": "my note"}, format="json")).data
+    note = LessonNote.objects.get(pk=data["id"])
+    assert note.user == student and note.body == "my note"
+
+    # A review answer: correctness and the Leitner box are decided by the server, never by the client.
+    question = add_mcq(w["subject"], w["unit"])
+    item = ReviewItem.objects.create(user=student, question=question, due_on=timezone.localdate())
+    wrong = question.choices.filter(is_correct=False).first()
+    _ok(
+        client.post(
+            f"/api/review/{item.id}/answer/",
+            {**w["bad"], "choice_ids": [wrong.id], "is_correct": True, "box": 9},
+            format="json",
+        )
+    )
+    item.refresh_from_db()
+    assert item.box == 0 and item.times_seen == 1  # a wrong answer stays in box 1 (0-based), not box 9
+
+
 def test_roster_columns_cannot_create_privileged_accounts(client_for, w):
     classroom = Classroom.objects.create(name="S2", grade="S2", teacher=w["teacher"])
     csv = "first_name,last_name,role,is_staff,is_superuser,school_status\nAline,Uwase,admin,true,true,approved\n"
@@ -531,6 +573,11 @@ TESTED = {
     "api/auth/delete-account/",
     "api/contact/",
     "api/admin/contact/{pk}/handle/",
+    "api/planner/",
+    "api/planner/exams/",
+    "api/bookmarks/",
+    "api/notes/",
+    "api/review/{pk}/answer/",
 }
 
 

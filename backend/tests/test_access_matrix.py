@@ -26,6 +26,9 @@ from apps.assessments.models import Answer, Attempt, Question, Quiz, QuizQuestio
 from apps.classroom.models import Assignment, Classroom, Enrollment
 from apps.community.models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
 from apps.curriculum.models import Lesson, LessonProgress, Resource
+from apps.notes.models import LessonBookmark, LessonNote
+from apps.planner.models import ExamDate, StudyPlan
+from apps.review.models import ReviewItem
 from apps.schools.models import LedgerEntry, Payment
 from apps.website.models import ContactMessage
 
@@ -175,6 +178,13 @@ def world(subject, unit):
         currency="USD",
         created_by=w["admin_b"],
     )
+
+    # Student B's private study data: review deck, study plan, exam dates, bookmarks and notes.
+    w["review_item_b"] = ReviewItem.objects.create(user=sb, question=practice_q, due_on=timezone.localdate())
+    StudyPlan.objects.create(user=sb, weekly_goal_lessons=7)
+    w["exam_b"] = ExamDate.objects.create(user=sb, title="SECRET-EXAM-B", date=timezone.localdate() + timedelta(days=30))
+    w["bookmark_b"] = LessonBookmark.objects.create(user=sb, lesson=w["pub_lesson_b"])
+    w["note_b"] = LessonNote.objects.create(user=sb, lesson=w["pub_lesson_b"], body="SECRET-NOTE-LESSON-B")
     return w
 
 
@@ -202,6 +212,8 @@ def markers(w):
         "SECRET-CONTACT-B",
         "+250-SECRET-B",
         w["school_b"].join_code,
+        "SECRET-EXAM-B",
+        "SECRET-NOTE-LESSON-B",
     ]
 
 
@@ -257,6 +269,12 @@ def route_targets(w):
         "api/admin/moderation/{pk}/resolve/": {"pk": w["report_b"].id},
         "api/admin/contact/{pk}/": {"pk": w["contact_b"].id},
         "api/admin/contact/{pk}/handle/": {"pk": w["contact_b"].id},
+        "api/review/{pk}/answer/": {"pk": w["review_item_b"].id},
+        "api/planner/exams/{pk}/": {"pk": w["exam_b"].id},
+        "api/bookmarks/{pk}/": {"pk": w["bookmark_b"].id},
+        "api/notes/{pk}/": {"pk": w["note_b"].id},
+        # my-notes resolves the lesson for the requester, so B's draft slug is invisible to A (404).
+        "api/my-notes/{slug}/": {"slug": w["draft_lesson_b"].slug},
     }
 
 
@@ -338,6 +356,11 @@ def snapshot(w):
         "consent_b": tuple(
             User.objects.filter(pk=sb.pk).values_list("terms_version", "deletion_due_at", "erased_at", "session_version").get()
         ),
+        "reviews_b": sorted(ReviewItem.objects.filter(user=sb).values_list("id", "box", "due_on", "retired_at")),
+        "plan_b": sorted(StudyPlan.objects.filter(user=sb).values_list("weekly_goal_lessons", flat=True)),
+        "exams_b": sorted(ExamDate.objects.filter(user=sb).values_list("id", "title", "date")),
+        "bookmarks_b": sorted(LessonBookmark.objects.filter(user=sb).values_list("id", "lesson_id")),
+        "lesson_notes_b": sorted(LessonNote.objects.filter(user=sb).values_list("id", "body")),
     }
     return rows
 
@@ -375,6 +398,11 @@ def test_the_owners_can_see_their_own_rows(client_for, world):
     assert "Secretparent-B" in client_for(w["student_b"]).get("/api/auth/parents/").content.decode()
     assert "Secretlastname-B" in client_for(w["admin_b"]).get("/api/school/members/").content.decode()
     assert client_for(w["admin_b"]).get(f"/api/billing/payments/{w['payment_b'].reference}/").status_code == 200
+    # Student B's own study data is readable by B.
+    assert client_for(w["student_b"]).get("/api/review/").status_code == 200
+    assert "SECRET-EXAM-B" in client_for(w["student_b"]).get("/api/planner/").content.decode()
+    assert "SECRET-NOTE-LESSON-B" in client_for(w["student_b"]).get("/api/notes/").content.decode()
+    assert "SECRET-NOTE-LESSON-B" in client_for(w["student_b"]).get(f"/api/my-notes/{w['pub_lesson_b'].slug}/").content.decode()
 
 
 def test_no_attacker_reads_or_changes_side_b_through_any_route(client_for, world):

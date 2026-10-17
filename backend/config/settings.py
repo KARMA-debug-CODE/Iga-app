@@ -113,6 +113,9 @@ INSTALLED_APPS = [
     "apps.coderun",
     "apps.schools",
     "apps.website",
+    "apps.review",
+    "apps.planner",
+    "apps.notes",
 ]
 
 MIDDLEWARE = [

@@ -114,6 +114,8 @@ CLEANED_FIELDS = {
     "schools.School": ("name", "sector"),
     "tutor.TutorExchange": ("message",),
     "website.ContactMessage": ("name", "school", "message"),
+    "planner.ExamDate": ("title",),
+    "notes.LessonNote": ("body",),
 }
 
 
