@@ -114,7 +114,7 @@ function NoteEditor({ slug, initialBody }) {
         onBlur={() => status === "editing" && flush()}
       />
       <div className="spread small muted" style={{ marginTop: 6 }}>
-        <span className="with-icon" aria-live="polite">
+        <span className="note-status with-icon" aria-live="polite">
           {info && (
             <>
               <Icon name={info.icon} size={14} /> {info.text}

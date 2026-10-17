@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
-import { api } from "../api";
+import { api, results } from "../api";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, SkeletonRows, Tabs } from "../components/ui";
 import { formatDay, useApi } from "../hooks";
 import { useI18n } from "../i18n";
+
+// List endpoints may be paginated ({results:[...]}) or a plain array; drop an item from either shape.
+function withoutId(data, id) {
+  if (Array.isArray(data)) return data.filter((item) => item.id !== id);
+  return { ...data, results: (data.results || []).filter((item) => item.id !== id) };
+}
 
 function LessonMeta({ lesson }) {
   return (
@@ -78,7 +84,7 @@ function NotesTab() {
     setError(null);
     try {
       await api(`/notes/${note.id}/`, { method: "DELETE" });
-      state.setData((list) => list.filter((n) => n.id !== note.id));
+      state.setData((data) => withoutId(data, note.id));
     } catch (e) {
       setError(e);
     }
@@ -95,8 +101,9 @@ function NotesTab() {
       </form>
       <ErrorMessage error={error} />
       <Loader state={state} skeleton={<SkeletonRows count={4} />}>
-        {(list) =>
-          list.length ? (
+        {(data) => {
+          const list = results(data);
+          return list.length ? (
             <ul className="list stagger" style={{ marginTop: 14 }}>
               {list.map((note) => (
                 <NoteRow key={note.id} note={note} onRemove={remove} />
@@ -106,8 +113,8 @@ function NotesTab() {
             <Empty icon="search">{t("notes.noSearch", { q: query })}</Empty>
           ) : (
             <Empty icon="notebook">{t("notes.noNotes")}</Empty>
-          )
-        }
+          );
+        }}
       </Loader>
     </>
   );
@@ -122,7 +129,7 @@ function BookmarksTab() {
     setError(null);
     try {
       await api(`/bookmarks/${bookmark.id}/`, { method: "DELETE" });
-      state.setData((list) => list.filter((b) => b.id !== bookmark.id));
+      state.setData((data) => withoutId(data, bookmark.id));
     } catch (e) {
       setError(e);
     }
@@ -132,8 +139,9 @@ function BookmarksTab() {
     <>
       <ErrorMessage error={error} />
       <Loader state={state} skeleton={<SkeletonRows count={4} />}>
-        {(list) =>
-          list.length ? (
+        {(data) => {
+          const list = results(data);
+          return list.length ? (
             <ul className="list stagger" style={{ marginTop: 14 }}>
               {list.map((bookmark) => (
                 <BookmarkRow key={bookmark.id} bookmark={bookmark} onRemove={remove} />
@@ -141,8 +149,8 @@ function BookmarksTab() {
             </ul>
           ) : (
             <Empty icon="bookmarkOff">{t("notes.noBookmarks")}</Empty>
-          )
-        }
+          );
+        }}
       </Loader>
     </>
   );
