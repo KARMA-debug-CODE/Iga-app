@@ -8,7 +8,7 @@ import Avatar from "../components/Avatar";
 import AvatarBuilder from "../components/AvatarBuilder";
 import { BadgeIcon, Icon } from "../components/Icon";
 import SchoolPicker from "../components/SchoolPicker";
-import { ErrorMessage, GRADES, Loader, Tabs, useToast } from "../components/ui";
+import { CountUp, ErrorMessage, GRADES, Loader, Tabs, useToast } from "../components/ui";
 import { useApi } from "../hooks";
 import { LANGUAGES, useI18n } from "../i18n";
 import { getTheme, setTheme } from "../theme";
@@ -428,17 +428,21 @@ function ProfileHeader({ onEditAvatar }) {
           <dl className="profile-hero-stats">
             <div>
               <dt>{t("profile.xp")}</dt>
-              <dd>{user.xp}</dd>
+              <dd>
+                <CountUp value={user.xp} id={`profile.xp.${user.id}`} />
+              </dd>
             </div>
             <div>
               <dt>{t("profile.streak")}</dt>
               <dd>
-                <Icon name="flame" size={16} /> {user.streak_days}
+                <Icon name="flame" size={16} /> <CountUp value={user.streak_days} id={`profile.streak.${user.id}`} />
               </dd>
             </div>
             <div>
               <dt>{t("profile.badges")}</dt>
-              <dd>{user.badges?.length ?? 0}</dd>
+              <dd>
+                <CountUp value={user.badges?.length ?? 0} id={`profile.badges.${user.id}`} />
+              </dd>
             </div>
           </dl>
         )}
@@ -620,7 +624,7 @@ function Badges() {
       </h2>
       <Loader state={badges}>
         {(list) => (
-          <div className="badge-grid">
+          <div className="badge-grid stagger">
             {list.map((b) => (
               <div key={b.code} className={`badge-tile ${b.earned ? "earned" : "locked"}`} title={t(`badge.${b.code}.desc`)}>
                 <div className="badge-icon">

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api, results } from "../api";
 import { useAuth } from "../auth";
 import { Icon, SubjectIcon } from "../components/Icon";
-import { Empty, ErrorMessage, GRADES, Loader } from "../components/ui";
+import { Empty, ErrorMessage, GRADES, Loader, SkeletonCards } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 import { SubjectSelect } from "./Labs";
@@ -140,12 +140,12 @@ export default function Classes() {
       </div>
       <div className="grid-2">
         <div className="stack" style={{ alignContent: "start" }}>
-          <Loader state={state}>
+          <Loader state={state} skeleton={<SkeletonCards count={3} layout="stack" />}>
             {(data) => {
               const list = results(data);
               if (!list.length) return <Empty icon="classes">{t("classes.empty")}</Empty>;
               return (
-                <div className="stack">
+                <div className="stack stagger">
                   {list.map((c) => (
                     <ClassCard key={c.id} c={c} />
                   ))}

@@ -5,7 +5,7 @@ import { useAuth } from "../auth";
 import { groupTitle, subjectGroups } from "../combinations";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { AccessBanner } from "../components/Locked";
-import { Empty, Loader, Progress, scoreClass } from "../components/ui";
+import { CountUp, Empty, Loader, Progress, scoreClass, Skeleton, SkeletonCards } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
@@ -46,7 +46,7 @@ export function SubjectGrid({ subjects, grade, headingLevel = 3 }) {
   const { user } = useAuth();
   const { t } = useI18n();
   const grid = (list) => (
-    <div className="grid">
+    <div className="grid stagger">
       {list.map((s) => (
         <SubjectCard key={s.code} subject={s} grade={grade} />
       ))}
@@ -114,15 +114,21 @@ function StudentDashboard({ data, user }) {
           <span className="small muted">{t("dash.xpToNext", { current: data.level.current, needed: data.level.needed })}</span>
           <div className="stats stats-3" style={{ marginTop: 14 }}>
             <div className="stat">
-              <strong>{data.xp}</strong>
+              <strong>
+                <CountUp value={data.xp} id={`dash.xp.${user.id}`} />
+              </strong>
               <span className="small muted">XP</span>
             </div>
             <div className="stat">
-              <strong>{data.lessons_completed}</strong>
+              <strong>
+                <CountUp value={data.lessons_completed} id={`dash.lessons.${user.id}`} />
+              </strong>
               <span className="small muted">{t("dash.lessonsDone")}</span>
             </div>
             <div className="stat">
-              <strong>{data.badges_earned}</strong>
+              <strong>
+                <CountUp value={data.badges_earned} id={`dash.badges.${user.id}`} />
+              </strong>
               <span className="small muted">{t("dash.badges")}</span>
             </div>
           </div>
@@ -180,7 +186,7 @@ function StudentDashboard({ data, user }) {
         <div className="card">
           <h2>{t("dash.assignments")}</h2>
           {data.assignments.length ? (
-            <ul className="list">
+            <ul className="list stagger">
               {data.assignments.map((a) => (
                 <AssignmentItem key={a.id} assignment={a} />
               ))}
@@ -197,7 +203,7 @@ function StudentDashboard({ data, user }) {
         <div className="card">
           <h2>{t("dash.recentScores")}</h2>
           {data.recent_attempts.length ? (
-            <ul className="list">
+            <ul className="list stagger">
               {data.recent_attempts.map((a) => (
                 <li key={a.id}>
                   <Link className="list-link" to={`/attempts/${a.id}`}>
@@ -223,28 +229,36 @@ function StudentDashboard({ data, user }) {
           </h2>
           <Link to="/learn">{t("learn.subjects")} →</Link>
         </div>
-        <Loader state={subjects}>{(list) => <SubjectGrid subjects={list} grade={user.grade} />}</Loader>
+        <Loader state={subjects} skeleton={<SkeletonCards count={6} progress />}>
+          {(list) => <SubjectGrid subjects={list} grade={user.grade} />}
+        </Loader>
       </section>
     </>
   );
 }
 
-function TeacherDashboard({ data }) {
+function TeacherDashboard({ data, user }) {
   const { t, lang } = useI18n();
   const teacher = data.teacher;
   return (
     <>
-      <div className="stats">
+      <div className="stats stagger">
         <Link to="/classes" className="card card-link stat">
-          <strong>{teacher.classes.length}</strong>
+          <strong>
+            <CountUp value={teacher.classes.length} id={`dash.classes.${user.id}`} />
+          </strong>
           <span className="muted small">{t("dash.myClasses")}</span>
         </Link>
         <Link to="/marking" className="card card-link stat">
-          <strong>{teacher.pending_marking}</strong>
+          <strong>
+            <CountUp value={teacher.pending_marking} id={`dash.marking.${user.id}`} />
+          </strong>
           <span className="muted small">{t("dash.pendingMarking")}</span>
         </Link>
         <Link to="/teach" className="card card-link stat">
-          <strong>{teacher.awaiting_review.lessons + teacher.awaiting_review.quizzes}</strong>
+          <strong>
+            <CountUp value={teacher.awaiting_review.lessons + teacher.awaiting_review.quizzes} id={`dash.review.${user.id}`} />
+          </strong>
           <span className="muted small">{t("dash.awaitingReview")}</span>
         </Link>
       </div>
@@ -255,7 +269,7 @@ function TeacherDashboard({ data }) {
             <Link to="/classes">+ {t("classes.create")}</Link>
           </div>
           {teacher.classes.length ? (
-            <ul className="list">
+            <ul className="list stagger">
               {teacher.classes.map((c) => (
                 <li key={c.id}>
                   <Link className="list-link" to={`/classes/${c.id}`}>
@@ -300,6 +314,56 @@ function TeacherDashboard({ data }) {
   );
 }
 
+/** The home screen while it loads: the level card and the "continue" card, then the subjects. */
+function DashboardSkeleton() {
+  return (
+    <Skeleton>
+      <div className="grid-2">
+        <div className="card skeleton">
+          <div className="spread">
+            <span className="sk sk-title" style={{ width: "30%" }} />
+            <span className="sk sk-pill" style={{ width: 90 }} />
+          </div>
+          <span className="sk sk-bar" style={{ margin: "18px 0 10px" }} />
+          <span className="sk" style={{ width: "45%" }} />
+          <div className="stats stats-3" style={{ marginTop: 18 }}>
+            {[0, 1, 2].map((i) => (
+              <span className="sk-lines" key={i}>
+                <span className="sk sk-title" style={{ width: "35%" }} />
+                <span className="sk" style={{ width: "70%" }} />
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="card skeleton">
+          <span className="sk" style={{ width: "35%" }} />
+          <div className="sk-row" style={{ marginTop: 14 }}>
+            <span className="sk sk-tile" />
+            <span className="sk-lines">
+              <span className="sk sk-title" />
+              <span className="sk" style={{ width: "75%" }} />
+            </span>
+          </div>
+          <span className="sk sk-pill" style={{ width: 110, height: 34, marginTop: 18 }} />
+        </div>
+      </div>
+      <div className="grid-2 section">
+        {[0, 1].map((i) => (
+          <div className="card skeleton" key={i}>
+            <div className="sk-row">
+              <span className="sk sk-tile" />
+              <span className="sk-lines">
+                <span className="sk sk-title" style={{ width: "40%" }} />
+                <span className="sk" style={{ width: "80%" }} />
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Skeleton>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { t, lang } = useI18n();
@@ -325,8 +389,8 @@ export default function Dashboard() {
           <ParentDashboard />
         </Suspense>
       ) : (
-        <Loader state={state}>
-          {(data) => (data.teacher?.classes ? <TeacherDashboard data={data} /> : <StudentDashboard data={data} user={user} />)}
+        <Loader state={state} skeleton={<DashboardSkeleton />}>
+          {(data) => (data.teacher?.classes ? <TeacherDashboard data={data} user={user} /> : <StudentDashboard data={data} user={user} />)}
         </Loader>
       )}
     </>

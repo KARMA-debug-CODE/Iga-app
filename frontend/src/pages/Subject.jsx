@@ -5,7 +5,7 @@ import { useAuth } from "../auth";
 import BookList, { officialTextbooks } from "../components/Books";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge } from "../components/Locked";
-import { GradeChips, Loader, Progress } from "../components/ui";
+import { GradeChips, Loader, Progress, Skeleton, SkeletonRows } from "../components/ui";
 import { results } from "../api";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
@@ -49,7 +49,7 @@ function QuizList({ code, grade }) {
   return (
     <section className="section">
       <h2>{t("practice.quizzes")}</h2>
-      <div className="grid">
+      <div className="grid stagger">
         {list.map((q) => (
           <Link key={q.id} to={q.locked ? `/practice?subject=${code}` : `/practice?start=${q.id}`} className="card card-link">
             <strong>{q.title}</strong>
@@ -59,6 +59,34 @@ function QuizList({ code, grade }) {
         ))}
       </div>
     </section>
+  );
+}
+
+/** A subject while it loads: its title, the grades, the progress card and a unit of lessons. */
+function SubjectSkeleton() {
+  return (
+    <Skeleton>
+      <span className="sk" style={{ width: 160, marginBottom: 16 }} />
+      <div className="sk-row skeleton" style={{ marginBottom: 18 }}>
+        <span className="sk sk-tile" style={{ width: 56, height: 56 }} />
+        <span className="sk-lines">
+          <span className="sk sk-title" style={{ height: 26, width: "45%" }} />
+          <span className="sk" style={{ width: "80%" }} />
+        </span>
+      </div>
+      <div className="row">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <span className="sk sk-pill" key={i} style={{ width: 52, height: 38 }} />
+        ))}
+      </div>
+      <div className="card skeleton" style={{ marginTop: 16 }}>
+        <span className="sk" style={{ width: 130 }} />
+        <span className="sk sk-bar" style={{ marginTop: 12 }} />
+      </div>
+      <div className="stack" style={{ marginTop: 16 }}>
+        <SkeletonRows count={4} lead="dot" />
+      </div>
+    </Skeleton>
   );
 }
 
@@ -73,7 +101,7 @@ export default function Subject() {
   const textbooks = officialTextbooks(books);
 
   return (
-    <Loader state={state}>
+    <Loader state={state} skeleton={<SubjectSkeleton />}>
       {(subject) => (
         <>
           <div className="breadcrumb">
@@ -131,7 +159,7 @@ export default function Subject() {
                     <SaveOffline unit={{ ...unit, grade }} />
                   </div>
                   {unit.lessons.length ? (
-                    <ul className="list">
+                    <ul className="list stagger">
                       {unit.lessons.map((lesson) => (
                         <li key={lesson.id}>
                           <Link className="list-link" to={`/lessons/${lesson.slug}`}>
