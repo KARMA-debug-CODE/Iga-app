@@ -92,6 +92,8 @@ export default function Layout() {
           : [
               { to: "/classes", icon: "classes", label: t("nav.classes") },
               { to: "/leaderboard", icon: "leaderboard", label: t("nav.leaderboard") },
+              { to: "/planner", icon: "target", label: t("nav.planner") },
+              { to: "/my-notes", icon: "notebook", label: t("nav.notes") },
             ]),
         { to: "/playground", icon: "playground", label: t("nav.playground") },
         { to: "/calculator", icon: "calculator", label: t("nav.calculator") },

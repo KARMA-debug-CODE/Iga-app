@@ -23,6 +23,8 @@ const Labs = lazy(() => import("./pages/Labs"));
 const Lab = lazy(() => import("./pages/Lab"));
 const Practice = lazy(() => import("./pages/Practice"));
 const QuizPlayer = lazy(() => import("./pages/QuizPlayer"));
+const Planner = lazy(() => import("./pages/Planner"));
+const MyNotes = lazy(() => import("./pages/MyNotes"));
 const Classes = lazy(() => import("./pages/Classes"));
 const ClassDetail = lazy(() => import("./pages/ClassDetail"));
 const Groups = lazy(() => import("./pages/Groups"));
@@ -159,6 +161,8 @@ export default function App() {
               <Route path="/labs/:slug" element={page(<Lab />)} />
               <Route path="/practice" element={page(<Practice />)} />
               <Route path="/attempts/:id" element={page(<QuizPlayer />)} />
+              <Route path="/planner" element={page(<Planner />)} />
+              <Route path="/my-notes" element={page(<MyNotes />)} />
               <Route path="/classes" element={page(<Classes />)} />
               <Route path="/classes/:id" element={page(<ClassDetail />)} />
               <Route path="/groups" element={page(<Groups />)} />

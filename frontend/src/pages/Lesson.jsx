@@ -5,6 +5,7 @@ import { api } from "../api";
 import Markdown from "../components/Markdown";
 import BookList from "../components/Books";
 import { Burst, useCelebrations } from "../components/Celebrate";
+import LessonNotes from "../components/LessonNotes";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge, LockedNotice } from "../components/Locked";
 import SimEmbed from "../components/SimEmbed";
@@ -115,6 +116,8 @@ export default function Lesson() {
                 </div>
               </>
             )}
+
+            <LessonNotes slug={lesson.slug} />
 
             {/* Shown on locked lessons too: the REB books are free for every student. */}
             {lesson.resources.length > 0 && (

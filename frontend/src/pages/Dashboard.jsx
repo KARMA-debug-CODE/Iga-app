@@ -6,7 +6,7 @@ import { groupTitle, subjectGroups } from "../combinations";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { AccessBanner } from "../components/Locked";
 import { CountUp, Empty, Loader, Progress, scoreClass, Skeleton, SkeletonCards } from "../components/ui";
-import { formatDate, useApi } from "../hooks";
+import { formatDate, formatDay, useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
 // Parents get their own (lazily loaded) dashboard, in the same chunk as the /children pages.
@@ -92,6 +92,116 @@ function AssignmentItem({ assignment }) {
         )}
       </Link>
     </li>
+  );
+}
+
+function SuggestionRow({ suggestion }) {
+  const { t } = useI18n();
+  if (suggestion.type === "review") {
+    return (
+      <li>
+        <Link className="list-link" to="/practice?tab=review">
+          <div className="icon-tile">
+            <Icon name="brain" size={22} />
+          </div>
+          <div className="grow" style={{ minWidth: 0 }}>
+            <strong style={{ display: "block" }}>{t("planner.reviewStep", { n: suggestion.count })}</strong>
+            <span className="small muted">{t("planner.reviewStepHint")}</span>
+          </div>
+          <Icon name="chevronRight" size={18} />
+        </Link>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <Link className="list-link" to={`/lessons/${suggestion.slug}`}>
+        <div className="icon-tile">
+          <SubjectIcon name={suggestion.icon} />
+        </div>
+        <div className="grow" style={{ minWidth: 0 }}>
+          <strong className="truncate" style={{ display: "block" }}>
+            {suggestion.title}
+          </strong>
+          <span className="small muted">
+            {suggestion.subject}
+            {suggestion.unit_number ? ` · ${t("planner.unit", { n: suggestion.unit_number })}` : ""}
+          </span>
+        </div>
+        <Icon name="chevronRight" size={18} />
+      </Link>
+    </li>
+  );
+}
+
+/** The study-plan block: this week's progress, the next exam countdown and the suggested next steps. */
+function PlannerBlock({ planner }) {
+  const { t, lang } = useI18n();
+  const { weekly_goal, lessons_this_week, next_exam, suggestions } = planner;
+  return (
+    <section className="section">
+      <div className="section-title">
+        <h2 className="title-with-icon">
+          <Icon name="target" /> {t("planner.title")}
+        </h2>
+        <Link to="/planner">{t("planner.manage")} →</Link>
+      </div>
+      <div className="grid-2">
+        <div className="card">
+          <div className="spread">
+            <strong>{t("planner.thisWeek")}</strong>
+            {lessons_this_week >= weekly_goal ? (
+              <span className="pill pill-success">
+                <Icon name="check" size={13} /> {t("planner.goalReached")}
+              </span>
+            ) : (
+              <span className="pill">
+                <CountUp value={lessons_this_week} id="plan.week" />/{weekly_goal}
+              </span>
+            )}
+          </div>
+          <div style={{ margin: "12px 0 6px" }}>
+            <Progress value={lessons_this_week} max={weekly_goal} label={t("planner.weeklyGoal")} />
+          </div>
+          <span className="small muted">{t("planner.weekProgress", { done: lessons_this_week, goal: weekly_goal })}</span>
+          <div className="planner-exam" style={{ marginTop: 14 }}>
+            {next_exam ? (
+              <div className="row" style={{ flexWrap: "nowrap", alignItems: "center" }}>
+                <div className="icon-tile">
+                  <Icon name="calendar" size={22} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <strong style={{ display: "block" }}>
+                    {next_exam.days_left <= 0 ? t("planner.examToday") : t("planner.daysLeft", { n: next_exam.days_left })}
+                  </strong>
+                  <span className="small muted">
+                    {next_exam.title} · {formatDay(next_exam.date, lang)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="small muted" style={{ margin: 0 }}>
+                {t("planner.noExamYet")} <Link to="/planner">{t("planner.addExam")}</Link>
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="card">
+          <strong>{t("planner.nextSteps")}</strong>
+          {suggestions.length ? (
+            <ul className="list stagger" style={{ marginTop: 10 }}>
+              {suggestions.map((suggestion, i) => (
+                <SuggestionRow key={i} suggestion={suggestion} />
+              ))}
+            </ul>
+          ) : (
+            <p className="muted small" style={{ marginTop: 10 }}>
+              {t("planner.allClear")}
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -181,6 +291,8 @@ function StudentDashboard({ data, user }) {
           </div>
         </Link>
       </div>
+
+      {data.planner && <PlannerBlock planner={data.planner} />}
 
       <section className="section grid-2">
         <div className="card">
