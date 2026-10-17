@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
@@ -76,16 +75,10 @@ class SchoolAdminSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer)
         }
 
     def get_pricing(self, school):
-        from . import providers
+        from . import billing, providers
 
         provider = providers.online_provider()
-        return {
-            "prices": {currency: str(amount) for currency, amount in settings.SUBSCRIPTION_PRICES.items()},
-            "month_options": settings.SUBSCRIPTION_MONTH_OPTIONS,
-            "online": provider is not None,
-            "provider": provider.key if provider else "",
-            "grace_days": settings.SUBSCRIPTION_GRACE_DAYS,
-        }
+        return {**billing.price_list(), "online": provider is not None, "provider": provider.key if provider else ""}
 
 
 class MemberSerializer(serializers.ModelSerializer):

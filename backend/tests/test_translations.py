@@ -34,7 +34,7 @@ def test_the_compiled_catalogue_is_up_to_date():
 
 def test_errors_follow_the_readers_language(client_for):
     school = make_school("Lycée de Kigali", "Nyarugenge")
-    payload = {"username": "newpupil", "password": "Str0ng-pass-123", "role": "student", "grade": "S2"}
+    payload = {"username": "newpupil", "password": "Str0ng-pass-123", "role": "student", "grade": "S2", "accept_terms": True}
     wrong_code = {**payload, "school": school.id, "school_code": "WRONG123"}
     english = client_for().post("/api/auth/register/", wrong_code, format="json")
     assert "doesn't match this school" in str(english.data)

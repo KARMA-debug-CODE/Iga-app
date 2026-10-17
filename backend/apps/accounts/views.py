@@ -1,3 +1,4 @@
+import json
 import logging
 import math
 from datetime import timedelta
@@ -7,7 +8,9 @@ from django.conf import settings
 from django.contrib.auth import password_validation
 from django.contrib.auth.models import update_last_login
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
+from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import status
@@ -22,12 +25,13 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.classroom.services import follow_grade
-from apps.core import security_log
+from apps.core import audit, maintenance, security_log
 from apps.core.audit import client_ip
+from apps.core.permissions import RecentAuthentication
 from apps.core.security_log import fingerprint
 from apps.core.throttles import ScopedRateThrottle
 
-from . import enumeration, lockout, password_reset
+from . import enumeration, legal, lockout, password_reset, privacy
 from .authentication import PasswordChangeRequired
 from .models import User
 from .security import (
@@ -41,7 +45,9 @@ from .security import (
     verify_totp,
 )
 from .serializers import (
+    AcceptTermsSerializer,
     ChangePasswordSerializer,
+    DeleteAccountSerializer,
     LoginSerializer,
     OTPSerializer,
     PasswordResetConfirmSerializer,
@@ -73,7 +79,7 @@ def _set_refresh_cookie(response, refresh_token):
     )
 
 
-def _session_response(user, status_code=status.HTTP_200_OK, auth_time=None):
+def _session_response(request, user, status_code=status.HTTP_200_OK, auth_time=None):
     refresh = issue_refresh_token(user, auth_time=auth_time)
     access = refresh.access_token  # copies the session version and auth_time
     response = Response(
@@ -81,6 +87,7 @@ def _session_response(user, status_code=status.HTTP_200_OK, auth_time=None):
         status=status_code,
     )
     _set_refresh_cookie(response, refresh)
+    maintenance.set_team_cookie(request, response, user)
     return response
 
 
@@ -141,7 +148,8 @@ class RegisterView(APIView):
             raise ValidationError(serializer.errors)
         user = serializer.save()
         security_log.event(request, "register", user, role=user.role)
-        return _session_response(user, status.HTTP_201_CREATED, auth_time=signed_in_now())
+        audit.record(request, "terms_accepted", user, version=user.terms_version, how="register")
+        return _session_response(request, user, status.HTTP_201_CREATED, auth_time=signed_in_now())
 
 
 class LoginView(APIView):
@@ -203,9 +211,16 @@ class LoginView(APIView):
                 return self._failed(request, keys, identifier, account, "otp", _("That code is not valid."), otp_required=True)
 
         lockout.succeed(keys)
+        if maintenance.maintenance_on() and not account.is_platform_admin:
+            return maintenance.drf_response()  # back soon: only the Iga team signs in
         update_last_login(None, account)
         security_log.event(request, "login", account)
-        return _session_response(account, auth_time=signed_in_now())
+        # Signing in during the grace period keeps an account its owner asked to delete (privacy.py).
+        cancelled = privacy.cancel_deletion(request, account)
+        response = _session_response(request, account, auth_time=signed_in_now())
+        if cancelled:
+            response.data["deletion_cancelled"] = True
+        return response
 
     @staticmethod
     def _failed(request, keys, identifier, account, reason, message, **extra):
@@ -247,8 +262,10 @@ class RefreshView(APIView):
                 # (A token rotated moments ago means another tab already holds the new cookie; keep it.)
                 response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.REFRESH_COOKIE_PATH)
             return response
+        if maintenance.maintenance_on() and not user.is_platform_admin:
+            return maintenance.drf_response()  # the session stays for later: the token is not used up
         old.blacklist()  # rotation: each refresh token works exactly once
-        return _session_response(user, auth_time=auth_time_of(old))
+        return _session_response(request, user, auth_time=auth_time_of(old))
 
     @staticmethod
     def _handle_reuse(request, raw):
@@ -296,6 +313,7 @@ class LogoutView(APIView):
                 pass
         response = Response(status=status.HTTP_204_NO_CONTENT)
         response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.REFRESH_COOKIE_PATH)
+        maintenance.set_team_cookie(request, response, None)
         return response
 
 
@@ -545,3 +563,68 @@ class PasswordResetConfirmView(APIView):
         revoke_all_sessions(user)
         security_log.event(request, "password_reset", user, other_sessions_ended=True)
         return Response({"detail": _("Your password has been changed. Log in with your new password.")})
+
+
+class AcceptTermsView(APIView):
+    """POST {version} -> the profile: accept the current Terms of Use and Privacy Policy (legal.py). The app asks
+    for it when they have changed since the account last accepted them, and at a roster account's first sign-in."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = AcceptTermsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        how = "first_sign_in" if not user.terms_version else "update"
+        legal.record_acceptance(request, user, how)
+        return Response(UserSerializer(user).data)
+
+
+class MyDataView(APIView):
+    """GET -> a JSON file of everything Iga holds about the signed-in user ("Download my data", privacy.py).
+    It needs a recent password check (step-up), like other privileged operations, and is limited per user."""
+
+    permission_classes = [IsAuthenticated, RecentAuthentication]
+    throttle_scope = "data_export"
+    throttle_classes = [ScopedRateThrottle, AuthIPThrottle]
+
+    def get(self, request):
+        user = request.user
+        data = privacy.export_user_data(user)
+        security_log.event(request, "data_export", user)
+        filename = f"iga-my-data-{timezone.localdate().isoformat()}.json"
+        response = HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False, indent=2),
+            content_type="application/json; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+class DeleteAccountView(APIView):
+    """POST {confirm: true} -> schedule the erasure of the signed-in user's account ("Delete my account",
+    privacy.py): after a recent password check (step-up), every session ends, and the account is erased
+    ACCOUNT_DELETION_GRACE_DAYS later unless its owner signs in before then."""
+
+    permission_classes = [IsAuthenticated, RecentAuthentication]
+    throttle_scope = "sensitive"
+    throttle_classes = [ScopedRateThrottle, AuthIPThrottle]
+
+    def post(self, request):
+        DeleteAccountSerializer(data=request.data).is_valid(raise_exception=True)
+        user = request.user
+        try:
+            due = privacy.request_deletion(request, user)
+        except privacy.DeletionRefused as refusal:
+            return Response({"detail": refusal.message, "code": refusal.code}, status=status.HTTP_409_CONFLICT)
+        response = Response(
+            {
+                "deletion_due_at": due,
+                "detail": _("Your account will be deleted in %(days)s days. To keep it, sign in again before then.")
+                % {"days": settings.ACCOUNT_DELETION_GRACE_DAYS},
+            }
+        )
+        response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.REFRESH_COOKIE_PATH)
+        maintenance.set_team_cookie(request, response, None)
+        return response

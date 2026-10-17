@@ -36,7 +36,7 @@ def apade(db):
 
 
 def register(client, **data):
-    payload = {"username": "newkid", "password": PASSWORD, "first_name": "New", "grade": "S2"}
+    payload = {"username": "newkid", "password": PASSWORD, "first_name": "New", "grade": "S2", "accept_terms": True}
     payload.update(data)
     return client.post("/api/auth/register/", payload, format="json")
 
@@ -855,6 +855,7 @@ def test_a_squatted_school_name_can_be_rejected(client_for, admin_user):
                 "email": f"{username}@example.com",
                 "role": "school_admin",
                 "new_school": {"name": "GS Remera", "district": "Gasabo", "phone": "+250788000000"},
+                "accept_terms": True,
             },
             format="json",
         )

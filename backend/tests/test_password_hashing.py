@@ -16,7 +16,7 @@ PASSWORD = "Str0ng-pass-123"
 def test_new_passwords_are_hashed_with_argon2id(client_for):
     response = client_for().post(
         "/api/auth/register/",
-        {"username": "newkid", "password": PASSWORD, "first_name": "New", "grade": "S1"},
+        {"username": "newkid", "password": PASSWORD, "first_name": "New", "grade": "S1", "accept_terms": True},
         format="json",
     )
     assert response.status_code == 201
@@ -51,7 +51,7 @@ def test_changed_argon2_costs_rehash_at_next_login(db, settings):
 def test_common_numeric_and_short_passwords_are_refused(client_for, weak):
     response = client_for().post(
         "/api/auth/register/",
-        {"username": "weakling", "password": weak, "first_name": "Weak", "grade": "S1"},
+        {"username": "weakling", "password": weak, "first_name": "Weak", "grade": "S1", "accept_terms": True},
         format="json",
     )
     assert response.status_code == 400
@@ -61,7 +61,7 @@ def test_common_numeric_and_short_passwords_are_refused(client_for, weak):
 def test_password_similar_to_the_username_is_refused(client_for):
     response = client_for().post(
         "/api/auth/register/",
-        {"username": "uwimanaaline", "password": "uwimanaaline1", "first_name": "Aline", "grade": "S1"},
+        {"username": "uwimanaaline", "password": "uwimanaaline1", "first_name": "Aline", "grade": "S1", "accept_terms": True},
         format="json",
     )
     assert response.status_code == 400

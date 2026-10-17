@@ -155,7 +155,9 @@ def test_saving_from_the_admin_or_code_cleans_too(student, teacher):
 def test_passwords_and_student_code_are_never_changed(client_for):
     password = f"Str0ng{ZWSP}-pass-é-123"
     response = client_for().post(
-        "/api/auth/register/", {"username": "newkid", "password": password, "first_name": "New", "grade": "S2"}, format="json"
+        "/api/auth/register/",
+        {"username": "newkid", "password": password, "first_name": "New", "grade": "S2", "accept_terms": True},
+        format="json",
     )
     assert response.status_code == 201, response.data
     assert User.objects.get(username="newkid").check_password(password)

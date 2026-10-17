@@ -183,13 +183,13 @@ def test_registration_is_limited_per_address(monkeypatch):
     client = APIClient()
 
     def register(n):
-        payload = {"username": f"kid{n}", "password": PASSWORD, "first_name": "K", "grade": "S1"}
+        payload = {"username": f"kid{n}", "password": PASSWORD, "first_name": "K", "grade": "S1", "accept_terms": True}
         return client.post("/api/auth/register/", payload, format="json", REMOTE_ADDR="10.9.9.9").status_code
 
     assert [register(n) for n in range(3)] == [201, 201, 429]
     other = client.post(
         "/api/auth/register/",
-        {"username": "kid9", "password": PASSWORD, "first_name": "K", "grade": "S1"},
+        {"username": "kid9", "password": PASSWORD, "first_name": "K", "grade": "S1", "accept_terms": True},
         format="json",
         REMOTE_ADDR="10.9.9.10",
     )

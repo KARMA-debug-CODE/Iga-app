@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.crypto import salted_hmac
+from django.utils.translation import gettext
 
 from apps.core.constants import A_LEVEL_GRADES, COMBINATION_CHOICES, COMBINATIONS, GRADES, LANGUAGES
 from apps.core.encryption import EncryptedTextField
@@ -69,6 +70,16 @@ class User(AbstractUser):
     # change or reset, a 2FA change, a stolen refresh token): tokens with an older number stop working.
     session_version = models.PositiveIntegerField(default=0, editable=False)
 
+    # The Terms of Use and Privacy Policy version this account accepted (LEGAL_VERSION), and when (legal.py).
+    terms_version = models.CharField(max_length=32, blank=True, default="")
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
+    # "Delete my account" (privacy.py): asked at deletion_requested_at; erased or anonymised from deletion_due_at
+    # unless the owner signs in before then. erased_at: when it was (the row stays, emptied, as the anonymised
+    # reference that payments, the ledger and the audit log keep).
+    deletion_requested_at = models.DateTimeField(null=True, blank=True)
+    deletion_due_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    erased_at = models.DateTimeField(null=True, blank=True)
+
     class Meta(AbstractUser.Meta):
         constraints = [
             # "Aline" and "aline" (or two spellings of one email) must not be two accounts.
@@ -128,6 +139,8 @@ class User(AbstractUser):
 
     @property
     def display_name(self):
+        if self.erased_at:
+            return gettext("Deleted account")
         return self.get_full_name() or self.username
 
     @property
@@ -140,6 +153,8 @@ class User(AbstractUser):
     @property
     def short_name(self):
         """First name + initial: what other students see, so minors' full names aren't shown to strangers."""
+        if self.erased_at:
+            return gettext("Deleted account")
         if self.first_name:
             initial = f" {self.last_name[0]}." if self.last_name else ""
             return f"{self.first_name}{initial}"

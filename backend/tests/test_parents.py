@@ -25,7 +25,14 @@ def link(client_for, student, parent):
 def test_parent_can_register_without_grade(client_for):
     response = client_for().post(
         "/api/auth/register/",
-        {"username": "papa", "password": "Str0ng-pass-123", "first_name": "Papa", "role": "parent", "grade": "S3"},
+        {
+            "username": "papa",
+            "password": "Str0ng-pass-123",
+            "first_name": "Papa",
+            "role": "parent",
+            "grade": "S3",
+            "accept_terms": True,
+        },
         format="json",
     )
     assert response.status_code == 201

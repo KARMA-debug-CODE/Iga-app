@@ -88,6 +88,12 @@ def tampering(victim, other_school):
         "deadline": FUTURE,
         "submitted_at": PAST,
         "question_order": [],
+        "terms_accepted_at": PAST,
+        "deletion_requested_at": PAST,
+        "deletion_due_at": PAST,
+        "erased_at": PAST,
+        "handled_at": PAST,
+        "handled_by": victim.id,
     }
 
 
@@ -117,6 +123,7 @@ def _ok(response):
 
 def test_register_cannot_choose_privileges(client_for, w):
     payload = {**w["bad"], "username": "newbie", "password": "Str0ng-pass-123", "grade": "S2", "first_name": "N"}
+    payload["accept_terms"] = True
     payload["role"] = "admin"
     assert client_for().post("/api/auth/register/", payload, format="json").status_code == 400
     payload.update(role="teacher", school=w["school"].id)
@@ -124,6 +131,39 @@ def test_register_cannot_choose_privileges(client_for, w):
     user = User.objects.get(username="newbie")
     assert user.role == "teacher" and not user.teacher_approved and not user.is_staff and not user.is_superuser
     assert user.school_status == "pending" and user.xp == 0 and not user.totp_enabled and not user.must_change_password
+
+
+def test_accepting_the_terms_sets_only_the_current_version_and_time(client_for, w, settings):
+    student = w["student"]
+    before = User.objects.filter(pk=student.pk).values().get()
+    _ok(client_for(student).post("/api/auth/accept-terms/", {**w["bad"], "version": settings.LEGAL_VERSION}, format="json"))
+    after = User.objects.filter(pk=student.pk).values().get()
+    assert {k for k in after if after[k] != before[k]} == {"terms_version", "terms_accepted_at"}
+    assert after["terms_version"] == settings.LEGAL_VERSION and after["terms_accepted_at"].year != 2000
+
+
+def test_asking_to_delete_an_account_cannot_choose_when(client_for, w, settings):
+    student = w["student"]
+    before = User.objects.filter(pk=student.pk).values().get()
+    _ok(client_for(student).post("/api/auth/delete-account/", {**w["bad"], "confirm": True}, format="json"))
+    after = User.objects.filter(pk=student.pk).values().get()
+    assert {k for k in after if after[k] != before[k]} == {"deletion_requested_at", "deletion_due_at", "session_version"}
+    grace = after["deletion_due_at"] - after["deletion_requested_at"]
+    assert grace.days == settings.ACCOUNT_DELETION_GRACE_DAYS and after["erased_at"] is None
+
+
+def test_a_contact_message_cannot_claim_a_sender_or_be_marked_handled(client_for, w):
+    from apps.website.models import ContactMessage
+
+    payload = {**w["bad"], "name": "Visitor", "email": "visitor@example.com", "message": "Hello, please call me back."}
+    _ok(client_for().post("/api/contact/", payload, format="json"))
+    message = ContactMessage.objects.get()
+    assert message.user is None and message.handled_at is None and message.handled_by is None
+    assert message.language == "en" and message.created_at.year != 2000
+    # A platform admin marking it handled is recorded as that admin, now.
+    _ok(client_for(w["admin"]).post(f"/api/admin/contact/{message.id}/handle/", {**w["bad"], "handled": True}, format="json"))
+    message.refresh_from_db()
+    assert message.handled_by == w["admin"] and message.handled_at.year != 2000 and message.name == "Visitor"
 
 
 def test_password_reset_link_sets_only_the_password(client_for, w):
@@ -487,6 +527,10 @@ TESTED = {
     "api/groups/{pk}/messages/",
     "api/groups/{pk}/notes/",
     "api/messages/{pk}/report/",
+    "api/auth/accept-terms/",
+    "api/auth/delete-account/",
+    "api/contact/",
+    "api/admin/contact/{pk}/handle/",
 }
 
 

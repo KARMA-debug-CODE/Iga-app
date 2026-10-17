@@ -16,6 +16,7 @@ def register(client, **overrides):
         "first_name": "New",
         "last_name": "Kid",
         "grade": "S1",
+        "accept_terms": True,
     }
     payload.update(overrides)
     return client.post("/api/auth/register/", payload, format="json")

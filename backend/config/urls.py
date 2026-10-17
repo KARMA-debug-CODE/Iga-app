@@ -14,6 +14,7 @@ from apps.curriculum.views import LessonViewSet, ResourceViewSet, SubjectViewSet
 from apps.gamification import views as gamification_views
 from apps.schools.downloads import PaperDownloadView
 from apps.simulations.views import SimulationViewSet
+from apps.website import views as website_views
 
 router = DefaultRouter()
 # The browsable list of every endpoint at /api/ is for development only.
@@ -35,6 +36,7 @@ router.register("messages", MessageViewSet, basename="message")
 router.register("admin/users", core_views.AdminUserViewSet, basename="admin-user")
 router.register("admin/review", core_views.ReviewViewSet, basename="admin-review")
 router.register("admin/moderation", ModerationViewSet, basename="admin-moderation")
+router.register("admin/contact", website_views.AdminContactViewSet, basename="admin-contact")
 
 api = [
     path("auth/", include("apps.accounts.urls")),
@@ -53,16 +55,24 @@ api = [
     path("files/papers/<str:token>/", PaperDownloadView.as_view(), name="paper-download"),
     path("files/resources/<str:token>/", ResourceDownloadView.as_view(), name="resource-download"),
     path("", include("apps.schools.urls")),
+    path("", include("apps.website.urls")),
     path("", include(router.urls)),
 ]
 
 admin.site.site_header = f"{settings.APP_NAME} administration"
 admin.site.site_title = settings.APP_NAME
 
-urlpatterns = [path("api/", include(api))]
+urlpatterns = [
+    path("api/", include(api)),
+    # For search engines: nginx passes these two to Django, which knows the site's public address (FRONTEND_URL).
+    path("robots.txt", website_views.RobotsView.as_view(), name="robots"),
+    path("sitemap.xml", website_views.SitemapView.as_view(), name="sitemap"),
+]
 
 # Requests refused before a view runs (a body over the size limits, ...) get a JSON answer.
 handler400 = "apps.core.errors.bad_request"
+# An unexpected error: a short, friendly answer (JSON for the API), never Django's page or a traceback.
+handler500 = "apps.core.errors.server_error"
 
 # Off unless enabled, and in production only at its secret path (see apps/core/admin_login.py).
 ADMIN_URL_PREFIX = admin_login.admin_url_prefix()

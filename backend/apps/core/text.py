@@ -113,6 +113,7 @@ CLEANED_FIELDS = {
     "curriculum.Resource": ("title", "description", "description_fr", "publisher", "licence"),
     "schools.School": ("name", "sector"),
     "tutor.TutorExchange": ("message",),
+    "website.ContactMessage": ("name", "school", "message"),
 }
 
 

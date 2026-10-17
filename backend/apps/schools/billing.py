@@ -46,6 +46,16 @@ def currencies():
     return list(settings.SUBSCRIPTION_PRICES)
 
 
+def price_list():
+    """The prices schools are offered, from the settings: what the school's billing page and the public
+    pricing section both show (so a price is never written down twice)."""
+    return {
+        "prices": {currency: str(amount) for currency, amount in settings.SUBSCRIPTION_PRICES.items()},
+        "month_options": settings.SUBSCRIPTION_MONTH_OPTIONS,
+        "grace_days": settings.SUBSCRIPTION_GRACE_DAYS,
+    }
+
+
 def finite_amount(value):
     """A Decimal for a finite number, else None (NaN, Infinity and anything unreadable)."""
     try:

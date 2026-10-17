@@ -72,7 +72,7 @@ def test_the_2fa_step_only_appears_after_the_right_password(student):
 
 
 def register(email, username, ip="10.1.1.1"):
-    payload = {"username": username, "email": email, "password": PASSWORD, "first_name": "N", "grade": "S1"}
+    payload = {"username": username, "email": email, "password": PASSWORD, "first_name": "N", "grade": "S1", "accept_terms": True}
     return APIClient().post("/api/auth/register/", payload, format="json", REMOTE_ADDR=ip)
 
 
@@ -88,7 +88,7 @@ def test_sign_up_can_test_only_a_few_emails_an_hour(student, settings):
     # Without an email, or from another address, sign-up still works.
     no_email = APIClient().post(
         "/api/auth/register/",
-        {"username": "plainkid", "password": PASSWORD, "first_name": "P", "grade": "S1"},
+        {"username": "plainkid", "password": PASSWORD, "first_name": "P", "grade": "S1", "accept_terms": True},
         format="json",
         REMOTE_ADDR="10.1.1.1",
     )

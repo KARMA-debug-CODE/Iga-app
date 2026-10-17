@@ -50,6 +50,9 @@ class Command(BaseCommand):
                     "role": role,
                     "grade": grade,
                     "email": f"{username}@{DEMO_EMAIL_DOMAIN}",
+                    # Demo accounts have accepted the current Terms and Privacy Policy.
+                    "terms_version": settings.LEGAL_VERSION,
+                    "terms_accepted_at": timezone.now(),
                     **extra,
                 },
             )

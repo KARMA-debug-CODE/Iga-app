@@ -27,6 +27,7 @@ from apps.classroom.models import Assignment, Classroom, Enrollment
 from apps.community.models import GroupMembership, Message, MessageReport, SharedNote, StudyGroup
 from apps.curriculum.models import Lesson, LessonProgress, Resource
 from apps.schools.models import LedgerEntry, Payment
+from apps.website.models import ContactMessage
 
 from .conftest import add_mcq, make_school, make_user
 from .routes import api_routes, fill, view_methods
@@ -48,6 +49,8 @@ PUBLIC_ROUTES = {
     "api/files/papers/{token}/",  # a signed, short-lived link checked inside
     "api/files/resources/{token}/",  # the same, for teachers' uploaded resources
     "api/billing/webhooks/flutterwave/",  # signed by Flutterwave, checked inside
+    "api/site/",  # what the public pages show (legal version, prices): the same for everyone
+    "api/contact/",  # the public contact form: anyone may write; only platform admins read
 }
 # Routes with an id that name shared catalogue content (no owner), so reading them is allowed.
 CATALOGUE_ROUTES = {
@@ -160,6 +163,9 @@ def world(subject, unit):
     GroupMembership.objects.create(group=public_group, user=sb, role=GroupMembership.Role.OWNER)
     w["public_group_b"] = public_group
     w["public_message_b"] = Message.objects.create(group=public_group, author=sb, body="hello")
+    w["contact_b"] = ContactMessage.objects.create(
+        name="Pupil B", email="secret-b@example.com", message="SECRET-CONTACT-B", user=sb
+    )
     w["payment_b"] = Payment.objects.create(
         reference="PAY-B-SECRET-REF",
         school=school_b,
@@ -193,6 +199,7 @@ def markers(w):
         "SECRET-NOTE-B",
         "SECRET-REPORT-B",
         "PAY-B-SECRET-REF",
+        "SECRET-CONTACT-B",
         "+250-SECRET-B",
         w["school_b"].join_code,
     ]
@@ -248,6 +255,8 @@ def route_targets(w):
         "api/messages/{pk}/report/": {"pk": w["message_b"].id},
         "api/admin/users/{pk}/": {"pk": w["student_b"].id},
         "api/admin/moderation/{pk}/resolve/": {"pk": w["report_b"].id},
+        "api/admin/contact/{pk}/": {"pk": w["contact_b"].id},
+        "api/admin/contact/{pk}/handle/": {"pk": w["contact_b"].id},
     }
 
 
@@ -325,6 +334,10 @@ def snapshot(w):
         "payments_b": sorted(Payment.objects.filter(school=w["school_b"]).values_list("reference", "status", "provider_data")),
         "ledger_b": sorted(LedgerEntry.objects.filter(school=w["school_b"]).values_list("sequence", "entry_hash")),
         "progress_b": sorted(LessonProgress.objects.filter(user=sb).values_list("lesson_id", flat=True)),
+        "contact_b": tuple(ContactMessage.objects.filter(pk=w["contact_b"].pk).values_list("message", "handled_at").get()),
+        "consent_b": tuple(
+            User.objects.filter(pk=sb.pk).values_list("terms_version", "deletion_due_at", "erased_at", "session_version").get()
+        ),
     }
     return rows
 

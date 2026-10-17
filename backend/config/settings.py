@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     "apps.tutor",
     "apps.coderun",
     "apps.schools",
+    "apps.website",
 ]
 
 MIDDLEWARE = [
@@ -126,6 +127,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     # A NUL character in the URL or query string is a 400 (PostgreSQL can't store one).
     "apps.core.middleware.RejectNulMiddleware",
+    # Maintenance mode: 503 "back soon" for everyone but platform admins (apps/core/maintenance.py).
+    "apps.core.maintenance.MaintenanceModeMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -278,6 +281,10 @@ REST_FRAMEWORK = {
         "code_run": os.environ.get("THROTTLE_CODE_RUN", "20/min"),
         # Per user: answers typed into a running program.
         "code_input": os.environ.get("THROTTLE_CODE_INPUT", "120/min"),
+        # Per user: "Download my data" (it reads every table that holds the user's data).
+        "data_export": os.environ.get("THROTTLE_DATA_EXPORT", "5/hour"),
+        # Per IP: messages sent with the contact form.
+        "contact": os.environ.get("THROTTLE_CONTACT", "20/hour"),
     },
 }
 
@@ -465,6 +472,45 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("FILE_UPLOAD_MAX_MEMORY_SIZE", 
 # Form fields and files in one request (JSON bodies are limited by size only).
 DATA_UPLOAD_MAX_NUMBER_FIELDS = int(os.environ.get("DATA_UPLOAD_MAX_NUMBER_FIELDS", "1000"))
 DATA_UPLOAD_MAX_NUMBER_FILES = int(os.environ.get("DATA_UPLOAD_MAX_NUMBER_FILES", "10"))
+
+# --- Legal, privacy and the public site --------------------------------------
+# The Terms of Use and Privacy Policy (frontend/src/legal/) are accepted together, as one version: the date
+# they last changed. Raise it whenever either text changes in a way people must agree to again: everyone is
+# asked to accept the new version at their next visit (apps/accounts/legal.py).
+LEGAL_VERSION = os.environ.get("LEGAL_VERSION", "2026-10-17").strip()
+# The note at the top of both pages saying they are drafts a lawyer must review before launch. Set it to
+# false once a lawyer has approved the texts.
+LEGAL_DRAFT_NOTICE = env_bool("LEGAL_DRAFT_NOTICE", True)
+# Who is responsible for the personal data (the "data controller"), and how to reach them about privacy.
+LEGAL_ENTITY_NAME = os.environ.get("LEGAL_ENTITY_NAME", "Iga").strip()
+LEGAL_ENTITY_ADDRESS = os.environ.get("LEGAL_ENTITY_ADDRESS", "Kigali, Rwanda").strip()
+PRIVACY_CONTACT_EMAIL = os.environ.get("PRIVACY_CONTACT_EMAIL", "privacy@iga.rw").strip()
+# Where the servers (and so the personal data) are. Storing personal data outside Rwanda needs an
+# authorisation from the supervisory authority (NCSA): see docs/DEPLOYMENT.md.
+DATA_HOSTING_LOCATION = os.environ.get("DATA_HOSTING_LOCATION", "Rwanda").strip()
+# "Delete my account": days during which signing in again cancels the deletion. Then `manage.py
+# privacy_cleanup` (the scheduler runs it) erases or anonymises the account (apps/accounts/privacy.py).
+ACCOUNT_DELETION_GRACE_DAYS = int(os.environ.get("ACCOUNT_DELETION_GRACE_DAYS", "14"))
+# How long records are kept (days; 0 = keep them). `manage.py privacy_cleanup` deletes older ones.
+# Santa's questions and answers (kept for safeguarding review):
+SANTA_LOG_RETENTION_DAYS = int(os.environ.get("SANTA_LOG_RETENTION_DAYS", "365"))
+# The audit log (sign-ins, security events, content changes, marks, approvals):
+AUDIT_LOG_RETENTION_DAYS = int(os.environ.get("AUDIT_LOG_RETENTION_DAYS", "730"))
+# Daily usage counters of Santa and the code runner:
+USAGE_RETENTION_DAYS = int(os.environ.get("USAGE_RETENTION_DAYS", "400"))
+# Messages sent with the contact form:
+CONTACT_RETENTION_DAYS = int(os.environ.get("CONTACT_RETENTION_DAYS", "730"))
+# Database backups (the backup service in docker-compose.yml keeps this many days; shown in the Privacy Policy).
+BACKUP_KEEP_DAYS = int(os.environ.get("BACKUP_KEEP_DAYS", "14"))
+# Where messages from the contact form are emailed (they are also kept for platform admins in Admin ->
+# Messages). Empty: kept only.
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "").strip()
+
+# Maintenance mode: every API request gets 503 "back soon" except a platform admin's, and nginx shows its
+# "back soon" page. On while MAINTENANCE_MODE is true or the file MAINTENANCE_FILE exists (`manage.py
+# maintenance on|off`; docker compose shares the file with nginx). See apps/core/maintenance.py.
+MAINTENANCE_MODE = env_bool("MAINTENANCE_MODE", False)
+MAINTENANCE_FILE = os.environ.get("MAINTENANCE_FILE", str(BASE_DIR / "maintenance" / "on")).strip()
 
 # Grace period after a timed exam's deadline during which a final submit is
 # still accepted (covers slow mobile connections).

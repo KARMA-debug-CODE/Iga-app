@@ -54,6 +54,10 @@ SECURITY_ACTIONS = {
     "santa_injection",
     "santa_forged_history",
     "code_run_limit",
+    "data_export",
+    "account_deletion_requested",
+    "account_deletion_cancelled",
+    "contact_spam",
 }
 
 # Never logged, whatever a caller passes in `details`.

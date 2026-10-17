@@ -100,7 +100,7 @@ def test_totp_code_is_single_use(student):
 
 def test_usernames_cannot_contain_at_or_collide_by_case(client_for, student):
     anon = client_for()
-    base = {"password": PASSWORD, "first_name": "A", "last_name": "B", "grade": "S1"}
+    base = {"password": PASSWORD, "first_name": "A", "last_name": "B", "grade": "S1", "accept_terms": True}
     response = anon.post("/api/auth/register/", {**base, "username": "x@y.rw", "email": "x@y.rw"}, format="json")
     assert response.status_code == 400 and "username" in response.data
     response = anon.post("/api/auth/register/", {**base, "username": "STUDENT", "email": "new@example.com"}, format="json")
