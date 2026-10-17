@@ -339,6 +339,75 @@ function Moderation() {
   );
 }
 
+// A strict check before an address becomes a mailto: link (the server validated it too).
+const EMAIL = /^[^\s@<>()"',;:]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+/** Messages sent with the public contact form. */
+function Messages() {
+  const { t, lang } = useI18n();
+  const [status, setStatus] = useState("open");
+  const state = useApi("/admin/contact/", { params: { status } });
+  const [error, setError] = useState(null);
+
+  async function mark(message, handled) {
+    setError(null);
+    try {
+      await api(`/admin/contact/${message.id}/handle/`, { method: "POST", body: { handled } });
+      state.reload();
+    } catch (err) {
+      setError(err);
+    }
+  }
+
+  return (
+    <div className="stack">
+      <div className="chips wrap">
+        {["open", "handled", "all"].map((value) => (
+          <button key={value} type="button" className={`chip ${status === value ? "active" : ""}`} aria-pressed={status === value} onClick={() => setStatus(value)}>
+            {t(`admin.messages.${value}`)}
+          </button>
+        ))}
+      </div>
+      <ErrorMessage error={error} />
+      <Loader state={state}>
+        {(data) =>
+          results(data).length === 0 ? (
+            <Empty icon="inbox">{t("admin.messages.none")}</Empty>
+          ) : (
+            results(data).map((m) => (
+              <article className="card contact-message" key={m.id}>
+                <div className="spread">
+                  <strong>{m.name}</strong>
+                  <span className="small muted">{formatDate(m.created_at, lang)}</span>
+                </div>
+                <div className="small muted">
+                  {m.email}
+                  {m.school && ` · ${m.school}`} · {m.language.toUpperCase()}
+                  {m.sender && ` · ${t("admin.messages.account", { username: m.sender.username })}`}
+                </div>
+                <p className="contact-message-text">{m.message}</p>
+                {m.handled_at && (
+                  <p className="small muted">{t("admin.messages.handledBy", { name: m.handled_by || "—", date: formatDate(m.handled_at, lang) })}</p>
+                )}
+                <div className="row">
+                  {EMAIL.test(m.email) && (
+                    <a className="btn btn-sm btn-secondary" href={`mailto:${m.email}`}>
+                      <Icon name="mail" size={16} /> {t("admin.messages.reply")}
+                    </a>
+                  )}
+                  <button className="btn btn-sm" onClick={() => mark(m, !m.handled_at)}>
+                    <Icon name={m.handled_at ? "reset" : "check"} size={16} /> {t(m.handled_at ? "admin.messages.reopen" : "admin.messages.markHandled")}
+                  </button>
+                </div>
+              </article>
+            ))
+          )
+        }
+      </Loader>
+    </div>
+  );
+}
+
 function Audit() {
   const { t, lang } = useI18n();
   // "Security" shows sign-ins, lockouts, password and 2FA changes, refused and throttled requests.
@@ -896,6 +965,7 @@ export default function Admin() {
           { value: "users", label: t("admin.users") },
           { value: "review", label: t("admin.review") },
           { value: "moderation", label: t("admin.moderation") },
+          { value: "messages", label: t("admin.messages") },
           { value: "audit", label: t("admin.audit") },
         ]}
       />
@@ -904,6 +974,7 @@ export default function Admin() {
       {tab === "users" && <Users />}
       {tab === "review" && <Review />}
       {tab === "moderation" && <Moderation />}
+      {tab === "messages" && <Messages />}
       {tab === "audit" && <Audit />}
     </>
   );

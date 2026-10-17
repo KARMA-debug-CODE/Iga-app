@@ -480,6 +480,8 @@ test("teacher creates accounts from a list and the student sets a password", asy
   await page.getByLabel(/temporary password/i).fill(temporary);
   await page.getByLabel(/^new password$/i).fill("Nkunda-imibare-2026");
   await page.getByLabel(/new password again/i).fill("Nkunda-imibare-2026");
+  // A roster account accepts the Terms of Use and Privacy Policy at its first sign-in, with its new password.
+  await page.getByLabel(/i have read and accept/i).check();
   await page.getByRole("button", { name: /save my password/i }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/hi keza/i);
 });

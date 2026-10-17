@@ -20,7 +20,7 @@ function savedNavHidden() {
 }
 
 export default function Layout() {
-  const { user, isTeacher, isAdmin } = useAuth();
+  const { user, isTeacher, isAdmin, notice, clearNotice } = useAuth();
   const { t } = useI18n();
   const online = useOnline();
   const navigate = useNavigate();
@@ -129,6 +129,14 @@ export default function Layout() {
           </Link>
         </div>
         {!online && <div className="offline-banner">{t("common.offline")}</div>}
+        {notice?.key === "deletionCancelled" && (
+          <div className="notice-banner" role="status">
+            <span>{t(`notice.${notice.key}`, notice)}</span>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={clearNotice} aria-label={t("notice.close")}>
+              <Icon name="close" size={18} />
+            </button>
+          </div>
+        )}
       </header>
 
       <div className={`layout ${navHidden ? "nav-hidden" : ""}`}>

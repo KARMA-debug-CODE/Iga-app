@@ -7,10 +7,13 @@ import Layout from "./components/Layout";
 import StepUpDialog from "./components/StepUpDialog";
 import { Spinner } from "./components/ui";
 import { useI18n } from "./i18n";
+import { useMaintenance } from "./maintenance";
+import ConsentGate from "./pages/ConsentGate";
 import Dashboard from "./pages/Dashboard";
 import FirstLogin from "./pages/FirstLogin";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import Maintenance from "./pages/Maintenance";
 import Register from "./pages/Register";
 
 const Subjects = lazy(() => import("./pages/Subjects"));
@@ -46,6 +49,13 @@ const SchoolHome = schoolPage("SchoolHome");
 const resetPage = (name) => lazy(() => import("./pages/PasswordReset").then((m) => ({ default: m[name] })));
 const ForgotPassword = resetPage("ForgotPassword");
 const ResetPassword = resetPage("ResetPassword");
+const legalPage = (name) => lazy(() => import("./pages/Legal").then((m) => ({ default: m[name] })));
+const Terms = legalPage("Terms");
+const Privacy = legalPage("Privacy");
+const Contact = lazy(() => import("./pages/Contact"));
+
+// Public pages: open to everyone, signed in or not, and while an account still has to accept the Terms.
+const OPEN_PATHS = new Set(["/terms", "/privacy", "/contact"]);
 
 function RequireAuth({ children, teacher = false, admin = false, schoolAdmin = false }) {
   const { user, isTeacher, isAdmin } = useAuth();
@@ -93,6 +103,7 @@ export default function App() {
   const { user, ready } = useAuth();
   const { lang, setLang } = useI18n();
   const location = useLocation();
+  const maintenance = useMaintenance();
 
   // Follow the language saved on the account when someone logs in.
   useEffect(() => {
@@ -102,8 +113,21 @@ export default function App() {
 
   if (!ready) return <Spinner />;
 
+  // Iga is being updated: "back soon" for everyone; the Iga team logs in at /team.
+  if (maintenance && location.pathname !== "/team") return <Maintenance />;
+
   // A temporary password from a teacher must be replaced before anything else.
   if (user?.must_change_password && !user.offline) return <FirstLogin />;
+
+  // The Terms of Use and Privacy Policy must be accepted (again, when they change) before the app opens.
+  if (user?.consent_required && !user.offline && !OPEN_PATHS.has(location.pathname)) {
+    return (
+      <>
+        <StepUpDialog />
+        <ConsentGate />
+      </>
+    );
+  }
 
   const page = (element, opts) => <RequireAuth {...opts}>{element}</RequireAuth>;
 
@@ -115,10 +139,16 @@ export default function App() {
         <Suspense fallback={<Spinner />}>
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+            <Route path="/team" element={user ? <Navigate to="/" replace /> : <Login team />} />
             <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
             <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPassword />} />
             {/* Open even when signed in: the link in the email may be opened on a shared computer. */}
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/pricing" element={<Landing section="pricing" />} />
+            <Route path="/faq" element={<Landing section="faq" />} />
             {!user && <Route path="/" element={<Landing />} />}
             <Route element={user ? <Layout /> : <RedirectToLogin />}>
               <Route path="/" element={page(<Dashboard />)} />

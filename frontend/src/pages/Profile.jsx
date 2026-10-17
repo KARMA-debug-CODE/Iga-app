@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { A_LEVEL, COMBINATIONS } from "../combinations";
+import { DeleteAccount, DownloadData, PrivacySummary } from "../components/AccountPrivacy";
 import Avatar from "../components/Avatar";
 import AvatarBuilder from "../components/AvatarBuilder";
 import { BadgeIcon, Icon } from "../components/Icon";
@@ -399,7 +400,7 @@ function Sessions() {
   );
 }
 
-const TABS = ["details", "avatar", "badges", "school", "security", "appearance"];
+const TABS = ["details", "avatar", "badges", "school", "security", "privacy", "appearance"];
 
 function ProfileHeader({ onEditAvatar }) {
   const { user, logout } = useAuth();
@@ -691,6 +692,13 @@ export default function Profile() {
             <TwoFactor />
             <Sessions />
             {user.role === "student" && <ParentAccess />}
+          </div>
+        )}
+        {tab === "privacy" && (
+          <div className="grid-2">
+            <PrivacySummary />
+            <DownloadData />
+            <DeleteAccount />
           </div>
         )}
         {tab === "appearance" && <Appearance />}

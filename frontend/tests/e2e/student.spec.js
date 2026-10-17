@@ -17,6 +17,7 @@ test("new student registers, reads a lesson, uses a lab and earns XP", async ({ 
   await page.getByLabel(/^username$/i).fill(username);
   await page.getByLabel(/^password/i).fill("Murakoze-2026");
   await page.getByLabel("Grade").selectOption("S1");
+  await page.getByLabel(/i have read and accept/i).check();
   await page.getByRole("button", { name: /create account/i }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Hi Keza");
 

@@ -3,6 +3,7 @@
 // cookie the browser sends to /api/auth/refresh/ automatically.
 
 import { currentLanguage, hasTranslation, translateNow } from "./i18n";
+import { isMaintenance, setMaintenance } from "./maintenance";
 
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
@@ -101,7 +102,11 @@ export async function refreshSession() {
   if (!refreshing) {
     refreshing = postRefresh()
       .then(async (res) => {
-        if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          if (isMaintenance(data, res.status)) setMaintenance(true);
+          throw new ApiError(res.status, data);
+        }
         const data = await res.json();
         accessToken = data.access;
         return data;
@@ -151,6 +156,8 @@ export async function api(path, { method = "GET", body, params, retry = true, si
   if (res.status === 204) return null;
   if (as === "blob" && res.ok) return res.blob();
   const data = await res.json().catch(() => null);
+  // Iga is being updated: the app shows its "back soon" page (maintenance.js).
+  if (isMaintenance(data, res.status)) setMaintenance(true);
   // Privileged actions need a password confirmed in the last few minutes: ask for it, then try once more.
   if (res.status === 403 && data?.code === "step_up_required" && stepUp && onStepUp) {
     try {
@@ -198,7 +205,11 @@ export async function apiStream(path, { body, signal, retry = true } = {}) {
     await refreshAfter401();
     return apiStream(path, { body, signal, retry: false });
   }
-  if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    if (isMaintenance(data, res.status)) setMaintenance(true);
+    throw new ApiError(res.status, data);
+  }
   return res;
 }
 

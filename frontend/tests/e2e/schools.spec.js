@@ -15,6 +15,7 @@ async function registerStudent(page, firstName, { school, code } = {}) {
     await page.getByRole("button", { name: new RegExp(school) }).click();
     if (code) await page.getByLabel(/school code/i).fill(code);
   }
+  await page.getByLabel(/i have read and accept/i).check();
   await page.getByRole("button", { name: /create account/i }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(`Hi ${firstName}`);
 }

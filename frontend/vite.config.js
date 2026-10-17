@@ -1,16 +1,21 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+import publicPages from "./scripts/public-pages.mjs";
+
 const backend = process.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 export default defineConfig({
-  plugins: [react()],
+  // publicPages: a copy of index.html per public page, with its title and link-preview tags.
+  plugins: [react(), publicPages()],
   server: {
     port: 5173,
     proxy: {
       "/api": backend,
       "/django-admin": backend,
       "/static": backend,
+      "/robots.txt": backend,
+      "/sitemap.xml": backend,
     },
   },
   preview: {
