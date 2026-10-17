@@ -10,6 +10,7 @@ import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 import { safeUrl } from "../safeUrl";
 import { SubjectSelect } from "./Labs";
+import ReviewPanel from "./Review";
 
 export function useStartQuiz() {
   const navigate = useNavigate();
@@ -213,12 +214,17 @@ export default function Practice() {
         tabs={[
           { value: "quizzes", label: t("practice.quizzes") },
           { value: "papers", label: t("practice.pastPapers") },
+          { value: "review", label: t("practice.reviewTab") },
         ]}
       />
-      <div className="form-row" style={{ marginBottom: 12 }}>
-        <SubjectSelect value={subject} onChange={setSubject} />
-      </div>
-      {tab === "quizzes" ? (
+      {tab !== "review" && (
+        <div className="form-row" style={{ marginBottom: 12 }}>
+          <SubjectSelect value={subject} onChange={setSubject} />
+        </div>
+      )}
+      {tab === "review" ? (
+        <ReviewPanel />
+      ) : tab === "quizzes" ? (
         <>
           <GradeChips value={grade} onChange={setGrade} allowAll />
           <div style={{ marginTop: 16 }}>
