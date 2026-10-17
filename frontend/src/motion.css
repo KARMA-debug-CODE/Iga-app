@@ -1,0 +1,518 @@
+/* Motion: movement and feedback only. The layout, colours and spacing are styles.css's, and so are the
+   duration and easing tokens (--motion-*, --ease-*). Only transform and opacity move (the score ring's fill
+   is the one exception, a small repaint), animations are short, a click never waits for one, and nothing
+   moves when the reader asks for less motion (the end of this file). */
+
+@keyframes motion-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes motion-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes motion-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes motion-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes motion-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes motion-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ---------- Pages ---------- */
+
+/* A page's content fades in and rises a little when it appears, and again when it has loaded. */
+.main > :not(.toast, .celebration) {
+  animation: motion-rise var(--motion-base) var(--ease-out) backwards;
+}
+
+/* The panel of the profile's tabs, when another tab is chosen. */
+.profile-panel > * {
+  animation: motion-fade var(--motion-base) var(--ease-out) backwards;
+}
+
+/* ---------- Lists: the items enter one after another when they appear ---------- */
+
+.stagger > * {
+  animation: motion-rise var(--motion-base) var(--ease-out) backwards;
+}
+
+.stagger > :nth-child(2) {
+  animation-delay: var(--stagger);
+}
+
+.stagger > :nth-child(3) {
+  animation-delay: calc(var(--stagger) * 2);
+}
+
+.stagger > :nth-child(4) {
+  animation-delay: calc(var(--stagger) * 3);
+}
+
+.stagger > :nth-child(5) {
+  animation-delay: calc(var(--stagger) * 4);
+}
+
+.stagger > :nth-child(6) {
+  animation-delay: calc(var(--stagger) * 5);
+}
+
+.stagger > :nth-child(7) {
+  animation-delay: calc(var(--stagger) * 6);
+}
+
+.stagger > :nth-child(n + 8) {
+  animation-delay: calc(var(--stagger) * 7);
+}
+
+/* ---------- Cards and list rows: lift on hover, settle when pressed ---------- */
+
+/* The lifted shadow is a layer that fades in (opacity), not a box-shadow that repaints each frame. */
+.card-link {
+  position: relative;
+}
+
+.card-link::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: var(--shadow-lift);
+  opacity: 0;
+  transition: opacity var(--motion-base) var(--ease-out);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .card-link:hover::after {
+    opacity: 1;
+  }
+
+  .list-link:hover .icon-tile {
+    transform: scale(1.08);
+  }
+}
+
+.card-link:active:not([aria-disabled="true"]) {
+  transform: translateY(0) scale(0.985);
+  transition-duration: 60ms;
+}
+
+.list-link {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.list-link .icon-tile {
+  transition: transform var(--motion-base) var(--ease-spring);
+}
+
+.list-link:active {
+  transform: scale(0.99);
+  transition-duration: 60ms;
+}
+
+/* ---------- Buttons, chips, tabs: a small press ---------- */
+
+.btn,
+.chip,
+.tab,
+.nav-toggle,
+.qnav button,
+.option,
+.theme-choice,
+.avatar-option {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.btn:active:not(:disabled, [aria-disabled="true"]),
+.chip:active:not(:disabled),
+.tab:active,
+.nav-toggle:active,
+.qnav button:active,
+.theme-choice:active,
+.avatar-option:active {
+  transform: scale(0.96);
+  transition-duration: 60ms;
+}
+
+.option:active:not(:has(input:disabled)) {
+  transform: scale(0.99);
+  transition-duration: 60ms;
+}
+
+/* The active tab's underline slides to the chosen tab (Tabs in components/ui.jsx). */
+.tabs {
+  position: relative;
+}
+
+.tab-indicator {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100px;
+  height: 3px;
+  background: var(--primary);
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.tab-indicator.is-moving {
+  transition: transform var(--motion-base) var(--ease-out);
+}
+
+.tabs.has-indicator .tab.active {
+  border-bottom-color: transparent;
+}
+
+/* ---------- The side menu and the bottom bar slide away and back ---------- */
+
+@keyframes motion-menu-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes motion-menu-out {
+  to {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes motion-bar-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes motion-bar-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.sidebar.is-entering {
+  animation: motion-menu-in var(--motion-base) var(--ease-out) backwards;
+}
+
+.sidebar.is-leaving {
+  animation: motion-menu-out var(--motion-base) var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+.bottom-nav.is-entering {
+  animation: motion-bar-in var(--motion-base) var(--ease-out) backwards;
+}
+
+.bottom-nav.is-leaving {
+  animation: motion-bar-out var(--motion-base) var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+/* ---------- Loading: placeholders shaped like the content, with a light passing over them ---------- */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 20%, var(--shimmer) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: motion-shimmer 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.sk {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+.sk-title {
+  height: 18px;
+  width: 60%;
+}
+
+.sk-tile {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+}
+
+.sk-circle {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.sk-bar {
+  height: 8px;
+  border-radius: 999px;
+}
+
+.sk-pill {
+  width: 56px;
+  height: 22px;
+  flex: none;
+  border-radius: 999px;
+}
+
+.sk-lines {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton-list > * + * {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- Progress: bars and the score ring fill when they appear ---------- */
+
+.progress > span {
+  transform-origin: left center;
+  animation: motion-fill var(--motion-slow) var(--ease-out) var(--motion-fast) backwards;
+}
+
+@property --ring-fill {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@keyframes motion-ring-fill {
+  from {
+    --ring-fill: 0;
+  }
+}
+
+.score-ring {
+  position: relative;
+}
+
+/* Added from JS only where the browser can animate --ring-fill (elsewhere the ring is simply full). */
+.score-ring.is-filling {
+  animation: motion-ring-fill 900ms var(--ease-out) var(--motion-fast) backwards;
+}
+
+/* ---------- Alerts, feedback and dialogs ---------- */
+
+.alert,
+.feedback {
+  animation: motion-drop var(--motion-base) var(--ease-out) backwards;
+}
+
+.modal-backdrop {
+  animation: motion-fade var(--motion-base) var(--ease-out);
+}
+
+/* ---------- Celebrations (components/Celebrate.jsx): a ring and rays in the flag's colours ---------- */
+
+@keyframes burst-ring {
+  from {
+    opacity: 0.9;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes burst-ray {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scaleY(0.3);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scaleY(1);
+  }
+}
+
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--burst-size, 96px);
+  height: var(--burst-size, 96px);
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.burst-ring {
+  fill: none;
+  stroke: var(--yellow);
+  stroke-width: 2.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: burst-ring 700ms var(--ease-out) forwards;
+}
+
+.burst-ray {
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: burst-ray 650ms var(--ease-out) forwards;
+}
+
+.burst > g:nth-of-type(even) .burst-ray {
+  animation-delay: 70ms;
+}
+
+.burst-blue {
+  stroke: var(--blue);
+}
+
+.burst-yellow {
+  stroke: var(--yellow);
+}
+
+.burst-green {
+  stroke: var(--green-bright);
+}
+
+.celebrate {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
+.celebrate > .icon,
+.celebrate-pop {
+  animation: motion-pop 480ms var(--ease-spring) backwards;
+}
+
+/* A new level or badge: a small card above the toasts, gone by itself, never in the way of a tap. */
+@keyframes celebration-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.92);
+  }
+}
+
+@keyframes celebration-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.96);
+  }
+}
+
+.celebration {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h) + 76px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 2 * var(--gutter));
+  padding: 6px 18px 6px 6px;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  transform: translateX(-50%);
+  animation: celebration-in var(--motion-slow) var(--ease-spring) backwards;
+  pointer-events: none;
+}
+
+.celebration.is-leaving {
+  animation: celebration-out var(--motion-base) var(--ease-out) forwards;
+}
+
+.celebration-medal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #3d2c00;
+  font-weight: 800;
+}
+
+.celebration-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Less motion: nothing moves (things appear at once) ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .skeleton::after,
+  .burst {
+    display: none !important;
+  }
+}
