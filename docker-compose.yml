@@ -131,17 +131,57 @@ services:
       db:
         condition: service_healthy
 
-  # Sends subscription reminders to school administrators once a day.
+  # Background jobs: subscription reminders, payment reconciliation, and the privacy clean-up.
   scheduler:
     build: ./backend
-    # Every 10 minutes: re-check open payments (lost webhooks, abandoned checkouts) and send any
-    # subscription reminders that are due (each is sent once, so running often is safe).
-    # Starts once the migrate service has applied the database migrations, and checks again before its first run.
-    command: sh -c "until python manage.py migrate --check > /dev/null 2>&1; do sleep 5; done; while true; do python manage.py reconcile_payments; python manage.py billing_reminders; sleep 600; done"
+    # Every 10 minutes: re-check open payments (lost webhooks, abandoned checkouts), send any subscription
+    # reminders that are due (each is sent once, so running often is safe), and run the privacy clean-up,
+    # which erases accounts whose 14-day deletion grace is over and deletes records past their retention
+    # period (both idempotent). Starts once the migrate service has applied the migrations, and checks again
+    # before its first run.
+    command: sh -c "until python manage.py migrate --check > /dev/null 2>&1; do sleep 5; done; while true; do python manage.py reconcile_payments; python manage.py billing_reminders; python manage.py privacy_cleanup; sleep 600; done"
     environment: *backend-env
     depends_on:
       migrate:
         condition: service_completed_successfully
+
+  # Daily database and media backups (backup/iga-backup.sh via iga-backup-loop.sh). pg_dump in PostgreSQL's
+  # compressed custom format to the "backups" volume, kept BACKUP_KEEP_DAYS days; copy that volume off the
+  # server, encrypted, to a second location (docs/DEPLOYMENT.md, "Backups and restore"). The dumps hold
+  # personal data and the field-encrypted columns stay encrypted in them, so keep FIELD_ENCRYPTION_KEYS
+  # safe and apart from the backups. Restore with iga-restore (docs/DEPLOYMENT.md, "Restore").
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      # The superuser: dumps everything, and restore drops and recreates the database (only it may).
+      PGHOST: db
+      PGUSER: iga
+      PGPASSWORD: ${POSTGRES_PASSWORD:-iga-local-only}
+      PGDATABASE: iga
+      BACKUP_DIR: /backups
+      MEDIA_DIR: /media
+      # How many days of backups to keep (the newest always stays), and the daily time (HH:MM in TZ).
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      BACKUP_TIME: ${BACKUP_TIME:-02:30}
+      TZ: ${TZ:-Africa/Kigali}
+    volumes:
+      - backups:/backups
+      - media:/media:ro
+      - ./backup/iga-backup.sh:/usr/local/bin/iga-backup:ro
+      - ./backup/iga-backup-loop.sh:/usr/local/bin/iga-backup-loop:ro
+      - ./backup/iga-restore.sh:/usr/local/bin/iga-restore:ro
+    command: ["iga-backup-loop"]
+    # Unhealthy once the newest backup is more than a day old (26 h), so monitoring can catch a stuck backup.
+    healthcheck:
+      test: ["CMD-SHELL", "find /backups/db -name 'iga-*.dump' -mmin -1560 | grep -q ."]
+      interval: 1h
+      timeout: 10s
+      retries: 2
+      start_period: 10m
+    depends_on:
+      db:
+        condition: service_healthy
 
   # Compiles and runs students' C++ and Java (coderunner/: official GCC and OpenJDK images, nothing to
   # download at start). Only the backend can reach it: no published port, and its network has no internet.
@@ -259,6 +299,8 @@ volumes:
   pgdata:
   media:
   santa-models:
+  # Daily database and media backups (the "backup" service). Copy this off the server, encrypted.
+  backups:
 
 networks:
   default: {}
