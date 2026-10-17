@@ -520,7 +520,7 @@ class FriendlyErrors(unittest.TestCase):
         down = Nginx().request("/robots.txt", headers=self.DROP)
         self.assertGreaterEqual(down.status, 500)
         self.assertIn(b"Something went wrong", down.body)
-        self.assertIn(b"lang=\"fr\"", down.body)  # the French half is in the same page
+        self.assertIn(b'lang="fr"', down.body)  # the French half is in the same page
         self.assertNotIn(b"<script", down.body)  # it must work when the app's scripts can't load
 
     def test_the_app_shell_and_its_files_do_not_need_the_backend(self):
