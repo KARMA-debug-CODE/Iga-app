@@ -168,3 +168,8 @@ def students_needing_help(classroom, unit):
         if average < HELP_BELOW_AVERAGE:
             found.append({"id": student.id, "display_name": student.display_name, "average": average, "answered": answered})
     return sorted(found, key=lambda row: (row["average"], row["id"]))[:MAX_NEEDING_HELP]
+
+
+def students_answered(classroom, unit):
+    """How many current students have at least one counted answer in `unit`."""
+    return len({answer.attempt.user_id for answer in _latest_answers(classroom, unit)})

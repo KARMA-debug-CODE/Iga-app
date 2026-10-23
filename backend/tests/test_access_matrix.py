@@ -15,6 +15,7 @@ and school admin, and an anonymous visitor, attack it:
 * anonymous visitors get 401 everywhere except the public routes.
 """
 
+import json
 from datetime import timedelta
 from decimal import Decimal
 
@@ -30,6 +31,7 @@ from apps.notes.models import LessonBookmark, LessonNote
 from apps.planner.models import ExamDate, StudyPlan
 from apps.review.models import ReviewItem
 from apps.schools.models import LedgerEntry, Payment
+from apps.teaching.models import PackAssignment, TeachingPack
 from apps.website.models import ContactMessage
 
 from .conftest import add_mcq, make_school, make_user
@@ -185,6 +187,15 @@ def world(subject, unit):
     w["exam_b"] = ExamDate.objects.create(user=sb, title="SECRET-EXAM-B", date=timezone.localdate() + timedelta(days=30))
     w["bookmark_b"] = LessonBookmark.objects.create(user=sb, lesson=w["pub_lesson_b"])
     w["note_b"] = LessonNote.objects.create(user=sb, lesson=w["pub_lesson_b"], body="SECRET-NOTE-LESSON-B")
+
+    # Teacher B's teaching pack for class B.
+    w["pack_b"] = TeachingPack.objects.create(
+        classroom=w["class_b"],
+        unit=unit,
+        created_by=tb,
+        document={"version": 1, "unit": {"label": "SECRET-PACK-B"}, "plan": {"objective": "SECRET-PACK-B", "steps": []}},
+        plan_edits={"objective": "SECRET-PACK-B"},
+    )
     return w
 
 
@@ -214,6 +225,7 @@ def markers(w):
         w["school_b"].join_code,
         "SECRET-EXAM-B",
         "SECRET-NOTE-LESSON-B",
+        "SECRET-PACK-B",
     ]
 
 
@@ -275,6 +287,9 @@ def route_targets(w):
         "api/notes/{pk}/": {"pk": w["note_b"].id},
         # my-notes resolves the lesson for the requester, so B's draft slug is invisible to A (404).
         "api/my-notes/{slug}/": {"slug": w["draft_lesson_b"].slug},
+        "api/teaching/classes/{pk}/units/": {"pk": w["class_b"].id},
+        "api/teaching/packs/{pk}/": {"pk": w["pack_b"].id},
+        "api/teaching/packs/{pk}/assign/": {"pk": w["pack_b"].id},
     }
 
 
@@ -361,6 +376,10 @@ def snapshot(w):
         "exams_b": sorted(ExamDate.objects.filter(user=sb).values_list("id", "title", "date")),
         "bookmarks_b": sorted(LessonBookmark.objects.filter(user=sb).values_list("id", "lesson_id")),
         "lesson_notes_b": sorted(LessonNote.objects.filter(user=sb).values_list("id", "body")),
+        "teaching_packs_b": sorted(
+            (pack.id, json.dumps(pack.plan_edits, sort_keys=True)) for pack in TeachingPack.objects.filter(classroom=w["class_b"])
+        ),
+        "pack_assignments_b": PackAssignment.objects.filter(pack__classroom=w["class_b"]).count(),
     }
     return rows
 
@@ -403,6 +422,7 @@ def test_the_owners_can_see_their_own_rows(client_for, world):
     assert "SECRET-EXAM-B" in client_for(w["student_b"]).get("/api/planner/").content.decode()
     assert "SECRET-NOTE-LESSON-B" in client_for(w["student_b"]).get("/api/notes/").content.decode()
     assert "SECRET-NOTE-LESSON-B" in client_for(w["student_b"]).get(f"/api/my-notes/{w['pub_lesson_b'].slug}/").content.decode()
+    assert "SECRET-PACK-B" in client_for(w["teacher_b"]).get(f"/api/teaching/packs/{w['pack_b'].id}/").content.decode()
 
 
 def test_no_attacker_reads_or_changes_side_b_through_any_route(client_for, world):

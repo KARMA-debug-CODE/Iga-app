@@ -59,6 +59,7 @@ api = [
     path("", include("apps.review.urls")),
     path("", include("apps.planner.urls")),
     path("", include("apps.notes.urls")),
+    path("teaching/", include("apps.teaching.urls")),
     path("", include(router.urls)),
 ]
 

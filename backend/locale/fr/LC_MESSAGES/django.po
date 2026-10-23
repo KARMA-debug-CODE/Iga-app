@@ -445,6 +445,7 @@ msgid "Only students join classes with a code."
 msgstr "Seuls les élèves rejoignent une classe avec un code."
 
 #: apps/classroom/views.py:300
+#: apps/teaching/access.py:33
 msgid "This class is archived."
 msgstr "Cette classe est archivée."
 
@@ -945,6 +946,10 @@ msgstr "Une simulation externe a besoin d'une adresse complète en https://."
 msgid "Not found."
 msgstr "Introuvable."
 
+#: apps/teaching/access.py:21
+msgid "Teaching packs are part of your school's Iga subscription."
+msgstr "Les kits pédagogiques font partie de l'abonnement Iga de votre école."
+
 #: apps/teaching/builder.py:20
 msgid "support"
 msgstr "soutien"
@@ -969,7 +974,7 @@ msgstr "En classe"
 msgid "The Iga worksheet (printed or on screen), the board, and the student's book."
 msgstr "La fiche d'exercices Iga (imprimée ou à l'écran), le tableau et le manuel de l'élève."
 
-#: apps/teaching/builder.py:235
+#: apps/teaching/builder.py:236
 msgid "Address the misconception: many learners chose \"%(wrong)s\". The correct answer is \"%(correct)s\"."
 msgstr "Traitez l'erreur fréquente : beaucoup d'élèves ont choisi « %(wrong)s ». La bonne réponse est « %(correct)s »."
 
@@ -1005,15 +1010,15 @@ msgstr "Travaillent en binôme sur la fiche, puis expliquent leurs réponses à 
 msgid "Problem solving, cooperation"
 msgstr "Résolution de problèmes, coopération"
 
-#: apps/teaching/builder.py:223
+#: apps/teaching/builder.py:224
 msgid "Answer the evaluation questions and note what they still find difficult."
 msgstr "Répondent aux questions d'évaluation et notent ce qu'ils trouvent encore difficile."
 
-#: apps/teaching/builder.py:224
+#: apps/teaching/builder.py:225
 msgid "Lifelong learning"
 msgstr "Apprentissage tout au long de la vie"
 
-#: apps/teaching/builder.py:265
+#: apps/teaching/builder.py:266
 msgid "Some content is only available in English."
 msgstr "Certains contenus ne sont disponibles qu'en anglais."
 
@@ -1025,13 +1030,45 @@ msgstr "Il n'existe pas encore de questions de %(level)s pour cette unité."
 msgid "Summarise the key points of %(topic)s, then ask the evaluation questions."
 msgstr "Résumez les points clés de %(topic)s, puis posez les questions d'évaluation."
 
-#: apps/teaching/builder.py:302
+#: apps/teaching/builder.py:305
 msgid "A simpler way to explain it: %(text)s"
 msgstr "Une façon plus simple de l'expliquer : %(text)s"
 
 #: apps/teaching/builder.py:88
 msgid "Only %(count)s %(level)s questions exist for this unit."
 msgstr "Il n'existe que %(count)s questions de %(level)s pour cette unité."
+
+#: apps/teaching/serializers.py:39
+msgid "Write plain text."
+msgstr "Écrivez du texte simple."
+
+#: apps/teaching/serializers.py:41
+msgid "Keep each field under %(count)s characters."
+msgstr "Chaque champ doit faire moins de %(count)s caractères."
+
+#: apps/teaching/serializers.py:53
+msgid "These fields can't be changed: %(fields)s."
+msgstr "Ces champs ne peuvent pas être modifiés : %(fields)s."
+
+#: apps/teaching/serializers.py:60
+msgid "A lesson plan has at most %(count)s steps."
+msgstr "Une fiche de préparation a au plus %(count)s étapes."
+
+#: apps/teaching/serializers.py:65
+msgid "A step can change only its teacher activities, learner activities and competences."
+msgstr "Une étape ne peut changer que les activités de l'enseignant, les activités des élèves et les compétences."
+
+#: apps/teaching/views.py:92
+msgid "Choose a unit of this class's subject and grade."
+msgstr "Choisissez une unité de la matière et du niveau de cette classe."
+
+#: apps/teaching/views.py:97
+msgid "Choose a published lesson of this unit."
+msgstr "Choisissez une leçon publiée de cette unité."
+
+#: apps/teaching/views.py:73
+msgid "Choose a class."
+msgstr "Choisissez une classe."
 
 #: apps/tutor/services.py:664
 msgid "Santa can't answer just now. Try again in a minute."

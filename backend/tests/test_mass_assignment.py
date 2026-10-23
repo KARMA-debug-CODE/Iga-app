@@ -577,6 +577,8 @@ TESTED = {
     "api/planner/exams/",
     "api/bookmarks/",
     "api/notes/",
+    "api/teaching/packs/",
+    "api/teaching/packs/{pk}/",
     "api/review/{pk}/answer/",
 }
 
@@ -593,3 +595,31 @@ def test_every_writable_route_is_covered():
     writable = {route for route, callback in api_routes() if set(view_methods(callback)) & {"POST", "PUT", "PATCH"}}
     missing = writable - NOTHING_TO_TAMPER - TESTED - REFUSED
     assert not missing, f"New writable routes: add a tampering test (or explain why there is nothing to tamper with): {missing}"
+
+
+def test_teaching_pack_writes_keep_owner_document_and_class(client_for, w):
+    from apps.classroom.models import Classroom
+    from apps.teaching.models import TeachingPack
+
+    teacher = w["teacher"]
+    mine = Classroom.objects.create(name="Mine", subject=w["subject"], grade="S2", teacher=teacher)
+    elsewhere = Classroom.objects.create(name="Theirs", subject=w["subject"], grade="S2", teacher=w["victim"])
+    client = client_for(teacher)
+
+    # Creating: the author is the requester, the document is built by the server, and Santa did not write it.
+    payload = {**w["bad"], "classroom": mine.id, "unit": w["unit"].id, "document": {"evil": True}, "ai_used": True}
+    pack = TeachingPack.objects.get(pk=_ok(client.post("/api/teaching/packs/", payload, format="json")).data["id"])
+    assert pack.created_by == teacher and pack.classroom == mine and "evil" not in pack.document and not pack.ai_used
+
+    # Editing: only the lesson plan's text changes.
+    before = pack.document
+    _ok(
+        client.patch(
+            f"/api/teaching/packs/{pack.id}/",
+            {**w["bad"], "plan": {"objective": "Mine"}, "document": {"evil": True}, "classroom": elsewhere.id, "ai_used": True},
+            format="json",
+        )
+    )
+    pack.refresh_from_db()
+    assert pack.document == before and pack.classroom == mine and pack.created_by == teacher and not pack.ai_used
+    assert pack.plan_edits == {"objective": "Mine"}
