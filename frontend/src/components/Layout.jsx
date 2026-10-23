@@ -102,6 +102,7 @@ export default function Layout() {
           ? [
               { to: "/teach", icon: "teach", label: t("nav.teach") },
               { to: "/marking", icon: "marking", label: t("nav.marking") },
+              { to: "/teaching-packs", icon: "pack", label: t("nav.packs") },
             ]
           : []),
         ...(isAdmin ? [{ to: "/admin", icon: "admin", label: t("nav.admin") }] : []),

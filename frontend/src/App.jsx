@@ -25,6 +25,7 @@ const Practice = lazy(() => import("./pages/Practice"));
 const QuizPlayer = lazy(() => import("./pages/QuizPlayer"));
 const Planner = lazy(() => import("./pages/Planner"));
 const MyNotes = lazy(() => import("./pages/MyNotes"));
+const TeachingPacks = lazy(() => import("./pages/TeachingPacks"));
 const Classes = lazy(() => import("./pages/Classes"));
 const ClassDetail = lazy(() => import("./pages/ClassDetail"));
 const Groups = lazy(() => import("./pages/Groups"));
@@ -178,6 +179,7 @@ export default function App() {
               <Route path="/classes/:id/quizzes/:quizId/analytics" element={page(<QuizAnalytics />, { teacher: true })} />
               <Route path="/teach/quizzes/:quizId/analytics" element={page(<QuizAnalytics />, { teacher: true })} />
               <Route path="/marking" element={page(<Marking />, { teacher: true })} />
+              <Route path="/teaching-packs" element={page(<TeachingPacks />, { teacher: true })} />
               <Route path="/admin" element={page(<Admin />, { admin: true })} />
               <Route path="/school" element={page(<SchoolHome />, { schoolAdmin: true })} />
               <Route path="/school/members" element={page(<SchoolMembers />, { schoolAdmin: true })} />

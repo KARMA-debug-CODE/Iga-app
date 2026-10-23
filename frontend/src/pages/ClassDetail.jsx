@@ -8,6 +8,7 @@ import { Icon, SubjectIcon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, scoreClass, Tabs } from "../components/ui";
 import { formatDate, useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import TeachingPackCard from "../teaching/TeachingPackCard";
 
 function NewAssignment({ classroom, onCreated }) {
   const { t } = useI18n();
@@ -113,21 +114,7 @@ function Report({ id }) {
     <Loader state={state}>
       {(report) => (
         <>
-          {report.weak_units.length > 0 && (
-            <div className="card" style={{ marginBottom: 16 }}>
-              <h3 className="title-with-icon">
-                <Icon name="chart" /> {t("classes.weakUnits")}
-              </h3>
-              <ul className="list">
-                {report.weak_units.map((u) => (
-                  <li key={u.unit} className="spread">
-                    <span>{u.unit}</span>
-                    <span className={scoreClass(u.average)}>{u.average}%</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <TeachingPackCard classroomId={Number(id)} weakUnits={report.weak_units} />
           {report.rows.length === 0 ? (
             <Empty icon="users">{t("classes.share")}</Empty>
           ) : (
