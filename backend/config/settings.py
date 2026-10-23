@@ -116,6 +116,7 @@ INSTALLED_APPS = [
     "apps.review",
     "apps.planner",
     "apps.notes",
+    "apps.teaching",
 ]
 
 MIDDLEWARE = [
@@ -280,6 +281,8 @@ REST_FRAMEWORK = {
         # The billing return page asks every few seconds while mobile money is confirmed.
         "billing_confirm": os.environ.get("THROTTLE_BILLING_CONFIRM", "30/min"),
         "tutor": os.environ.get("THROTTLE_TUTOR", "30/hour"),
+        # Making a Teaching Pack (reads the class's answers, may ask Santa): per teacher.
+        "teaching_pack": os.environ.get("THROTTLE_TEACHING_PACK", "30/hour"),
         # Per user: C++ and Java runs in the code playground.
         "code_run": os.environ.get("THROTTLE_CODE_RUN", "20/min"),
         # Per user: answers typed into a running program.
@@ -400,6 +403,22 @@ CODE_RUNNER_URL = os.environ.get("CODE_RUNNER_URL", "").strip()
 CODE_RUNNER_TOKEN = os.environ.get("CODE_RUNNER_TOKEN", "").strip()
 # Compiling (up to 30 s) plus running until the program ends or asks for input (up to 10 s), plus a margin.
 CODE_RUNNER_TIMEOUT_SECONDS = float(os.environ.get("CODE_RUNNER_TIMEOUT_SECONDS", "45"))
+
+# Teaching Packs (apps/teaching): a class's weak unit turned into a lesson plan, a worksheet and a quiz.
+# A question's results count once this many current students answered it.
+TEACHING_MIN_STUDENTS = int(os.environ.get("TEACHING_MIN_STUDENTS", "5"))
+# A wrong option is a class misconception when at least this share of the students who answered picked it.
+TEACHING_MISCONCEPTION_SHARE = float(os.environ.get("TEACHING_MISCONCEPTION_SHARE", "0.3"))
+# Questions the class gets right at least this often are mastered: left out of worksheets and quizzes.
+TEACHING_MASTERED_SHARE = float(os.environ.get("TEACHING_MASTERED_SHARE", "0.85"))
+TEACHING_WORKSHEET_PER_LEVEL = int(os.environ.get("TEACHING_WORKSHEET_PER_LEVEL", "5"))
+TEACHING_QUIZ_SIZE = int(os.environ.get("TEACHING_QUIZ_SIZE", "10"))
+# The length of a lesson in the lesson plan (minutes).
+TEACHING_PERIOD_MINUTES = int(os.environ.get("TEACHING_PERIOD_MINUTES", "40"))
+# Only answers from this many days back count.
+TEACHING_LOOKBACK_DAYS = int(os.environ.get("TEACHING_LOOKBACK_DAYS", "365"))
+# How long a pack waits for Santa's suggestions before using the templates (seconds).
+TEACHING_AI_SECONDS = float(os.environ.get("TEACHING_AI_SECONDS", "20"))
 # Who may run C++ and Java: "signed_in" (every signed-in user, like the other playgrounds) or "subscribed"
 # (members of a subscribed school, and platform admins).
 CODE_RUNNER_ACCESS = os.environ.get("CODE_RUNNER_ACCESS", "signed_in").strip().lower()
