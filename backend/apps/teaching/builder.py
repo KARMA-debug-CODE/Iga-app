@@ -23,7 +23,8 @@ MAX_ACTIVITIES = 3
 MAX_REFERENCES = 3
 MAX_EVALUATION_QUESTIONS = 3
 _HEADING = re.compile(r"^##[ \t]+(.+?)[ \t]*$", re.MULTILINE)
-_MARKUP = re.compile(r"[*_`$]")
+_BOLD = re.compile(r"\*\*(.+?)\*\*")
+_ITALIC = re.compile(r"\*(.+?)\*|(?<!\w)_(.+?)_(?!\w)")
 
 
 def question_payload(question):
@@ -84,9 +85,12 @@ def select_worksheet(unit, stats, priority):
         if not level:
             sheet["notes"].append(_("No %(level)s questions exist for this unit yet.") % {"level": LEVEL_NAMES[name]})
         elif len(level) < size:
-            sheet["notes"].append(
-                _("Only %(count)s %(level)s questions exist for this unit.") % {"count": len(level), "level": LEVEL_NAMES[name]}
-            )
+            # Two messages rather than ngettext: scripts/messages.py extracts plain gettext calls only.
+            if len(level) == 1:
+                note = _("Only %(count)s %(level)s question exists for this unit.")
+            else:
+                note = _("Only %(count)s %(level)s questions exist for this unit.")
+            sheet["notes"].append(note % {"count": len(level), "level": LEVEL_NAMES[name]})
     return sheet
 
 
@@ -126,7 +130,11 @@ def _lesson_text(lesson, lang):
 
 
 def _plain(text):
-    return " ".join(_MARKUP.sub("", text).lstrip("#").split())
+    """Lesson or question text as plain words for the plan: no maths delimiters, code ticks or emphasis, but
+    subscripts such as 10_2 kept."""
+    text = _BOLD.sub(r"\1", text.replace("$", "").replace("`", ""))
+    text = _ITALIC.sub(lambda m: m.group(1) or m.group(2), text)
+    return " ".join(text.lstrip("#").split())
 
 
 def _activities(lesson, lang, fallback_title):
@@ -156,7 +164,7 @@ def _template_hook(insight, topic):
     if insight["misconceptions"]:
         return _(
             'Start with a class vote on this question: "%(question)s". Let learners give their reasons before you reveal the answer.'
-        ) % {"question": insight["misconceptions"][0]["prompt"]}
+        ) % {"question": _plain(insight["misconceptions"][0]["prompt"])}
     return _("Ask learners what they already know about %(topic)s and write their ideas on the board.") % {"topic": topic}
 
 
@@ -226,7 +234,7 @@ def lesson_plan(classroom, unit, lesson, teacher, insight, core_questions, lang)
             },
         ],
         "evaluation": "\n".join(
-            f"{i}. {question.prompt}" for i, question in enumerate(core_questions[:MAX_EVALUATION_QUESTIONS], start=1)
+            f"{i}. {_plain(question.prompt)}" for i, question in enumerate(core_questions[:MAX_EVALUATION_QUESTIONS], start=1)
         ),
         "self_evaluation": "",
     }
@@ -234,11 +242,11 @@ def lesson_plan(classroom, unit, lesson, teacher, insight, core_questions, lang)
 
 def _misconception_note(misconception):
     note = _('Address the misconception: many learners chose "%(wrong)s". The correct answer is "%(correct)s".') % {
-        "wrong": misconception["wrong_choice"],
-        "correct": misconception["correct"],
+        "wrong": _plain(misconception["wrong_choice"]),
+        "correct": _plain(misconception["correct"]),
     }
     if misconception["explanation"]:
-        note += " " + misconception["explanation"]
+        note += " " + _plain(misconception["explanation"])
     return note
 
 

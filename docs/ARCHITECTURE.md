@@ -53,6 +53,7 @@
 | `tutor` | Santa, the AI tutor, in lessons, quizzes and on the Santa page: builds the context the model may see (lesson, chosen subject, or a question once its solution is visible), switches itself off while the student sits a timed test, finds matching lesson passages, runs the calculator tool, talks to Santa's model server, answers from the lessons when the model can't, logs exchanges | `TutorExchange` |
 | `coderun` | C++ and Java for the code playground: checks the request, starts the program on the code runner, and passes the student's answers to a program waiting for input. Each session belongs to the student who started it. Stores nothing | – |
 | `core` | Constants, permissions, audit log, dashboard, search, admin API, content loader and management commands | `AuditLog` |
+| `teaching` | Teaching Packs: a class's weak unit turned into what the class gets wrong (misconceptions from the wrong options students picked), a CBC lesson plan, a three-level worksheet with answer key and a targeted quiz, printable or assigned in Iga; Santa may add a labelled hook and simpler explanation | `TeachingPack`, `PackAssignment` |
 
 ### Data model (simplified)
 
@@ -101,6 +102,27 @@ The integrity rules live in `apps/assessments/services.py`:
 7. **Scoring.** MCQ and true/false are all-or-nothing. Multi-select gives partial credit, `(right − wrong) / total right`, never below zero. Numeric answers allow an absolute tolerance (plus a tiny relative allowance for floating-point noise). Short answers ignore case, extra spaces and a trailing full stop. Essays, and short answers with no accepted list, go to the teacher.
 8. **Teacher marking.** A teacher marks written answers only for their current classes: work set as one of their assignments, or a student's self-practice in that class's subject. Auto-marked questions can't be re-marked. The attempt becomes `marked` once every answer has marks, and XP is awarded then.
 9. **Exactly-once rewards.** XP events carry a unique `reference` (`quiz:42`, `quiz-perfect:42`), so quiz XP is earned once per quiz however often it is retaken, and racing requests can't award it twice. Blank attempts earn nothing.
+
+## Teaching Packs
+
+The paid feature for teachers (`apps/teaching`, design in `docs/superpowers/specs/2026-10-23-teaching-packs-design.md`).
+From a class's report, one click builds a pack for a unit:
+
+- **Insight** (`insight.py`): the class average beside its other units (the gradebook's own maths, shared through
+  `apps/classroom/analytics.py`), the wrong option most of the class picks for each question (a misconception needs
+  `TEACHING_MIN_STUDENTS` answers and `TEACHING_MISCONCEPTION_SHARE` of them), the hardest questions, and the students
+  who need help. Only current students and each student's latest marked answer count; partial marks are not correct.
+  Students needing help are computed when the pack is opened and never stored.
+- **Pack** (`builder.py`): from checked content only, never invented: worksheet levels by question difficulty
+  (misconceptions first, mastered and draft questions left out, short levels noted), a quiz of self-marking questions
+  (a diagnostic one while the class has no answers), and a lesson plan in the competence-based curriculum layout whose
+  development step tackles the misconceptions. The pack is a snapshot; the teacher's plan edits are kept apart.
+- **Santa's touch** (`polish.py`): optional. When the model is installed and the teacher is within Santa's caps, it
+  suggests an opening hook and a simpler explanation, labelled as Santa's; any error or odd reply gives the templates.
+- **API**: `/api/teaching/classes/<id>/units/` (free: the teaser counts), `/api/teaching/packs/` (make, list, read,
+  edit the plan, delete) and `/api/teaching/packs/<id>/assign/` (a teacher-authored practice quiz of the pack's
+  questions, once per part). Only the class's current teacher; making and assigning need the school's subscription
+  and an active class. Printing is the browser's: `/teaching-packs/<id>?print=plan|worksheet|key|quiz|insight`.
 
 ## Santa, the AI tutor
 

@@ -31,7 +31,7 @@ export default function AssignDialog({ packId, what, classroomId, onClose }) {
     return (
       <div className="pack-assign pack-assigned" role="status">
         <p>{result.created ? t("packs.assigned") : t("packs.alreadyAssigned")}</p>
-        {result.dropped > 0 && <p className="muted">{t("packs.dropped", { count: result.dropped })}</p>}
+        {result.dropped > 0 && <p className="muted">{t("packs.dropped", { n: result.dropped })}</p>}
         <Link to={`/classes/${classroomId}`}>{t("packs.openClass")}</Link>
       </div>
     );

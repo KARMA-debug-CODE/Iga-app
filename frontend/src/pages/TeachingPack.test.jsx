@@ -85,7 +85,7 @@ describe("Teaching pack page", () => {
     const post = calls.find((c) => c.url.includes("/assign/"));
     expect(post.body.what).toBe("quiz");
     expect(new Date(post.body.due_at).getTime()).toBe(new Date("2026-11-01T10:00").getTime());
-    expect(screen.getByText(/1 questions were left out/)).toBeInTheDocument();
+    expect(screen.getByText(/1 question was left out/)).toBeInTheDocument();
   });
 
   it("assign is disabled for a part with no questions", async () => {
@@ -95,6 +95,8 @@ describe("Teaching pack page", () => {
     expect(screen.getByRole("button", { name: "Assign the stretch level to the class" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Assign the core level to the class" })).toBeEnabled();
     expect(screen.getByText("No stretch questions exist for this unit yet.")).toBeInTheDocument();
+    expect(screen.getAllByText("1 question")).toHaveLength(2);
+    expect(screen.getByText("0 questions")).toBeInTheDocument();
   });
 
   it("labels Santa's text only when it is AI", async () => {

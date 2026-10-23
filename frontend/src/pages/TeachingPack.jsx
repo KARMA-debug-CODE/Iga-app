@@ -78,7 +78,7 @@ function Worksheet({ pack }) {
           <div key={level} className="pack-level">
             <div className="spread">
               <h3>
-                {name} <span className="muted">{t("packs.questionsCount", { count: sheet[level].length })}</span>
+                {name} <span className="muted">{t("packs.questionsCount", { n: sheet[level].length })}</span>
               </h3>
               <AssignPart
                 pack={pack}

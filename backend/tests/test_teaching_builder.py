@@ -3,6 +3,7 @@
 import json
 
 import pytest
+from django.utils import translation
 
 from apps.assessments.models import Question
 from apps.curriculum.models import Lesson, LessonTranslation, Resource, Unit
@@ -59,7 +60,8 @@ def test_short_levels_say_so_and_are_not_backfilled(settings, subject, unit):
     settings.TEACHING_WORKSHEET_PER_LEVEL = 5
     stretch = [q(subject, unit, f"hard{i}", 3) for i in range(2)]
     core = [q(subject, unit, f"core{i}", 2) for i in range(6)]
-    sheet = select_worksheet(unit, {}, [])
+    with translation.override("en"):
+        sheet = select_worksheet(unit, {}, [])
     assert sheet["stretch"] == stretch and sheet["core"] == core[:5] and sheet["support"] == []
     assert "Only 2 stretch questions exist for this unit." in sheet["notes"]
     assert "No support questions exist for this unit yet." in sheet["notes"]
@@ -210,3 +212,25 @@ def test_apply_polish_only_changes_text_when_ai(teacher, unit, lesson, classroom
     apply_polish(document, {"hook": "HOOK!", "simpler": "SIMPLE!", "ai": True})
     assert "HOOK!" in steps(document)["introduction"]["teacher"]
     assert "SIMPLE!" in steps(document)["development"]["teacher"] and document["polish"]["hook"] == "HOOK!"
+
+
+def test_plan_text_has_no_maths_delimiters(teacher, subject, unit, lesson, classroom):
+    q(subject, unit, "Convert $101101_2$ to base ten.")
+    plan = build_pack(classroom, unit, lesson, teacher, "en")["plan"]
+    assert plan["evaluation"] == "1. Convert 101101_2 to base ten."
+
+
+def test_headings_keep_subscripts(teacher, unit, classroom):
+    bases = Lesson.objects.create(
+        unit=unit, slug="bases", title="Bases", body="## Bases $10_2$ and _place value_", status="published"
+    )
+    development = steps(build_pack(classroom, unit, bases, teacher, "en"))["development"]["teacher"]
+    assert "Bases 10_2 and place value" in development
+
+
+def test_a_single_question_is_singular(settings, subject, unit):
+    settings.TEACHING_WORKSHEET_PER_LEVEL = 5
+    q(subject, unit, "hard", 3)
+    with translation.override("en"):
+        notes = select_worksheet(unit, {}, [])["notes"]
+    assert "Only 1 stretch question exists for this unit." in notes

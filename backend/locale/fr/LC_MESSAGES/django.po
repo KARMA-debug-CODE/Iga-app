@@ -962,81 +962,85 @@ msgstr "base"
 msgid "stretch"
 msgstr "approfondissement"
 
-#: apps/teaching/builder.py:160
+#: apps/teaching/builder.py:168
 msgid "Ask learners what they already know about %(topic)s and write their ideas on the board."
 msgstr "Demandez aux élèves ce qu'ils savent déjà sur %(topic)s et notez leurs idées au tableau."
 
-#: apps/teaching/builder.py:201
+#: apps/teaching/builder.py:209
 msgid "In the classroom"
 msgstr "En classe"
 
-#: apps/teaching/builder.py:202
+#: apps/teaching/builder.py:210
 msgid "The Iga worksheet (printed or on screen), the board, and the student's book."
 msgstr "La fiche d'exercices Iga (imprimée ou à l'écran), le tableau et le manuel de l'élève."
 
-#: apps/teaching/builder.py:236
+#: apps/teaching/builder.py:244
 msgid "Address the misconception: many learners chose \"%(wrong)s\". The correct answer is \"%(correct)s\"."
 msgstr "Traitez l'erreur fréquente : beaucoup d'élèves ont choisi « %(wrong)s ». La bonne réponse est « %(correct)s »."
 
-#: apps/teaching/builder.py:157
+#: apps/teaching/builder.py:165
 msgid "Start with a class vote on this question: \"%(question)s\". Let learners give their reasons before you reveal the answer."
 msgstr "Commencez par un vote en classe sur cette question : « %(question)s ». Laissez les élèves justifier leur choix avant de donner la réponse."
 
-#: apps/teaching/builder.py:179
+#: apps/teaching/builder.py:187
 msgid "Activity %(number)s: %(title)s."
 msgstr "Activité %(number)s : %(title)s."
 
-#: apps/teaching/builder.py:200
+#: apps/teaching/builder.py:208
 msgid "By the end of this lesson, learners can explain and use %(topic)s."
 msgstr "À la fin de cette leçon, les élèves savent expliquer et utiliser %(topic)s."
 
-#: apps/teaching/builder.py:174
+#: apps/teaching/builder.py:182
 msgid "Recall %(unit)s: ask two learners to say what they remember."
 msgstr "Rappel de %(unit)s : demandez à deux élèves ce dont ils se souviennent."
 
-#: apps/teaching/builder.py:209
+#: apps/teaching/builder.py:217
 msgid "Vote, explain their choice and listen to each other."
 msgstr "Votent, expliquent leur choix et s'écoutent les uns les autres."
 
-#: apps/teaching/builder.py:210
+#: apps/teaching/builder.py:218
 msgid "Critical thinking, communication"
 msgstr "Pensée critique, communication"
 
-#: apps/teaching/builder.py:216
+#: apps/teaching/builder.py:224
 msgid "Work in pairs on the worksheet, then explain their answers to the class."
 msgstr "Travaillent en binôme sur la fiche, puis expliquent leurs réponses à la classe."
 
-#: apps/teaching/builder.py:217
+#: apps/teaching/builder.py:225
 msgid "Problem solving, cooperation"
 msgstr "Résolution de problèmes, coopération"
 
-#: apps/teaching/builder.py:224
+#: apps/teaching/builder.py:232
 msgid "Answer the evaluation questions and note what they still find difficult."
 msgstr "Répondent aux questions d'évaluation et notent ce qu'ils trouvent encore difficile."
 
-#: apps/teaching/builder.py:225
+#: apps/teaching/builder.py:233
 msgid "Lifelong learning"
 msgstr "Apprentissage tout au long de la vie"
 
-#: apps/teaching/builder.py:266
+#: apps/teaching/builder.py:274
 msgid "Some content is only available in English."
 msgstr "Certains contenus ne sont disponibles qu'en anglais."
 
-#: apps/teaching/builder.py:85
+#: apps/teaching/builder.py:86
 msgid "No %(level)s questions exist for this unit yet."
-msgstr "Il n'existe pas encore de questions de %(level)s pour cette unité."
+msgstr "Il n'y a pas encore de questions au niveau %(level)s pour cette unité."
 
-#: apps/teaching/builder.py:222
+#: apps/teaching/builder.py:90
+msgid "Only %(count)s %(level)s question exists for this unit."
+msgstr "Il n'y a que %(count)s question au niveau %(level)s pour cette unité."
+
+#: apps/teaching/builder.py:92
+msgid "Only %(count)s %(level)s questions exist for this unit."
+msgstr "Il n'y a que %(count)s questions au niveau %(level)s pour cette unité."
+
+#: apps/teaching/builder.py:230
 msgid "Summarise the key points of %(topic)s, then ask the evaluation questions."
 msgstr "Résumez les points clés de %(topic)s, puis posez les questions d'évaluation."
 
-#: apps/teaching/builder.py:305
+#: apps/teaching/builder.py:313
 msgid "A simpler way to explain it: %(text)s"
 msgstr "Une façon plus simple de l'expliquer : %(text)s"
-
-#: apps/teaching/builder.py:88
-msgid "Only %(count)s %(level)s questions exist for this unit."
-msgstr "Il n'existe que %(count)s questions de %(level)s pour cette unité."
 
 #: apps/teaching/serializers.py:39
 msgid "Write plain text."
