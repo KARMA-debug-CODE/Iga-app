@@ -1,8 +1,9 @@
 import Markdown from "../components/Markdown";
 import { useI18n } from "../i18n";
+import AnswerLine from "./AnswerLine";
 import PackQuestions from "./PackQuestions";
 
-export const PRINT_MODES = ["insight", "plan", "worksheet", "key", "quiz"];
+export const PRINT_MODES = ["insight", "plan", "worksheet", "key", "quiz", "quizKey"];
 const LEVELS = ["support", "core", "stretch"];
 const PLAN_HEADER = [
   "school", "teacher", "term", "date", "subject", "class_name", "unit_number", "lesson_number", "duration", "class_size",
@@ -49,7 +50,7 @@ function Plan({ pack }) {
   const row = (name) => (
     <tr key={name}>
       <th scope="row">{t(`packs.f.${name}`)}</th>
-      <td>{plan[name]}</td>
+      <td className="pack-print-text">{plan[name]}</td>
     </tr>
   );
   return (
@@ -103,8 +104,8 @@ function Insight({ pack }) {
             {insight.misconceptions.map((m) => (
               <li key={m.question_id}>
                 <Markdown interactive={false}>{m.prompt}</Markdown>
-                <p>{t("packs.chose", { share: Math.round(m.share * 100), choice: m.wrong_choice })}</p>
-                <p>{t("packs.correctAnswer", { answer: m.correct })}</p>
+                <AnswerLine label={t("packs.choseLabel", { share: Math.round(m.share * 100) })} text={m.wrong_choice} />
+                <AnswerLine label={t("packs.correctLabel")} text={m.correct} />
               </li>
             ))}
           </ol>
@@ -168,10 +169,12 @@ export default function PackPrint({ pack, mode }) {
           <div className="pack-print-questions">
             <PackQuestions questions={doc.quiz.questions} />
           </div>
-          <section className="pack-page-break">
-            <h2>{t("packs.print.quizKey")}</h2>
-            <PackQuestions questions={doc.quiz.questions} showAnswers />
-          </section>
+        </>
+      )}
+      {mode === "quizKey" && (
+        <>
+          <Heading title={t("packs.print.quizKeyTitle", { unit })} pack={pack} />
+          <PackQuestions questions={doc.quiz.questions} showAnswers />
         </>
       )}
       {mode === "plan" && (

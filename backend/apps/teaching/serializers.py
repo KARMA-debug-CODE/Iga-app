@@ -109,6 +109,12 @@ class PackSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.context.get("live") is False:
+            del fields["students_needing_help"]
+        return fields
+
     def get_document(self, pack):
         return merged_document(pack)
 

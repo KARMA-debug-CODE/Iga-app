@@ -16,7 +16,8 @@ export default function PackQuestions({ questions, showAnswers = false, start = 
             <ul className="pack-choices">
               {q.choices.map((c, i) => (
                 <li key={c.id} className={showAnswers && c.is_correct ? "is-correct" : ""}>
-                  <span className="pack-choice-letter">{LETTERS[i]}</span> {c.text}
+                  <span className="pack-choice-letter">{LETTERS[i]}</span>
+                  <Markdown interactive={false}>{c.text}</Markdown>
                   {showAnswers && c.is_correct && <Icon name="check" label={t("packs.correctChoice")} />}
                 </li>
               ))}

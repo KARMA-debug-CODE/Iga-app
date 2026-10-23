@@ -25,6 +25,32 @@ MAX_EVALUATION_QUESTIONS = 3
 _HEADING = re.compile(r"^##[ \t]+(.+?)[ \t]*$", re.MULTILINE)
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
 _ITALIC = re.compile(r"\*(.+?)\*|(?<!\w)_(.+?)_(?!\w)")
+_MATHS = re.compile(r"\$\$(.+?)\$\$|\$(.+?)\$", re.DOTALL)
+_MATHS_SPACE = re.compile(r"\\[,;:! ]")
+_MATHS_ESCAPE = re.compile(r"\\([%&#_])")
+_DEGREES = re.compile(r"\^\s*\{?\s*\\circ\s*\}?")
+_WRAPPER = re.compile(
+    r"\\(?:text|textbf|textit|mathrm|mathbf|mathit|mathbb|mathcal|operatorname|boldsymbol|vec|hat|bar|overline|"
+    r"underline|overrightarrow|emph)\s*\{([^{}]*)\}"
+)
+_FRAC = re.compile(r"\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}")
+_ROOT = re.compile(r"\\sqrt\s*(?:\[(\d+)\])?\s*\{([^{}]*)\}")
+_FUNCTION = re.compile(r"\\(sin|cos|tan|cot|sec|csc|log|ln|exp|lim|max|min)(?![A-Za-z])")
+_FUNCTION_BRACKET = re.compile(r"\b(sin|cos|tan|cot|sec|csc|log|ln|exp) \(")
+_COMMAND = re.compile(r"\\([A-Za-z]+)")
+_POWER = re.compile(r"\^\s*(?:\{([^{}]*)\}|([^\s{}]))")
+_SYMBOLS = {
+    "times": "×", "div": "÷", "cdot": "·", "pm": "±", "mp": "∓", "le": "≤", "leq": "≤", "ge": "≥", "geq": "≥",
+    "ne": "≠", "neq": "≠", "approx": "≈", "equiv": "≡", "propto": "∝", "infty": "∞", "circ": "°", "degree": "°",
+    "to": "→", "rightarrow": "→", "leftarrow": "←", "Rightarrow": "⇒", "leftrightarrow": "<->",
+    "rightleftharpoons": "⇌", "angle": "∠", "triangle": "△", "perp": "⊥", "parallel": "∥", "in": "∈", "cup": "∪",
+    "cap": "∩", "subset": "⊂", "emptyset": "∅", "sum": "Σ", "int": "∫", "ldots": "…", "dots": "…", "cdots": "⋯",
+    "quad": " ", "qquad": " ", "left": "", "right": "", "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ",
+    "Delta": "Δ", "epsilon": "ε", "theta": "θ", "lambda": "λ", "mu": "μ", "pi": "π", "rho": "ρ", "sigma": "σ",
+    "Sigma": "Σ", "tau": "τ", "phi": "φ", "omega": "ω", "Omega": "Ω",
+}  # fmt: skip
+_SUPERSCRIPTS = str.maketrans("0123456789+-=()n", "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿ")
+_ROOT_SIGNS = {None: "√", "2": "√", "3": "∛", "4": "∜"}
 
 
 def question_payload(question):
@@ -129,9 +155,46 @@ def _lesson_text(lesson, lang):
     return lesson.title, lesson.body
 
 
+def _grouped(part):
+    part = part.strip()
+    return f"({part})" if re.search(r"[\s+\-×÷·=/]", part) else part
+
+
+def _power(match):
+    exponent = match.group(1) if match.group(1) is not None else match.group(2)
+    if exponent and all(c in "0123456789+-=()n" for c in exponent):
+        return exponent.translate(_SUPERSCRIPTS)
+    return "^" + (exponent if len(exponent) == 1 else f"({exponent})")
+
+
+def _root(match):
+    sign = _ROOT_SIGNS.get(match.group(1))
+    if sign is None:
+        return f"{_grouped(match.group(2))}^(1/{match.group(1)})"
+    return sign + _grouped(match.group(2))
+
+
+def _maths_words(expression):
+    """LaTeX as text a teacher can read on paper: \\frac{3}{4} -> 3/4, x^2 -> x², \\times -> ×. Subscripts stay as _2."""
+    text = _MATHS_ESCAPE.sub(r"\1", _MATHS_SPACE.sub(" ", expression))
+    text = _DEGREES.sub("°", text)
+    previous = None
+    while previous != text:  # innermost first, so fractions and roots inside each other read right
+        previous = text
+        text = _WRAPPER.sub(r"\1", text)
+        text = _FRAC.sub(lambda m: f"{_grouped(m.group(1))}/{_grouped(m.group(2))}", text)
+        text = _ROOT.sub(_root, text)
+    text = _FUNCTION.sub(r"\1 ", text)
+    text = _COMMAND.sub(lambda m: _SYMBOLS.get(m.group(1), m.group(1)), text)
+    text = _POWER.sub(_power, text)
+    text = _FUNCTION_BRACKET.sub(r"\1(", text.replace("{", "").replace("}", ""))
+    return " ".join(text.split())
+
+
 def _plain(text):
-    """Lesson or question text as plain words for the plan: no maths delimiters, code ticks or emphasis, but
+    """Lesson or question text as plain words for the plan: maths read as text, no code ticks or emphasis, but
     subscripts such as 10_2 kept."""
+    text = _MATHS.sub(lambda m: _maths_words(m.group(1) or m.group(2)), text)
     text = _BOLD.sub(r"\1", text.replace("$", "").replace("`", ""))
     text = _ITALIC.sub(lambda m: m.group(1) or m.group(2), text)
     return " ".join(text.lstrip("#").split())

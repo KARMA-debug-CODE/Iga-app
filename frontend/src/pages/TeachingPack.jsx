@@ -177,7 +177,10 @@ export default function TeachingPack() {
               ]}
             />
             {tab === "insight" && <PackInsight insight={doc.insight} studentsNeedingHelp={pack.students_needing_help} />}
-            {tab === "plan" && <PackPlan pack={pack} />}
+            {/* Kept mounted while hidden, so the teacher's edits and any save on its way survive a tab switch. */}
+            <div hidden={tab !== "plan"}>
+              <PackPlan key={pack.id} pack={pack} />
+            </div>
             {tab === "worksheet" && <Worksheet pack={pack} />}
             {tab === "quiz" && <Quiz pack={pack} />}
           </div>

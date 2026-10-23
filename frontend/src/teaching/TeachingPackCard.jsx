@@ -47,7 +47,7 @@ export default function TeachingPackCard({ classroomId, weakUnits }) {
               <span>{u.unit}</span>
               <span className="pack-unit-actions">
                 <span className={scoreClass(u.average)}>{u.average}%</span>
-                {u.unit_id && (
+                {u.unit_id && u.of_class_grade && (
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"

@@ -12,6 +12,16 @@ const BODY = ["unit_title", "key_unit_competence", "lesson_title", "objective", 
 const STEP_COLUMNS = ["teacher", "learners", "competences"];
 const SAVE_DELAY = 800;
 
+/** Edits waiting to be saved, a later edit of the same field or step cell winning. */
+function mergeEdits(base, edit) {
+  const merged = { ...base, ...edit };
+  if (base.steps && edit.steps) {
+    const length = Math.max(base.steps.length, edit.steps.length);
+    merged.steps = Array.from({ length }, (_, i) => ({ ...base.steps[i], ...edit.steps[i] }));
+  }
+  return merged;
+}
+
 /** The editable lesson plan: changes are saved a moment after the teacher stops typing. */
 export default function PackPlan({ pack }) {
   const { t } = useI18n();
@@ -21,7 +31,9 @@ export default function PackPlan({ pack }) {
   const pending = useRef({});
   const timer = useRef(null);
 
-  async function save() {
+  const queue = useRef(Promise.resolve());
+
+  async function send() {
     const edits = pending.current;
     pending.current = {};
     if (!Object.keys(edits).length) return;
@@ -30,9 +42,14 @@ export default function PackPlan({ pack }) {
       await api(`/teaching/packs/${pack.id}/`, { method: "PATCH", body: { plan: edits } });
       setStatus("saved");
     } catch {
-      pending.current = { ...edits, ...pending.current };
+      pending.current = mergeEdits(edits, pending.current);
       setStatus("error");
     }
+  }
+
+  function save() {
+    // One save at a time, in order: on a slow network an older save must not land after a newer one.
+    queue.current = queue.current.then(send);
   }
 
   function schedule() {
@@ -43,7 +60,7 @@ export default function PackPlan({ pack }) {
   function update(next, edit) {
     planRef.current = next;
     setPlan(next);
-    Object.assign(pending.current, edit);
+    pending.current = mergeEdits(pending.current, edit);
     setStatus("idle");
     schedule();
   }
@@ -54,7 +71,8 @@ export default function PackPlan({ pack }) {
 
   function changeStep(index, column, value) {
     const steps = planRef.current.steps.map((step, i) => (i === index ? { ...step, [column]: value } : step));
-    const edit = steps.map((step) => Object.fromEntries(STEP_COLUMNS.map((c) => [c, step[c]])));
+    // Only the cell that changed: the server merges steps by position.
+    const edit = Array.from({ length: index + 1 }, (_, i) => (i === index ? { [column]: value } : {}));
     update({ ...planRef.current, steps }, { steps: edit });
   }
 

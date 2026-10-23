@@ -41,12 +41,41 @@ describe("Teaching pack print layouts", () => {
     expect(screen.getByText(/Answer key: S2 Unit 3: Motion/)).toBeInTheDocument();
   });
 
-  it("the quiz print ends with its key on a new page", () => {
+  it("the quiz print is a student copy, with no key", () => {
     const { container } = print("quiz");
-    const key = container.querySelector(".pack-page-break");
-    expect(key).not.toBeNull();
-    expect(key.textContent).toContain("Explanation for How do you work out speed?");
-    expect(container.querySelectorAll(".pack-print-questions .is-correct").length).toBe(0);
+    expect(screen.getByText("How do you work out speed?")).toBeInTheDocument();
+    expect(screen.queryByText(/Explanation for/)).not.toBeInTheDocument();
+    expect(container.querySelector(".is-correct")).toBeNull();
+    expect(screen.getByText("Name")).toBeInTheDocument();
+  });
+
+  it("the quiz key prints on its own, with the answers", () => {
+    const { container } = print("quizKey");
+    expect(screen.getByText("Explanation for How do you work out speed?")).toBeInTheDocument();
+    expect(container.querySelectorAll(".is-correct").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Quiz answer key: S2 Unit 3: Motion/)).toBeInTheDocument();
+    expect(screen.queryByText("Name")).not.toBeInTheDocument();
+  });
+
+  it("answer options and misconceptions print their maths, not raw LaTeX", () => {
+    const pack = packWith();
+    pack.document.worksheet.core[0].choices[0].text = "$x^2$";
+    pack.document.insight.misconceptions[0].wrong_choice = "$2x$";
+    pack.document.insight.misconceptions[0].correct = "$x^2$";
+    const { container } = print("worksheet", pack);
+    expect(container.querySelector(".pack-choices .katex")).not.toBeNull();
+    expect(container.textContent).not.toContain("$x^2$");
+    cleanup();
+    const insight = print("insight", pack);
+    expect(insight.container.querySelectorAll("ol .katex").length).toBeGreaterThanOrEqual(2);
+    expect(insight.container.textContent).not.toMatch(/\$2x\$|\$x\^2\$/);
+  });
+
+  it("the plan print keeps the lines of multi-line fields", () => {
+    const pack = packWith();
+    pack.document.plan.references = "Book one\nBook two";
+    print("plan", pack);
+    expect(screen.getByText(/Book one/).closest("td")).toHaveClass("pack-print-text");
   });
 
   it("the plan print shows the teacher's edits", () => {

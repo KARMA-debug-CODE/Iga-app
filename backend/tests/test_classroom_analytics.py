@@ -42,9 +42,32 @@ def test_report_weak_units_are_unchanged_and_carry_the_unit_id(client_for, teach
     unit_a, unit_b = scored["unit_a"], scored["unit_b"]
     report = client_for(teacher).get(f"/api/classes/{scored['classroom'].id}/report/").json()
     assert report["weak_units"] == [
-        {"unit": f"{unit_a.grade} Unit {unit_a.number}: {unit_a.title}", "average": 25.0, "unit_id": unit_a.id},
-        {"unit": f"{unit_b.grade} Unit {unit_b.number}: {unit_b.title}", "average": 75.0, "unit_id": unit_b.id},
+        {
+            "unit": f"{unit_a.grade} Unit {unit_a.number}: {unit_a.title}",
+            "average": 25.0,
+            "unit_id": unit_a.id,
+            "of_class_grade": True,
+        },
+        {
+            "unit": f"{unit_b.grade} Unit {unit_b.number}: {unit_b.title}",
+            "average": 75.0,
+            "unit_id": unit_b.id,
+            "of_class_grade": True,
+        },
     ]
+
+
+def test_report_marks_weak_units_from_another_grade(client_for, teacher, student, subject, scored):
+    # S2 students revising an S1 unit: the unit is listed, but it is not one of the class's own (no pack for it).
+    revision = Unit.objects.create(subject=subject, grade="S1", number=9, title="Revision")
+    question = add_mcq(subject, revision, "Old?")
+    _mark(student, make_quiz(subject, revision, [question]), question, 0)
+    rows = client_for(teacher).get(f"/api/classes/{scored['classroom'].id}/report/").json()["weak_units"]
+    assert {row["unit_id"]: row["of_class_grade"] for row in rows} == {
+        revision.id: False,
+        scored["unit_a"].id: True,
+        scored["unit_b"].id: True,
+    }
 
 
 def test_class_unit_scores_are_weakest_first(student, scored):

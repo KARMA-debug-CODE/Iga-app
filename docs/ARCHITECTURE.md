@@ -121,8 +121,11 @@ From a class's report, one click builds a pack for a unit:
   suggests an opening hook and a simpler explanation, labelled as Santa's; any error or odd reply gives the templates.
 - **API**: `/api/teaching/classes/<id>/units/` (free: the teaser counts), `/api/teaching/packs/` (make, list, read,
   edit the plan, delete) and `/api/teaching/packs/<id>/assign/` (a teacher-authored practice quiz of the pack's
-  questions, once per part). Only the class's current teacher; making and assigning need the school's subscription
-  and an active class. Printing is the browser's: `/teaching-packs/<id>?print=plan|worksheet|key|quiz|insight`.
+  questions, once per part, kept as a draft so it reaches the class through the assignment and never the public
+  library). Only the class's current teacher, while still an approved teacher; making and assigning need the school's
+  subscription and an active class. Plan edits are merged under a row lock and saved one at a time by the page.
+  Printing is the browser's: `/teaching-packs/<id>?print=plan|worksheet|key|quiz|quizKey|insight` (student copies
+  never carry answers; the keys print on their own).
 
 ## Santa, the AI tutor
 

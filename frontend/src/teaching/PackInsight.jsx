@@ -1,6 +1,7 @@
 import Markdown from "../components/Markdown";
 import { scoreClass } from "../components/ui";
 import { useI18n } from "../i18n";
+import AnswerLine from "./AnswerLine";
 
 /** What the class gets wrong in the unit, and who needs most help (teacher only). */
 export default function PackInsight({ insight, studentsNeedingHelp }) {
@@ -22,8 +23,8 @@ export default function PackInsight({ insight, studentsNeedingHelp }) {
               {insight.misconceptions.map((m) => (
                 <li key={m.question_id}>
                   <Markdown interactive={false}>{m.prompt}</Markdown>
-                  <p className="pack-wrong">{t("packs.chose", { share: Math.round(m.share * 100), choice: m.wrong_choice })}</p>
-                  <p>{t("packs.correctAnswer", { answer: m.correct })}</p>
+                  <AnswerLine className="pack-wrong" label={t("packs.choseLabel", { share: Math.round(m.share * 100) })} text={m.wrong_choice} />
+                  <AnswerLine label={t("packs.correctLabel")} text={m.correct} />
                   {m.explanation && <Markdown interactive={false}>{m.explanation}</Markdown>}
                 </li>
               ))}

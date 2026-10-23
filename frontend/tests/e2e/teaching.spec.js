@@ -41,7 +41,7 @@ test("a teacher makes, edits, prints and assigns a teaching pack", async ({ page
   // Assign the quiz to the class.
   await page.goto(packUrl);
   await page.getByRole("tab", { name: "Quiz" }).click();
-  const quizTitle = (await page.locator(".pack-section h3").first().textContent()).trim();
+  const quizTitle = (await page.locator(".pack-section:visible h3").first().textContent()).trim();
   await page.getByRole("button", { name: "Assign to the class" }).click();
   await page.getByRole("button", { name: "Assign", exact: true }).click();
   await expect(page.getByText(/assigned to the class/i)).toBeVisible();

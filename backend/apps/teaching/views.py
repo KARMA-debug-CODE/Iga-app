@@ -10,7 +10,6 @@ from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,12 +17,13 @@ from apps.assessments.models import Question, Quiz, QuizQuestion
 from apps.classroom.analytics import class_unit_scores
 from apps.classroom.models import Assignment
 from apps.core.constants import ContentStatus
+from apps.core.permissions import IsTeacher
 from apps.core.utils import request_language
 from apps.curriculum.models import Unit
 
 from .access import SubscriptionRequired, packs_for, require_active, require_premium, teacher_classroom
 from .builder import LEVEL_NAMES, apply_polish, build_pack, default_lesson
-from .insight import current_students, students_answered, unit_insight, unit_label
+from .insight import current_students, unit_insight, unit_label, unit_overview
 from .models import PackAssignment, TeachingPack
 from .polish import polish
 from .serializers import AssignSerializer, PackCreateSerializer, PackSerializer, PackSummarySerializer, PlanEditSerializer
@@ -41,24 +41,27 @@ class ClassUnitsView(APIView):
     """GET /api/teaching/classes/<id>/units/: the class's units, weakest first, with what Iga found. Free: it is
     the teaser an unpaid school sees (counts only, no question content)."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsTeacher]  # as the gradebook: a teacher who left the school or was revoked loses it
 
     def get(self, request, pk):
         classroom = teacher_classroom(request.user, pk)
         lang = request_language(request)
         since = timezone.now() - timedelta(days=settings.TEACHING_LOOKBACK_DAYS)
         scores = {s.unit.id: s for s in class_unit_scores(classroom, current_students(classroom), since=since)}
+        units = list(class_units(classroom))
+        found = unit_overview(classroom, units)
         rows = []
-        for unit in class_units(classroom):
+        for unit in units:
             score = scores.get(unit.id)
+            overview = found.get(unit.id, {}) if score else {}
             rows.append(
                 {
                     "unit_id": unit.id,
                     "label": unit_label(unit, lang),
                     "subject": unit.subject.localized_name(lang),
                     "average": score.average if score else None,
-                    "answered": students_answered(classroom, unit) if score else 0,
-                    "misconceptions_found": len(unit_insight(classroom, unit, lang)["misconceptions"]) if score else 0,
+                    "answered": overview.get("answered", 0),
+                    "misconceptions_found": overview.get("misconceptions_found", 0),
                 }
             )
         rows.sort(key=lambda row: (row["average"] is None, row["average"] or 0, row["unit_id"]))
@@ -66,7 +69,7 @@ class ClassUnitsView(APIView):
 
 
 class PackViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsTeacher]
 
     def get_queryset(self):
         packs = packs_for(self.request.user).select_related("classroom", "unit").prefetch_related("assignments")
@@ -131,20 +134,25 @@ class PackViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Destr
         pack = self.get_object()
         data = PlanEditSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        edits = dict(pack.plan_edits or {})
-        for key, value in data.validated_data["plan"].items():
-            if key == "steps":
-                steps = list(edits.get("steps", []))
-                for index, step in enumerate(value):
-                    while len(steps) <= index:
-                        steps.append({})
-                    steps[index] = {**steps[index], **step}
-                edits["steps"] = steps
-            else:
-                edits[key] = value
-        pack.plan_edits = edits
-        pack.save(update_fields=["plan_edits"])
-        return Response(PackSerializer(pack, context=self.get_serializer_context()).data)
+        with transaction.atomic():
+            # Re-read under a row lock: a save that landed since get_object() (a slow network, a second tab) stays.
+            locked = TeachingPack.objects.select_for_update().get(pk=pack.pk)
+            edits = dict(locked.plan_edits or {})
+            for key, value in data.validated_data["plan"].items():
+                if key == "steps":
+                    steps = list(edits.get("steps", []))
+                    for index, step in enumerate(value):
+                        while len(steps) <= index:
+                            steps.append({})
+                        steps[index] = {**steps[index], **step}
+                    edits["steps"] = steps
+                else:
+                    edits[key] = value
+            pack.plan_edits = edits
+            pack.save(update_fields=["plan_edits"])
+        # The students needing help are read from the class's answers: not on every save while the teacher types.
+        context = {**self.get_serializer_context(), "live": False}
+        return Response(PackSerializer(pack, context=context).data)
 
     @action(detail=True, methods=["post"])
     def assign(self, request, pk=None):
@@ -210,7 +218,8 @@ def _create_assignment(pack, what, questions, due_at, teacher):
         subject=unit.subject if unit else first.subject,
         grade=unit.grade if unit else first.grade,
         unit=unit,
-        status=ContentStatus.PUBLISHED,
+        # A draft reaches the class through its assignment only, never the library every school browses.
+        status=ContentStatus.DRAFT,
         author=teacher,
         is_free=False,  # library questions stay premium, as in any teacher-made quiz
     )

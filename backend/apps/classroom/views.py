@@ -379,6 +379,8 @@ class ClassroomViewSet(viewsets.ModelViewSet):
                 "unit": f"{s.unit.grade} Unit {s.unit.number}: {s.unit.title}",
                 "average": s.average,
                 "unit_id": s.unit.id,
+                # Students may revise another grade's units: listed, but teaching packs are for the class's own grade.
+                "of_class_grade": s.unit.grade == classroom.grade,
             }
             for s in class_unit_scores(classroom, students)[:5]
         ]

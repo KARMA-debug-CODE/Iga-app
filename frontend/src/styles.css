@@ -2984,6 +2984,21 @@ tr:last-child td {
   align-items: center;
   gap: 8px;
 }
+.pack-choices .prose,
+.pack-answer-line .prose {
+  font-size: inherit;
+}
+.pack-choices .prose p,
+.pack-answer-line .prose p {
+  margin: 0;
+}
+.pack-answer-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35em;
+  margin: 6px 0;
+}
 .pack-choices li.is-correct {
   color: var(--success);
   font-weight: 600;

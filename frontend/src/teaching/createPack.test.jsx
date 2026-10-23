@@ -10,7 +10,7 @@ function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
 
-const WEAK = [{ unit: "S2 Unit 1: Graphs", average: 25, unit_id: 7 }];
+const WEAK = [{ unit: "S2 Unit 1: Graphs", average: 25, unit_id: 7, of_class_grade: true }];
 const UNITS = [
   { unit_id: 7, label: "S2 Unit 1: Graphs", subject: "Mathematics", average: 25, answered: 6, misconceptions_found: 2 },
   { unit_id: 8, label: "S2 Unit 2: Angles", subject: "Mathematics", average: 80, answered: 6, misconceptions_found: 0 },
@@ -60,6 +60,13 @@ describe("Teaching packs from the class report", () => {
     expect(await screen.findByText("PACK PAGE")).toBeInTheDocument();
     const post = calls.find((c) => c.method === "POST");
     expect(post.body).toEqual({ classroom: 3, unit: 7 });
+  });
+
+  it("a weak unit from another grade is listed without a pack button", () => {
+    show([...WEAK, { unit: "S1 Unit 3: Indices", average: 10, unit_id: 4, of_class_grade: false }]);
+    expect(screen.getByText("S1 Unit 3: Indices")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Make a teaching pack for S1 Unit 3: Indices" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Make a teaching pack for S2 Unit 1: Graphs" })).toBeInTheDocument();
   });
 
   it("an unpaid school sees the teaser with the misconception count", async () => {

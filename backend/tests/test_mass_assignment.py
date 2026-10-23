@@ -649,6 +649,6 @@ def test_assigning_a_pack_decides_author_class_and_price_on_the_server(client_fo
     }
     data = _ok(client.post(f"/api/teaching/packs/{pack_id}/assign/", payload, format="json")).data
     quiz, assignment = Quiz.objects.get(pk=data["quiz_id"]), Assignment.objects.get(pk=data["assignment_id"])
-    assert (quiz.author, quiz.is_free, quiz.status) == (teacher, False, "published") and quiz.title != "Hijacked"
+    assert (quiz.author, quiz.is_free, quiz.status) == (teacher, False, "draft") and quiz.title != "Hijacked"
     assert (assignment.classroom, assignment.created_by) == (mine, teacher)
     assert TeachingPack.objects.get(pk=pack_id).classroom == mine

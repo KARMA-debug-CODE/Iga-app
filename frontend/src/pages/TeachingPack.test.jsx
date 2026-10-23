@@ -74,6 +74,80 @@ describe("Teaching pack page", () => {
     expect(await screen.findByText("Saved")).toBeInTheDocument();
   });
 
+  it("keeps plan edits when the teacher switches tabs and comes back", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    show();
+    await screen.findByText("S2 Unit 3: Motion");
+    tab("Lesson plan");
+    fireEvent.change(screen.getByLabelText("Instructional objective"), { target: { value: "Kept" } });
+    await act(async () => {
+      vi.advanceTimersByTime(850);
+    });
+    tab("Worksheet");
+    tab("Lesson plan");
+    expect(screen.getByLabelText("Instructional objective")).toHaveValue("Kept");
+  });
+
+  it("a step edit saves only that cell", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const { container } = show();
+    await screen.findByText("S2 Unit 3: Motion");
+    tab("Lesson plan");
+    fireEvent.change(container.querySelector("#step-0-teacher"), { target: { value: "Start" } });
+    fireEvent.change(container.querySelector("#step-2-learners"), { target: { value: "Recap" } });
+    await act(async () => {
+      vi.advanceTimersByTime(850);
+    });
+    await waitFor(() => expect(calls.filter((c) => c.method === "PATCH")).toHaveLength(1));
+    expect(calls.find((c) => c.method === "PATCH").body).toEqual({ plan: { steps: [{ teacher: "Start" }, {}, { learners: "Recap" }] } });
+  });
+
+  it("a save waits for the one before it", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    let release;
+    const stub = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url, init = {}) => {
+        if (init.method === "PATCH" && !release) {
+          calls.push({ url: String(url), method: "PATCH", body: JSON.parse(init.body) });
+          await new Promise((resolve) => {
+            release = resolve;
+          });
+          return jsonResponse(pack);
+        }
+        return stub(url, init);
+      }),
+    );
+    show();
+    await screen.findByText("S2 Unit 3: Motion");
+    tab("Lesson plan");
+    fireEvent.change(screen.getByLabelText("Instructional objective"), { target: { value: "First" } });
+    await act(async () => {
+      vi.advanceTimersByTime(850);
+    });
+    await waitFor(() => expect(calls.filter((c) => c.method === "PATCH")).toHaveLength(1));
+    fireEvent.change(screen.getByLabelText("Learning materials"), { target: { value: "Chalk" } });
+    await act(async () => {
+      vi.advanceTimersByTime(850);
+    });
+    expect(calls.filter((c) => c.method === "PATCH")).toHaveLength(1);
+    await act(async () => {
+      release();
+    });
+    await waitFor(() => expect(calls.filter((c) => c.method === "PATCH")).toHaveLength(2));
+    expect(calls.filter((c) => c.method === "PATCH")[1].body).toEqual({ plan: { materials: "Chalk" } });
+  });
+
+  it("shows maths in the misconceptions", async () => {
+    pack = packWith();
+    pack.document.insight.misconceptions[0].wrong_choice = "$2x$";
+    const { container } = show();
+    await screen.findByText("S2 Unit 3: Motion");
+    expect(container.querySelector(".pack-misconceptions .pack-wrong .katex")).not.toBeNull();
+    expect(container.textContent).not.toContain("$2x$");
+  });
+
   it("assigning the quiz posts what and due date", async () => {
     show();
     await screen.findByText("S2 Unit 3: Motion");

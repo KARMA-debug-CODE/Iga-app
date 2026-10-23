@@ -3,12 +3,15 @@
 from datetime import timedelta
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.classroom.models import Classroom
 from apps.curriculum.models import Lesson, Subject, Unit
 from apps.teaching.models import TeachingPack
+from apps.teaching.serializers import PlanEditSerializer
 from apps.teaching.views import PackViewSet
 
 from .conftest import add_mcq, make_school, make_user
@@ -179,3 +182,54 @@ def test_creation_uses_the_teaching_pack_throttle():
     listing.action = "list"
     listing.get_throttles()
     assert getattr(listing, "throttle_scope", None) is None
+
+
+def test_a_teacher_who_left_the_school_loses_the_packs(client_for, teacher, unit, classroom):
+    # Leaving a school (or being revoked) drops teacher approval but keeps classroom.teacher: like the gradebook,
+    # the packs, with their live list of students, close.
+    pack_id = make_pack(client_for, teacher, classroom, unit)["id"]
+    User.objects.filter(pk=teacher.pk).update(teacher_approved=False)
+    client = client_for(User.objects.get(pk=teacher.pk))
+    assert client.get(f"{PACKS}{pack_id}/").status_code == 403
+    assert client.get(PACKS).status_code == 403
+    assert client.get(f"/api/teaching/classes/{classroom.id}/units/").status_code == 403
+    assert client.patch(f"{PACKS}{pack_id}/", {"plan": {"objective": "x"}}, format="json").status_code == 403
+    assert client.delete(f"{PACKS}{pack_id}/").status_code == 403
+    assert TeachingPack.objects.filter(pk=pack_id).exists()
+
+
+def test_units_query_count_does_not_grow_with_units(client_for, teacher, subject):
+    def measure(count, prefix, first_number):
+        c, students = class_with_students(teacher, subject, 5, prefix=prefix)
+        for number in range(first_number, first_number + count):
+            unit = Unit.objects.create(subject=subject, grade="S2", number=number, title=f"{prefix}{number}")
+            question = add_mcq(subject, unit, f"{prefix}{number}?")
+            for student in students:
+                mark_answer(student, question, 0, choices=["3"])
+        client = client_for(teacher)
+        with CaptureQueriesContext(connection) as queries:
+            assert client.get(f"/api/teaching/classes/{c.id}/units/").status_code == 200
+        return len(queries)
+
+    assert measure(2, "few", 100) == measure(8, "many", 200)
+
+
+def test_a_plan_edit_keeps_one_saved_meanwhile(client_for, teacher, unit, classroom, monkeypatch):
+    # Two saves of the same pack (a slow network, a second tab): the later one must not undo the earlier.
+    pack_id = make_pack(client_for, teacher, classroom, unit)["id"]
+    validate = PlanEditSerializer.is_valid
+
+    def another_save_lands_first(self, *args, **kwargs):
+        TeachingPack.objects.filter(pk=pack_id).update(plan_edits={"materials": "Chalk"})
+        return validate(self, *args, **kwargs)
+
+    monkeypatch.setattr(PlanEditSerializer, "is_valid", another_save_lands_first)
+    response = client_for(teacher).patch(f"{PACKS}{pack_id}/", {"plan": {"objective": "Mine"}}, format="json")
+    assert response.status_code == 200
+    assert TeachingPack.objects.get(pk=pack_id).plan_edits == {"materials": "Chalk", "objective": "Mine"}
+
+
+def test_saving_the_plan_does_not_recompute_the_students(client_for, teacher, unit, classroom):
+    pack_id = make_pack(client_for, teacher, classroom, unit)["id"]
+    body = client_for(teacher).patch(f"{PACKS}{pack_id}/", {"plan": {"objective": "x"}}, format="json").json()
+    assert body["document"]["plan"]["objective"] == "x" and "students_needing_help" not in body

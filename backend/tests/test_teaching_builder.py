@@ -234,3 +234,15 @@ def test_a_single_question_is_singular(settings, subject, unit):
     with translation.override("en"):
         notes = select_worksheet(unit, {}, [])["notes"]
     assert "Only 1 stretch question exists for this unit." in notes
+
+
+def test_plan_text_reads_maths_as_words(teacher, subject, unit, lesson, classroom):
+    q(subject, unit, r"Simplify $\frac{3}{4} \times 8$, $x^2 \div x^{-1}$ and $\sqrt{x+1}$.")
+    q(subject, unit, r"Show $\sin\theta = \frac{\text{opposite}}{\text{hypotenuse}}$ for $30^\circ$.")
+    q(subject, unit, r"Is $\frac{a+b}{2} \geq \sqrt{ab}$? Keep `my_var` and $H_2O$.")
+    evaluation = build_pack(classroom, unit, lesson, teacher, "en")["plan"]["evaluation"].splitlines()
+    assert evaluation == [
+        "1. Simplify 3/4 × 8, x² ÷ x⁻¹ and √(x+1).",
+        "2. Show sin θ = opposite/hypotenuse for 30°.",
+        "3. Is (a+b)/2 ≥ √ab? Keep my_var and H_2O.",
+    ]
