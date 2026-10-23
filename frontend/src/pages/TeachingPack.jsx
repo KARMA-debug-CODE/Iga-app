@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { Icon } from "../components/Icon";
 import { ErrorMessage, Loader, Tabs } from "../components/ui";
@@ -9,10 +9,35 @@ import AssignDialog from "../teaching/AssignDialog";
 import { createPack } from "../teaching/createPack";
 import PackInsight from "../teaching/PackInsight";
 import PackPlan from "../teaching/PackPlan";
+import PackPrint, { PRINT_MODES } from "../teaching/PackPrint";
 import PackQuestions from "../teaching/PackQuestions";
 import PackTeaser from "../teaching/PackTeaser";
 
 const LEVELS = ["support", "core", "stretch"];
+const PRINT_DELAY = 400; // lets maths and fonts finish drawing before the print dialog opens
+
+/** A pack on its own for paper, then the browser's print dialog (once). */
+function PrintView({ pack, mode }) {
+  useEffect(() => {
+    const timer = setTimeout(() => window.print(), PRINT_DELAY);
+    return () => clearTimeout(timer);
+  }, []);
+  return <PackPrint pack={pack} mode={mode} />;
+}
+
+function PrintMenu({ packId }) {
+  const { t } = useI18n();
+  return (
+    <div className="pack-print-menu">
+      <span className="muted">{t("packs.print.menu")}</span>
+      {PRINT_MODES.map((mode) => (
+        <a key={mode} className="btn btn-ghost btn-sm" href={`/teaching-packs/${packId}?print=${mode}`} target="_blank" rel="noopener">
+          <Icon name="print" /> {t(`packs.print.${mode}`)}
+        </a>
+      ))}
+    </div>
+  );
+}
 
 function Notes({ notes }) {
   if (!notes?.length) return null;
@@ -92,6 +117,8 @@ function Quiz({ pack }) {
 /** A teaching pack: what the class gets wrong, the lesson plan, the worksheet and the quiz. */
 export default function TeachingPack() {
   const { id } = useParams();
+  const [search] = useSearchParams();
+  const printMode = PRINT_MODES.includes(search.get("print")) ? search.get("print") : null;
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const state = useApi(`/teaching/packs/${id}/`);
@@ -117,6 +144,7 @@ export default function TeachingPack() {
   return (
     <Loader state={state}>
       {(pack) => {
+        if (printMode) return <PrintView pack={pack} mode={printMode} />;
         const doc = pack.document;
         return (
           <div className="page pack-page">
@@ -133,6 +161,7 @@ export default function TeachingPack() {
                   <Icon name="refresh" /> {refreshing ? t("packs.building") : t("packs.refresh")}
                 </button>
               )}
+              <PrintMenu packId={pack.id} />
               {teaser && <PackTeaser teaser={teaser} />}
               {error && <ErrorMessage error={error} />}
               <Notes notes={doc.notes} />
