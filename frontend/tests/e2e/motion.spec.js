@@ -10,6 +10,7 @@ async function newStudent(page) {
   await page.getByLabel(/^username$/i).fill(`move${Date.now()}`);
   await page.getByLabel(/^password/i).fill("Murakoze-2026");
   await page.getByLabel("Grade").selectOption("S1");
+  await page.getByLabel(/i have read and accept/i).check();
   await page.getByRole("button", { name: /create account/i }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Hi Keza");
 }
@@ -99,7 +100,10 @@ test.describe("with reduced motion", () => {
     // Numbers are shown as they are, not counted up.
     await page.goto("/");
     await expect(page.locator(".stat strong").first()).toHaveText("10");
-    const running = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").length);
-    expect(running).toBe(0);
+    // Reduced motion shortens animations to 1ms rather than removing them: none may last longer than that.
+    const moving = await page.evaluate(
+      () => document.getAnimations().filter((a) => a.playState === "running" && a.effect?.getComputedTiming().duration > 1).length,
+    );
+    expect(moving).toBe(0);
   });
 });

@@ -8,7 +8,8 @@ test("forgot password: the same answer for any name, and an unusable link says s
   await page.getByLabel(/username or email/i).fill("divine");
   await page.getByRole("button", { name: /send the link/i }).click();
   const answer = page.getByRole("status");
-  await expect(answer).toContainText(/if an account matches/i);
+  // Often the run's first request: a freshly started server loads its code on it, which can take a few seconds.
+  await expect(answer).toContainText(/if an account matches/i, { timeout: 15000 });
   const realText = await answer.innerText();
 
   await page.goto("/forgot-password");
