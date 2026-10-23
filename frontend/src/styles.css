@@ -2866,3 +2866,167 @@ tr:last-child td {
     flex-wrap: wrap;
   }
 }
+
+/* The teaching pack page. */
+.pack-header {
+  margin-bottom: 12px;
+}
+.pack-header .muted {
+  margin: 4px 0 8px;
+}
+.pack-section {
+  margin-top: 16px;
+}
+.pack-section h3 {
+  margin-top: 18px;
+}
+.pack-section h3:first-child {
+  margin-top: 0;
+}
+.pack-notice,
+.pack-notes li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--warn-bg);
+}
+.pack-notes {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.pack-average {
+  font-weight: 600;
+}
+.pack-misconceptions > li {
+  margin-bottom: 14px;
+}
+.pack-wrong {
+  font-weight: 600;
+}
+.pack-santa .badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.pack-save-status {
+  min-height: 1.2em;
+  margin: 0 0 8px;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+.pack-plan-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px 14px;
+  margin-bottom: 10px;
+}
+.pack-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.pack-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
+.pack-field output {
+  padding: 8px 0;
+}
+.pack-field textarea {
+  resize: vertical;
+}
+.pack-steps {
+  display: grid;
+  gap: 12px;
+}
+.pack-step {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.pack-step h4 {
+  margin: 0 0 8px;
+}
+.pack-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pack-level {
+  margin-top: 14px;
+}
+.pack-level h3 {
+  margin: 0;
+}
+.pack-questions {
+  padding-left: 1.4em;
+}
+.pack-question {
+  margin-bottom: 14px;
+}
+.pack-choices {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0;
+  display: grid;
+  gap: 4px;
+}
+.pack-choices li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pack-choices li.is-correct {
+  color: var(--success);
+  font-weight: 600;
+}
+.pack-choice-letter {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.pack-answer {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--success);
+  background: var(--surface-2);
+  border-radius: 0 10px 10px 0;
+}
+.pack-answer p {
+  margin: 0 0 4px;
+}
+.pack-assign {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+.pack-assign label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+.pack-assign-actions {
+  display: flex;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .pack-level > .spread,
+  .pack-section > .spread {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
