@@ -28,6 +28,7 @@ from apps.schools import access
 from apps.simulations.models import SimulationView
 
 from . import roster
+from .analytics import class_unit_scores
 from .models import Assignment, Classroom, Enrollment
 
 
@@ -373,29 +374,14 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             )
 
         # Weak topics: average percentage per unit across all marked answers by class members.
-        unit_totals = defaultdict(lambda: [0.0, 0.0, None])
-        attempts = Attempt.objects.filter(user__in=students, status=Attempt.Status.MARKED).prefetch_related(
-            "answers__question__unit"
-        )
-        if classroom.subject_id:
-            attempts = attempts.filter(quiz__subject_id=classroom.subject_id)
-        for attempt in attempts:
-            for answer in attempt.answers.all():
-                unit = answer.question.unit
-                if unit is None or answer.marks_awarded is None:
-                    continue
-                totals = unit_totals[unit.id]
-                totals[0] += float(answer.marks_awarded)
-                totals[1] += float(answer.question.marks)
-                totals[2] = unit
-        weak_units = sorted(
-            (
-                {"unit": f"{u.grade} Unit {u.number}: {u.title}", "average": round(got / possible * 100, 1)}
-                for got, possible, u in unit_totals.values()
-                if possible
-            ),
-            key=lambda item: item["average"],
-        )[:5]
+        weak_units = [
+            {
+                "unit": f"{s.unit.grade} Unit {s.unit.number}: {s.unit.title}",
+                "average": s.average,
+                "unit_id": s.unit.id,
+            }
+            for s in class_unit_scores(classroom, students)[:5]
+        ]
 
         return Response(
             {
