@@ -6,7 +6,7 @@ from rest_framework import serializers
 from apps.core.text import clean_text
 
 from .insight import students_needing_help
-from .models import PLAN_EDITABLE_FIELDS, TeachingPack
+from .models import PLAN_EDITABLE_FIELDS, PackAssignment, TeachingPack
 
 MAX_TEXT = 2000
 STEP_FIELDS = {"teacher", "learners", "competences"}
@@ -117,3 +117,8 @@ class PackSerializer(serializers.ModelSerializer):
 
     def get_assignments(self, pack):
         return [{"what": a.what, "assignment_id": a.assignment_id, "quiz_id": a.quiz_id} for a in pack.assignments.all()]
+
+
+class AssignSerializer(serializers.Serializer):
+    what = serializers.ChoiceField(choices=PackAssignment.What.choices)
+    due_at = serializers.DateTimeField(required=False, allow_null=True)

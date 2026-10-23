@@ -1058,15 +1058,31 @@ msgstr "Une fiche de préparation a au plus %(count)s étapes."
 msgid "A step can change only its teacher activities, learner activities and competences."
 msgstr "Une étape ne peut changer que les activités de l'enseignant, les activités des élèves et les compétences."
 
-#: apps/teaching/views.py:92
+#: apps/teaching/views.py:197
+msgid "Diagnostic quiz"
+msgstr "Quiz diagnostique"
+
+#: apps/teaching/views.py:197
+msgid "Targeted quiz"
+msgstr "Quiz ciblé"
+
+#: apps/teaching/views.py:199
+msgid "Worksheet: %(level)s"
+msgstr "Fiche d'exercices : %(level)s"
+
+#: apps/teaching/views.py:167
+msgid "None of these questions can be assigned any more."
+msgstr "Aucune de ces questions ne peut plus être donnée."
+
+#: apps/teaching/views.py:96
 msgid "Choose a unit of this class's subject and grade."
 msgstr "Choisissez une unité de la matière et du niveau de cette classe."
 
-#: apps/teaching/views.py:97
+#: apps/teaching/views.py:101
 msgid "Choose a published lesson of this unit."
 msgstr "Choisissez une leçon publiée de cette unité."
 
-#: apps/teaching/views.py:73
+#: apps/teaching/views.py:77
 msgid "Choose a class."
 msgstr "Choisissez une classe."
 

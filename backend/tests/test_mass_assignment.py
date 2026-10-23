@@ -579,6 +579,7 @@ TESTED = {
     "api/notes/",
     "api/teaching/packs/",
     "api/teaching/packs/{pk}/",
+    "api/teaching/packs/{pk}/assign/",
     "api/review/{pk}/answer/",
 }
 
@@ -623,3 +624,25 @@ def test_teaching_pack_writes_keep_owner_document_and_class(client_for, w):
     pack.refresh_from_db()
     assert pack.document == before and pack.classroom == mine and pack.created_by == teacher and not pack.ai_used
     assert pack.plan_edits == {"objective": "Mine"}
+
+
+def test_assigning_a_pack_decides_author_class_and_price_on_the_server(client_for, w):
+    from apps.assessments.models import Quiz
+    from apps.classroom.models import Assignment, Classroom
+    from apps.teaching.models import TeachingPack
+
+    teacher = w["teacher"]
+    mine = Classroom.objects.create(name="Mine", subject=w["subject"], grade="S2", teacher=teacher)
+    elsewhere = Classroom.objects.create(name="Theirs", subject=w["subject"], grade="S2", teacher=w["victim"])
+    add_mcq(w["subject"], w["unit"])
+    client = client_for(teacher)
+    pack_id = _ok(client.post("/api/teaching/packs/", {"classroom": mine.id, "unit": w["unit"].id}, format="json")).data["id"]
+    payload = {
+        **w["bad"], "what": "quiz", "classroom": elsewhere.id, "quiz": 999999, "assignment": 999999,
+        "is_free": True, "status": "draft", "title": "Hijacked",
+    }
+    data = _ok(client.post(f"/api/teaching/packs/{pack_id}/assign/", payload, format="json")).data
+    quiz, assignment = Quiz.objects.get(pk=data["quiz_id"]), Assignment.objects.get(pk=data["assignment_id"])
+    assert (quiz.author, quiz.is_free, quiz.status) == (teacher, False, "published") and quiz.title != "Hijacked"
+    assert (assignment.classroom, assignment.created_by) == (mine, teacher)
+    assert TeachingPack.objects.get(pk=pack_id).classroom == mine

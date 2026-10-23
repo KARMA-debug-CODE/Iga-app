@@ -4,25 +4,29 @@ Making and assigning need the school's subscription; packs already made stay rea
 from datetime import timedelta
 
 from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.assessments.models import Question, Quiz, QuizQuestion
 from apps.classroom.analytics import class_unit_scores
+from apps.classroom.models import Assignment
 from apps.core.constants import ContentStatus
 from apps.core.utils import request_language
 from apps.curriculum.models import Unit
 
 from .access import SubscriptionRequired, packs_for, require_active, require_premium, teacher_classroom
-from .builder import apply_polish, build_pack, default_lesson
+from .builder import LEVEL_NAMES, apply_polish, build_pack, default_lesson
 from .insight import current_students, students_answered, unit_insight, unit_label
-from .models import TeachingPack
+from .models import PackAssignment, TeachingPack
 from .polish import polish
-from .serializers import PackCreateSerializer, PackSerializer, PackSummarySerializer, PlanEditSerializer
+from .serializers import AssignSerializer, PackCreateSerializer, PackSerializer, PackSummarySerializer, PlanEditSerializer
 
 
 def class_units(classroom):
@@ -141,3 +145,82 @@ class PackViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Destr
         pack.plan_edits = edits
         pack.save(update_fields=["plan_edits"])
         return Response(PackSerializer(pack, context=self.get_serializer_context()).data)
+
+    @action(detail=True, methods=["post"])
+    def assign(self, request, pk=None):
+        """Assign the pack's quiz or one worksheet level to its class: a teacher-authored copy of the questions
+        that are still published, as a practice quiz. Assigning the same part again returns the first one."""
+        pack = self.get_object()
+        data = AssignSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        what, due_at = data.validated_data["what"], data.validated_data.get("due_at")
+        require_active(pack.classroom)
+        require_premium(request.user)
+        existing = _assigned_part(pack, what)
+        if existing:
+            return Response(_assignment_body(existing, dropped=0, created=False))
+        ids = _part_question_ids(pack.document, what)
+        published = Question.objects.filter(id__in=ids, status=ContentStatus.PUBLISHED).in_bulk()
+        questions = [published[i] for i in ids if i in published]
+        if not questions:
+            return Response(
+                {"detail": _("None of these questions can be assigned any more."), "code": "nothing_to_assign"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        dropped = len(ids) - len(questions)
+        try:
+            with transaction.atomic():
+                TeachingPack.objects.select_for_update().get(pk=pack.pk)  # one assign of this pack at a time
+                existing = _assigned_part(pack, what)
+                if existing:
+                    return Response(_assignment_body(existing, dropped=0, created=False))
+                row = _create_assignment(pack, what, questions, due_at, request.user)
+        except IntegrityError:  # a simultaneous request created it first
+            return Response(_assignment_body(_assigned_part(pack, what), dropped=0, created=False))
+        return Response(_assignment_body(row, dropped=dropped, created=True), status=status.HTTP_201_CREATED)
+
+
+def _part_question_ids(document, what):
+    if what == PackAssignment.What.QUIZ:
+        questions = document.get("quiz", {}).get("questions", [])
+    else:
+        questions = document.get("worksheet", {}).get(what.removeprefix("worksheet_"), [])
+    return [q["id"] for q in questions]
+
+
+def _assigned_part(pack, what):
+    return PackAssignment.objects.filter(pack=pack, what=what, assignment__isnull=False).first()
+
+
+def _part_title(pack, what):
+    if what == PackAssignment.What.QUIZ:
+        name = _("Diagnostic quiz") if pack.document.get("quiz", {}).get("diagnostic") else _("Targeted quiz")
+    else:
+        name = _("Worksheet: %(level)s") % {"level": LEVEL_NAMES[what.removeprefix("worksheet_")]}
+    label = (pack.document.get("unit") or {}).get("label", "")
+    return f"{label} - {name}"[:200] if label else name
+
+
+def _create_assignment(pack, what, questions, due_at, teacher):
+    first = questions[0]
+    unit = pack.unit or first.unit
+    title = _part_title(pack, what)
+    quiz = Quiz.objects.create(
+        title=title,
+        subject=unit.subject if unit else first.subject,
+        grade=unit.grade if unit else first.grade,
+        unit=unit,
+        status=ContentStatus.PUBLISHED,
+        author=teacher,
+        is_free=False,  # library questions stay premium, as in any teacher-made quiz
+    )
+    QuizQuestion.objects.bulk_create(QuizQuestion(quiz=quiz, question=q, order=i) for i, q in enumerate(questions))
+    assignment = Assignment.objects.create(classroom=pack.classroom, title=title, quiz=quiz, due_at=due_at, created_by=teacher)
+    row, _created = PackAssignment.objects.update_or_create(
+        pack=pack, what=what, defaults={"quiz": quiz, "assignment": assignment}
+    )
+    return row
+
+
+def _assignment_body(row, dropped, created):
+    return {"what": row.what, "assignment_id": row.assignment_id, "quiz_id": row.quiz_id, "dropped": dropped, "created": created}
