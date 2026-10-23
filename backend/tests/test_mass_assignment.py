@@ -638,8 +638,14 @@ def test_assigning_a_pack_decides_author_class_and_price_on_the_server(client_fo
     client = client_for(teacher)
     pack_id = _ok(client.post("/api/teaching/packs/", {"classroom": mine.id, "unit": w["unit"].id}, format="json")).data["id"]
     payload = {
-        **w["bad"], "what": "quiz", "classroom": elsewhere.id, "quiz": 999999, "assignment": 999999,
-        "is_free": True, "status": "draft", "title": "Hijacked",
+        **w["bad"],
+        "what": "quiz",
+        "classroom": elsewhere.id,
+        "quiz": 999999,
+        "assignment": 999999,
+        "is_free": True,
+        "status": "draft",
+        "title": "Hijacked",
     }
     data = _ok(client.post(f"/api/teaching/packs/{pack_id}/assign/", payload, format="json")).data
     quiz, assignment = Quiz.objects.get(pk=data["quiz_id"]), Assignment.objects.get(pk=data["assignment_id"])
