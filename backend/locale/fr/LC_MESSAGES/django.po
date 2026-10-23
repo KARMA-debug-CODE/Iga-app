@@ -243,7 +243,7 @@ msgid "Incorrect password."
 msgstr "Mot de passe incorrect."
 
 #: apps/assessments/analytics.py:20
-#: apps/classroom/views.py:108
+#: apps/classroom/views.py:109
 msgid "That is not your class."
 msgstr "Ce n'est pas votre classe."
 
@@ -436,33 +436,33 @@ msgstr "Cette adresse e-mail est déjà utilisée par un autre compte."
 msgid "That email address isn't valid."
 msgstr "Cette adresse e-mail n'est pas valide."
 
-#: apps/classroom/views.py:104
+#: apps/classroom/views.py:105
 msgid "Attach exactly one quiz, lesson or simulation."
 msgstr "Joignez exactement un quiz, une leçon ou une simulation."
 
-#: apps/classroom/views.py:270
+#: apps/classroom/views.py:271
 msgid "Only students join classes with a code."
 msgstr "Seuls les élèves rejoignent une classe avec un code."
 
-#: apps/classroom/views.py:299
+#: apps/classroom/views.py:300
 msgid "This class is archived."
 msgstr "Cette classe est archivée."
 
-#: apps/classroom/views.py:110
+#: apps/classroom/views.py:111
 msgid "Quiz not found."
 msgstr "Quiz introuvable."
 
-#: apps/classroom/views.py:112
+#: apps/classroom/views.py:113
 #: apps/tutor/services.py:290
 msgid "Lesson not found."
 msgstr "Leçon introuvable."
 
-#: apps/classroom/views.py:274
+#: apps/classroom/views.py:275
 msgid "No class has that code. Check with your teacher."
 msgstr "Aucune classe n'a ce code. Vérifiez auprès de votre enseignant."
 
-#: apps/classroom/views.py:290
-#: apps/classroom/views.py:333
+#: apps/classroom/views.py:291
+#: apps/classroom/views.py:334
 msgid "That student is not in this class."
 msgstr "Cet élève n'est pas dans cette classe."
 
@@ -944,6 +944,94 @@ msgstr "Une simulation externe a besoin d'une adresse complète en https://."
 #: apps/simulations/views.py:69
 msgid "Not found."
 msgstr "Introuvable."
+
+#: apps/teaching/builder.py:20
+msgid "support"
+msgstr "soutien"
+
+#: apps/teaching/builder.py:20
+msgid "core"
+msgstr "base"
+
+#: apps/teaching/builder.py:20
+msgid "stretch"
+msgstr "approfondissement"
+
+#: apps/teaching/builder.py:160
+msgid "Ask learners what they already know about %(topic)s and write their ideas on the board."
+msgstr "Demandez aux élèves ce qu'ils savent déjà sur %(topic)s et notez leurs idées au tableau."
+
+#: apps/teaching/builder.py:201
+msgid "In the classroom"
+msgstr "En classe"
+
+#: apps/teaching/builder.py:202
+msgid "The Iga worksheet (printed or on screen), the board, and the student's book."
+msgstr "La fiche d'exercices Iga (imprimée ou à l'écran), le tableau et le manuel de l'élève."
+
+#: apps/teaching/builder.py:235
+msgid "Address the misconception: many learners chose \"%(wrong)s\". The correct answer is \"%(correct)s\"."
+msgstr "Traitez l'erreur fréquente : beaucoup d'élèves ont choisi « %(wrong)s ». La bonne réponse est « %(correct)s »."
+
+#: apps/teaching/builder.py:157
+msgid "Start with a class vote on this question: \"%(question)s\". Let learners give their reasons before you reveal the answer."
+msgstr "Commencez par un vote en classe sur cette question : « %(question)s ». Laissez les élèves justifier leur choix avant de donner la réponse."
+
+#: apps/teaching/builder.py:179
+msgid "Activity %(number)s: %(title)s."
+msgstr "Activité %(number)s : %(title)s."
+
+#: apps/teaching/builder.py:200
+msgid "By the end of this lesson, learners can explain and use %(topic)s."
+msgstr "À la fin de cette leçon, les élèves savent expliquer et utiliser %(topic)s."
+
+#: apps/teaching/builder.py:174
+msgid "Recall %(unit)s: ask two learners to say what they remember."
+msgstr "Rappel de %(unit)s : demandez à deux élèves ce dont ils se souviennent."
+
+#: apps/teaching/builder.py:209
+msgid "Vote, explain their choice and listen to each other."
+msgstr "Votent, expliquent leur choix et s'écoutent les uns les autres."
+
+#: apps/teaching/builder.py:210
+msgid "Critical thinking, communication"
+msgstr "Pensée critique, communication"
+
+#: apps/teaching/builder.py:216
+msgid "Work in pairs on the worksheet, then explain their answers to the class."
+msgstr "Travaillent en binôme sur la fiche, puis expliquent leurs réponses à la classe."
+
+#: apps/teaching/builder.py:217
+msgid "Problem solving, cooperation"
+msgstr "Résolution de problèmes, coopération"
+
+#: apps/teaching/builder.py:223
+msgid "Answer the evaluation questions and note what they still find difficult."
+msgstr "Répondent aux questions d'évaluation et notent ce qu'ils trouvent encore difficile."
+
+#: apps/teaching/builder.py:224
+msgid "Lifelong learning"
+msgstr "Apprentissage tout au long de la vie"
+
+#: apps/teaching/builder.py:265
+msgid "Some content is only available in English."
+msgstr "Certains contenus ne sont disponibles qu'en anglais."
+
+#: apps/teaching/builder.py:85
+msgid "No %(level)s questions exist for this unit yet."
+msgstr "Il n'existe pas encore de questions de %(level)s pour cette unité."
+
+#: apps/teaching/builder.py:222
+msgid "Summarise the key points of %(topic)s, then ask the evaluation questions."
+msgstr "Résumez les points clés de %(topic)s, puis posez les questions d'évaluation."
+
+#: apps/teaching/builder.py:302
+msgid "A simpler way to explain it: %(text)s"
+msgstr "Une façon plus simple de l'expliquer : %(text)s"
+
+#: apps/teaching/builder.py:88
+msgid "Only %(count)s %(level)s questions exist for this unit."
+msgstr "Il n'existe que %(count)s questions de %(level)s pour cette unité."
 
 #: apps/tutor/services.py:664
 msgid "Santa can't answer just now. Try again in a minute."
