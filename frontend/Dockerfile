@@ -17,7 +17,7 @@ COPY --chmod=755 nginx/real-ip.sh /docker-entrypoint.d/25-iga-real-ip.sh
 RUN rm -f /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
