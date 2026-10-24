@@ -186,7 +186,7 @@ services:
   # personal data and the field-encrypted columns stay encrypted in them, so keep FIELD_ENCRYPTION_KEYS
   # safe and apart from the backups. Restore with iga-restore (docs/DEPLOYMENT.md, "Restore").
   backup:
-    image: postgres:16
+    image: postgres:18
     restart: unless-stopped
     environment:
       # The superuser: dumps everything, and restore drops and recreates the database (only it may).
