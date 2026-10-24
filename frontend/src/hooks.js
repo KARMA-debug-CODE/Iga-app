@@ -60,6 +60,15 @@ export function formatDay(value, lang = "en") {
   }
 }
 
+/** A count in the reader's format ("12,345" or "12 345"). */
+export function formatNumber(value, lang = "en") {
+  try {
+    return new Intl.NumberFormat(LOCALES[lang] || "en-GB").format(Number(value) || 0);
+  } catch {
+    return String(value);
+  }
+}
+
 /** An amount of money in the reader's format (whole francs for RWF). */
 export function formatMoney(amount, currency, lang = "en") {
   const value = Number(amount);

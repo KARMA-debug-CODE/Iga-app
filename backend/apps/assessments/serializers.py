@@ -5,6 +5,8 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField, clean_text
 from apps.core.utils import request_language, serializer_language
 from apps.schools import access
 from apps.schools.downloads import signed_download_url
@@ -20,7 +22,7 @@ class ChoiceWriteSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     """Teacher-facing: includes the answers. Never use this for students."""
 
     choices = ChoiceWriteSerializer(many=True, required=False)
@@ -55,7 +57,8 @@ class QuestionSerializer(serializers.ModelSerializer):
             return []
         if not isinstance(value, list) or not all(isinstance(a, str) for a in value):
             raise serializers.ValidationError(_("Give a list of accepted answers (text)."))
-        cleaned = [a.strip() for a in value if a.strip()]
+        # Each one line, normalised, without invisible characters (apps/core/text.py).
+        cleaned = [a for a in (clean_text(a).strip() for a in value) if a]
         if len(cleaned) > 50 or any(len(a) > 200 for a in cleaned):
             raise serializers.ValidationError(_("Use at most 50 accepted answers of up to 200 characters each."))
         return cleaned
@@ -272,7 +275,7 @@ class QuizSummarySerializer(serializers.ModelSerializer):
         }
 
 
-class QuizWriteSerializer(serializers.ModelSerializer):
+class QuizWriteSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     question_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
 
     class Meta:
@@ -480,11 +483,12 @@ class AttemptListSerializer(serializers.ModelSerializer):
 
 class AnswerInputSerializer(serializers.Serializer):
     question = serializers.IntegerField()
-    choice_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list)
-    text = serializers.CharField(required=False, allow_blank=True, default="", max_length=10000)
+    # A question has a handful of options; a longer list is a forged request.
+    choice_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=list, max_length=50)
+    text = CleanCharField(multiline=True, required=False, allow_blank=True, default="", max_length=10000)
     numeric = serializers.FloatField(required=False, allow_null=True, default=None)
 
 
 class MarkInputSerializer(serializers.Serializer):
     marks = serializers.DecimalField(max_digits=5, decimal_places=2)
-    feedback = serializers.CharField(required=False, allow_blank=True, default="", max_length=5000)
+    feedback = CleanCharField(multiline=True, required=False, allow_blank=True, default="", max_length=5000)

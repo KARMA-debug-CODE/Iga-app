@@ -33,6 +33,7 @@ It is mobile-first, installable as an app (PWA), works in **English and French**
 | **Assessment** | 6 question types (MCQ, multi-select, true/false, numeric with tolerance, short answer, essay); practice and exam modes; server-enforced time limits; per-attempt shuffling; answers never sent before submit; partial credit; teacher marking queue; explanations and marking guides |
 | **Past papers** | Library filtered by level, year and subject; PDF and marking-guide links; interactive versions. Ships with **2 clearly-labelled unofficial sample papers**. Real NESA papers go in through the importer |
 | **Teachers** | Classes with readable join codes, student accounts created from a CSV list (temporary passwords, changed at first login) and password resets, assignments (quiz, lesson or lab) with due dates, gradebook, "hardest topics" report, per-quiz results analysis (score distribution, question difficulty and discrimination, option choices), question-bank and quiz builder, lesson editor with live preview, resource sharing |
+| **Teaching packs** | From a class's report, one click turns a weak unit into a ready-to-teach pack built from the class's own results: what the class gets wrong (the wrong option most students picked, and why), a lesson plan in the official CBC layout (pre-filled, editable), a worksheet at three levels with a separate answer key, and a targeted quiz (a diagnostic one before the class has answers). Print any part, or assign the quiz or a worksheet level in one click. Part of the school subscription; see [Teaching Packs](docs/ARCHITECTURE.md#teaching-packs) |
 | **Schools & billing** | Verified school directory; membership by school code or administrator approval; school administrators manage members, the school code and the subscription (1, 3, 6 or 12 months by card or mobile money through Flutterwave, or bank transfer recorded by the Iga team); receipts and email reminders; premium content locked for everyone else, including past-paper files served only through access-checked links |
 | **Parents** | A student creates a one-time code; the linked parent sees a read-only progress report (subjects, recent scores, assignments) and can unlink at any time |
 | **Community** | Public and private study groups, polling chat, shared Markdown notes, message reporting, moderator hiding, an admin moderation queue |
@@ -82,23 +83,39 @@ cd backend && pytest                 # 429 API tests (SQLite by default; set DAT
 cd backend && ruff check .           # lint
 cd frontend && npm test              # 158 unit tests: calculator, lab maths, Santa's stream reader, the no-emoji guard
 cd frontend && npm run lint
-cd frontend && npx playwright test   # 33 end-to-end journeys × (mobile + desktop) against the real API
+cd frontend && npx playwright test   # end-to-end journeys × (mobile + desktop) against the real API
+python3 frontend/tests/nginx/test_nginx.py   # the nginx layer: rate limits, client addresses, sizes, HTTPS, headers (Docker)
+cd frontend && npx playwright test -c playwright.docker.config.js   # the Docker stack in a browser, CSP on (below)
 ```
 
-The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.
+The Playwright run starts its own Django server (fresh database with demo data) and Vite dev server. The `playwright.docker.config.js` run instead uses the production build behind the real nginx on http://localhost:8080 (start the Docker stack first, with the curriculum and demo accounts loaded): it signs in, opens a lesson with maths, the labs, the Python, SQL and HTML playgrounds, Santa and the calculator, and fails on any Content-Security-Policy violation. CI (`.github/workflows/ci.yml`) runs everything, including the backend suite against PostgreSQL 16.
 
 ## Production-like run with Docker
 
 ```bash
 cp .env.docker.example .env
 echo "DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" >> .env
+echo "FIELD_ENCRYPTION_KEYS=$(python3 -c 'import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')" >> .env
 docker compose up --build
 docker compose exec backend python manage.py load_curriculum
-docker compose exec backend python manage.py seed_demo --force   # optional demo accounts
+docker compose exec -e DJANGO_DEBUG=true backend python manage.py seed_demo   # optional demo accounts (local trial only)
 # open http://localhost:8080
 ```
 
-This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, Iga's code runner for C++ and Java (built from the official GCC and OpenJDK images, so the first build downloads about 700 MB once; it needs no special Docker permissions), and Santa's model server (its first start downloads the model once, about 4.5 GB: see [Santa](#santa-igas-own-ai-tutor)). To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env` (the playground then says they are off) and start only the other services: `docker compose up --build db redis backend scheduler web santa`. For a real deployment, set a random `CODE_RUNNER_TOKEN` and `SANTA_API_KEY` in `.env`. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY`. See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
+This runs PostgreSQL 16, Redis (shared rate limits), Django on gunicorn, nginx serving the built app, Iga's code runner for C++ and Java (built from the official GCC and OpenJDK images, so the first build downloads about 700 MB once; it needs no special Docker permissions), and, when you ask for it, Santa's model server. Santa's model is optional: plain `docker compose up` starts the app without it (the app says Santa's model is not installed, and Santa answers from the lessons), so the app always starts even where the model server's image or model can't be downloaded. To run it too, start with `docker compose --profile santa up --build -d`, or put `COMPOSE_PROFILES=santa` in `.env` so every `docker compose` command includes it (its first start downloads the model once, about 4.5 GB: see [Santa](#santa-igas-own-ai-tutor)). To run without C++ and Java, add `CODE_RUNNER_URL=` to `.env` (the playground then says they are off) and start only the other services: `docker compose up --build db migrate redis backend scheduler web`. For a real deployment, set a random `CODE_RUNNER_TOKEN` and `SANTA_API_KEY` in `.env`. The example `.env` sets `HTTPS=false` so the trial works on plain `http://localhost`. For a real deployment, put it behind HTTPS and delete that line: secure cookies, HSTS and the HTTPS redirect then switch on. The stack refuses to start without a `DJANGO_SECRET_KEY` and a `FIELD_ENCRYPTION_KEYS` key (it encrypts 2FA secrets, phone numbers and payment details in the database: keep a copy apart from database backups). Before the backend starts, the one-off `migrate` service sets up the database roles with the PostgreSQL superuser and applies the migrations as `iga_owner`, the role that owns the tables; the backend and the scheduler connect as `iga_app`, which may only read and write rows (see "Database roles" in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#database-roles)). An existing database from an older version is converted on the first start. For a real deployment, set random `POSTGRES_PASSWORD`, `POSTGRES_OWNER_PASSWORD` and `POSTGRES_APP_PASSWORD` too: the local values are refused when HTTPS is on. Password reset emails need real email settings (`EMAIL_BACKEND` and friends). See [`.env.docker.example`](.env.docker.example) and [`backend/.env.example`](backend/.env.example) for every setting.
+
+nginx limits requests per client address (strictly for sign-in and account changes, tightly for Santa, C++/Java runs and payments, generously for the rest; `NGINX_RATE_*`) and answers a flood with a JSON 429; Django adds its own limits per account and per user. Behind a load balancer or Cloudflare, tell nginx which proxies may name the client (`NGINX_TRUSTED_PROXIES`), or every student would share the proxy's address: see [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md), which also covers the DDoS protection only such a network can give. `python3 frontend/tests/nginx/test_nginx.py` tests the nginx layer (needs Docker).
+
+### Secrets
+
+Every key and password lives in `.env` on the server (git and every image build ignore `.env` files and key files). The defaults in `docker-compose.yml` (`iga-local-...`) are public, like the examples in the docs: as soon as `DJANGO_ALLOWED_HOSTS` names a real server or HTTPS is on, Iga refuses to start with any of them, or with a short or placeholder secret, for the secret key, the database passwords, `CODE_RUNNER_TOKEN`, `SANTA_API_KEY`, the Flutterwave keys and `LEDGER_HMAC_KEY` (check `iga.E002`; `docker compose logs migrate` says which). Generate each with `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`. CI scans dependencies, images and every commit for known vulnerabilities and secrets (`.github/workflows/security.yml`), and Dependabot proposes upgrades.
+
+### HTTPS
+
+A real deployment runs over HTTPS only: leave `HTTPS=false` out of `.env` and nginx redirects plain HTTP to HTTPS and sends HSTS (a year, with subdomains), Django redirects too, marks every cookie `Secure` and sends HSTS on the API, and `manage.py check --deploy` is clean (`docker compose exec backend python manage.py check --deploy`). HSTS `preload` is a commitment for the whole domain, so it is off until you set `HSTS_PRELOAD=true`. Two ways to get the certificate:
+
+- **Behind Cloudflare or a load balancer that terminates HTTPS:** tell nginx which proxies to trust (`NGINX_TRUSTED_PROXIES=cloudflare`, or your load balancer's addresses). nginx then believes their `X-Forwarded-Proto`, so Django knows the visitor used HTTPS; from anyone else the header is ignored. See [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md).
+- **nginx with your own certificate** (Let's Encrypt or Cloudflare's Origin CA): copy [`frontend/nginx/tls.conf.example`](frontend/nginx/tls.conf.example) to `tls/tls.conf`, put `fullchain.pem` and `privkey.pem` in `certs/`, and mount both with the `docker-compose.override.yml` shown in that file (it also publishes ports 80 and 443). nginx answers on 443 with TLS 1.2 and 1.3 only, and on 80 redirects everything except Let's Encrypt's checks.
 
 ## Santa, Iga's own AI tutor
 
@@ -121,7 +138,9 @@ SANTA_MEMORY_LIMIT=5g
 SANTA_THREADS=4          # the number of physical CPU cores
 ```
 
-**First start.** `docker compose up` starts the `santa` service, which downloads the model from Hugging Face once into the `santa-models` volume (about 4.5 GB; follow it with `docker compose logs -f santa`). Until it is ready, the app says "Santa is waking up" and answers from the lessons. To download from an internal mirror instead, set `MODEL_ENDPOINT` on the service; `HF_TOKEN` is only needed for gated or private models.
+**Switching it on.** The `santa` service belongs to the Compose profile `santa`, so it runs only when asked for: `docker compose --profile santa up -d`, or `COMPOSE_PROFILES=santa` in `.env` (then plain `docker compose up -d` includes it). Without it, Django can't find the host `santa` and the app says Santa's model is not installed; nothing else changes, and Santa answers from the lessons. Stop it again with `docker compose --profile santa stop santa`.
+
+**First start.** `docker compose --profile santa up -d` starts the `santa` service, which downloads the model from Hugging Face once into the `santa-models` volume (about 4.5 GB; follow it with `docker compose logs -f santa`). Until it is ready, the app says "Santa is waking up" and answers from the lessons. To download from an internal mirror instead, set `MODEL_ENDPOINT` on the service; `HF_TOKEN` is only needed for gated or private models.
 
 **Fully offline.** Once the model is downloaded, set `SANTA_OFFLINE=true` in `.env` (llama.cpp's `--offline`: it uses only the cached model and never goes online), and if you like remove the `santa-download` network from the service so it has no route to the internet at all. Alternatively, point it at the file itself: replace `-hf <model>` in the command with `-m /models/<path to the .gguf file>` (find it with `docker compose exec santa find /models -name "*.gguf"`). To install a school with no internet, download on another machine and copy the `santa-models` volume.
 
@@ -145,7 +164,7 @@ services:
 
 **Measuring speed.** `docker run --rm -v <project>_santa-models:/models ghcr.io/ggml-org/llama.cpp:full-b11151 --bench -m /models/<path to the .gguf file> -p 512 -n 128 -t 4` (`docker volume ls` shows the volume's full name).
 
-**Settings** (backend environment; defaults in brackets): `SANTA_URL` (`http://santa:8080` in Compose; empty = no model, answers from the lessons only), `SANTA_API_KEY` (shared with the model server's `LLAMA_API_KEY`), `SANTA_MODEL_NAME` (`santa`), `SANTA_MAX_TOKENS` (600), `SANTA_TEMPERATURE` (0.6), `SANTA_TIMEOUT_SECONDS` (150, calculator rounds included), `SANTA_PARALLEL` (4, match `-np`), `THROTTLE_TUTOR` (30/hour per student). In development, leave `SANTA_URL` empty, or run a model server as shown in [`backend/.env.example`](backend/.env.example).
+**Settings** (backend environment; defaults in brackets): `SANTA_URL` (`http://santa:8080` in Compose; empty = no model, answers from the lessons only), `SANTA_API_KEY` (shared with the model server's `LLAMA_API_KEY`), `SANTA_MODEL_NAME` (`santa`), `SANTA_MAX_TOKENS` (600), `SANTA_TEMPERATURE` (0.6), `SANTA_TIMEOUT_SECONDS` (150, calculator rounds included), `SANTA_PARALLEL` (4, match `-np`), `THROTTLE_TUTOR` (30/hour per student), `SANTA_MAX_INPUT_TOKENS` (2800, what one question may send besides the system prompt), and the allowances (0 = no limit): `SANTA_USER_DAILY_QUESTIONS` (60), `SANTA_USER_MONTHLY_QUESTIONS` (800), `SANTA_USER_DAILY_TOKENS` (250000), `SANTA_USER_MONTHLY_TOKENS` (3000000) per student, and `SANTA_SCHOOL_DAILY_TOKENS` (20000000) per school. When one is used up, Santa answers from the lessons and says so; students see what is left, platform admins the use (Admin -> Overview). In development, leave `SANTA_URL` empty, or run a model server as shown in [`backend/.env.example`](backend/.env.example).
 
 **Honest limits.** A 2-4 billion parameter model on a school server is far less capable than the large AI models in the cloud. Santa can be wrong, sound sure when it is not, misread a question, or slip in long multi-step maths (the calculator checks arithmetic, not reasoning). Grounding in Iga's lessons helps, but only for topics the lessons cover. The app tells students that Santa can make mistakes and to check important answers in their lessons or with their teacher. Before a pilot, have teachers try about 50 typical S1-S6 questions in English and French, and review the logged exchanges now and then.
 
@@ -179,6 +198,7 @@ docker-compose.yml       PostgreSQL + Redis + backend + nginx + code runner + Sa
 
 ## Documentation
 
+- [Deployment](docs/DEPLOYMENT.md): a step-by-step checklist to put Iga on a real server (domain, HTTPS, secrets, first admin, email, backups, monitoring)
 - [Architecture](docs/ARCHITECTURE.md): components, data model, API, security and scaling
 - [Content guide](docs/CONTENT_GUIDE.md): how teachers and editors add lessons, translations, quizzes and exam papers
 - [School subscriptions](docs/SUBSCRIPTIONS.md): how schools join and pay, what's free, setting up Flutterwave, reminders

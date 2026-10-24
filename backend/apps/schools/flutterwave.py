@@ -3,8 +3,13 @@
 Flow: create a hosted checkout link for our reference (tx_ref) -> the school administrator pays
 on Flutterwave -> Flutterwave redirects back and also calls our webhook -> in both cases we ask
 Flutterwave's API about the transaction (by the id we were given, else by our reference) and only
-apply the payment if it is successful for our reference, the expected currency and at least the
-expected amount.
+apply the payment if it is successful for our reference, the expected currency, at least the
+expected amount and (when Flutterwave echoes our meta) the payment's school. The redirect's query
+string and the webhook body are only hints about which transaction to look up.
+
+Money (see billing.money_for): gross is the verified `charged_amount` (what the payer was charged;
+it includes Flutterwave's fee when the customer is set to bear it), the provider fee is the verified
+`app_fee`, and net = gross - fee.
 
 One checkout can hold several attempts: when a card is declined, the hosted page lets the payer
 try again with the same tx_ref until the session ends. A failed attempt is therefore not a failed
@@ -32,14 +37,14 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django.conf import settings
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from rest_framework.exceptions import APIException
 
-from .billing import ZERO_DECIMAL_CURRENCIES
+from .billing import ZERO_DECIMAL_CURRENCIES, finite_amount
 from .providers import Verification, checkout_closed, return_url
 
 log = logging.getLogger(__name__)
@@ -92,10 +97,28 @@ def _request(method, path, payload=None):
 
 
 def _amount(value):
-    try:
-        return Decimal(str(value))
-    except (InvalidOperation, TypeError):
-        return None
+    """A finite Decimal, or None (NaN and Infinity never count as an amount)."""
+    return finite_amount(value)
+
+
+def _meta_value(data, name):
+    """A value we sent in `meta`, as Flutterwave echoes it: a dict, or a list of {metaname, metavalue}."""
+    meta = data.get("meta")
+    if isinstance(meta, dict):
+        return meta.get(name)
+    if isinstance(meta, list):
+        for item in meta:
+            if isinstance(item, dict) and item.get("metaname") == name:
+                return item.get("metavalue")
+    return None
+
+
+def _money(data):
+    """(gross, fee) from a verified transaction: what the payer was charged and Flutterwave's fee."""
+    amount = _amount(data.get("amount"))
+    charged = _amount(data.get("charged_amount"))
+    gross = charged if charged is not None and amount is not None and charged >= amount else amount
+    return gross, _amount(data.get("app_fee"))
 
 
 class FlutterwaveProvider:
@@ -131,7 +154,8 @@ class FlutterwaveProvider:
         }
         body = _request("POST", "/payments", payload)
         link = (body.get("data") or {}).get("link") if body.get("status") == "success" else None
-        if not link:
+        # The browser is sent to this page: only ever an https address (never javascript: or data:).
+        if not isinstance(link, str) or not link.startswith("https://"):
             log.warning("Flutterwave refused checkout for %s: %s", payment.reference, body.get("message"))
             raise ProviderUnavailable(body.get("message") or ProviderUnavailable.default_detail)
         return link
@@ -189,10 +213,18 @@ class FlutterwaveProvider:
         status = str(data.get("status", "")).lower()
         if status == "successful":
             amount = _amount(data.get("amount"))
-            if str(data.get("currency", "")).upper() == payment.currency and amount is not None and amount >= payment.amount:
-                return Verification("succeeded", found_id, data)
-            log.error("Flutterwave amount/currency mismatch for %s: %s", payment.reference, data)
-            return Verification("failed", found_id, data)
+            school = _meta_value(data, "school_id")
+            if str(data.get("currency", "")).upper() != payment.currency:
+                reason = "currency_mismatch"
+            elif amount is None or amount < payment.amount:
+                reason = "amount_mismatch"
+            elif school not in (None, "") and str(school) != str(payment.school_id):
+                reason = "school_mismatch"
+            else:
+                gross, fee = _money(data)
+                return Verification("succeeded", found_id, data, gross=gross, fee=fee)
+            log.error("Flutterwave %s for %s: %s", reason, payment.reference, data)
+            return Verification("failed", found_id, data, reason=reason)
         if status in ("failed", "cancelled"):
             # The payer may still be retrying on the hosted page with the same reference.
             if checkout_closed(payment):

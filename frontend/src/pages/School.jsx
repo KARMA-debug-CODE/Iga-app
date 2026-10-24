@@ -8,6 +8,7 @@ import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs, useToast } from "../components/ui";
 import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 
 function daysUntil(date) {
   return Math.ceil((new Date(date).getTime() - Date.now()) / 86_400_000);
@@ -331,7 +332,9 @@ export function SchoolBilling() {
       // Hosted checkout pages live on the provider's site; the dev checkout is one of our routes.
       const url = new URL(res.checkout_url, window.location.origin);
       if (url.origin === window.location.origin) navigate(url.pathname + url.search);
-      else window.location.assign(res.checkout_url);
+      // Never a javascript: or data: address, whatever the provider's answer says.
+      else if (safeUrl(res.checkout_url, { httpsOnly: true })) window.location.assign(url.href);
+      else throw new Error(t("common.error"));
     } catch (err) {
       setError(err);
       setBusy(false);

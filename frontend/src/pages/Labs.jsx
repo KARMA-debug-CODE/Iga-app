@@ -49,7 +49,7 @@ export default function Labs() {
       <div style={{ marginTop: 16 }}>
         <Loader state={state}>
           {(sims) => (
-            <div className="grid">
+            <div className="grid stagger">
               {sims.map((sim) => (
                 <Link key={sim.slug} to={`/labs/${sim.slug}`} className="card card-link">
                   <div className="spread" style={{ alignItems: "flex-start" }}>

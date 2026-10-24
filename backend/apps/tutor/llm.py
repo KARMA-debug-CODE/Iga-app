@@ -7,6 +7,7 @@ Every problem is turned into one of the SantaError classes below, so callers can
 
 import json
 import logging
+import socket
 import time
 import urllib.error
 import urllib.request
@@ -76,6 +77,12 @@ def installed():
     return bool(settings.SANTA_URL)
 
 
+def _not_resolved(exc):
+    """The model server's host name doesn't resolve: under docker compose the santa service isn't running
+    (it starts only with the "santa" profile), so Santa is not installed rather than not answering."""
+    return isinstance(getattr(exc, "reason", exc), socket.gaierror)
+
+
 # The model server is an internal service: never send requests to it through an outbound proxy.
 _opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
@@ -107,7 +114,8 @@ def cached_health():
 
 
 def health(timeout=3):
-    """'ready', 'loading', 'unreachable' or 'not_installed'. GET /health answers 503 while the model loads."""
+    """'ready', 'loading', 'unreachable' or 'not_installed' (no SANTA_URL, or its host doesn't resolve).
+    GET /health answers 503 while the model loads."""
     if not installed():
         return "not_installed"
     state = cached_health()
@@ -118,8 +126,8 @@ def health(timeout=3):
             state = "ready"
     except urllib.error.HTTPError as exc:
         state = "loading" if exc.code == 503 else "unreachable"
-    except (urllib.error.URLError, OSError, ValueError):
-        state = "unreachable"
+    except (urllib.error.URLError, OSError, ValueError) as exc:
+        state = "not_installed" if _not_resolved(exc) else "unreachable"
     remember_health(state)
     return state
 
@@ -166,6 +174,9 @@ def _open(payload, timeout):
     except urllib.error.URLError as exc:
         if isinstance(exc.reason, TimeoutError):
             raise Timeout(str(exc.reason)) from exc
+        if _not_resolved(exc):
+            remember_health("not_installed")
+            raise NotInstalled(str(exc.reason)) from exc
         remember_health("unreachable")
         raise Unreachable(str(exc.reason)) from exc
     except (OSError, ValueError) as exc:

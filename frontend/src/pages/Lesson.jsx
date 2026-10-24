@@ -4,12 +4,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import Markdown from "../components/Markdown";
 import BookList from "../components/Books";
+import { Burst, useCelebrations } from "../components/Celebrate";
+import LessonNotes from "../components/LessonNotes";
 import { Icon, SubjectIcon } from "../components/Icon";
 import { LockBadge, LockedNotice } from "../components/Locked";
 import SimEmbed from "../components/SimEmbed";
 import TutorPanel from "../components/TutorPanel";
 import { Loader, useToast } from "../components/ui";
 import { useApi } from "../hooks";
+import { safeUrl } from "../safeUrl";
 import { LANGUAGES, useI18n } from "../i18n";
 
 export default function Lesson() {
@@ -19,14 +22,18 @@ export default function Lesson() {
   const [readLang, setReadLang] = useState(null);
   const state = useApi(`/lessons/${slug}/`, { params: { lang: readLang || lang } });
   const [toast, showToast] = useToast();
+  const [celebration, celebrate] = useCelebrations();
   const [busy, setBusy] = useState(false);
+  const [justDone, setJustDone] = useState(null); // the lesson just marked complete, for its burst
 
   async function complete() {
     setBusy(true);
     try {
       const res = await api(`/lessons/${slug}/complete/`, { method: "POST" });
       state.setData((d) => ({ ...d, completed: true }));
+      setJustDone(slug);
       if (res.xp_gained) showToast(t("learn.xpGained", { n: res.xp_gained }));
+      celebrate(res.rewards);
     } finally {
       setBusy(false);
     }
@@ -50,6 +57,7 @@ export default function Lesson() {
         return (
           <article style={{ maxWidth: 820 }}>
             {toast}
+            {celebration}
             <div className="breadcrumb">
               <Link to={`/learn/${lesson.subject.code}?grade=${lesson.unit.grade}`} className="with-icon">
                 <SubjectIcon name={lesson.subject.icon} size={16} /> {lesson.subject.name}
@@ -87,9 +95,9 @@ export default function Lesson() {
             </div>
             {lesson.summary && <p className="alert">{lesson.summary}</p>}
 
-            {lesson.video_url && (
+            {safeUrl(lesson.video_url) && (
               <div className="sim-frame">
-                <a className="sim-placeholder" href={lesson.video_url} target="_blank" rel="noopener noreferrer">
+                <a className="sim-placeholder" href={safeUrl(lesson.video_url)} target="_blank" rel="noopener noreferrer">
                   <Icon name="video" size={36} strokeWidth={1.6} /> {t("learn.watchVideo")}
                 </a>
               </div>
@@ -108,6 +116,8 @@ export default function Lesson() {
                 </div>
               </>
             )}
+
+            <LessonNotes slug={lesson.slug} />
 
             {/* Shown on locked lessons too: the REB books are free for every student. */}
             {lesson.resources.length > 0 && (
@@ -134,7 +144,15 @@ export default function Lesson() {
               <div className="card section" style={{ textAlign: "center" }}>
                 {lesson.completed ? (
                   <strong className="with-icon" style={{ color: "var(--success)" }}>
-                    <Icon name="ok" /> {t("learn.completed")}
+                    {justDone === slug ? (
+                      <span className="celebrate">
+                        <Icon name="ok" />
+                        <Burst size={72} />
+                      </span>
+                    ) : (
+                      <Icon name="ok" />
+                    )}{" "}
+                    {t("learn.completed")}
                   </strong>
                 ) : (
                   <button className="btn btn-success" onClick={complete} disabled={busy}>

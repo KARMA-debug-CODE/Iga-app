@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
@@ -10,12 +9,16 @@ from apps.classroom.views import AssignmentViewSet, ClassroomViewSet
 from apps.community.views import MessageViewSet, ModerationViewSet, StudyGroupViewSet
 from apps.core import admin_login
 from apps.core import views as core_views
+from apps.curriculum.downloads import ResourceDownloadView
 from apps.curriculum.views import LessonViewSet, ResourceViewSet, SubjectViewSet, UnitViewSet
 from apps.gamification import views as gamification_views
 from apps.schools.downloads import PaperDownloadView
 from apps.simulations.views import SimulationViewSet
+from apps.website import views as website_views
 
 router = DefaultRouter()
+# The browsable list of every endpoint at /api/ is for development only.
+router.include_root_view = settings.DEBUG
 router.register("subjects", SubjectViewSet, basename="subject")
 router.register("units", UnitViewSet, basename="unit")
 router.register("lessons", LessonViewSet, basename="lesson")
@@ -33,13 +36,14 @@ router.register("messages", MessageViewSet, basename="message")
 router.register("admin/users", core_views.AdminUserViewSet, basename="admin-user")
 router.register("admin/review", core_views.ReviewViewSet, basename="admin-review")
 router.register("admin/moderation", ModerationViewSet, basename="admin-moderation")
+router.register("admin/contact", website_views.AdminContactViewSet, basename="admin-contact")
 
 api = [
     path("auth/", include("apps.accounts.urls")),
     path("tutor/", include("apps.tutor.urls")),
     path("code/", include("apps.coderun.urls")),
     path("children/", parents.ChildrenView.as_view(), name="children"),
-    path("children/<int:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
+    path("children/<id:student_id>/", parents.ChildDetailView.as_view(), name="child-detail"),
     path("health/", core_views.health, name="health"),
     path("meta/", core_views.meta, name="meta"),
     path("dashboard/", core_views.dashboard, name="dashboard"),
@@ -49,18 +53,36 @@ api = [
     path("admin/stats/", core_views.admin_stats, name="admin-stats"),
     path("admin/audit/", core_views.admin_audit, name="admin-audit"),
     path("files/papers/<str:token>/", PaperDownloadView.as_view(), name="paper-download"),
+    path("files/resources/<str:token>/", ResourceDownloadView.as_view(), name="resource-download"),
     path("", include("apps.schools.urls")),
+    path("", include("apps.website.urls")),
+    path("", include("apps.review.urls")),
+    path("", include("apps.planner.urls")),
+    path("", include("apps.notes.urls")),
+    path("teaching/", include("apps.teaching.urls")),
     path("", include(router.urls)),
 ]
 
 admin.site.site_header = f"{settings.APP_NAME} administration"
 admin.site.site_title = settings.APP_NAME
 
-urlpatterns = [path("api/", include(api))]
+urlpatterns = [
+    path("api/", include(api)),
+    # For search engines: nginx passes these two to Django, which knows the site's public address (FRONTEND_URL).
+    path("robots.txt", website_views.RobotsView.as_view(), name="robots"),
+    path("sitemap.xml", website_views.SitemapView.as_view(), name="sitemap"),
+]
 
-if settings.ADMIN_ENABLED:
+# Requests refused before a view runs (a body over the size limits, ...) get a JSON answer.
+handler400 = "apps.core.errors.bad_request"
+# An unexpected error: a short, friendly answer (JSON for the API), never Django's page or a traceback.
+handler500 = "apps.core.errors.server_error"
+
+# Off unless enabled, and in production only at its secret path (see apps/core/admin_login.py).
+ADMIN_URL_PREFIX = admin_login.admin_url_prefix()
+if ADMIN_URL_PREFIX:
     admin_login.install()
-    urlpatterns.append(path("django-admin/", admin.site.urls))
+    urlpatterns.append(path(ADMIN_URL_PREFIX, admin.site.urls))
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Uploaded files have no public URL, not even in development: they are sent by the access-checked
+# views under api/files/ (apps/core/media.py).

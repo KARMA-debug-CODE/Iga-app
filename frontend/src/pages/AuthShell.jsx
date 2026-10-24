@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { Logo } from "../components/ui";
-import { LanguagePicker } from "./Landing";
+import LanguagePicker from "../components/LanguagePicker";
 
 export default function AuthShell({ title, children }) {
   return (

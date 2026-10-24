@@ -2,8 +2,11 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
+from django.utils.translation import gettext
 
 from apps.core.constants import A_LEVEL_GRADES, COMBINATION_CHOICES, COMBINATIONS, GRADES, LANGUAGES
+from apps.core.encryption import EncryptedTextField
 
 
 class User(AbstractUser):
@@ -54,12 +57,28 @@ class User(AbstractUser):
     last_active_date = models.DateField(null=True, blank=True)
 
     # Optional TOTP two-factor authentication (RFC 6238, works with any authenticator app).
-    totp_secret = models.CharField(max_length=64, blank=True)
+    # The secret is encrypted in the database (FIELD_ENCRYPTION_KEYS).
+    totp_secret = EncryptedTextField(blank=True)
     totp_enabled = models.BooleanField(default=False)
     # Last 30-second time step accepted, so a code can't be used twice.
     totp_last_step = models.BigIntegerField(null=True, blank=True)
     # Set when a teacher creates the account or resets its password: the student must pick their own.
     must_change_password = models.BooleanField(default=False)
+    # A teacher's temporary password stops working after this (TEMPORARY_PASSWORD_DAYS).
+    temporary_password_expires_at = models.DateTimeField(null=True, blank=True)
+    # Stamped into every access and refresh token. Raising it ends every session at once (a password
+    # change or reset, a 2FA change, a stolen refresh token): tokens with an older number stop working.
+    session_version = models.PositiveIntegerField(default=0, editable=False)
+
+    # The Terms of Use and Privacy Policy version this account accepted (LEGAL_VERSION), and when (legal.py).
+    terms_version = models.CharField(max_length=32, blank=True, default="")
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
+    # "Delete my account" (privacy.py): asked at deletion_requested_at; erased or anonymised from deletion_due_at
+    # unless the owner signs in before then. erased_at: when it was (the row stays, emptied, as the anonymised
+    # reference that payments, the ledger and the audit log keep).
+    deletion_requested_at = models.DateTimeField(null=True, blank=True)
+    deletion_due_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    erased_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(AbstractUser.Meta):
         constraints = [
@@ -120,6 +139,8 @@ class User(AbstractUser):
 
     @property
     def display_name(self):
+        if self.erased_at:
+            return gettext("Deleted account")
         return self.get_full_name() or self.username
 
     @property
@@ -132,6 +153,8 @@ class User(AbstractUser):
     @property
     def short_name(self):
         """First name + initial: what other students see, so minors' full names aren't shown to strangers."""
+        if self.erased_at:
+            return gettext("Deleted account")
         if self.first_name:
             initial = f" {self.last_name[0]}." if self.last_name else ""
             return f"{self.first_name}{initial}"
@@ -150,20 +173,57 @@ class User(AbstractUser):
         # Store empty emails as NULL so the unique constraint allows many blanks.
         if not self.email:
             self.email = None
+        # A new password (set_password, not the automatic re-hash at login) ends every session,
+        # whichever way it was set: the app, a reset link, a teacher, the Django admin, manage.py.
+        password_changed = self._password is not None and self.pk is not None
         super().save(*args, **kwargs)
+        if password_changed:
+            self.bump_session_version()
+            self.password_reset_tokens.all().delete()  # emailed reset links stop working too
+
+    @property
+    def temporary_password_expired(self):
+        expires = self.temporary_password_expires_at
+        return self.must_change_password and expires is not None and expires <= timezone.now()
+
+    def bump_session_version(self):
+        """End every session: tokens carrying an older session version stop working at once."""
+        users = type(self).objects.filter(pk=self.pk)
+        users.update(session_version=models.F("session_version") + 1)
+        self.session_version = users.values_list("session_version", flat=True).get()
+
+
+class PasswordResetToken(models.Model):
+    """One emailed password-reset link (see password_reset.py). Only a hash of its secret is kept."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_reset_tokens")
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(db_index=True)
+
+    def __str__(self):
+        return f"{self.user} (until {self.expires_at:%Y-%m-%d %H:%M})"
+
+
+def parent_code_digest(code):
+    """What is stored for a parent code: a keyed hash (the code itself is shown once, to the student)."""
+    return salted_hmac("iga.parent-invite", code.strip().upper().replace(" ", ""), algorithm="sha256").hexdigest()
 
 
 class ParentInvite(models.Model):
-    """A short-lived code a student gives to a parent or guardian so they can follow their progress."""
+    """A short-lived code a student gives to a parent or guardian so they can follow their progress.
+
+    Only a keyed hash of the code is kept, so a copy of the database can't be used to link to a child.
+    """
 
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="parent_invites")
-    code = models.CharField(max_length=12, unique=True)
+    code_hash = models.CharField(max_length=64, unique=True)
     expires_at = models.DateTimeField()
     used_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.student} → {self.code}"
+        return f"{self.student} (until {self.expires_at:%Y-%m-%d})"
 
 
 class ParentLink(models.Model):

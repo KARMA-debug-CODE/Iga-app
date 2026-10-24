@@ -1,15 +1,18 @@
 from django.contrib.auth import password_validation
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import A_LEVEL_GRADES, GRADE_CODES
+from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 from apps.schools.access import content_access
 from apps.schools.constants import DISTRICTS
 from apps.schools.membership import choose_school
 from apps.schools.models import School
 
-from . import avatar
+from . import avatar, legal
 from .models import User
 
 
@@ -29,13 +32,15 @@ def school_summary(user):
     return data
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     streak_days = serializers.IntegerField(source="current_streak", read_only=True)
     school = serializers.SerializerMethodField()
     access = serializers.SerializerMethodField()
     display_name = serializers.CharField(read_only=True)
     badges = serializers.SerializerMethodField()
     combination_subjects = serializers.ListField(child=serializers.CharField(), read_only=True)
+    # True while the account hasn't accepted the current Terms of Use and Privacy Policy (legal.py).
+    consent_required = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -62,6 +67,10 @@ class UserSerializer(serializers.ModelSerializer):
             "must_change_password",
             "badges",
             "date_joined",
+            "consent_required",
+            "terms_version",
+            "terms_accepted_at",
+            "deletion_due_at",
         ]
         read_only_fields = [
             "id",
@@ -75,13 +84,24 @@ class UserSerializer(serializers.ModelSerializer):
             "must_change_password",
             "badges",
             "date_joined",
+            "consent_required",
+            "terms_version",
+            "terms_accepted_at",
+            "deletion_due_at",
         ]
+        # Uniqueness is checked in validate_email, which counts "already used" answers (enumeration.py).
+        extra_kwargs = {"email": {"validators": []}}
+
+    email_in_use = False
 
     def validate_avatar(self, value):
         return avatar.clean(value)
 
     def get_school(self, user):
         return school_summary(user)
+
+    def get_consent_required(self, user):
+        return legal.consent_required(user)
 
     def get_access(self, user):
         result = content_access(user)
@@ -118,6 +138,7 @@ class UserSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             others = others.exclude(pk=self.instance.pk)
         if others.exists():
+            self.email_in_use = True
             raise serializers.ValidationError(_("An account with this email already exists."))
         return value
 
@@ -133,9 +154,9 @@ class PublicUserSerializer(serializers.ModelSerializer):
 
 
 class NewSchoolSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=200)
+    name = CleanCharField(max_length=200)
     district = serializers.ChoiceField(choices=DISTRICTS)
-    sector = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    sector = CleanCharField(max_length=80, required=False, allow_blank=True)
     phone = serializers.CharField(max_length=40)
     email = serializers.EmailField(required=False, allow_blank=True)
 
@@ -144,7 +165,7 @@ class NewSchoolSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=8, max_length=4096)
     role = serializers.ChoiceField(
         choices=[User.Role.STUDENT, User.Role.TEACHER, User.Role.PARENT, User.Role.SCHOOL_ADMIN], default=User.Role.STUDENT
     )
@@ -154,6 +175,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     school_code = serializers.CharField(required=False, allow_blank=True, write_only=True)
     # School administrators registering a school that isn't on Iga yet.
     new_school = NewSchoolSerializer(required=False, write_only=True)
+    # The Terms of Use and Privacy Policy must be accepted (legal.py). terms_version is the version the form
+    # showed: if the texts changed meanwhile, the person is asked to read them again.
+    accept_terms = serializers.BooleanField(write_only=True)
+    terms_version = serializers.CharField(write_only=True, required=False, max_length=32)
 
     class Meta:
         model = User
@@ -169,7 +194,27 @@ class RegisterSerializer(serializers.ModelSerializer):
             "school_code",
             "new_school",
             "preferred_language",
+            "accept_terms",
+            "terms_version",
         ]
+        # Uniqueness is checked in validate_email, which counts "already used" answers (enumeration.py).
+        extra_kwargs = {"email": {"validators": []}}
+
+    email_in_use = False
+    # What the form sends besides the account's own fields.
+    NOT_USER_FIELDS = ("password", "school", "school_code", "new_school", "accept_terms", "terms_version")
+
+    def validate_accept_terms(self, value):
+        if value is not True:
+            raise serializers.ValidationError(_("To create an account, accept the Terms of Use and the Privacy Policy."))
+        return value
+
+    def validate_terms_version(self, value):
+        if value != legal.current_version():
+            raise serializers.ValidationError(
+                _("The Terms of Use and the Privacy Policy have just changed. Read them again, then accept them.")
+            )
+        return value
 
     def validate(self, attrs):
         role = attrs.get("role", User.Role.STUDENT)
@@ -211,7 +256,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                     )
                 }
             )
-        candidate = User(**{k: v for k, v in attrs.items() if k not in ("password", "school", "school_code", "new_school")})
+        candidate = User(**{k: v for k, v in attrs.items() if k not in self.NOT_USER_FIELDS})
         password_validation.validate_password(attrs["password"], candidate)
         return attrs
 
@@ -224,7 +269,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         if value and User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError(_("An account with this email already exists."))
+            self.email_in_use = True
+            raise serializers.ValidationError(
+                _("This email address already has an account. If it's yours, log in or reset your password.")
+            )
         return value.lower() if value else value
 
     @transaction.atomic
@@ -233,8 +281,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         school = validated_data.pop("school", None)
         code = validated_data.pop("school_code", "")
         new_school = validated_data.pop("new_school", None)
+        validated_data.pop("accept_terms")
+        validated_data.pop("terms_version", None)
         user = User(**validated_data)
         user.set_password(password)
+        # Accepted on the form (validate_accept_terms): the current version, now. RegisterView adds the audit entry.
+        user.terms_version = legal.current_version()
+        user.terms_accepted_at = timezone.now()
         user.save()
         if new_school:
             # Waits for the Iga team to verify the school (and this administrator).
@@ -254,24 +307,55 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    identifier = serializers.CharField(help_text="Username or email")
-    password = serializers.CharField(write_only=True)
-    otp = serializers.CharField(required=False, allow_blank=True)
+    identifier = serializers.CharField(help_text="Username or email", max_length=254)
+    password = serializers.CharField(write_only=True, max_length=4096)
+    otp = serializers.CharField(required=False, allow_blank=True, max_length=16)
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    current_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True, min_length=8)
+    """The view has already checked current_password (with the re-authentication lockout)."""
+
+    current_password = serializers.CharField(write_only=True, max_length=4096)
+    new_password = serializers.CharField(write_only=True, min_length=8, max_length=4096)
 
     def validate(self, attrs):
         user = self.context["request"].user
-        if not user.check_password(attrs["current_password"]):
-            raise serializers.ValidationError({"current_password": _("Incorrect password.")})
         if attrs["new_password"] == attrs["current_password"]:
             raise serializers.ValidationError({"new_password": _("Choose a password different from the current one.")})
         password_validation.validate_password(attrs["new_password"], user)
         return attrs
 
 
+class PasswordResetRequestSerializer(serializers.Serializer):
+    identifier = serializers.CharField(help_text="Username or email", max_length=254)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=128)
+    new_password = serializers.CharField(write_only=True, min_length=8, max_length=4096)
+
+
 class OTPSerializer(serializers.Serializer):
     otp = serializers.CharField(min_length=6, max_length=8)
+
+
+class AcceptTermsSerializer(serializers.Serializer):
+    """The version the app showed; accepting an older one (the texts changed meanwhile) is refused."""
+
+    version = serializers.CharField(max_length=32)
+
+    def validate_version(self, value):
+        if value != legal.current_version():
+            raise serializers.ValidationError(
+                _("The Terms of Use and the Privacy Policy have just changed. Read them again, then accept them.")
+            )
+        return value
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    confirm = serializers.BooleanField()
+
+    def validate_confirm(self, value):
+        if value is not True:
+            raise serializers.ValidationError(_("Tick the box to confirm that you want to delete your account."))
+        return value

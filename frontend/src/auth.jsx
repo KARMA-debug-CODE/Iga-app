@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { api, ApiError, refreshSession, setAccessToken, setSessionExpiredHandler } from "./api";
+import { setMaintenance } from "./maintenance";
 import { clearAskHistory, clearOfflineData, forgetPremiumLessons } from "./offline";
 
 const AuthContext = createContext(null);
@@ -27,11 +28,16 @@ function rememberedUser() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
+  // A message to show once: {key: "deletionCancelled"} after signing in kept an account its owner had asked to
+  // delete, {key: "deletionScheduled", date} on the log in page after asking for it.
+  const [notice, setNotice] = useState(null);
 
   const lastLoaded = useRef(0);
 
   const startSession = useCallback((data) => {
     setAccessToken(data.access);
+    setMaintenance(false); // the server let this account in
+    setNotice(data.deletion_cancelled ? { key: "deletionCancelled" } : null);
     // Someone else used this device before: their saved pages must not be shown to this user.
     const previous = rememberedUser();
     if (previous && previous.id !== data.user.id) clearOfflineData().catch(() => {});
@@ -112,11 +118,22 @@ export function AuthProvider({ children }) {
     [startSession],
   );
 
-  const logout = useCallback(async () => {
+  // `notice`: a message for the log in page that follows (see `notice` above).
+  const logout = useCallback(async ({ notice: next = null } = {}) => {
     await api("/auth/logout/", { method: "POST" }).catch(() => {});
     setAccessToken(null);
+    setNotice(next);
     setUser(null);
     // Shared school computers: don't leave this student's cached pages for the next one.
+    await clearOfflineData().catch(() => {});
+  }, []);
+
+  // Ends every session of the account on every device (this one too). Errors are thrown, so the page
+  // can say so instead of pretending the other devices were signed out.
+  const logoutEverywhere = useCallback(async () => {
+    await api("/auth/logout-all/", { method: "POST" });
+    setAccessToken(null);
+    setUser(null);
     await clearOfflineData().catch(() => {});
   }, []);
 
@@ -153,12 +170,15 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      logoutEverywhere,
       reloadUser,
       setUser,
+      notice,
+      clearNotice: () => setNotice(null),
       isTeacher: !!user && (user.role === "admin" || (user.role === "teacher" && user.teacher_approved)),
       isAdmin: user?.role === "admin",
     }),
-    [user, ready, login, register, logout, reloadUser],
+    [user, ready, notice, login, register, logout, logoutEverywhere, reloadUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

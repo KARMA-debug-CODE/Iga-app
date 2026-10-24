@@ -1,9 +1,10 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth";
 import { useOnline } from "../hooks";
 import { useI18n } from "../i18n";
+import { slideFrom, usePresence } from "../motion";
 import Avatar from "./Avatar";
 import ErrorBoundary from "./ErrorBoundary";
 import { Icon } from "./Icon";
@@ -20,13 +21,31 @@ function savedNavHidden() {
 }
 
 export default function Layout() {
-  const { user, isTeacher, isAdmin } = useAuth();
+  const { user, isTeacher, isAdmin, notice, clearNotice } = useAuth();
   const { t } = useI18n();
   const online = useOnline();
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
   const [navHidden, setNavHidden] = useState(savedNavHidden);
+  // The menu slides away before it is hidden, and back in when shown (not on every page load).
+  const nav = usePresence(!navHidden);
+  const [navMoved, setNavMoved] = useState(false);
+  const navMotion = nav.leaving ? "is-leaving" : navMoved ? "is-entering" : "";
+  const mainRef = useRef(null);
+  const mainBefore = useRef(null);
+  // When the menu's column comes or goes, the page slides over instead of jumping.
+  useLayoutEffect(() => {
+    if (!mainBefore.current) return;
+    slideFrom(mainRef.current, mainBefore.current);
+    mainBefore.current = null;
+  }, [nav.mounted]);
+
+  function toggleNav() {
+    mainBefore.current = mainRef.current?.getBoundingClientRect() ?? null;
+    setNavMoved(true);
+    setNavHidden((hidden) => !hidden);
+  }
 
   useEffect(() => {
     try {
@@ -73,6 +92,8 @@ export default function Layout() {
           : [
               { to: "/classes", icon: "classes", label: t("nav.classes") },
               { to: "/leaderboard", icon: "leaderboard", label: t("nav.leaderboard") },
+              { to: "/planner", icon: "target", label: t("nav.planner") },
+              { to: "/my-notes", icon: "notebook", label: t("nav.notes") },
             ]),
         { to: "/playground", icon: "playground", label: t("nav.playground") },
         { to: "/calculator", icon: "calculator", label: t("nav.calculator") },
@@ -81,6 +102,7 @@ export default function Layout() {
           ? [
               { to: "/teach", icon: "teach", label: t("nav.teach") },
               { to: "/marking", icon: "marking", label: t("nav.marking") },
+              { to: "/teaching-packs", icon: "pack", label: t("nav.packs") },
             ]
           : []),
         ...(isAdmin ? [{ to: "/admin", icon: "admin", label: t("nav.admin") }] : []),
@@ -100,7 +122,7 @@ export default function Layout() {
           <button
             type="button"
             className="nav-toggle"
-            onClick={() => setNavHidden((hidden) => !hidden)}
+            onClick={toggleNav}
             aria-pressed={navHidden}
             aria-controls="main-nav"
             title={navHidden ? t("nav.show") : t("nav.hide")}
@@ -129,10 +151,18 @@ export default function Layout() {
           </Link>
         </div>
         {!online && <div className="offline-banner">{t("common.offline")}</div>}
+        {notice?.key === "deletionCancelled" && (
+          <div className="notice-banner" role="status">
+            <span>{t(`notice.${notice.key}`, notice)}</span>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={clearNotice} aria-label={t("notice.close")}>
+              <Icon name="close" size={18} />
+            </button>
+          </div>
+        )}
       </header>
 
-      <div className={`layout ${navHidden ? "nav-hidden" : ""}`}>
-        <aside className="sidebar" id="main-nav" aria-label={t("a11y.mainNav")} hidden={navHidden}>
+      <div className={`layout ${nav.mounted ? "" : "nav-hidden"}`}>
+        <aside className={`sidebar ${navMotion}`} id="main-nav" aria-label={t("a11y.mainNav")} hidden={!nav.mounted}>
           <nav>
             {primary.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.end}>
@@ -149,7 +179,7 @@ export default function Layout() {
             ))}
           </nav>
         </aside>
-        <main className="main" id="main">
+        <main className="main" id="main" ref={mainRef}>
           <ErrorBoundary resetKey={location.pathname}>
             <Suspense fallback={<Spinner />}>
               <Outlet />
@@ -158,8 +188,8 @@ export default function Layout() {
         </main>
       </div>
 
-      {!navHidden && (
-        <nav className="bottom-nav" aria-label={t("a11y.mainNav")}>
+      {nav.mounted && (
+        <nav className={`bottom-nav ${navMotion}`} aria-label={t("a11y.mainNav")}>
           {primary.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end}>
               <Icon name={item.icon} size={22} className="nav-icon" />

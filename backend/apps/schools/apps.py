@@ -7,4 +7,4 @@ class SchoolsConfig(AppConfig):
     verbose_name = "Schools and subscriptions"
 
     def ready(self):
-        from . import signals  # noqa: F401
+        from . import checks, signals  # noqa: F401  (signals, and registers the billing system checks)

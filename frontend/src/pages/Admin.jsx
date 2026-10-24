@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { api, results } from "../api";
+import { api, newIdempotencyKey, results, saveFile } from "../api";
 import { Icon } from "../components/Icon";
 import { Empty, ErrorMessage, Loader, Tabs } from "../components/ui";
-import { formatDate, formatDay, formatMoney, useApi } from "../hooks";
+import { formatDate, formatDay, formatMoney, formatNumber, useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 
 const ROLE_KEYS = { student: "auth.student", teacher: "auth.teacher", parent: "auth.parent", school_admin: "auth.schoolAdmin", admin: "auth.admin" };
 
@@ -15,9 +16,88 @@ function tOr(t, key, fallback) {
   return text === key ? fallback : text;
 }
 
-function Stats() {
+/** Santa's AI and the code runner, the costly services: use today and over 30 days, and their limits. */
+function CostlyServices({ santa, runner }) {
+  const { t, lang } = useI18n();
+  const n = (value) => formatNumber(value, lang);
+  const limit = (value) => (value ? n(value) : t("admin.limit.none"));
+  const rows = (period) => [
+    ["admin.santa.questions", n(period.questions)],
+    ["admin.santa.tokens", `${n(period.input_tokens)} / ${n(period.output_tokens)}`],
+    ["admin.santa.students", n(period.students)],
+    ["admin.santa.limited", n(period.limited)],
+  ];
+  return (
+    <div className="card costly-services">
+      <h3>{t("admin.santa.title")}</h3>
+      <div className="grid-2">
+        {[
+          ["admin.santa.today", santa.today],
+          ["admin.santa.last30", santa.last_30_days],
+        ].map(([label, period]) => (
+          <div key={label}>
+            <h4>{t(label)}</h4>
+            <ul className="list">
+              {rows(period).map(([key, value]) => (
+                <li key={key} className="spread">
+                  <span>{t(key)}</span>
+                  <strong>{value}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      {santa.top_schools_today.length > 0 && (
+        <>
+          <h4>{t("admin.santa.topSchools")}</h4>
+          <ol>
+            {santa.top_schools_today.map((school) => (
+              <li key={school.school}>
+                {school.school}{" "}
+                <span className="muted small">
+                  {t("admin.santa.schoolUse", { questions: n(school.questions), tokens: n(school.tokens), students: n(school.students) })}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+      <h4>{t("admin.santa.limits")}</h4>
+      <ul className="list">
+        {Object.entries(santa.limits).map(([key, value]) => (
+          <li key={key} className="spread">
+            <span>{t(`admin.limit.${key}`)}</span>
+            <strong>{limit(value)}</strong>
+          </li>
+        ))}
+      </ul>
+      {runner && (
+        <>
+          <h3 style={{ marginTop: 16 }}>{t("admin.runner.title")}</h3>
+          <ul className="list">
+            {[
+              ["admin.runner.runs", n(runner.today.runs)],
+              ["admin.runner.cpu", n(runner.today.cpu_seconds)],
+              ["admin.runner.students", n(runner.today.students)],
+              ["admin.runner.limited", n(runner.today.limited)],
+              ["admin.runner.dailyRuns", limit(runner.limits.daily_runs)],
+              ["admin.runner.dailyCpu", limit(runner.limits.daily_cpu_seconds)],
+            ].map(([key, value]) => (
+              <li key={key} className="spread">
+                <span>{t(key)}</span>
+                <strong>{value}</strong>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Stats({ state }) {
   const { t } = useI18n();
-  const state = useApi("/admin/stats/");
   return (
     <Loader state={state}>
       {(s) => (
@@ -80,6 +160,7 @@ function Stats() {
                 ))}
               </ol>
             </div>
+            {s.santa && <CostlyServices santa={s.santa} runner={s.code_runner} />}
             <div className="card">
               <h3>{t("admin.popularLabs")}</h3>
               <ol>
@@ -196,7 +277,7 @@ function Review() {
                   </div>
                   {item.type === "lesson" && <Link to={`/lessons/${item.slug}`}>{t("teach.preview")} →</Link>}
                   {item.url && (
-                    <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <a href={safeUrl(item.url)} target="_blank" rel="noopener noreferrer">
                       {item.url}
                     </a>
                   )}
@@ -258,42 +339,125 @@ function Moderation() {
   );
 }
 
+// A strict check before an address becomes a mailto: link (the server validated it too).
+const EMAIL = /^[^\s@<>()"',;:]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+/** Messages sent with the public contact form. */
+function Messages() {
+  const { t, lang } = useI18n();
+  const [status, setStatus] = useState("open");
+  const state = useApi("/admin/contact/", { params: { status } });
+  const [error, setError] = useState(null);
+
+  async function mark(message, handled) {
+    setError(null);
+    try {
+      await api(`/admin/contact/${message.id}/handle/`, { method: "POST", body: { handled } });
+      state.reload();
+    } catch (err) {
+      setError(err);
+    }
+  }
+
+  return (
+    <div className="stack">
+      <div className="chips wrap">
+        {["open", "handled", "all"].map((value) => (
+          <button key={value} type="button" className={`chip ${status === value ? "active" : ""}`} aria-pressed={status === value} onClick={() => setStatus(value)}>
+            {t(`admin.messages.${value}`)}
+          </button>
+        ))}
+      </div>
+      <ErrorMessage error={error} />
+      <Loader state={state}>
+        {(data) =>
+          results(data).length === 0 ? (
+            <Empty icon="inbox">{t("admin.messages.none")}</Empty>
+          ) : (
+            results(data).map((m) => (
+              <article className="card contact-message" key={m.id}>
+                <div className="spread">
+                  <strong>{m.name}</strong>
+                  <span className="small muted">{formatDate(m.created_at, lang)}</span>
+                </div>
+                <div className="small muted">
+                  {m.email}
+                  {m.school && ` · ${m.school}`} · {m.language.toUpperCase()}
+                  {m.sender && ` · ${t("admin.messages.account", { username: m.sender.username })}`}
+                </div>
+                <p className="contact-message-text">{m.message}</p>
+                {m.handled_at && (
+                  <p className="small muted">{t("admin.messages.handledBy", { name: m.handled_by || "—", date: formatDate(m.handled_at, lang) })}</p>
+                )}
+                <div className="row">
+                  {EMAIL.test(m.email) && (
+                    <a className="btn btn-sm btn-secondary" href={`mailto:${m.email}`}>
+                      <Icon name="mail" size={16} /> {t("admin.messages.reply")}
+                    </a>
+                  )}
+                  <button className="btn btn-sm" onClick={() => mark(m, !m.handled_at)}>
+                    <Icon name={m.handled_at ? "reset" : "check"} size={16} /> {t(m.handled_at ? "admin.messages.reopen" : "admin.messages.markHandled")}
+                  </button>
+                </div>
+              </article>
+            ))
+          )
+        }
+      </Loader>
+    </div>
+  );
+}
+
 function Audit() {
   const { t, lang } = useI18n();
-  const state = useApi("/admin/audit/");
+  // "Security" shows sign-ins, lockouts, password and 2FA changes, refused and throttled requests.
+  const [security, setSecurity] = useState(false);
+  const state = useApi("/admin/audit/", { params: security ? { security: 1 } : undefined });
   return (
-    <Loader state={state}>
-      {(entries) => (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("admin.col.when")}</th>
-                <th>{t("admin.col.who")}</th>
-                <th>{t("admin.col.action")}</th>
-                <th>{t("admin.col.target")}</th>
-                <th>{t("admin.col.details")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((e) => (
-                <tr key={e.id}>
-                  <td className="small">{formatDate(e.created_at, lang)}</td>
-                  <td>{e.actor || "—"}</td>
-                  <td>
-                    <code>{e.action}</code>
-                  </td>
-                  <td className="small">{e.target}</td>
-                  <td className="small">
-                    <code>{JSON.stringify(e.details)}</code>
-                  </td>
+    <div className="stack">
+      <div className="chips wrap">
+        <button type="button" className={`chip ${!security ? "active" : ""}`} aria-pressed={!security} onClick={() => setSecurity(false)}>
+          {t("admin.auditAll")}
+        </button>
+        <button type="button" className={`chip ${security ? "active" : ""}`} aria-pressed={security} onClick={() => setSecurity(true)}>
+          {t("admin.auditSecurity")}
+        </button>
+      </div>
+      <Loader state={state}>
+        {(entries) => (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("admin.col.when")}</th>
+                  <th>{t("admin.col.who")}</th>
+                  <th>{t("admin.col.action")}</th>
+                  <th>{t("admin.col.target")}</th>
+                  <th>{t("admin.col.ip")}</th>
+                  <th>{t("admin.col.details")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </Loader>
+              </thead>
+              <tbody>
+                {entries.map((e) => (
+                  <tr key={e.id}>
+                    <td className="small">{formatDate(e.created_at, lang)}</td>
+                    <td>{e.actor || "—"}</td>
+                    <td>
+                      <code>{e.action}</code>
+                    </td>
+                    <td className="small">{e.target}</td>
+                    <td className="small">{e.ip || "—"}</td>
+                    <td className="small">
+                      <code>{JSON.stringify(e.details)}</code>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Loader>
+    </div>
   );
 }
 
@@ -301,7 +465,9 @@ function SchoolDetail({ id, onChanged }) {
   const { t, lang } = useI18n();
   const state = useApi(`/admin/schools/${id}/`, {}, [id]);
   const members = useApi(`/admin/schools/${id}/members/`, {}, [id]);
-  const [form, setForm] = useState({ months: 1, amount: "200", currency: "USD", note: "" });
+  const [form, setForm] = useState({ months: 1, amount: "200", currency: "USD", note: "", external_reference: "" });
+  // One key per payment being recorded: a double click or a resend after an error records it once.
+  const [paymentKey, setPaymentKey] = useState(newIdempotencyKey);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -336,8 +502,9 @@ function SchoolDetail({ id, onChanged }) {
   const recordPayment = (e) => {
     e.preventDefault();
     run(async () => {
-      await api(`/admin/schools/${id}/payments/`, { method: "POST", body: form });
-      setForm((f) => ({ ...f, note: "" }));
+      await api(`/admin/schools/${id}/payments/`, { method: "POST", body: form, headers: { "Idempotency-Key": paymentKey } });
+      setForm((f) => ({ ...f, note: "", external_reference: "" }));
+      setPaymentKey(newIdempotencyKey());
     });
   };
   const pendingAdmins = (members.data || []).filter((m) => m.role === "school_admin" && m.school_status === "pending");
@@ -444,7 +611,17 @@ function SchoolDetail({ id, onChanged }) {
                   value={form.note}
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
                   required
+                  maxLength={300}
                   placeholder={t("admin.paymentNoteHint")}
+                />
+              </label>
+              <label>
+                {t("admin.externalReference")}
+                <input
+                  value={form.external_reference}
+                  onChange={(e) => setForm({ ...form, external_reference: e.target.value })}
+                  maxLength={100}
+                  placeholder={t("admin.externalReferenceHint")}
                 />
               </label>
               <button className="btn btn-sm" disabled={busy}>
@@ -459,6 +636,9 @@ function SchoolDetail({ id, onChanged }) {
                   <tr>
                     <th>{t("billing.date")}</th>
                     <th>{t("billing.amount")}</th>
+                    <th>{t("admin.gross")}</th>
+                    <th>{t("admin.providerFee")}</th>
+                    <th>{t("admin.net")}</th>
                     <th>{t("billing.months")}</th>
                     <th>{t("billing.method")}</th>
                     <th>{t("billing.status")}</th>
@@ -469,9 +649,13 @@ function SchoolDetail({ id, onChanged }) {
                     <tr key={p.reference}>
                       <td>{formatDay(p.paid_at || p.created_at, lang)}</td>
                       <td>{formatMoney(p.amount, p.currency, lang)}</td>
+                      <td>{p.gross_amount == null ? "—" : formatMoney(p.gross_amount, p.currency, lang)}</td>
+                      <td>{p.provider_fee == null ? "—" : formatMoney(p.provider_fee, p.currency, lang)}</td>
+                      <td>{p.net_amount == null ? "—" : formatMoney(p.net_amount, p.currency, lang)}</td>
                       <td>{p.months}</td>
                       <td>
                         {t(`billing.provider.${p.provider}`)}
+                        {p.external_reference && ` · ${p.external_reference}`}
                         {p.note && ` · ${p.note}`}
                       </td>
                       <td>{t(`billing.paymentStatus.${p.status}`)}</td>
@@ -481,9 +665,168 @@ function SchoolDetail({ id, onChanged }) {
               </table>
             </div>
           )}
+          <Ledger school={school} busy={busy} run={run} />
         </div>
       )}
     </Loader>
+  );
+}
+
+const EMPTY_CORRECTION = { kind: "refund", amount: "", currency: "USD", months: 0, corrects: "", note: "" };
+
+/** The school's money ledger: entries are never changed; a refund or a correction is a new entry. */
+function Ledger({ school, busy, run }) {
+  const { t, lang } = useI18n();
+  const [form, setForm] = useState(EMPTY_CORRECTION);
+  const [key, setKey] = useState(newIdempotencyKey);
+  const [open, setOpen] = useState(false);
+
+  const record = (e) => {
+    e.preventDefault();
+    run(async () => {
+      const body = { ...form, months: Number(form.months) || 0, corrects: form.corrects ? Number(form.corrects) : null };
+      await api(`/admin/schools/${school.id}/ledger/`, { method: "POST", body, headers: { "Idempotency-Key": key } });
+      setForm(EMPTY_CORRECTION);
+      setKey(newIdempotencyKey());
+      setOpen(false);
+    });
+  };
+
+  return (
+    <div className="stack" style={{ gap: 8 }}>
+      <div className="spread">
+        <strong>{t("admin.ledger")}</strong>
+        <button className="btn btn-sm btn-secondary" type="button" onClick={() => setOpen(!open)} aria-expanded={open}>
+          {t("admin.addCorrection")}
+        </button>
+      </div>
+      <p className="small muted" style={{ margin: 0 }}>
+        {t("admin.ledgerHelp")}
+      </p>
+      {open && (
+        <form className="form" onSubmit={record}>
+          <div className="form-row">
+            <label>
+              {t("admin.entryKind")}
+              <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
+                <option value="refund">{t("admin.ledgerKind.refund")}</option>
+                <option value="correction">{t("admin.ledgerKind.correction")}</option>
+              </select>
+            </label>
+            <label>
+              {t("billing.amount")}
+              <input
+                type="number"
+                step="0.01"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                required
+                placeholder={form.kind === "refund" ? "-200" : "0"}
+              />
+            </label>
+            <label>
+              {t("field.currency")}
+              <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+                <option>USD</option>
+                <option>RWF</option>
+              </select>
+            </label>
+            <label>
+              {t("billing.months")}
+              <input
+                type="number"
+                min="-24"
+                max="24"
+                value={form.months}
+                onChange={(e) => setForm({ ...form, months: e.target.value })}
+              />
+            </label>
+            <label>
+              {t("admin.corrects")}
+              <input
+                type="number"
+                min="1"
+                value={form.corrects}
+                onChange={(e) => setForm({ ...form, corrects: e.target.value })}
+              />
+            </label>
+          </div>
+          <label>
+            {t("admin.correctionNote")}
+            <input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} required maxLength={300} />
+          </label>
+          <span className="small muted">{t("admin.correctionHelp")}</span>
+          <button className="btn btn-sm" disabled={busy}>
+            {t("admin.record")}
+          </button>
+        </form>
+      )}
+      {school.ledger.length === 0 ? (
+        <span className="small muted">{t("admin.ledgerEmpty")}</span>
+      ) : (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{t("billing.date")}</th>
+                <th>{t("admin.entryKind")}</th>
+                <th>{t("admin.gross")}</th>
+                <th>{t("admin.providerFee")}</th>
+                <th>{t("admin.net")}</th>
+                <th>{t("billing.months")}</th>
+                <th>{t("field.note")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {school.ledger.map((e) => (
+                <tr key={e.sequence}>
+                  <td>{e.sequence}</td>
+                  <td>{formatDay(e.created_at, lang)}</td>
+                  <td>
+                    {tOr(t, `admin.ledgerKind.${e.kind}`, e.kind)}
+                    {e.corrects && ` (#${e.corrects})`}
+                  </td>
+                  <td>{formatMoney(e.gross_amount, e.currency, lang)}</td>
+                  <td>{formatMoney(e.provider_fee, e.currency, lang)}</td>
+                  <td>{formatMoney(e.net_amount, e.currency, lang)}</td>
+                  <td>{e.months}</td>
+                  <td className="small">
+                    {[e.reference, e.note, e.actor_name].filter(Boolean).join(" · ")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LedgerExport() {
+  const { t } = useI18n();
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+  async function download() {
+    setBusy(true);
+    setError(null);
+    try {
+      const blob = await api("/admin/ledger/export/", { as: "blob" });
+      saveFile(blob, `iga-ledger-${new Date().toISOString().slice(0, 10)}.csv`);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <button className="btn btn-sm btn-secondary" disabled={busy} onClick={download}>
+        <Icon name="download" size={16} /> {t("admin.exportLedger")}
+      </button>
+      <ErrorMessage error={error} />
+    </>
   );
 }
 
@@ -515,6 +858,7 @@ function Schools() {
           aria-label={t("school.search")}
           style={{ maxWidth: 260 }}
         />
+        <LedgerExport />
       </div>
       <Loader state={state}>
         {(list) =>
@@ -551,6 +895,9 @@ function Schools() {
   );
 }
 
+/** {currency: {gross, fees, net}} -> {currency: one of them}. */
+const ledgerColumn = (totals, column) => Object.fromEntries(Object.entries(totals || {}).map(([c, v]) => [c, v[column]]));
+
 function SubscriptionStats({ subs }) {
   const { t, lang } = useI18n();
   const fmt = (byCurrency) =>
@@ -575,6 +922,18 @@ function SubscriptionStats({ subs }) {
         <strong>{fmt(subs.all_time)}</strong>
         <span className="muted small">{t("admin.revenueTotal")}</span>
       </div>
+      {subs.ledger && (
+        <>
+          <div className="card stat">
+            <strong>{fmt(ledgerColumn(subs.ledger.all_time, "fees"))}</strong>
+            <span className="muted small">{t("admin.feesTotal")}</span>
+          </div>
+          <div className="card stat">
+            <strong>{fmt(ledgerColumn(subs.ledger.all_time, "net"))}</strong>
+            <span className="muted small">{t("admin.netTotal")}</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -582,15 +941,20 @@ function SubscriptionStats({ subs }) {
 export default function Admin() {
   const { t } = useI18n();
   const [tab, setTab] = useState("stats");
+  const stats = useApi("/admin/stats/");
+  // The Django admin has a secret address, given only to platform administrators (none when it is off).
+  const djangoAdmin = stats.data?.django_admin_url;
   return (
     <>
       <div className="page-header spread">
         <h1 className="title-with-icon" style={{ margin: 0 }}>
           <Icon name="admin" size={28} /> {t("admin.title")}
         </h1>
-        <a className="btn btn-secondary btn-sm" href="/django-admin/" target="_blank" rel="noopener noreferrer">
-          {t("admin.djangoAdmin")} <Icon name="external" size={16} />
-        </a>
+        {djangoAdmin && (
+          <a className="btn btn-secondary btn-sm" href={djangoAdmin} target="_blank" rel="noopener noreferrer">
+            {t("admin.djangoAdmin")} <Icon name="external" size={16} />
+          </a>
+        )}
       </div>
       <Tabs
         value={tab}
@@ -601,14 +965,16 @@ export default function Admin() {
           { value: "users", label: t("admin.users") },
           { value: "review", label: t("admin.review") },
           { value: "moderation", label: t("admin.moderation") },
+          { value: "messages", label: t("admin.messages") },
           { value: "audit", label: t("admin.audit") },
         ]}
       />
-      {tab === "stats" && <Stats />}
+      {tab === "stats" && <Stats state={stats} />}
       {tab === "schools" && <Schools />}
       {tab === "users" && <Users />}
       {tab === "review" && <Review />}
       {tab === "moderation" && <Moderation />}
+      {tab === "messages" && <Messages />}
       {tab === "audit" && <Audit />}
     </>
   );

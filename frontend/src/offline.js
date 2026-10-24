@@ -1,6 +1,7 @@
 // "Save for offline": fetch every lesson in a unit so the service worker keeps a copy.
 // On logout every saved lesson is wiped, because school computers are often shared.
 import { api } from "./api";
+import { clearPendingNotes } from "./notes-offline";
 
 const KEY = "iga.offline.units";
 
@@ -128,6 +129,7 @@ export function clearAskHistory() {
 
 export async function clearOfflineData() {
   clearAskHistory();
+  clearPendingNotes();
   try {
     localStorage.removeItem(KEY);
     localStorage.removeItem("iga.user");

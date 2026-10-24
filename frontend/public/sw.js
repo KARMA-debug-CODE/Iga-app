@@ -69,6 +69,8 @@ self.addEventListener("fetch", (event) => {
     if (OFFLINE_API.some((re) => re.test(url.pathname))) event.respondWith(networkFirst(request));
     return;
   }
+  // Pages inside frames (the HTML playground's preview) are not the app: never keep them as index.html.
+  if (request.mode === "navigate" && request.destination === "iframe") return;
   if (request.mode === "navigate") {
     // Single-page app: every route is served by index.html. Keep the latest copy for offline use.
     event.respondWith(

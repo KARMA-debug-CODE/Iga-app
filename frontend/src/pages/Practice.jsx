@@ -8,7 +8,9 @@ import { LockBadge, LockedNotice } from "../components/Locked";
 import { Empty, ErrorMessage, GradeChips, Loader, scoreClass, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 import { SubjectSelect } from "./Labs";
+import ReviewPanel from "./Review";
 
 export function useStartQuiz() {
   const navigate = useNavigate();
@@ -44,7 +46,7 @@ function QuizGrid({ subject, grade }) {
           const list = results(data);
           if (!list.length) return <Empty icon="practice">—</Empty>;
           return (
-            <div className="grid">
+            <div className="grid stagger">
               {list.map((q) => {
                 const pct = q.my_best != null && q.total_marks ? Math.round((q.my_best / q.total_marks) * 100) : null;
                 return (
@@ -157,12 +159,12 @@ function PastPapers({ subject }) {
                       </button>
                     )}
                     {p.paper_link && (
-                      <a className="btn btn-sm btn-secondary" href={p.paper_link} target="_blank" rel="noopener noreferrer">
+                      <a className="btn btn-sm btn-secondary" href={safeUrl(p.paper_link)} target="_blank" rel="noopener noreferrer">
                         <Icon name="file" size={16} /> {t("practice.openPaper")}
                       </a>
                     )}
                     {p.marking_guide_link && (
-                      <a className="btn btn-sm btn-secondary" href={p.marking_guide_link} target="_blank" rel="noopener noreferrer">
+                      <a className="btn btn-sm btn-secondary" href={safeUrl(p.marking_guide_link)} target="_blank" rel="noopener noreferrer">
                         <Icon name="fileCheck" size={16} /> {t("practice.markingGuide")}
                       </a>
                     )}
@@ -212,12 +214,17 @@ export default function Practice() {
         tabs={[
           { value: "quizzes", label: t("practice.quizzes") },
           { value: "papers", label: t("practice.pastPapers") },
+          { value: "review", label: t("practice.reviewTab") },
         ]}
       />
-      <div className="form-row" style={{ marginBottom: 12 }}>
-        <SubjectSelect value={subject} onChange={setSubject} />
-      </div>
-      {tab === "quizzes" ? (
+      {tab !== "review" && (
+        <div className="form-row" style={{ marginBottom: 12 }}>
+          <SubjectSelect value={subject} onChange={setSubject} />
+        </div>
+      )}
+      {tab === "review" ? (
+        <ReviewPanel />
+      ) : tab === "quizzes" ? (
         <>
           <GradeChips value={grade} onChange={setGrade} allowAll />
           <div style={{ marginTop: 16 }}>

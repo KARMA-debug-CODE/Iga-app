@@ -6,6 +6,7 @@ import { useAuth } from "../auth";
 import { LockedNotice } from "../components/Locked";
 import {
   finishedMessages,
+  SantaAllowance,
   SantaForm,
   SantaLog,
   SantaMark,
@@ -153,6 +154,7 @@ export default function Ask() {
             {t("ask.openExam")}
           </Link>
         )}
+        <SantaAllowance allowance={chat.allowance || status.allowance} />
         <div style={{ marginTop: 8 }}>
           <SantaForm
             id="ask-input"

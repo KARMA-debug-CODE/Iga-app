@@ -3,15 +3,28 @@
 // cookie the browser sends to /api/auth/refresh/ automatically.
 
 import { currentLanguage, hasTranslation, translateNow } from "./i18n";
+import { isMaintenance, setMaintenance } from "./maintenance";
 
 const BASE = import.meta.env.VITE_API_BASE || "/api";
 
 // Auth endpoints where a 401 is the answer itself rather than an expired access token.
-const NO_REFRESH = new Set(["/auth/login/", "/auth/register/", "/auth/refresh/", "/auth/logout/"]);
+const NO_REFRESH = new Set([
+  "/auth/login/",
+  "/auth/register/",
+  "/auth/refresh/",
+  "/auth/logout/",
+  "/auth/password-reset/",
+  "/auth/password-reset/confirm/",
+]);
+// Security changes end every session, this one's access token included: the answer carries a new one.
+const ISSUES_ACCESS_TOKEN = new Set(["/auth/password/", "/auth/2fa/enable/", "/auth/2fa/disable/"]);
 
 let accessToken = null;
 let refreshing = null;
 let onSessionExpired = () => {};
+// Asks the person to confirm their password (StepUpDialog); resolves once they have, rejects if they cancel.
+let onStepUp = null;
+let steppingUp = null;
 
 export function setAccessToken(token) {
   accessToken = token;
@@ -19,6 +32,29 @@ export function setAccessToken(token) {
 
 export function setSessionExpiredHandler(fn) {
   onSessionExpired = fn;
+}
+
+export function setStepUpHandler(fn) {
+  onStepUp = fn;
+}
+
+/** Confirm the password (and 2FA code) for privileged actions; the new access token replaces the old one. */
+export async function confirmIdentity(password, otp) {
+  const data = await api("/auth/step-up/", { method: "POST", body: { password, otp: otp || undefined }, stepUp: false });
+  accessToken = data.access;
+  return data;
+}
+
+// Several requests refused at once share one prompt.
+function stepUpOnce() {
+  if (!steppingUp) {
+    steppingUp = Promise.resolve()
+      .then(() => onStepUp())
+      .finally(() => {
+        steppingUp = null;
+      });
+  }
+  return steppingUp;
 }
 
 export class ApiError extends Error {
@@ -66,7 +102,11 @@ export async function refreshSession() {
   if (!refreshing) {
     refreshing = postRefresh()
       .then(async (res) => {
-        if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          if (isMaintenance(data, res.status)) setMaintenance(true);
+          throw new ApiError(res.status, data);
+        }
         const data = await res.json();
         accessToken = data.access;
         return data;
@@ -78,14 +118,18 @@ export async function refreshSession() {
   return refreshing;
 }
 
-export async function api(path, { method = "GET", body, params, retry = true, signal } = {}) {
+/**
+ * `headers` adds request headers (an Idempotency-Key, for example); `as: "blob"` returns the body as a Blob
+ * (a file to download) instead of parsed JSON.
+ */
+export async function api(path, { method = "GET", body, params, retry = true, signal, stepUp = true, headers: extra, as } = {}) {
   let url = `${BASE}${path}`;
   if (params) {
     const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
     if ([...query].length) url += `?${query}`;
   }
   // The server answers in the reader's language (its own error messages included).
-  const headers = { "Accept-Language": currentLanguage() };
+  const headers = { ...extra, "Accept-Language": currentLanguage() };
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
@@ -106,12 +150,28 @@ export async function api(path, { method = "GET", body, params, retry = true, si
 
   if (res.status === 401 && retry && !NO_REFRESH.has(path)) {
     await refreshAfter401();
-    return api(path, { method, body, params, retry: false, signal });
+    return api(path, { method, body, params, retry: false, signal, stepUp, headers: extra, as });
   }
 
   if (res.status === 204) return null;
+  if (as === "blob" && res.ok) return res.blob();
   const data = await res.json().catch(() => null);
+  // Iga is being updated: the app shows its "back soon" page (maintenance.js).
+  if (isMaintenance(data, res.status)) setMaintenance(true);
+  // Privileged actions need a password confirmed in the last few minutes: ask for it, then try once more.
+  if (res.status === 403 && data?.code === "step_up_required" && stepUp && onStepUp) {
+    try {
+      await stepUpOnce();
+    } catch {
+      throw new ApiError(res.status, data);
+    }
+    return api(path, { method, body, params, retry, signal, stepUp: false, headers: extra, as });
+  }
   if (!res.ok) throw new ApiError(res.status, data);
+  if (ISSUES_ACCESS_TOKEN.has(path) && data?.access) {
+    accessToken = data.access;
+    delete data.access; // kept in memory here only, never in page state
+  }
   return data;
 }
 
@@ -145,7 +205,11 @@ export async function apiStream(path, { body, signal, retry = true } = {}) {
     await refreshAfter401();
     return apiStream(path, { body, signal, retry: false });
   }
-  if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => null));
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    if (isMaintenance(data, res.status)) setMaintenance(true);
+    throw new ApiError(res.status, data);
+  }
   return res;
 }
 
@@ -173,6 +237,23 @@ export async function readEvents(response, onEvent) {
     if (done) break;
   }
   flush(buffer);
+}
+
+/** A fresh key for one action, sent as Idempotency-Key, so a resent request (a double click, a retry) does nothing new. */
+export function newIdempotencyKey() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Save a Blob the API sent as a file on the user's device. */
+export function saveFile(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // DRF paginated responses have {results}; plain lists don't.

@@ -1,22 +1,27 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+import publicPages from "./scripts/public-pages.mjs";
+
 const backend = process.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
 export default defineConfig({
-  plugins: [react()],
+  // publicPages: a copy of index.html per public page, with its title and link-preview tags.
+  plugins: [react(), publicPages()],
   server: {
     port: 5173,
     proxy: {
       "/api": backend,
-      "/media": backend,
       "/django-admin": backend,
       "/static": backend,
+      "/robots.txt": backend,
+      "/sitemap.xml": backend,
     },
   },
   preview: {
     port: 4173,
-    proxy: { "/api": backend, "/media": backend },
+    // Uploaded files have no /media URL: they come from the access-checked /api/files/ links.
+    proxy: { "/api": backend },
   },
   build: {
     rollupOptions: {
@@ -34,7 +39,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.{js,jsx}"],
+    // scripts/: the build's own checks (check-bundle.mjs).
+    include: ["src/**/*.test.{js,jsx}", "scripts/**/*.test.js"],
     setupFiles: ["./src/test-setup.js"],
   },
 });

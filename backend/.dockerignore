@@ -6,4 +6,9 @@ media
 staticfiles
 .pytest_cache
 .ruff_cache
+# Local settings and secrets never go into an image.
 .env
+.env.*
+*.local
+*.pem
+*.key

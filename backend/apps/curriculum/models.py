@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.core.constants import GRADES, LANGUAGES, RESOURCE_LANGUAGES, ContentStatus
-from apps.core.uploads import RandomName, validate_upload
+from apps.core.uploads import RESOURCE_KINDS, RandomName, SafeFileField
 
 
 class Subject(models.Model):
@@ -151,7 +151,7 @@ class Resource(models.Model):
     description_fr = models.TextField("Description (French)", blank=True)
     url = models.URLField(max_length=500, blank=True)
     format = models.CharField(max_length=4, choices=Format.choices, blank=True)
-    file = models.FileField(upload_to=RandomName("resources"), blank=True, validators=[validate_upload])
+    file = SafeFileField(upload_to=RandomName("resources"), kinds=RESOURCE_KINDS, blank=True)
     language = models.CharField(max_length=2, choices=RESOURCE_LANGUAGES, default="en")
     publisher = models.CharField(max_length=120, blank=True)
     licence = models.CharField(max_length=120, blank=True)

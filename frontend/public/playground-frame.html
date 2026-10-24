@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Preview</title>
+    <!--
+      The HTML playground's preview (src/components/CodePlayground.jsx). Iga frames this page sandboxed, so the
+      student's page runs with no access to Iga's origin, cookies or storage, and posts the page here; nginx
+      gives it its own Content-Security-Policy (the app's own would block the student's inline scripts).
+    -->
+    <script>
+      window.addEventListener(
+        "message",
+        function (event) {
+          if (event.source !== window.parent || !event.data || event.data.type !== "iga-playground") return;
+          document.open();
+          document.write(String(event.data.html));
+          document.close();
+        },
+        { once: true },
+      );
+      window.parent.postMessage({ type: "iga-playground-ready" }, "*");
+    </script>
+  </head>
+  <body></body>
+</html>

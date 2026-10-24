@@ -3,7 +3,7 @@ import { useState } from "react";
 import { results } from "../api";
 import Avatar from "../components/Avatar";
 import { Icon } from "../components/Icon";
-import { Empty, Loader, Tabs } from "../components/ui";
+import { Empty, Loader, SkeletonRows, Tabs } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
 
@@ -51,13 +51,13 @@ export default function Leaderboard() {
           </select>
         )}
       </div>
-      <Loader state={state}>
+      <Loader state={state} skeleton={<SkeletonRows count={8} lead="rank" />}>
         {(board) =>
           board.entries.length === 0 ? (
             <Empty icon="flag">{t("board.empty")}</Empty>
           ) : (
             <div className="card">
-              <ol className="list">
+              <ol className="list stagger">
                 {board.entries.map((e, i) => (
                   <li key={`${e.rank}-${i}`} className={`row ${e.is_me ? "me-row" : ""}`} style={{ flexWrap: "nowrap", gap: 10 }}>
                     <span className={`rank ${e.rank <= 3 ? `rank-${e.rank}` : ""}`}>{e.rank}</span>

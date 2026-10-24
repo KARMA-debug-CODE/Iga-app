@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 
 from django.db.models import Count, Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers, status, viewsets
@@ -10,23 +11,28 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.accounts import enumeration
+from apps.accounts.models import User
 from apps.accounts.serializers import PublicUserSerializer
 from apps.assessments.models import Attempt
 from apps.assessments.services import finalize_if_expired, visible_quizzes
-from apps.core import audit
-from apps.core.permissions import IsTeacher
+from apps.core import audit, security_log
+from apps.core.permissions import IsTeacher, RecentAuthentication
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.core.throttles import JoinRateThrottle
 from apps.core.utils import serializer_language
+from apps.core.validation import id_param, parse_id, text_field
 from apps.curriculum.models import LessonProgress
 from apps.curriculum.views import visible_lessons
 from apps.schools import access
 from apps.simulations.models import SimulationView
 
 from . import roster
+from .analytics import class_unit_scores
 from .models import Assignment, Classroom, Enrollment
 
 
-class ClassroomSerializer(serializers.ModelSerializer):
+class ClassroomSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     teacher_name = serializers.CharField(source="teacher.display_name", read_only=True)
     subject_name = serializers.SerializerMethodField()
     subject_icon = serializers.CharField(source="subject.icon", read_only=True, default="school")
@@ -61,7 +67,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
         return classroom.join_code if classroom.teacher_id == user.id or user.is_platform_admin else None
 
 
-class AssignmentSerializer(serializers.ModelSerializer):
+class AssignmentSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     kind = serializers.CharField(read_only=True)
     classroom_name = serializers.CharField(source="classroom.name", read_only=True)
     quiz_title = serializers.CharField(source="quiz.title", read_only=True, default=None)
@@ -91,6 +97,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "locked",
         ]
         read_only_fields = ["id", "created_at"]
+        extra_kwargs = {"instructions": {"max_length": 5000}}
 
     def validate(self, attrs):
         targets = [attrs.get(k) for k in ("quiz", "lesson", "simulation")]
@@ -116,6 +123,12 @@ class AssignmentSerializer(serializers.ModelSerializer):
         """True when the viewer can't open the assigned lesson or quiz (their school hasn't subscribed)."""
         target = assignment.quiz or assignment.lesson
         return target is not None and not access.can_open(self.context["request"].user, target)
+
+
+class RosterImportSerializer(serializers.Serializer):
+    # 200 rows (roster.MAX_ROWS) of names and emails fit easily.
+    csv = serializers.CharField(max_length=100_000, allow_blank=True, required=False, default="", trim_whitespace=False)
+    confirm = serializers.BooleanField(default=False)
 
 
 def assignment_status(assignment, student):
@@ -186,6 +199,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     serializer_class = ClassroomSerializer
 
     def get_permissions(self):
+        if self.action == "reset_password":
+            # Taking over a student's sign-in is privileged: the teacher confirms their own password first.
+            return [IsTeacher(), RecentAuthentication()]
         if self.action in (
             "create",
             "update",
@@ -195,7 +211,6 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             "remove_student",
             "new_code",
             "import_roster",
-            "reset_password",
         ):
             return [IsTeacher()]
         return [IsAuthenticated()]
@@ -254,7 +269,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def join(self, request):
         if not request.user.is_student:
             raise PermissionDenied(_("Only students join classes with a code."))
-        code = (request.data.get("code") or "").strip().upper()
+        code = text_field(request.data, "code", 12).upper()
         classroom = Classroom.objects.filter(join_code=code, archived=False).first()
         if not classroom:
             raise ValidationError({"code": _("No class has that code. Check with your teacher.")})
@@ -270,10 +285,11 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def remove_student(self, request, pk=None):
         classroom = self.get_object()
-        deleted, _created = Enrollment.objects.filter(classroom=classroom, student_id=request.data.get("student")).delete()
+        student_id = parse_id(request.data.get("student"), "student")
+        deleted, _created = Enrollment.objects.filter(classroom=classroom, student_id=student_id).delete()
         if not deleted:
             raise ValidationError({"student": _("That student is not in this class.")})
-        audit.record(request, "remove_student", classroom, student=request.data.get("student"))
+        audit.record(request, "remove_student", classroom, student=student_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"])
@@ -282,12 +298,22 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         classroom = self.get_object()
         if classroom.archived:
             raise ValidationError(_("This class is archived."))
+        data = RosterImportSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
         try:
-            rows = roster.parse(request.data.get("csv", ""))
+            rows = roster.parse(data.validated_data["csv"])
         except roster.RosterError as exc:
             raise ValidationError({"csv": str(exc)})
+        # "Already used" answers about emails are limited per teacher, so the preview can't be used
+        # to find out which email addresses have an account.
+        emails = {row["email"].lower() for row in rows if row["email"]}
+        if emails:
+            enumeration.check_budget(request, request.user)
         ok = roster.check(rows)
-        if not ok or not request.data.get("confirm"):
+        in_use = User.objects.annotate(email_lower=Lower("email")).filter(email_lower__in=emails).count() if emails else 0
+        if in_use:
+            enumeration.spend(request, request.user, in_use)
+        if not ok or not data.validated_data["confirm"]:
             return Response({"valid": ok, "rows": rows})
         created = roster.create_accounts(rows, classroom, request.user)
         audit.record(request, "import_roster", classroom, count=len(created), usernames=[r["username"] for r in created])
@@ -297,15 +323,19 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def reset_password(self, request, pk=None):
         """Give a student in this class a new temporary password (they choose their own at next login)."""
         classroom = self.get_object()
+        student_id = parse_id(request.data.get("student"), "student")
+        # Only a current student of this class: not one who has moved to another grade (inactive).
         enrollment = (
-            Enrollment.objects.filter(classroom=classroom, classroom__archived=False, student_id=request.data.get("student"))
+            Enrollment.objects.filter(classroom=classroom, classroom__archived=False, student_id=student_id, active=True)
             .select_related("student")
             .first()
         )
         if enrollment is None or not enrollment.student.is_student:
             raise ValidationError({"student": _("That student is not in this class.")})
         password = roster.reset_password(enrollment.student)
-        audit.record(request, "reset_student_password", enrollment.student, classroom=classroom.id)
+        security_log.event(
+            request, "reset_student_password", enrollment.student, classroom=classroom.id, other_sessions_ended=True
+        )
         return Response({"username": enrollment.student.username, "temporary_password": password})
 
     @action(detail=True, methods=["post"])
@@ -344,29 +374,16 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             )
 
         # Weak topics: average percentage per unit across all marked answers by class members.
-        unit_totals = defaultdict(lambda: [0.0, 0.0, None])
-        attempts = Attempt.objects.filter(user__in=students, status=Attempt.Status.MARKED).prefetch_related(
-            "answers__question__unit"
-        )
-        if classroom.subject_id:
-            attempts = attempts.filter(quiz__subject_id=classroom.subject_id)
-        for attempt in attempts:
-            for answer in attempt.answers.all():
-                unit = answer.question.unit
-                if unit is None or answer.marks_awarded is None:
-                    continue
-                totals = unit_totals[unit.id]
-                totals[0] += float(answer.marks_awarded)
-                totals[1] += float(answer.question.marks)
-                totals[2] = unit
-        weak_units = sorted(
-            (
-                {"unit": f"{u.grade} Unit {u.number}: {u.title}", "average": round(got / possible * 100, 1)}
-                for got, possible, u in unit_totals.values()
-                if possible
-            ),
-            key=lambda item: item["average"],
-        )[:5]
+        weak_units = [
+            {
+                "unit": f"{s.unit.grade} Unit {s.unit.number}: {s.unit.title}",
+                "average": s.average,
+                "unit_id": s.unit.id,
+                # Students may revise another grade's units: listed, but teaching packs are for the class's own grade.
+                "of_class_grade": s.unit.grade == classroom.grade,
+            }
+            for s in class_unit_scores(classroom, students)[:5]
+        ]
 
         return Response(
             {
@@ -396,8 +413,9 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(classroom__teacher=user)
         else:
             qs = qs.filter(classroom__enrollments__student=user, classroom__enrollments__active=True, classroom__archived=False)
-        if self.request.query_params.get("classroom"):
-            qs = qs.filter(classroom_id=self.request.query_params["classroom"])
+        classroom_id = id_param(self.request, "classroom")
+        if classroom_id:
+            qs = qs.filter(classroom_id=classroom_id)
         if self.request.query_params.get("upcoming"):
             qs = qs.filter(Q(due_at__isnull=True) | Q(due_at__gte=timezone.now() - timedelta(days=1)))
         return qs

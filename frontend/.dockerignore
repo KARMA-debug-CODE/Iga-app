@@ -2,3 +2,12 @@ node_modules
 dist
 test-results
 playwright-report
+# Copied from node_modules by `npm run copy-runtimes` during the build itself.
+public/pyodide
+public/runtimes
+# Local settings and secrets never go into an image.
+.env
+.env.*
+*.local
+*.pem
+*.key

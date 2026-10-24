@@ -63,6 +63,46 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  nginx:
+    name: nginx (rate limits, client addresses, request limits, HTTPS, headers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Builds the web image's nginx stage and tests it next to a stub backend (Docker and Python only).
+      - run: python3 frontend/tests/nginx/test_nginx.py
+
+  stack:
+    name: Production stack in a browser (security headers and CSP)
+    needs: [nginx]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Start the Docker stack (without the code runner and Santa)
+        run: |
+          {
+            echo "DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')"
+            echo "FIELD_ENCRYPTION_KEYS=$(python3 -c 'import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')"
+            echo "HTTPS=false"
+            echo "CODE_RUNNER_URL="
+          } > .env
+          docker compose up -d --build db redis backend web
+          until curl -sf http://localhost:8080/api/health/ > /dev/null; do sleep 2; done
+          docker compose exec -T backend python manage.py load_curriculum
+          docker compose exec -T -e DJANGO_DEBUG=true backend python manage.py seed_demo
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npx playwright test -c playwright.docker.config.js
+        working-directory: frontend
+      - if: failure()
+        run: docker compose logs --tail 200 backend web
+
   e2e:
     name: End-to-end (Playwright)
     needs: [backend, frontend]

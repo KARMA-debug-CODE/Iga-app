@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../auth";
+import ConsentCheckbox from "../components/ConsentCheckbox";
 import { Icon } from "../components/Icon";
 import SchoolPicker, { DistrictSelect } from "../components/SchoolPicker";
 import { GRADES } from "../components/ui";
 import { useI18n } from "../i18n";
+import { usePageMeta } from "../pageMeta";
+import { useSiteInfo } from "../site";
 import AuthShell from "./AuthShell";
 
 // Role -> icon on the role buttons.
@@ -14,9 +17,14 @@ const ROLES = { student: "backpack", teacher: "teach", parent: "users", school_a
 export default function Register() {
   const { register } = useAuth();
   const { t, lang } = useI18n();
+  usePageMeta("register");
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const site = useSiteInfo();
+  const [accepted, setAccepted] = useState(false);
   const [form, setForm] = useState({
-    role: "student",
+    // ?role=school_admin from the pricing section's "Register your school".
+    role: Object.hasOwn(ROLES, params.get("role") || "") ? params.get("role") : "student",
     first_name: "",
     last_name: "",
     username: "",
@@ -39,7 +47,9 @@ export default function Register() {
     setBusy(true);
     setError("");
     try {
-      const payload = { ...form, preferred_language: lang };
+      // The Terms and Privacy Policy accepted, in the version this form showed (the server refuses an older one).
+      const payload = { ...form, preferred_language: lang, accept_terms: accepted };
+      if (site.data?.legal?.version) payload.terms_version = site.data.legal.version;
       if (payload.role !== "student") payload.grade = "";
       if (!payload.email) delete payload.email;
       if (isSchoolAdmin && newSchool) {
@@ -187,6 +197,7 @@ export default function Register() {
           </fieldset>
         )}
 
+        <ConsentCheckbox checked={accepted} onChange={setAccepted} student={form.role === "student"} />
         {error && (
           <div className="alert alert-error" role="alert">
             {error}

@@ -185,8 +185,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .calc-nav,
-  .calc-side.is-open {
+  .calc-side.is-open,
+  .calc-value.is-error {
     animation: none;
+  }
+
+  .calc-key {
+    transition: none;
   }
 }
 
@@ -279,6 +284,19 @@
 
 .calc-value.is-error {
   font-size: clamp(1.2rem, calc(170cqi / var(--calc-len, 8)), 2.4rem);
+  animation: calc-shake 280ms ease-out;
+}
+
+/* "Cannot divide by zero" and the like: a short shake, as a no. */
+@keyframes calc-shake {
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 /* ---------- Programmer: HEX DEC OCT BIN ---------- */
@@ -416,7 +434,10 @@
   user-select: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 80ms linear;
+  /* Released keys spring back (the press itself is quicker, below). */
+  transition:
+    background-color 80ms linear,
+    transform 180ms var(--ease-spring);
 }
 
 .calc-key sup,
@@ -485,11 +506,15 @@
   }
 }
 
-/* Pressed: on click, and briefly when the same key is typed on the keyboard. */
+/* Pressed: on click, and briefly when the same key is typed on the keyboard. The key sinks a little. */
 .calc-key:not([aria-disabled="true"]):active,
 .calc-key.calc-key-pressed {
   background: color-mix(in srgb, var(--calc-fn) 20%, var(--calc-bg));
   color: var(--text-soft);
+  transform: scale(0.94);
+  transition:
+    background-color 80ms linear,
+    transform 60ms ease-out;
 }
 
 .calc-key-digit:not([aria-disabled="true"]):active,

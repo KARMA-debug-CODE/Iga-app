@@ -11,6 +11,7 @@ from apps.assessments.models import Attempt, ExamPaper, Question
 from apps.curriculum.models import Lesson
 from apps.schools.access import content_access
 
+from . import samples
 from .conftest import add_mcq, make_quiz, make_school, make_user
 
 pytestmark = pytest.mark.django_db
@@ -182,7 +183,8 @@ def test_past_paper_links_are_withheld_when_locked(client_for, apade_student, st
     settings.MEDIA_ROOT = tmp_path
     quiz = make_quiz(subject, unit, [add_mcq(subject, unit)], kind="past_paper")
     paper = ExamPaper.objects.create(subject=subject, level="O", year=2024, title="Maths 2024", quiz=quiz)
-    paper.paper_file.save("paper.pdf", ContentFile(b"%PDF-1.4 secret paper"))
+    secret = samples.pdf(samples.stream(b"/Type /XObject /Subtype /Form", b"secret paper"))
+    paper.paper_file.save("paper.pdf", ContentFile(secret))
     paper.marking_guide_url = "https://example.org/guide.pdf"
     paper.save()
 
@@ -194,14 +196,14 @@ def test_past_paper_links_are_withheld_when_locked(client_for, apade_student, st
     link = open_["paper_link"]
     assert "/api/files/papers/" in link and "/media/" not in link
     download = client_for().get(link.replace("http://testserver", ""))
-    assert download.status_code == 200 and b"".join(download.streaming_content) == b"%PDF-1.4 secret paper"
+    assert download.status_code == 200 and b"".join(download.streaming_content) == secret
     assert download["Cache-Control"] == "private, no-store"
 
 
 def test_download_links_are_rechecked_and_expire(client_for, student, subject, unit, settings, tmp_path, monkeypatch):
     settings.MEDIA_ROOT = tmp_path
     paper = ExamPaper.objects.create(subject=subject, level="O", year=2023, title="Maths 2023")
-    paper.paper_file.save("p.pdf", ContentFile(b"%PDF-1.4"))
+    paper.paper_file.save("p.pdf", ContentFile(samples.pdf()))
     link = client_for(student).get(f"/api/exam-papers/{paper.id}/").data["paper_link"].replace("http://testserver", "")
     # The student's school stops paying: the old link no longer works.
     school = student.school
@@ -222,7 +224,7 @@ def test_protected_files_use_nginx_internal_redirect(client_for, student, subjec
     settings.MEDIA_ROOT = tmp_path
     settings.PROTECTED_MEDIA_ACCEL = True
     paper = ExamPaper.objects.create(subject=subject, level="A", year=2022, title="Paper")
-    paper.paper_file.save("x.pdf", ContentFile(b"%PDF"))
+    paper.paper_file.save("x.pdf", ContentFile(samples.pdf()))
     link = client_for(student).get(f"/api/exam-papers/{paper.id}/").data["paper_link"].replace("http://testserver", "")
     response = client_for().get(link)
     assert response["X-Accel-Redirect"] == f"/protected-media/{paper.paper_file.name}"
@@ -292,6 +294,7 @@ def test_tutor_needs_a_subscription(client_for, apade_student):
         "reason": "subscription_required",
         "state": "",
         "exam": None,
+        "allowance": None,
     }
     for path in ("/api/tutor/ask/", "/api/tutor/stream/"):
         response = client.post(path, {"message": "help"}, format="json")

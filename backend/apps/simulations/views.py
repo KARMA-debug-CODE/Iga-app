@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -10,6 +13,8 @@ from apps.gamification import services as gamification
 
 from .models import Simulation, SimulationView
 from .serializers import SimulationSerializer
+
+VIEW_DEDUP_WINDOW = timedelta(minutes=10)
 
 
 class SimulationViewSet(viewsets.ReadOnlyModelViewSet):
@@ -62,6 +67,10 @@ class SimulationViewSet(viewsets.ReadOnlyModelViewSet):
             sim = self.get_object()
         except Simulation.DoesNotExist:
             return Response({"detail": _("Not found.")}, status=404)
-        SimulationView.objects.create(user=request.user, simulation=sim)
+        # A resent or replayed request (a flaky connection, a tampered client) records one view, not
+        # one per request: views feed teachers' gradebooks and the admin statistics.
+        recent = timezone.now() - VIEW_DEDUP_WINDOW
+        if not SimulationView.objects.filter(user=request.user, simulation=sim, viewed_at__gte=recent).exists():
+            SimulationView.objects.create(user=request.user, simulation=sim)
         xp = gamification.on_simulation_viewed(request.user, sim)
         return Response({"xp_gained": xp, "xp": request.user.xp})

@@ -2,9 +2,11 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from apps.core.constants import ContentStatus
+from apps.core.serializers import SaveChangedFieldsMixin
 from apps.core.utils import serializer_language
 from apps.schools.access import content_access
 
+from .downloads import signed_resource_url
 from .models import Lesson, LessonTranslation, Resource, Subject, Unit
 
 
@@ -99,7 +101,7 @@ class UnitSerializer(serializers.ModelSerializer):
         return LessonSummarySerializer(lessons, many=True, context=self.context).data
 
 
-class ResourceSerializer(serializers.ModelSerializer):
+class ResourceSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     subject_code = serializers.CharField(source="subject.code", read_only=True)
     file_url = serializers.SerializerMethodField()
 
@@ -130,10 +132,11 @@ class ResourceSerializer(serializers.ModelSerializer):
         extra_kwargs = {"file": {"write_only": True, "required": False}}
 
     def get_file_url(self, resource):
+        """A signed link checked again when opened (apps/curriculum/downloads.py), never a public /media URL."""
         if not resource.file:
             return None
         request = self.context.get("request")
-        return request.build_absolute_uri(resource.file.url) if request else resource.file.url
+        return signed_resource_url(request, resource, getattr(request, "user", None))
 
     def validate(self, attrs):
         if not attrs.get("url") and not attrs.get("file") and not (self.instance and (self.instance.url or self.instance.file)):
@@ -275,7 +278,7 @@ class LessonTranslationSerializer(serializers.ModelSerializer):
         read_only_fields = ["reviewed"]
 
 
-class LessonWriteSerializer(serializers.ModelSerializer):
+class LessonWriteSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     """Teachers author lessons; they go to review before students can see them."""
 
     translations = LessonTranslationSerializer(many=True, required=False)

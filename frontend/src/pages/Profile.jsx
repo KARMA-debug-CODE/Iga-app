@@ -4,11 +4,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { A_LEVEL, COMBINATIONS } from "../combinations";
+import { DeleteAccount, DownloadData, PrivacySummary } from "../components/AccountPrivacy";
 import Avatar from "../components/Avatar";
 import AvatarBuilder from "../components/AvatarBuilder";
 import { BadgeIcon, Icon } from "../components/Icon";
 import SchoolPicker from "../components/SchoolPicker";
-import { ErrorMessage, GRADES, Loader, Tabs, useToast } from "../components/ui";
+import { CountUp, ErrorMessage, GRADES, Loader, Tabs, useToast } from "../components/ui";
 import { useApi } from "../hooks";
 import { LANGUAGES, useI18n } from "../i18n";
 import { getTheme, setTheme } from "../theme";
@@ -303,7 +304,103 @@ function ChangePassword() {
   );
 }
 
-const TABS = ["details", "avatar", "badges", "school", "security", "appearance"];
+// The address password reset links go to. Changing it asks for the password.
+function EmailAddress() {
+  const { user, setUser } = useAuth();
+  const { t } = useI18n();
+  const [form, setForm] = useState({ email: user.email || "", current_password: "" });
+  const [error, setError] = useState(null);
+  const [done, setDone] = useState(false);
+  const changed = form.email.trim().toLowerCase() !== (user.email || "").toLowerCase();
+
+  async function submit(e) {
+    e.preventDefault();
+    setError(null);
+    setDone(false);
+    try {
+      const updated = await api("/auth/me/", {
+        method: "PATCH",
+        body: { email: form.email.trim(), current_password: form.current_password },
+      });
+      setUser(updated);
+      setForm({ email: updated.email || "", current_password: "" });
+      setDone(true);
+    } catch (err) {
+      setError(err);
+    }
+  }
+
+  return (
+    <form className="card form" onSubmit={submit}>
+      <h2>
+        <Icon name="mail" /> {t("profile.email")}
+      </h2>
+      <p className="muted small">{user.email ? t("profile.emailHelp") : t("profile.emailMissing")}</p>
+      <label>
+        {t("profile.emailLabel")}
+        <input
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          autoComplete="email"
+          maxLength={254}
+          required={user.role === "school_admin"}
+        />
+      </label>
+      {changed && (
+        <label>
+          {t("profile.currentPassword")}
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={form.current_password}
+            onChange={(e) => setForm({ ...form, current_password: e.target.value })}
+            required
+          />
+        </label>
+      )}
+      <ErrorMessage error={error} />
+      {done && <div className="alert alert-success">{t("common.saved")}</div>}
+      <button className="btn btn-secondary" disabled={!changed}>
+        {t("common.save")}
+      </button>
+    </form>
+  );
+}
+
+function Sessions() {
+  const { logoutEverywhere } = useAuth();
+  const { t } = useI18n();
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    if (!window.confirm(t("profile.logoutEverywhereConfirm"))) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await logoutEverywhere();
+    } catch (err) {
+      setError(err);
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card">
+      <h2>
+        <Icon name="logout" /> {t("profile.sessions")}
+      </h2>
+      <p className="muted small">{t("profile.sessionsHelp")}</p>
+      <ErrorMessage error={error} />
+      <button className="btn btn-secondary" onClick={run} disabled={busy}>
+        {t("profile.logoutEverywhere")}
+      </button>
+    </div>
+  );
+}
+
+const TABS = ["details", "avatar", "badges", "school", "security", "privacy", "appearance"];
 
 function ProfileHeader({ onEditAvatar }) {
   const { user, logout } = useAuth();
@@ -332,17 +429,21 @@ function ProfileHeader({ onEditAvatar }) {
           <dl className="profile-hero-stats">
             <div>
               <dt>{t("profile.xp")}</dt>
-              <dd>{user.xp}</dd>
+              <dd>
+                <CountUp value={user.xp} id={`profile.xp.${user.id}`} />
+              </dd>
             </div>
             <div>
               <dt>{t("profile.streak")}</dt>
               <dd>
-                <Icon name="flame" size={16} /> {user.streak_days}
+                <Icon name="flame" size={16} /> <CountUp value={user.streak_days} id={`profile.streak.${user.id}`} />
               </dd>
             </div>
             <div>
               <dt>{t("profile.badges")}</dt>
-              <dd>{user.badges?.length ?? 0}</dd>
+              <dd>
+                <CountUp value={user.badges?.length ?? 0} id={`profile.badges.${user.id}`} />
+              </dd>
             </div>
           </dl>
         )}
@@ -524,7 +625,7 @@ function Badges() {
       </h2>
       <Loader state={badges}>
         {(list) => (
-          <div className="badge-grid">
+          <div className="badge-grid stagger">
             {list.map((b) => (
               <div key={b.code} className={`badge-tile ${b.earned ? "earned" : "locked"}`} title={t(`badge.${b.code}.desc`)}>
                 <div className="badge-icon">
@@ -591,8 +692,17 @@ export default function Profile() {
         {tab === "security" && (
           <div className="grid-2">
             <ChangePassword />
+            <EmailAddress />
             <TwoFactor />
+            <Sessions />
             {user.role === "student" && <ParentAccess />}
+          </div>
+        )}
+        {tab === "privacy" && (
+          <div className="grid-2">
+            <PrivacySummary />
+            <DownloadData />
+            <DeleteAccount />
           </div>
         )}
         {tab === "appearance" && <Appearance />}

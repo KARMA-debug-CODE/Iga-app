@@ -19,6 +19,7 @@ from django.utils.translation import gettext as _
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.core.constants import ContentStatus
+from apps.core.text import clean_text
 from apps.gamification import services as gamification
 
 from .models import Answer, Attempt, Question, Quiz
@@ -62,7 +63,9 @@ def _q(value):
 
 
 def normalise_text(value):
-    value = re.sub(r"\s+", " ", (value or "").strip().lower())
+    # NFC, without invisible characters (apps/core/text.py), so "café" typed as e + accent, or an accepted
+    # answer saved before text was cleaned, still matches.
+    value = re.sub(r"\s+", " ", clean_text(value or "").strip().lower())
     return value.rstrip(".")
 
 
@@ -196,11 +199,23 @@ def _save_answer(attempt, question_id, choice_ids, text, numeric):
 
 def score_answer(answer):
     """Return (is_correct, marks). Both are None when a teacher must mark it."""
-    question = answer.question
+    return grade_response(
+        answer.question,
+        choice_ids=answer.selected_choices.values_list("id", flat=True),
+        text=answer.text_answer,
+        numeric=answer.numeric_answer,
+    )
+
+
+def grade_response(question, *, choice_ids=(), text="", numeric=None):
+    """Score one response to a question without a stored Answer row (used by the review deck too).
+
+    Returns (is_correct, marks). Both are None when a teacher must mark it (an essay, or a short answer
+    with no accepted-answer list). The server always decides correctness; the client never sends it."""
     full = Decimal(question.marks)
 
     if question.type in Question.CHOICE_TYPES:
-        selected = set(answer.selected_choices.values_list("id", flat=True))
+        selected = set(choice_ids)
         correct = set(question.choices.filter(is_correct=True).values_list("id", flat=True))
         if question.type == Question.Type.MULTI and correct:
             hits = len(selected & correct)
@@ -211,21 +226,30 @@ def score_answer(answer):
         return is_correct, full if is_correct else Decimal("0")
 
     if question.type == Question.Type.NUMERIC:
-        if answer.numeric_answer is None or question.numeric_answer is None:
+        if numeric is None or question.numeric_answer is None:
             return False, Decimal("0")
         expected = question.numeric_answer
         # Float noise grows with magnitude (e.g. 6.02e23), so the allowance is relative.
         allowance = question.numeric_tolerance + 1e-9 * max(1.0, abs(expected))
-        is_correct = abs(answer.numeric_answer - expected) <= allowance
+        is_correct = abs(numeric - expected) <= allowance
         return is_correct, full if is_correct else Decimal("0")
 
     if question.type == Question.Type.SHORT and question.accepted_answers:
-        given = normalise_text(answer.text_answer)
+        given = normalise_text(text)
         accepted = {normalise_text(a) for a in question.accepted_answers}
         is_correct = bool(given) and given in accepted
         return is_correct, full if is_correct else Decimal("0")
 
     return None, None
+
+
+def _record_reviews(attempt):
+    """Add questions the student just got wrong to their spaced-repetition deck (apps.review).
+
+    Imported lazily so the assessments app does not depend on the review app at import time."""
+    from apps.review.services import add_wrong_answers
+
+    add_wrong_answers(attempt)
 
 
 def check_answer(attempt, question_id):
@@ -243,6 +267,7 @@ def check_answer(attempt, question_id):
             answer.is_correct, answer.marks_awarded = score_answer(answer)
             answer.checked = True
             answer.save()
+            _record_reviews(attempt)
         return answer
 
 
@@ -279,6 +304,7 @@ def submit_attempt(attempt):
     attempt.submitted_at = min(now, attempt.deadline) if attempt.deadline else now
     attempt.save(update_fields=["submitted_at"])
     _recalculate(attempt)
+    _record_reviews(attempt)
     return attempt
 
 
@@ -319,6 +345,32 @@ def manual_questions_q(prefix=""):
     )
 
 
+def _teaches_in_subject(user, student_ref, subject_ref):
+    """An active enrolment of the student in one of this teacher's current classes for that subject
+    (a class without a subject covers every subject). Students who moved grade are no longer counted."""
+    from apps.classroom.models import Enrollment
+
+    return Enrollment.objects.filter(
+        classroom__teacher=user,
+        classroom__archived=False,
+        active=True,
+        student=student_ref,
+    ).filter(Q(classroom__subject__isnull=True) | Q(classroom__subject=subject_ref))
+
+
+def attempts_visible_to(user):
+    """Attempts this user may read: their own; for a teacher, also every attempt at one of their own
+    assignments (moved students stay in the gradebook) and their current students' work in the class's
+    subject (the same rule as marking). Nobody else's."""
+    qs = Attempt.objects.select_related("quiz", "quiz__subject", "user")
+    if user.is_platform_admin:
+        return qs
+    if user.can_teach:
+        teaches = _teaches_in_subject(user, OuterRef("user"), OuterRef("quiz__subject"))
+        return qs.filter(Q(user=user) | Q(assignment__classroom__teacher=user) | Q(Exists(teaches)))
+    return qs.filter(user=user)
+
+
 def markable_answers(user):
     """Submitted written answers this teacher may mark.
 
@@ -329,13 +381,7 @@ def markable_answers(user):
     qs = Answer.objects.exclude(attempt__status=Attempt.Status.IN_PROGRESS).filter(manual_questions_q("question__"))
     if user.is_platform_admin:
         return qs
-    from apps.classroom.models import Enrollment
-
-    teaches_this = Enrollment.objects.filter(
-        classroom__teacher=user,
-        classroom__archived=False,
-        student=OuterRef("attempt__user"),
-    ).filter(Q(classroom__subject__isnull=True) | Q(classroom__subject=OuterRef("attempt__quiz__subject")))
+    teaches_this = _teaches_in_subject(user, OuterRef("attempt__user"), OuterRef("attempt__quiz__subject"))
     own_assignment = Q(attempt__assignment__classroom__teacher=user, attempt__assignment__classroom__archived=False)
     return qs.filter(own_assignment | Q(Exists(teaches_this)))
 

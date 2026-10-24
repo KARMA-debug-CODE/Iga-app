@@ -5,6 +5,8 @@ __pycache__/
 backend/*.sqlite3
 backend/media/
 backend/staticfiles/
+# Maintenance mode's switch (manage.py maintenance on|off)
+backend/maintenance/
 .pytest_cache/
 .ruff_cache/
 
@@ -14,9 +16,14 @@ frontend/dist/
 frontend/test-results/
 frontend/playwright-report/
 
-# Env
+# Env and keys: secrets live on the server, never in git (the examples are the exception)
 .env
+.env.*
+!.env.example
+!.env.docker.example
 *.local
+*.pem
+*.key
 
 # OS / editors
 .DS_Store

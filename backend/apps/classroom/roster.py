@@ -9,7 +9,9 @@ import io
 import re
 import secrets
 import unicodedata
+from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import password_validation
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
@@ -20,6 +22,7 @@ from django.utils.translation import gettext as _
 
 from apps.accounts.models import User
 from apps.accounts.security import revoke_all_sessions
+from apps.core.text import clean_text
 
 from .models import Enrollment
 
@@ -40,6 +43,11 @@ WORDS = [
 
 class RosterError(Exception):
     pass
+
+
+def temporary_password_expiry():
+    """When a temporary password handed out now stops working (TEMPORARY_PASSWORD_DAYS)."""
+    return timezone.now() + timedelta(days=settings.TEMPORARY_PASSWORD_DAYS)
 
 
 def temporary_password(user=None):
@@ -71,7 +79,7 @@ def _canonical(header):
 
 def parse(text):
     """Rows as dicts with first_name, last_name, username, email (and the CSV line number)."""
-    text = (text or "").lstrip("﻿").strip()
+    text = (text or "").lstrip("\ufeff").strip()
     if not text:
         raise RosterError(_("The list is empty."))
     try:
@@ -89,7 +97,8 @@ def parse(text):
         row = {"line": line, "first_name": "", "last_name": "", "username": "", "email": ""}
         for column, value in zip(header, values, strict=False):
             if column:
-                row[column] = value.strip()
+                # One line each, without invisible or control characters (apps/core/text.py).
+                row[column] = clean_text(value).strip()
         full_name = row.pop("name", "")
         if full_name and not row["first_name"]:
             first, _space, last = full_name.partition(" ")
@@ -156,6 +165,7 @@ def create_accounts(rows, classroom, teacher):
             role=User.Role.STUDENT,
             grade=classroom.grade,
             must_change_password=True,
+            temporary_password_expires_at=temporary_password_expiry(),
         )
         # They join the teacher's school straight away: the teacher vouches for their own class.
         school = teacher.school_member
@@ -176,6 +186,7 @@ def reset_password(student):
     password = temporary_password(student)
     student.set_password(password)
     student.must_change_password = True
-    student.save(update_fields=["password", "must_change_password"])
+    student.temporary_password_expires_at = temporary_password_expiry()
+    student.save(update_fields=["password", "must_change_password", "temporary_password_expires_at"])
     revoke_all_sessions(student)
     return password

@@ -1,0 +1,25 @@
+# gitleaks (https://github.com/gitleaks/gitleaks): the CI job "secrets" scans every commit with its default
+# rules. The only exceptions are values made up for the test suite; none of them is used anywhere else, and
+# production refuses every published value anyway (backend/apps/core/checks.py, iga.E002). A real key never
+# belongs here: if gitleaks finds one, revoke it with its provider first (see docs/ARCHITECTURE.md, "Secrets").
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Made-up values in the backend's tests"
+# Each pattern matches only the made-up value itself, so anything else is still reported, tests included.
+regexes = [
+  # Test users' passwords.
+  '''^(?i)(str0ng|an0ther|n3w-str0ng)-pass''',
+  # Fake Flutterwave keys, and markers the leak tests look for in answers.
+  '''^FLWSECK(_TEST)?-0123456789ab''',
+  '''(?i)-marker(-[0-9a-z-]*)?$''',
+  # Unsigned JWTs and one whose signature is the word "signature", for the old-token tests.
+  '''^eyJhbGciOiJIUzI1NiJ9\.eyJqdGkiOiJsZWdhY3kifQ(\.(c2lnbmF0dXJl)?)?$''',
+  # Random-looking constants the admin and billing tests compare with.
+  '''^Zr8wq0C9hJ1eLmW4tYb7sKdNfVxP2aGu$''',
+  '''^Gd5kP0sQ3mT8wZ1xB6nV9cR2yL4hJ7fE$''',
+  '''^k3J9-xQ2_vL8mN4p''',
+  # A test's Fernet key, replaced by a fresh random key per run in 8273325.
+  '''^Cs1lH4LCoM_SJMFjbM3MgKs5oXGkNVW3PVlO81oU1EM=$''',
+]

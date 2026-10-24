@@ -120,6 +120,33 @@ def on_attempt_marked(attempt):
     return gained
 
 
+def _saved_xp(user):
+    return type(user).objects.filter(pk=user.pk).values_list("xp", flat=True).first() or 0
+
+
+def rewards_snapshot(user):
+    """The user's XP and badges before an action, to compare with afterwards (rewards_since)."""
+    return _saved_xp(user), set(user.badges.values_list("badge__code", flat=True))
+
+
+def rewards_since(user, snapshot):
+    """What an action earned that the app celebrates: a new level (or None) and new badge codes."""
+    from apps.core.views import level_from_xp
+
+    xp_before, badges_before = snapshot
+    xp_after = _saved_xp(user)
+    level_before, level_after = level_from_xp(xp_before)["level"], level_from_xp(xp_after)["level"]
+    earned = set(user.badges.values_list("badge__code", flat=True)) - badges_before
+    return {
+        "level": level_after if level_after > level_before else None,
+        "badges": [code for code in BADGES if code in earned],
+    }
+
+
+def no_rewards():
+    return {"level": None, "badges": []}
+
+
 def on_group_joined(user, group):
     award_badge(user, "team-player")
     return award_xp(user, XP_JOIN_GROUP, "group", f"group:{group.pk}")

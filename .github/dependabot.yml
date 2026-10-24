@@ -1,0 +1,42 @@
+# Dependabot opens pull requests for new versions; CI (ci.yml and security.yml) must pass before a merge.
+# Security updates for known vulnerabilities come on top of these, as soon as an advisory is published,
+# once "Dependabot security updates" is on in the repository's settings (Code security).
+version: 2
+updates:
+  # Backend (requirements.txt and requirements-dev.txt).
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      python-minor-and-patch:
+        update-types: [minor, patch]
+
+  # Frontend (package.json and package-lock.json).
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  # Base images of the images Iga builds.
+  - package-ecosystem: docker
+    directories: [/backend, /frontend, /coderunner]
+    schedule:
+      interval: weekly
+
+  # Images docker-compose.yml runs as published (PostgreSQL, Redis, Santa's model server).
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+
+  # The actions the workflows use.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -2,32 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { api } from "../api";
+import { Burst, useCelebrations } from "../components/Celebrate";
 import { Icon, SubjectIcon } from "../components/Icon";
 import Markdown from "../components/Markdown";
+import { CHOICE_TYPES, isAnswered, QuestionBody, SolutionPanel, verdict } from "../components/Question";
 import TutorPanel from "../components/TutorPanel";
 import { LockedNotice } from "../components/Locked";
-import { ErrorMessage, Loader } from "../components/ui";
+import { CountUp, ErrorMessage, Loader } from "../components/ui";
 import { useApi } from "../hooks";
 import { useI18n } from "../i18n";
+import { safeUrl } from "../safeUrl";
 import { useStartQuiz } from "./Practice";
 
-const CHOICE_TYPES = ["mcq", "multi", "true_false"];
 const RETRY_MS = 5000;
-
-function isAnswered(question, answer) {
-  if (!answer) return false;
-  if (CHOICE_TYPES.includes(question.type)) return (answer.choice_ids || []).length > 0;
-  if (question.type === "numeric") return answer.numeric !== null && answer.numeric !== undefined && answer.numeric !== "";
-  return Boolean(answer.text && answer.text.trim());
-}
-
-function verdict(question) {
-  const s = question.solution;
-  if (!s) return null;
-  if (s.is_correct === null || s.marks_awarded === null) return "pending";
-  if (s.is_correct) return "right";
-  return Number(s.marks_awarded) > 0 ? "partial" : "wrong";
-}
 
 function formatClock(ms) {
   const total = Math.max(0, Math.ceil(ms / 1000));
@@ -62,148 +49,22 @@ function Timer({ deadline, offset, onExpire }) {
   );
 }
 
-function QuestionBody({ question, answer, onChange, locked }) {
-  const { t } = useI18n();
-  const solution = question.solution;
-  const correct = new Set(solution?.correct_choice_ids || []);
-  const selected = new Set(answer?.choice_ids || []);
+// From this score up a quiz just finished gets a burst around its ring (the same line as a green score pill).
+const GOOD_SCORE = 75;
 
-  if (CHOICE_TYPES.includes(question.type)) {
-    const multi = question.type === "multi";
-    return (
-      <div className="stack" role={multi ? "group" : "radiogroup"}>
-        {multi && <span className="small muted">{t("quiz.chooseMany")}</span>}
-        {question.choices.map((choice) => {
-          const isSelected = selected.has(choice.id);
-          let cls = isSelected ? "selected" : "";
-          if (solution) {
-            if (correct.has(choice.id)) cls = "correct";
-            else if (isSelected) cls = "wrong";
-          }
-          return (
-            <label key={choice.id} className={`option ${cls}`}>
-              <input
-                type={multi ? "checkbox" : "radio"}
-                name={`q-${question.id}`}
-                checked={isSelected}
-                disabled={locked}
-                onChange={() => {
-                  const next = multi
-                    ? isSelected
-                      ? [...selected].filter((id) => id !== choice.id)
-                      : [...selected, choice.id]
-                    : [choice.id];
-                  onChange({ choice_ids: next });
-                }}
-              />
-              <Markdown interactive={false}>{choice.text}</Markdown>
-            </label>
-          );
-        })}
-      </div>
-    );
-  }
+// The ring fills from empty where the browser can animate its fill (CSS @property), and is simply full elsewhere.
+const canFillRing = typeof CSS !== "undefined" && typeof CSS.registerProperty === "function";
 
-  if (question.type === "numeric") {
-    return (
-      <input
-        type="number"
-        step="any"
-        inputMode="decimal"
-        placeholder={t("quiz.numberPlaceholder")}
-        value={answer?.numeric ?? ""}
-        disabled={locked}
-        onChange={(e) => onChange({ numeric: e.target.value === "" ? null : e.target.value })}
-        aria-label={t("quiz.yourAnswer")}
-        style={{ maxWidth: 260 }}
-      />
-    );
-  }
-
-  if (question.type === "short") {
-    return (
-      <input
-        placeholder={t("quiz.textPlaceholder")}
-        value={answer?.text ?? ""}
-        disabled={locked}
-        onChange={(e) => onChange({ text: e.target.value })}
-        aria-label={t("quiz.yourAnswer")}
-      />
-    );
-  }
-
+function ScoreRing({ pct, celebrate }) {
   return (
-    <textarea
-      placeholder={t("quiz.essayPlaceholder")}
-      value={answer?.text ?? ""}
-      disabled={locked}
-      onChange={(e) => onChange({ text: e.target.value })}
-      rows={8}
-      aria-label={t("quiz.yourAnswer")}
-    />
-  );
-}
-
-function SolutionPanel({ question, answer }) {
-  const { t } = useI18n();
-  const s = question.solution;
-  if (!s) return null;
-  const v = verdict(question);
-  const cls = v === "right" ? "good" : v === "wrong" ? "bad" : "neutral";
-  const [icon, heading] = {
-    right: ["ok", t("quiz.correct")],
-    wrong: ["fail", t("quiz.incorrect")],
-    partial: ["partial", t("quiz.partly")],
-    pending: ["teach", t("quiz.teacherMarked")],
-  }[v];
-  const showTyped = ["numeric", "short"].includes(question.type);
-  const expected = question.type === "numeric" ? s.numeric_answer : s.accepted_answers?.[0];
-
-  return (
-    <div className={`feedback ${cls}`} aria-live="polite">
-      <div className="spread">
-        <strong className="with-icon">
-          <Icon name={icon} /> {heading}
-        </strong>
-        {s.marks_awarded !== null && (
-          <span className="pill">
-            {Number(s.marks_awarded)} / {Number(question.marks)}
-          </span>
-        )}
-      </div>
-      {showTyped && (
-        <p style={{ margin: "8px 0 0" }}>
-          {t("quiz.yourAnswer")}: <strong>{(question.type === "numeric" ? answer?.numeric : answer?.text) ?? t("quiz.noAnswer")}</strong>
-          {v !== "right" && expected !== undefined && expected !== null && (
-            <>
-              {" · "}
-              {t("quiz.correctAnswer")}: <strong>{String(expected)}</strong>
-            </>
-          )}
-        </p>
-      )}
-      {s.teacher_feedback && (
-        <div style={{ marginTop: 10 }}>
-          <strong>{t("quiz.teacherFeedback")}:</strong> {s.teacher_feedback}
-        </div>
-      )}
-      {s.explanation && (
-        <div style={{ marginTop: 10 }}>
-          <strong>{t("quiz.explanation")}</strong>
-          <Markdown interactive={false}>{s.explanation}</Markdown>
-        </div>
-      )}
-      {s.marking_guide && (
-        <details style={{ marginTop: 8 }}>
-          <summary>{t("quiz.markingGuide")}</summary>
-          <Markdown interactive={false}>{s.marking_guide}</Markdown>
-        </details>
-      )}
+    <div className={`score-ring ${canFillRing ? "is-filling" : ""}`} style={{ "--pct": pct ?? 0 }}>
+      <div>{pct != null ? <CountUp value={Math.round(pct)} format={(n) => `${n}%`} /> : "…"}</div>
+      {celebrate && <Burst size={280} />}
     </div>
   );
 }
 
-function Results({ attempt }) {
+function Results({ attempt, fresh = false }) {
   const { t } = useI18n();
   const { start, busy, error } = useStartQuiz();
   const pct = attempt.percentage;
@@ -214,9 +75,7 @@ function Results({ attempt }) {
           <SubjectIcon name={attempt.quiz.subject.icon} size={16} /> {attempt.quiz.subject.name} · {attempt.quiz.grade}
         </span>
         <h1 style={{ margin: "6px 0 16px" }}>{attempt.quiz.title}</h1>
-        <div className="score-ring" style={{ "--pct": pct ?? 0 }}>
-          <div>{pct != null ? `${Math.round(pct)}%` : "…"}</div>
-        </div>
+        <ScoreRing pct={pct} celebrate={fresh && pct != null && pct >= GOOD_SCORE} />
         <p style={{ marginTop: 12 }}>
           {t("quiz.yourScore")}: <strong>{Number(attempt.score ?? 0)}</strong> / {Number(attempt.max_score)}
         </p>
@@ -230,7 +89,7 @@ function Results({ attempt }) {
             <Icon name="refresh" size={16} /> {t("quiz.tryAgain")}
           </button>
           {attempt.quiz.marking_guide_link && (
-            <a className="btn btn-secondary" href={attempt.quiz.marking_guide_link} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-secondary" href={safeUrl(attempt.quiz.marking_guide_link)} target="_blank" rel="noopener noreferrer">
               {t("practice.markingGuide")}
             </a>
           )}
@@ -390,8 +249,8 @@ function Player({ initial, onFinished }) {
         }
       }
       try {
-        await api(`/attempts/${attempt.id}/submit/`, { method: "POST" });
-        onFinished(force ? t("quiz.timeUp") : null);
+        const done = await api(`/attempts/${attempt.id}/submit/`, { method: "POST" });
+        onFinished(force ? t("quiz.timeUp") : null, done?.rewards);
       } catch (e) {
         if (closedByServer(e)) return;
         setError(e);
@@ -511,25 +370,32 @@ export default function QuizPlayer() {
   const { id } = useParams();
   const state = useApi(`/attempts/${id}/`, {}, [id]);
   const [notice, setNotice] = useState(null);
+  const [freshId, setFreshId] = useState(null); // finished here just now, rather than an old attempt opened again
+  const [celebration, celebrate] = useCelebrations();
   const finished = useCallback(
-    (message) => {
+    (message, rewards) => {
       if (message) setNotice(message);
+      setFreshId(id);
+      celebrate(rewards);
       state.reload();
     },
-    [state],
+    [state, celebrate, id],
   );
   return (
-    <Loader state={state}>
-      {(attempt) =>
-        attempt.status === "in_progress" ? (
-          <Player key={attempt.id} initial={attempt} onFinished={finished} />
-        ) : (
-          <>
-            {notice && <div className="alert alert-warn quiz-shell" style={{ marginBottom: 12 }}>{notice}</div>}
-            <Results attempt={attempt} />
-          </>
-        )
-      }
-    </Loader>
+    <>
+      {celebration}
+      <Loader state={state}>
+        {(attempt) =>
+          attempt.status === "in_progress" ? (
+            <Player key={attempt.id} initial={attempt} onFinished={finished} />
+          ) : (
+            <>
+              {notice && <div className="alert alert-warn quiz-shell" style={{ marginBottom: 12 }}>{notice}</div>}
+              <Results attempt={attempt} fresh={String(attempt.id) === freshId} />
+            </>
+          )
+        }
+      </Loader>
+    </>
   );
 }

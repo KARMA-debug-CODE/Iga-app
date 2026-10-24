@@ -1,0 +1,35 @@
+# HTTPS served by nginx itself, for a server with no load balancer in front (behind Cloudflare, use a
+# Cloudflare Origin CA certificate here and "Full (strict)": docs/CLOUDFLARE.md). See README.md, "HTTPS".
+#
+# 1. Put the certificate (full chain) and its key in ./certs on the server, for example with Let's Encrypt:
+#      certbot certonly --webroot -w ./certbot -d iga.example.rw   (nginx serves ./certbot's challenges)
+#    then copy /etc/letsencrypt/live/iga.example.rw/{fullchain,privkey}.pem to ./certs.
+# 2. Copy this file to ./tls/tls.conf and mount it with a docker-compose.override.yml:
+#      services:
+#        web:
+#          ports: ["80:80", "443:443"]
+#          volumes:
+#            - ./tls:/etc/nginx/iga/tls:ro
+#            - ./certs:/etc/nginx/certs:ro
+#            - ./certbot:/var/www/certbot:ro
+# 3. Leave HTTPS on (no HTTPS=false in .env): plain HTTP is then redirected to HTTPS and HSTS is sent.
+#
+# These lines go inside nginx's server block, which answers on port 80 too.
+listen 443 ssl;
+# listen [::]:443 ssl;   (also over IPv6, where the container has it)
+http2 on;
+
+ssl_certificate     /etc/nginx/certs/fullchain.pem;
+ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+# Mozilla's "intermediate" settings: TLS 1.2 and 1.3 only, forward-secret ciphers.
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+ssl_prefer_server_ciphers off;
+ssl_session_cache shared:iga_tls:10m;
+ssl_session_timeout 1d;
+ssl_session_tickets off;
+
+# Behind Cloudflare with Authenticated Origin Pulls on: only Cloudflare's client certificate gets in.
+# ssl_client_certificate /etc/nginx/certs/cloudflare-origin-pull-ca.pem;
+# ssl_verify_client on;

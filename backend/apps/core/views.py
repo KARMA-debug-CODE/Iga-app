@@ -2,33 +2,42 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Count, F, Q
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from apps.accounts.security import revoke_all_sessions
 from apps.assessments.models import Attempt, Question, Quiz
 from apps.assessments.serializers import AttemptListSerializer
-from apps.assessments.services import markable_answers, visible_quizzes
+from apps.assessments.services import attempts_visible_to, markable_answers, visible_quizzes
 from apps.classroom.models import Assignment, Classroom
 from apps.classroom.views import AssignmentSerializer, assignment_statuses
+from apps.coderun import services as code_runner
+from apps.core.serializers import SaveChangedFieldsMixin
+from apps.core.text import CleanCharField
 from apps.core.utils import request_language
+from apps.curriculum.downloads import signed_resource_url
 from apps.curriculum.models import Lesson, LessonProgress, Resource, Subject, localized_lesson_titles
 from apps.curriculum.views import visible_lessons
+from apps.planner import services as planner_services
+from apps.review import services as review_services
 from apps.schools.access import has_premium
 from apps.schools.views import revenue_summary
 from apps.simulations.models import Simulation, SimulationView
+from apps.tutor import usage as santa_usage
 
-from . import audit
+from . import admin_login, audit
 from .constants import GRADES, LANGUAGES, ContentStatus
 from .models import AuditLog
-from .permissions import IsPlatformAdmin
+from .permissions import IsPlatformAdmin, RecentAuthentication
+from .security_log import SECURITY_ACTIONS
 
 User = get_user_model()
 
@@ -115,9 +124,6 @@ def dashboard(request):
         classes = Classroom.objects.filter(teacher=user, archived=False).annotate(
             student_total=Count("enrollments", filter=Q(enrollments__active=True))
         )
-        my_students = User.objects.filter(enrollments__classroom__teacher=user, enrollments__classroom__archived=False).values(
-            "id"
-        )
         data["teacher"] = {
             "classes": [
                 {"id": c.id, "name": c.name, "grade": c.grade, "students": c.student_total, "join_code": c.join_code}
@@ -125,9 +131,9 @@ def dashboard(request):
             ],
             "pending_marking": markable_answers(user).filter(marks_awarded__isnull=True).count(),
             "recent_submissions": AttemptListSerializer(
-                Attempt.objects.filter(user_id__in=my_students)
+                attempts_visible_to(user)
+                .exclude(user=user)
                 .exclude(status=Attempt.Status.IN_PROGRESS)
-                .select_related("quiz", "quiz__subject", "user")
                 .order_by("-submitted_at")[:8],
                 many=True,
                 context={"request": request},
@@ -167,6 +173,8 @@ def dashboard(request):
     data["continue_learning"] = _continue_learning(user, request_language(request))
     data["lessons_completed"] = LessonProgress.objects.filter(user=user).count()
     data["badges_earned"] = user.badges.count()
+    data["reviews_due"] = review_services.due_count(user)
+    data["planner"] = planner_services.dashboard_summary(user, request_language(request))
     return Response(data)
 
 
@@ -231,7 +239,7 @@ def search(request):
 # --- Administration ------------------------------------------------------------
 
 
-class AdminUserSerializer(serializers.ModelSerializer):
+class AdminUserSerializer(SaveChangedFieldsMixin, serializers.ModelSerializer):
     school = serializers.CharField(source="school.name", read_only=True, default=None)
 
     class Meta:
@@ -256,7 +264,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 
 class AdminUserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
     serializer_class = AdminUserSerializer
     http_method_names = ["get", "patch", "head", "options"]
 
@@ -277,11 +285,32 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             )
         return qs
 
+    def list(self, request, *args, **kwargs):
+        # The user directory holds everyone's email address: each look at it is recorded.
+        filters = {
+            k: request.query_params[k][:100] for k in ("role", "pending_teachers", "q", "page") if k in request.query_params
+        }
+        audit.record(request, "list_users", request.user, **filters)
+        return super().list(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        # Role and approval changes happen one at a time per user, on the row as it is now.
+        with transaction.atomic():
+            return super().update(request, *args, **kwargs)
+
+    def get_object(self):
+        user = super().get_object()
+        if self.action in ("update", "partial_update"):
+            user = User.objects.select_for_update().get(pk=user.pk)
+        return user
+
     def perform_update(self, serializer):
         before = {f: getattr(serializer.instance, f) for f in ("role", "teacher_approved", "is_active")}
         if serializer.instance == self.request.user and serializer.validated_data.get("role", "admin") != "admin":
             raise ValidationError(_("You can't remove your own administrator role."))
         user = serializer.save()
+        if before["is_active"] and not user.is_active:
+            revoke_all_sessions(user)  # a deactivated account is logged out everywhere, at once
         if before["teacher_approved"] != user.teacher_approved:
             # The Iga team's decision replaces any school's, and a withdrawal sticks.
             user.set_teacher_approval(user.teacher_approved)
@@ -291,10 +320,18 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             audit.record(self.request, "update_user", user, **{k: [str(v) for v in pair] for k, pair in changes.items()})
 
 
+class ReviewDecisionSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(choices=["lesson", "quiz", "resource"])
+    id = serializers.IntegerField(min_value=1)
+    # A real true/false: the text "false" must not approve anything.
+    approve = serializers.BooleanField()
+    note = CleanCharField(max_length=500, required=False, allow_blank=True, default="")
+
+
 class ReviewViewSet(viewsets.ViewSet):
     """Content awaiting approval before it appears in the public library."""
 
-    permission_classes = [IsPlatformAdmin]
+    permission_classes = [IsPlatformAdmin, RecentAuthentication]
     MODELS = {"lesson": Lesson, "quiz": Quiz, "resource": Resource}
 
     def list(self, request):
@@ -338,7 +375,8 @@ class ReviewViewSet(viewsets.ViewSet):
                         "grade": r.grade,
                         "author": r.uploaded_by.display_name if r.uploaded_by else None,
                         "updated_at": r.created_at,
-                        "url": r.url,
+                        # An uploaded file opens through a signed, access-checked link.
+                        "url": r.url or (signed_resource_url(request, r, request.user) if r.file else ""),
                     }
                     for r in resources
                 ],
@@ -347,19 +385,20 @@ class ReviewViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["post"])
     def decide(self, request):
-        model = self.MODELS.get(request.data.get("type"))
-        if model is None:
-            raise ValidationError({"type": _("Unknown content type.")})
-        obj = get_object_or_404(model, pk=request.data.get("id"))
-        approve = bool(request.data.get("approve"))
-        obj.status = ContentStatus.PUBLISHED if approve else ContentStatus.DRAFT
-        obj.save(update_fields=["status"])
-        audit.record(request, "approve_content" if approve else "reject_content", obj, note=request.data.get("note", ""))
+        data = ReviewDecisionSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        v = data.validated_data
+        with transaction.atomic():
+            obj = get_object_or_404(self.MODELS[v["type"]].objects.select_for_update(), pk=v["id"])
+            approve = v["approve"]
+            obj.status = ContentStatus.PUBLISHED if approve else ContentStatus.DRAFT
+            obj.save(update_fields=["status"])
+            audit.record(request, "approve_content" if approve else "reject_content", obj, note=v["note"])
         return Response({"status": obj.status})
 
 
 @api_view(["GET"])
-@permission_classes([IsPlatformAdmin])
+@permission_classes([IsPlatformAdmin, RecentAuthentication])
 def admin_stats(request):
     week_ago = timezone.now() - timedelta(days=7)
     users_by_role = dict(User.objects.values_list("role").annotate(n=Count("id")))
@@ -401,16 +440,24 @@ def admin_stats(request):
             },
             "popular_lessons": [{"title": r["lesson__title"], "count": r["n"]} for r in popular_lessons],
             "popular_simulations": [{"title": r["simulation__title"], "count": r["n"]} for r in popular_sims],
+            # The costly services: Santa's model and the code runner, with their limits.
+            "santa": santa_usage.summary(),
+            "code_runner": code_runner.summary(),
+            # The Django admin's secret address (None when it is off), for the Admin page's link.
+            "django_admin_url": f"/{admin_prefix}" if (admin_prefix := admin_login.admin_url_prefix()) else None,
         }
     )
 
 
 @api_view(["GET"])
-@permission_classes([IsPlatformAdmin])
+@permission_classes([IsPlatformAdmin, RecentAuthentication])
 def admin_audit(request):
     entries = AuditLog.objects.select_related("actor")
     if request.query_params.get("action"):
         entries = entries.filter(action=request.query_params["action"])
+    if request.query_params.get("security"):
+        # Sign-ins, lockouts, password and 2FA changes, refused and throttled requests...
+        entries = entries.filter(action__in=SECURITY_ACTIONS)
     return Response(
         [
             {
@@ -420,6 +467,7 @@ def admin_audit(request):
                 "action": e.action,
                 "target": f"{e.target_type}#{e.target_id}",
                 "details": e.details,
+                "ip": e.ip_address,
             }
             for e in entries[:200]
         ]
