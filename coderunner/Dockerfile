@@ -2,7 +2,7 @@
 # Built from the official GCC and Eclipse Temurin (OpenJDK) images, so nothing is downloaded when it starts.
 FROM eclipse-temurin:21-jdk AS jdk
 
-FROM gcc:14-bookworm
+FROM gcc:15-bookworm
 COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk \
     PATH=/opt/java/openjdk/bin:$PATH \
