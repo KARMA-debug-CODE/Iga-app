@@ -1,6 +1,6 @@
 # Iga code runner: compiles and runs students' C++ and Java programs for the code playground.
 # Built from the official GCC and Eclipse Temurin (OpenJDK) images, so nothing is downloaded when it starts.
-FROM eclipse-temurin:21-jdk AS jdk
+FROM eclipse-temurin:25-jdk AS jdk
 
 FROM gcc:14-bookworm
 COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
